@@ -45,7 +45,8 @@ public struct NotchGestureState: Sendable {
 
 /// The widget after (or before) the current one, wrapping around. Nil when there is nothing to switch to.
 public func neighbourWidget(_ current: NotchWidget, in widgets: [NotchWidget], forward: Bool) -> NotchWidget? {
-    guard widgets.count > 1, let index = widgets.firstIndex(of: current) else { return widgets.first }
+    guard let index = widgets.firstIndex(of: current) else { return widgets.first }
+    guard widgets.count > 1 else { return nil }
     let next = forward ? (index + 1) % widgets.count : (index - 1 + widgets.count) % widgets.count
     return widgets[next]
 }
