@@ -7,24 +7,44 @@ public protocol AccelerationControlling: Sendable {
     func write(_ value: Double) -> Bool
 }
 
-/// Reads and writes the system mouse acceleration through IOHID. A value of -1 turns acceleration off.
+/// Reads and writes the system mouse acceleration through the IOHIDSystem service.
+/// The system stores it as a 16.16 fixed-point number; -1 turns acceleration off.
 public struct IOHIDAccelerationControl: AccelerationControlling {
+    private static let key = "HIDMouseAcceleration" as CFString
+
     public init() {}
 
+    private func withConnection<T>(_ body: (io_connect_t) -> T?) -> T? {
+        let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOHIDSystem"))
+        guard service != 0 else { return nil }
+        defer { IOObjectRelease(service) }
+        var connect: io_connect_t = 0
+        guard IOServiceOpen(service, task_self_trap(), UInt32(kIOHIDParamConnectType), &connect) == KERN_SUCCESS else {
+            return nil
+        }
+        defer { IOServiceClose(connect) }
+        return body(connect)
+    }
+
     public func read() -> Double? {
-        let handle = NXOpenEventStatus()
-        guard handle != 0 else { return nil }
-        defer { NXCloseEventStatus(handle) }
-        var value = 0.0
-        let result = IOHIDGetAccelerationWithKey(handle, kIOHIDMouseAccelerationType as CFString, &value)
-        return result == KERN_SUCCESS ? value : nil
+        withConnection { connect in
+            var raw: Int32 = 0
+            var size: IOByteCount = 0
+            let result = withUnsafeMutablePointer(to: &raw) { pointer in
+                IOHIDGetParameter(connect, Self.key, IOByteCount(MemoryLayout<Int32>.size), pointer, &size)
+            }
+            return result == KERN_SUCCESS ? Double(raw) / 65536.0 : nil
+        }
     }
 
     public func write(_ value: Double) -> Bool {
-        let handle = NXOpenEventStatus()
-        guard handle != 0 else { return false }
-        defer { NXCloseEventStatus(handle) }
-        return IOHIDSetAccelerationWithKey(handle, kIOHIDMouseAccelerationType as CFString, value) == KERN_SUCCESS
+        withConnection { connect in
+            var raw = Int32((value * 65536.0).rounded())
+            let result = withUnsafeMutablePointer(to: &raw) { pointer in
+                IOHIDSetParameter(connect, Self.key, pointer, IOByteCount(MemoryLayout<Int32>.size))
+            }
+            return result == KERN_SUCCESS
+        } ?? false
     }
 }
 
