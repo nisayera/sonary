@@ -68,8 +68,8 @@ jobs:
           SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
         run: |
           if [ -z "$SPARKLE_ED_PRIVATE_KEY" ]; then
-            echo "::warning::SPARKLE_ED_PRIVATE_KEY secret is missing: publishing WITHOUT an update feed."
-            exit 0
+            echo "::error::SPARKLE_ED_PRIVATE_KEY secret is missing: refusing to publish a release without an update feed."
+            exit 1
           fi
           V="${{ steps.version.outputs.marketing }}"
           .venv/bin/python scripts/release_tools.py appcast --tag "$GITHUB_REF_NAME" \
