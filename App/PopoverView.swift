@@ -13,10 +13,14 @@ struct PopoverView: View {
                                        description: Text("Turn modules on in Settings."))
             } else {
                 ForEach(active, id: \.id) { module in
-                    Label {
-                        Text(module.title)
-                    } icon: {
-                        Image(systemName: module.symbol)
+                    if let content = module.makePopoverView() {
+                        content
+                    } else {
+                        Label {
+                            Text(module.title)
+                        } icon: {
+                            Image(systemName: module.symbol)
+                        }
                     }
                 }
             }

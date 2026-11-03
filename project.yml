@@ -37,3 +37,24 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.sonary.Sonary
         ENABLE_HARDENED_RUNTIME: YES
         GENERATE_INFOPLIST_FILE: NO
+  SonaryTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - SonaryTests
+    dependencies:
+      - target: Sonary
+      - package: SonaryCore
+      - package: Monitor
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: app.sonary.SonaryTests
+schemes:
+  Sonary:
+    build:
+      targets:
+        Sonary: all
+    test:
+      targets:
+        - SonaryTests

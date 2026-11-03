@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import Monitor
 import SonaryCore
 
 @MainActor
@@ -8,6 +9,7 @@ final class AppModel {
     let registry: ModuleRegistry
     let broker: PermissionBroker
     let launchAtLogin = LaunchAtLoginModel()
+    let monitor: MonitorModule
     private(set) var onboardingCompleted: Bool
 
     @ObservationIgnored private let defaults: UserDefaults
@@ -16,7 +18,9 @@ final class AppModel {
         let broker = PermissionBroker()
         self.broker = broker
         self.defaults = defaults
-        self.registry = ModuleRegistry(modules: [], defaults: defaults, permissions: broker)
+        let monitor = MonitorModule(defaults: defaults)
+        self.monitor = monitor
+        self.registry = ModuleRegistry(modules: [monitor], defaults: defaults, permissions: broker)
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
     }
 

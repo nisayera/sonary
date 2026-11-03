@@ -38,6 +38,15 @@ jobs:
             CODE_SIGNING_ALLOWED=NO SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
             build 2>&1 | tee build.log
 
+      - name: Test app
+        run: |
+          set -eo pipefail
+          xcodebuild -project Sonary.xcodeproj -scheme Sonary \
+            -destination 'platform=macOS,arch=arm64' \
+            CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES ENABLE_HARDENED_RUNTIME=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
+            test 2>&1 | tee app-test.log
+
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4

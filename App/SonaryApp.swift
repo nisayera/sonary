@@ -7,8 +7,10 @@ struct SonaryApp: App {
     @State private var model = AppModel()
 
     var body: some Scene {
-        MenuBarExtra("Sonary", systemImage: "waveform") {
+        MenuBarExtra {
             PopoverView(model: model)
+        } label: {
+            MenuBarLabel(model: model)
                 .task { await model.registry.startEnabled() }
         }
         .menuBarExtraStyle(.window)
