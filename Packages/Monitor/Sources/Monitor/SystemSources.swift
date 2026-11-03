@@ -20,7 +20,7 @@ public struct SystemSources: MetricsSources {
         }
         defer {
             let size = vm_size_t(infoCount) * vm_size_t(MemoryLayout<integer_t>.stride)
-            vm_deallocate(mach_task_self(), vm_address_t(bitPattern: info), size)
+            vm_deallocate(task_self_trap(), vm_address_t(bitPattern: info), size)
         }
         var ticks = CPUTicks(user: 0, system: 0, idle: 0, nice: 0)
         let stride = Int(CPU_STATE_MAX)

@@ -4,13 +4,13 @@
 // Taken from vorssaint-utils (Sources/Vorssaint/Services/SystemMonitor/SMCClient.swift,
 // commit a5694c4c2f426fbd0f97ecfba9bbaa5746398dc1) and modified for Sonary:
 // reduced to the read-only subset (write support and SMCValueCodec removed),
-// value decoding lives in SMCValueDecoder.swift, mach_task_self() replaced by mach_task_self().
+// value decoding lives in SMCValueDecoder.swift, task_self_trap() replaced by task_self_trap().
 
 import Foundation
 import IOKit
 
 /// Minimal client for the System Management Controller (AppleSMC). It reads
-/// sensors and allows narrowly scoped writes through the SMCParamStruct ABI.
+/// sensors through the SMCParamStruct ABI (read-only in Sonary).
 final class SMCClient {
     struct Key {
         let code: UInt32
@@ -31,7 +31,7 @@ final class SMCClient {
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSMC"))
         guard service != 0 else { return nil }
         defer { IOObjectRelease(service) }
-        guard IOServiceOpen(service, mach_task_self(), 0, &connection) == kIOReturnSuccess else { return nil }
+        guard IOServiceOpen(service, task_self_trap(), 0, &connection) == kIOReturnSuccess else { return nil }
     }
 
     deinit {
