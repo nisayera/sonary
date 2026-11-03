@@ -15,6 +15,17 @@ public final class ClipboardModel {
     @ObservationIgnored private var pollTask: Task<Void, Never>?
     @ObservationIgnored private var lastChangeCount = NSPasteboard.general.changeCount
     @ObservationIgnored private var plainPasteKey: HotKey?
+    @ObservationIgnored private var autoClearTask: Task<Void, Never>?
+    @ObservationIgnored private var sleepObserver: (any NSObjectProtocol)?
+    @ObservationIgnored private var lockObserver: (any NSObjectProtocol)?
+
+    /// Where copied images are kept, next to the rest of Sonary's data.
+    private var imageFolder: URL? {
+        guard let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        let folder = base.appendingPathComponent("app.sonary.Sonary/clipboard", isDirectory: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        return folder
+    }
 
     public init(defaults: UserDefaults) {
         store = ClipboardStore(defaults: defaults)
@@ -33,6 +44,8 @@ public final class ClipboardModel {
             }
         }
         applyShortcut()
+        startAutoClear()
+        observeSleepAndLock()
     }
 
     func stop() {
@@ -40,6 +53,61 @@ public final class ClipboardModel {
         pollTask = nil
         plainPasteKey?.unregister()
         plainPasteKey = nil
+        autoClearTask?.cancel()
+        autoClearTask = nil
+        if let sleepObserver { NSWorkspace.shared.notificationCenter.removeObserver(sleepObserver) }
+        if let lockObserver { DistributedNotificationCenter.default().removeObserver(lockObserver) }
+        sleepObserver = nil
+        lockObserver = nil
+    }
+
+    private func startAutoClear() {
+        guard autoClearTask == nil else { return }
+        autoClearTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                self?.runAutoClear()
+            }
+        }
+    }
+
+    private func runAutoClear() {
+        guard settings.autoClearMinutes > 0 else { return }
+        let dropped = history.autoClear(now: Date(), olderThanMinutes: settings.autoClearMinutes)
+        guard !dropped.isEmpty else { return }
+        removeImageFiles(of: dropped)
+        store.save(history)
+    }
+
+    private func observeSleepAndLock() {
+        if sleepObserver == nil {
+            sleepObserver = NSWorkspace.shared.notificationCenter.addObserver(
+                forName: NSWorkspace.willSleepNotification, object: nil, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { if self?.settings.clearOnSleep == true { self?.clearHistory() } }
+            }
+        }
+        if lockObserver == nil {
+            lockObserver = DistributedNotificationCenter.default().addObserver(
+                forName: Notification.Name("com.apple.screenIsLocked"), object: nil, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { if self?.settings.clearOnLock == true { self?.clearHistory() } }
+            }
+        }
+    }
+
+    /// Deletes the image files of entries that are gone.
+    private func removeImageFiles(of entries: [ClipboardEntry]) {
+        guard let folder = imageFolder else { return }
+        for entry in entries {
+            guard case let .image(fileName) = entry.content else { continue }
+            try? FileManager.default.removeItem(at: folder.appendingPathComponent(fileName))
+        }
+    }
+
+    public func imageURL(for entry: ClipboardEntry) -> URL? {
+        guard case let .image(fileName) = entry.content, let folder = imageFolder else { return nil }
+        return folder.appendingPathComponent(fileName)
     }
 
     private func poll() {
@@ -48,27 +116,64 @@ public final class ClipboardModel {
         lastChangeCount = board.changeCount
         let types = board.types?.map(\.rawValue) ?? []
         let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        guard shouldRecord(types: types), !settings.ignoredApps.contains(frontmost ?? ""),
-              let text = board.string(forType: .string) else { return }
-        var recorded = text
-        if settings.cleanLinks, let clean = cleanedURL(text) {
-            board.clearContents()
-            board.setString(clean, forType: .string)
-            lastChangeCount = board.changeCount
-            recorded = clean
+        guard shouldRecord(types: types), !settings.ignoredApps.contains(frontmost ?? "") else { return }
+
+        if let text = board.string(forType: .string) {
+            var recorded = text
+            if settings.cleanLinks, let clean = cleanedURL(text) {
+                board.clearContents()
+                board.setString(clean, forType: .string)
+                lastChangeCount = board.changeCount
+                recorded = clean
+            }
+            history.add(recorded, at: Date(), sourceApp: frontmost)
+            store.save(history)
+            return
         }
-        history.add(recorded, at: Date(), sourceApp: frontmost)
-        store.save(history)
+        if settings.captureFiles,
+           let urls = board.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL],
+           !urls.isEmpty {
+            history.add(.files(urls.map(\.path)), at: Date(), sourceApp: frontmost)
+            store.save(history)
+            return
+        }
+        if settings.captureImages, let fileName = saveImageFromPasteboard(board) {
+            history.add(.image(fileName: fileName), at: Date(), sourceApp: frontmost)
+            store.save(history)
+        }
     }
 
     // MARK: History
 
+    /// Writes a copied image to the cache folder as PNG and returns its file name.
+    private func saveImageFromPasteboard(_ board: NSPasteboard) -> String? {
+        guard let folder = imageFolder,
+              let image = NSImage(pasteboard: board),
+              let tiff = image.tiffRepresentation,
+              let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { return nil }
+        let fileName = "\(UUID().uuidString).png"
+        do {
+            try png.write(to: folder.appendingPathComponent(fileName))
+        } catch {
+            return nil
+        }
+        return fileName
+    }
+
     public func copy(_ entry: ClipboardEntry) {
         let board = NSPasteboard.general
         board.clearContents()
-        board.setString(entry.text, forType: .string)
+        switch entry.content {
+        case let .text(value):
+            board.setString(value, forType: .string)
+        case .image:
+            guard let url = imageURL(for: entry), let image = NSImage(contentsOf: url) else { return }
+            board.writeObjects([image])
+        case let .files(paths):
+            board.writeObjects(paths.map { URL(fileURLWithPath: $0) as NSURL })
+        }
         lastChangeCount = board.changeCount
-        history.add(entry.text, at: Date(), sourceApp: entry.sourceApp)
+        history.add(entry.content, at: Date(), sourceApp: entry.sourceApp)
         store.save(history)
     }
 
@@ -79,11 +184,14 @@ public final class ClipboardModel {
 
     public func remove(_ entry: ClipboardEntry) {
         history.remove(entry.id)
+        removeImageFiles(of: [entry])
         store.save(history)
     }
 
     public func clearHistory() {
+        let gone = history.entries.filter { !$0.isPinned }
         history.clear()
+        removeImageFiles(of: gone)
         store.save(history)
     }
 
@@ -115,10 +223,11 @@ public final class ClipboardModel {
         plainPasteKey = HotKey(keyCode: 9, modifiers: 256 | 2048 | 512) { [weak self] in self?.pastePlainText() }
     }
 
-    /// Replaces the clipboard with its plain text and presses ⌘V.
+    /// Pastes the clipboard without its formatting and puts the original contents back afterwards.
     func pastePlainText() {
         let board = NSPasteboard.general
         guard let text = board.string(forType: .string) else { return }
+        let saved = snapshot(board)
         board.clearContents()
         board.setString(text, forType: .string)
         lastChangeCount = board.changeCount
@@ -128,6 +237,33 @@ public final class ClipboardModel {
             event?.flags = .maskCommand
             event?.post(tap: .cghidEventTap)
         }
+        Task { [weak self] in
+            // Give the app a moment to read the pasteboard before it changes back.
+            try? await Task.sleep(for: .milliseconds(350))
+            self?.restore(saved, to: board)
+        }
+    }
+
+    private func snapshot(_ board: NSPasteboard) -> [[String: Data]] {
+        (board.pasteboardItems ?? []).map { item in
+            var stored: [String: Data] = [:]
+            for type in item.types {
+                if let data = item.data(forType: type) { stored[type.rawValue] = data }
+            }
+            return stored
+        }
+    }
+
+    private func restore(_ snapshot: [[String: Data]], to board: NSPasteboard) {
+        guard !snapshot.isEmpty else { return }
+        let items = snapshot.map { stored -> NSPasteboardItem in
+            let item = NSPasteboardItem()
+            for (type, data) in stored { item.setData(data, forType: NSPasteboard.PasteboardType(type)) }
+            return item
+        }
+        board.clearContents()
+        board.writeObjects(items)
+        lastChangeCount = board.changeCount
     }
 
     // MARK: Shelf

@@ -8,7 +8,8 @@ enum DisplayServicesBridge {
     private typealias GetBrightness = @convention(c) (CGDirectDisplayID, UnsafeMutablePointer<Float>) -> Int32
     private typealias SetBrightness = @convention(c) (CGDirectDisplayID, Float) -> Int32
 
-    private static let handle: UnsafeMutableRawPointer? = dlopen(
+    // The handle is opened once and only read afterwards, so sharing it across threads is safe.
+    private nonisolated(unsafe) static let handle: UnsafeMutableRawPointer? = dlopen(
         "/System/Library/PrivateFrameworks/DisplayServices.framework/DisplayServices", RTLD_LAZY)
 
     private static func symbol<T>(_ name: String, as type: T.Type) -> T? {

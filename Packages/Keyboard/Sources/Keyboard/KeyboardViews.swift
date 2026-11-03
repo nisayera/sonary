@@ -47,8 +47,14 @@ struct KeyboardSettingsView: View {
                 }
                 HStack(spacing: 8) {
                     Circle().fill(model.isHolding ? Color.green : Color.secondary.opacity(0.3)).frame(width: 9, height: 9)
-                    Text(model.isHolding ? Text("Holding", bundle: .module) : Text("Hold the key to test it", bundle: .module))
-                        .font(.caption).foregroundStyle(.secondary)
+                    Group {
+                        if model.isHolding {
+                            Text("Holding", bundle: .module)
+                        } else {
+                            Text("Hold the key to test it", bundle: .module)
+                        }
+                    }
+                    .font(.caption).foregroundStyle(.secondary)
                 }
             }
         }

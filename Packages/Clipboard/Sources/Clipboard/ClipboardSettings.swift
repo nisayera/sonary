@@ -6,6 +6,12 @@ public struct ClipboardSettings: Codable, Equatable, Sendable {
     /// ⌘⌥⇧V pastes the clipboard without formatting. Needs Accessibility to press ⌘V for you.
     public var plainTextPasteShortcut = false
     public var ignoredApps: [String] = []
+    public var captureImages = true
+    public var captureFiles = true
+    /// Minutes after which unpinned entries are dropped; 0 keeps them.
+    public var autoClearMinutes = 0
+    public var clearOnSleep = false
+    public var clearOnLock = false
 
     public init() {}
 }

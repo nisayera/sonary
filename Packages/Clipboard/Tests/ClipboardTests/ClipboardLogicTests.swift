@@ -9,7 +9,7 @@ struct ClipboardHistoryTests {
         var history = ClipboardHistory()
         history.add("a", at: t)
         history.add("b", at: t)
-        #expect(history.entries.map(\.text) == ["b", "a"])
+        #expect(history.entries.map(\.searchText) == ["b", "a"])
     }
 
     @Test func duplicateMovesToTop() {
@@ -17,7 +17,7 @@ struct ClipboardHistoryTests {
         history.add("a", at: t)
         history.add("b", at: t)
         history.add("a", at: t)
-        #expect(history.entries.map(\.text) == ["a", "b"])
+        #expect(history.entries.map(\.searchText) == ["a", "b"])
     }
 
     @Test func ignoresBlank() {
@@ -32,7 +32,7 @@ struct ClipboardHistoryTests {
         if let id = history.entries.first?.id { history.togglePin(id) }
         history.add("b", at: t)
         history.add("c", at: t)
-        #expect(history.entries.map(\.text) == ["c", "old"])
+        #expect(history.entries.map(\.searchText) == ["c", "old"])
     }
 
     @Test func clearKeepsPinned() {
@@ -41,7 +41,7 @@ struct ClipboardHistoryTests {
         if let id = history.entries.first?.id { history.togglePin(id) }
         history.add("drop", at: t)
         history.clear()
-        #expect(history.entries.map(\.text) == ["keep"])
+        #expect(history.entries.map(\.searchText) == ["keep"])
     }
 
     @Test func duplicateKeepsPin() {
@@ -56,7 +56,7 @@ struct ClipboardHistoryTests {
         var history = ClipboardHistory()
         history.add("Hello World", at: t)
         history.add("other", at: t)
-        #expect(history.search("world").map(\.text) == ["Hello World"])
+        #expect(history.search("world").map(\.searchText) == ["Hello World"])
         #expect(history.search("").count == 2)
     }
 
@@ -109,7 +109,7 @@ struct ClipboardStoreTests {
         var history = ClipboardHistory(limit: 80)
         history.add("x", at: Date(timeIntervalSince1970: 0))
         store.save(history)
-        #expect(store.loadHistory(limit: 80).entries.map(\.text) == ["x"])
+        #expect(store.loadHistory(limit: 80).entries.map(\.searchText) == ["x"])
     }
 
     @Test func defaultsAreSensible() {
@@ -117,5 +117,82 @@ struct ClipboardStoreTests {
         #expect(settings.cleanLinks)
         #expect(!settings.plainTextPasteShortcut)
         #expect(settings.historyLimit == 50)
+    }
+}
+
+struct ClipboardContentTests {
+    private let t = Date(timeIntervalSince1970: 1_000)
+
+    @Test func imagesAndFilesAreKept() {
+        var history = ClipboardHistory()
+        history.add(.image(fileName: "a.png"), at: t)
+        history.add(.files(["/tmp/report.pdf", "/tmp/notes.txt"]), at: t)
+        #expect(history.entries.count == 2)
+        #expect(history.entries.first?.searchText == "report.pdf, notes.txt")
+        #expect(history.entries.last?.searchText == "Image")
+        #expect(history.entries.last?.text == nil)
+    }
+
+    @Test func emptyFileListIsIgnored() {
+        var history = ClipboardHistory()
+        history.add(.files([]), at: t)
+        #expect(history.entries.isEmpty)
+    }
+
+    @Test func copyingTheSameImageAgainMovesItUp() {
+        var history = ClipboardHistory()
+        history.add(.image(fileName: "a.png"), at: t)
+        history.add("text", at: t)
+        history.add(.image(fileName: "a.png"), at: t)
+        #expect(history.entries.count == 2)
+        #expect(history.entries.first?.content == .image(fileName: "a.png"))
+    }
+
+    @Test func searchFindsFileNames() {
+        var history = ClipboardHistory()
+        history.add(.files(["/tmp/invoice-2026.pdf"]), at: t)
+        #expect(history.search("invoice").count == 1)
+        #expect(history.search("nothing").isEmpty)
+    }
+}
+
+struct ClipboardAutoClearTests {
+    private let now = Date(timeIntervalSince1970: 10_000)
+
+    @Test func dropsOldUnpinnedEntries() {
+        var history = ClipboardHistory()
+        history.add("old", at: now.addingTimeInterval(-3600))
+        history.add("fresh", at: now.addingTimeInterval(-60))
+        let dropped = history.autoClear(now: now, olderThanMinutes: 15)
+        #expect(dropped.map(\.searchText) == ["old"])
+        #expect(history.entries.map(\.searchText) == ["fresh"])
+    }
+
+    @Test func keepsPinnedEntries() {
+        var history = ClipboardHistory()
+        history.add("old", at: now.addingTimeInterval(-3600))
+        if let id = history.entries.first?.id { history.togglePin(id) }
+        #expect(history.autoClear(now: now, olderThanMinutes: 15).isEmpty)
+        #expect(history.entries.count == 1)
+    }
+
+    @Test func zeroMinutesKeepsEverything() {
+        var history = ClipboardHistory()
+        history.add("old", at: now.addingTimeInterval(-99_999))
+        #expect(history.autoClear(now: now, olderThanMinutes: 0).isEmpty)
+        #expect(history.entries.count == 1)
+    }
+
+    @Test func orphanedImageFilesAreReported() {
+        var history = ClipboardHistory()
+        history.add(.image(fileName: "keep.png"), at: now)
+        #expect(history.orphanedImageFiles(knownFiles: ["keep.png", "gone.png"]) == ["gone.png"])
+    }
+
+    @Test func newDefaultsKeepEverythingUntilAsked() {
+        let settings = ClipboardSettings()
+        #expect(settings.autoClearMinutes == 0)
+        #expect(!settings.clearOnSleep && !settings.clearOnLock)
+        #expect(settings.captureImages && settings.captureFiles)
     }
 }

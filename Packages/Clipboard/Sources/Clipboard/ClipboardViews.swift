@@ -48,9 +48,12 @@ struct ClipboardPopoverView: View {
             ForEach(entries) { entry in
                 HStack(spacing: 8) {
                     Button { model.copy(entry) } label: {
-                        Text(entry.text.replacingOccurrences(of: "\n", with: " "))
-                            .lineLimit(2)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        HStack(spacing: 8) {
+                            preview(for: entry)
+                            Text(entry.searchText.replacingOccurrences(of: "\n", with: " "))
+                                .lineLimit(2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                     }
                     .buttonStyle(.plain)
                     .help(Text("Copy again", bundle: .module))
@@ -71,6 +74,26 @@ struct ClipboardPopoverView: View {
                     Text("Clear history (keeps pinned)", bundle: .module)
                 }
                 .buttonStyle(.borderless)
+            }
+        }
+    }
+
+    /// A thumbnail for images, an icon for files, nothing for plain text.
+    @ViewBuilder
+    private func preview(for entry: ClipboardEntry) -> some View {
+        switch entry.content {
+        case .text:
+            EmptyView()
+        case .image:
+            if let url = model.imageURL(for: entry), let image = NSImage(contentsOf: url) {
+                Image(nsImage: image).resizable().aspectRatio(contentMode: .fill)
+                    .frame(width: 34, height: 26).clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+            } else {
+                Image(systemName: "photo").foregroundStyle(.secondary)
+            }
+        case let .files(paths):
+            if let first = paths.first {
+                Image(nsImage: NSWorkspace.shared.icon(forFile: first)).resizable().frame(width: 20, height: 20)
             }
         }
     }
@@ -148,6 +171,33 @@ struct ClipboardSettingsView: View {
                     .labelsHidden()
             }
         }
+        SettingsCard(Text("What is recorded", bundle: .module)) {
+            SettingsToggleRow(symbol: "photo", title: Text("Images", bundle: .module),
+                              caption: Text("Copied images are kept as files and opened again from the list.", bundle: .module),
+                              isOn: Binding(get: { model.settings.captureImages },
+                                            set: { value in model.update { $0.captureImages = value } }))
+            SettingsToggleRow(symbol: "doc", title: Text("Files", bundle: .module),
+                              isOn: Binding(get: { model.settings.captureFiles },
+                                            set: { value in model.update { $0.captureFiles = value } }))
+        }
+        SettingsCard(Text("Clearing", bundle: .module)) {
+            SettingsRow(symbol: "clock.badge.xmark",
+                        title: model.settings.autoClearMinutes == 0
+                            ? Text("Keep entries until I clear them", bundle: .module)
+                            : Text("Forget entries after \(model.settings.autoClearMinutes) minutes", bundle: .module),
+                        caption: Text("Pinned entries always stay.", bundle: .module)) {
+                Stepper(value: Binding(get: { model.settings.autoClearMinutes },
+                                       set: { value in model.update { $0.autoClearMinutes = value } }),
+                        in: 0...240, step: 15) { EmptyView() }
+                    .labelsHidden()
+            }
+            SettingsToggleRow(symbol: "moon.zzz", title: Text("Clear when the Mac goes to sleep", bundle: .module),
+                              isOn: Binding(get: { model.settings.clearOnSleep },
+                                            set: { value in model.update { $0.clearOnSleep = value } }))
+            SettingsToggleRow(symbol: "lock", title: Text("Clear when the screen locks", bundle: .module),
+                              isOn: Binding(get: { model.settings.clearOnLock },
+                                            set: { value in model.update { $0.clearOnLock = value } }))
+        }
         SettingsCard(Text("Copying and pasting", bundle: .module)) {
             SettingsToggleRow(symbol: "link", title: Text("Clean links", bundle: .module),
                               caption: Text("Removes tracking parameters such as utm_source or fbclid from copied links.",
@@ -155,7 +205,8 @@ struct ClipboardSettingsView: View {
                               isOn: Binding(get: { model.settings.cleanLinks },
                                             set: { value in model.update { $0.cleanLinks = value } }))
             SettingsToggleRow(symbol: "textformat", title: Text("Paste as plain text with ⌘⌥⇧V", bundle: .module),
-                              caption: Text("Strips formatting and pastes. Needs the Accessibility permission.", bundle: .module),
+                              caption: Text("Strips formatting, pastes, and puts the original contents back. Needs the Accessibility permission.",
+                                            bundle: .module),
                               isOn: Binding(get: { model.settings.plainTextPasteShortcut },
                                             set: { value in model.update { $0.plainTextPasteShortcut = value } }))
         }

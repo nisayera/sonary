@@ -1,22 +1,45 @@
 import Foundation
 
+/// What was copied. Images are kept as files next to the history, so the list stays small.
+public enum ClipboardContent: Codable, Equatable, Sendable {
+    case text(String)
+    case image(fileName: String)
+    case files([String])
+}
+
 public struct ClipboardEntry: Codable, Equatable, Sendable, Identifiable {
     public var id: UUID
-    public var text: String
+    public var content: ClipboardContent
     public var copiedAt: Date
     public var sourceApp: String?
     public var isPinned: Bool
 
-    public init(id: UUID = UUID(), text: String, copiedAt: Date, sourceApp: String? = nil, isPinned: Bool = false) {
+    public init(id: UUID = UUID(), content: ClipboardContent, copiedAt: Date,
+                sourceApp: String? = nil, isPinned: Bool = false) {
         self.id = id
-        self.text = text
+        self.content = content
         self.copiedAt = copiedAt
         self.sourceApp = sourceApp
         self.isPinned = isPinned
     }
+
+    /// Plain text entries keep their text; everything else has none.
+    public var text: String? {
+        if case let .text(value) = content { return value }
+        return nil
+    }
+
+    /// What the list shows and what a search looks through.
+    public var searchText: String {
+        switch content {
+        case let .text(value): value
+        case .image: "Image"
+        case let .files(paths): paths.map { ($0 as NSString).lastPathComponent }.joined(separator: ", ")
+        }
+    }
 }
 
-/// Newest first. Copying the same text again moves it to the top; pinned entries are never dropped.
+/// Newest first. Copying the same thing again moves it to the top; pinned entries are never dropped.
 public struct ClipboardHistory: Codable, Equatable, Sendable {
     public private(set) var entries: [ClipboardEntry] = []
     public var limit: Int
@@ -26,14 +49,19 @@ public struct ClipboardHistory: Codable, Equatable, Sendable {
     }
 
     public mutating func add(_ text: String, at date: Date, sourceApp: String? = nil) {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        add(.text(text), at: date, sourceApp: sourceApp)
+    }
+
+    public mutating func add(_ content: ClipboardContent, at date: Date, sourceApp: String? = nil) {
+        if case let .text(value) = content, value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return }
+        if case let .files(paths) = content, paths.isEmpty { return }
         var pinned = false
-        if let index = entries.firstIndex(where: { $0.text == text }) {
+        if let index = entries.firstIndex(where: { $0.content == content }) {
             pinned = entries[index].isPinned
             entries.remove(at: index)
         }
-        entries.insert(ClipboardEntry(text: text, copiedAt: date, sourceApp: sourceApp, isPinned: pinned), at: 0)
+        entries.insert(ClipboardEntry(content: content, copiedAt: date, sourceApp: sourceApp, isPinned: pinned), at: 0)
         trim()
     }
 
@@ -57,10 +85,29 @@ public struct ClipboardHistory: Codable, Equatable, Sendable {
         entries.removeAll { !$0.isPinned }
     }
 
+    /// Drops unpinned entries older than the given age. Zero minutes means never.
+    @discardableResult
+    public mutating func autoClear(now: Date, olderThanMinutes minutes: Int) -> [ClipboardEntry] {
+        guard minutes > 0 else { return [] }
+        let cutoff = now.addingTimeInterval(-Double(minutes) * 60)
+        let dropped = entries.filter { !$0.isPinned && $0.copiedAt < cutoff }
+        entries.removeAll { !$0.isPinned && $0.copiedAt < cutoff }
+        return dropped
+    }
+
     public func search(_ query: String) -> [ClipboardEntry] {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty else { return entries }
-        return entries.filter { $0.text.localizedCaseInsensitiveContains(q) }
+        return entries.filter { $0.searchText.localizedCaseInsensitiveContains(q) }
+    }
+
+    /// Image files that no entry refers to any more, so the caller can delete them.
+    public func orphanedImageFiles(knownFiles: [String]) -> [String] {
+        let used = Set(entries.compactMap { entry -> String? in
+            if case let .image(fileName) = entry.content { return fileName }
+            return nil
+        })
+        return knownFiles.filter { !used.contains($0) }
     }
 
     private mutating func trim() {
