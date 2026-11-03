@@ -440,6 +440,26 @@
           }
         }
       }
+    },
+    "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwischenablage-Verlauf, saubere Links, Einsetzen als reiner Text, eine Datei-Ablage und Finder-Helfer."
+          }
+        }
+      }
+    },
+    "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufräumen, Deinstallieren, Beenden und Sofort-Beenden, Port-Manager und Homebrew-Updates."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -28,7 +28,7 @@
 </p>
 
 > [!NOTE]
-> **Sonary is in early development.** The app shell, module system, the System Monitor, Mouse and Notch modules are released (v0.4). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
+> **Sonary is in early development.** The app shell, module system, the System Monitor, Mouse, Notch, Clipboard and App Management modules are released (v0.6). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
 
 ---
 
@@ -49,8 +49,8 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 | 📊 **System Monitor** | CPU, GPU, RAM, network, disk, battery and temperatures in the menu bar, with history and alerts | ✅ Available |
 | 🖱 **Mouse** | Linear or smooth scrolling, acceleration off, button mapping, click filter, per-app exceptions | ✅ Available |
 | 🏝 **Notch / Dynamic Island** | Music, calendar, timers, downloads and accessory batteries around the notch (simulated on displays without one) | ✅ Available |
-| 📋 **Clipboard & Files** | Clipboard history, file shelf, clean tracking parameters from URLs | 🗓 Planned |
-| 🧹 **App Management** | Uninstaller, leftover cleaner, port manager | 🗓 Planned |
+| 📋 **Clipboard & Files** | Clipboard history, file shelf, clean tracking parameters from links, plain-text paste, Finder helpers | ✅ Available |
+| 🧹 **App Management** | Cleaner, uninstaller with leftovers, quit and force quit, port manager, Homebrew updates | ✅ Available |
 | 🪟 **Windows & Dock** | Window management and Dock enhancements | 🗓 Planned |
 | 🔊 **Sound & Display** | Per-app volume mixer, output switcher, keep awake | 🗓 Planned |
 | 🧰 **Tools** | Command bar, OCR, color picker, screenshots | 🗓 Planned |
@@ -86,8 +86,8 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 - [x] **M1 — System Monitor**
 - [x] **M2 — Mouse**
 - [x] **M3 — Notch / Dynamic Island**
-- [ ] M4 — Clipboard & Files
-- [ ] M5 — App Management
+- [x] **M4 — Clipboard & Files**
+- [x] **M5 — App Management**
 - [ ] M6 — Windows & Dock
 - [ ] M7 — Sound & Display
 - [ ] M8 — Tools
