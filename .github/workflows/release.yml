@@ -82,4 +82,10 @@ jobs:
           V="${{ steps.version.outputs.marketing }}"
           FILES=("Sonary-$V.zip" "Sonary-$V.dmg")
           [ -f appcast.xml ] && FILES+=(appcast.xml)
-          gh release create "$GITHUB_REF_NAME" "${FILES[@]}" --title "Sonary $V" --notes-file notes.md --verify-tag
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            # A release for this tag already exists (e.g. created in the web UI): fill it in.
+            gh release upload "$GITHUB_REF_NAME" "${FILES[@]}" --clobber
+            gh release edit "$GITHUB_REF_NAME" --title "Sonary $V" --notes-file notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" "${FILES[@]}" --title "Sonary $V" --notes-file notes.md --verify-tag
+          fi
