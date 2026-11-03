@@ -16,9 +16,11 @@ final class UpdateModel {
         controller = SPUStandardUpdaterController(startingUpdater: startUpdater, updaterDelegate: nil, userDriverDelegate: nil)
         automaticallyChecks = controller.updater.automaticallyChecksForUpdates
         canCheckForUpdates = controller.updater.canCheckForUpdates
-        observation = controller.updater.observe(\.canCheckForUpdates, options: [.new]) { [weak self] updater, _ in
-            let value = updater.canCheckForUpdates
-            Task { @MainActor in self?.canCheckForUpdates = value }
+        observation = controller.updater.observe(\.canCheckForUpdates, options: [.new]) { [weak self] _, _ in
+            Task { @MainActor in
+                guard let self else { return }
+                self.canCheckForUpdates = self.controller.updater.canCheckForUpdates
+            }
         }
     }
 
