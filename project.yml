@@ -1,0 +1,39 @@
+name: Sonary
+options:
+  bundleIdPrefix: app.sonary
+  deploymentTarget:
+    macOS: "26.0"
+packages:
+  SonaryCore:
+    path: Packages/SonaryCore
+  SonaryUI:
+    path: Packages/SonaryUI
+  Monitor:
+    path: Packages/Monitor
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    ARCHS: arm64
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+targets:
+  Sonary:
+    type: application
+    platform: macOS
+    sources:
+      - App
+    dependencies:
+      - package: SonaryCore
+      - package: SonaryUI
+      - package: Monitor
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleName: Sonary
+        CFBundleDisplayName: Sonary
+        LSUIElement: true
+        NSHumanReadableCopyright: "GPL-3.0-or-later"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.sonary.Sonary
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: NO

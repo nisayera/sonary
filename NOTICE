@@ -1,0 +1,13 @@
+Sonary – Drittcode und Herkunft
+
+Sonary ist lizenziert unter GPL-3.0-or-later (siehe LICENSE).
+
+Sonary ist von den Funktionen der freien App Vorssaint (vorssaint-utils, GPL-3.0)
+inspiriert. Name, Logo und Look von Vorssaint werden nicht verwendet.
+
+Aus Vorssaint übernommene Dateien behalten ihre originalen Copyright- und
+Lizenz-Header. Jede übernommene Datei wird hier eingetragen:
+
+| Datei in Sonary | Quelle (Pfad im Vorssaint-Repo) | Commit der Quelle |
+|---|---|---|
+| (noch keine) | | |

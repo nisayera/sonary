@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          uname -m
+
+      - name: Test packages
+        run: |
+          set -eo pipefail
+          for p in SonaryCore SonaryUI Monitor; do
+            echo "::group::swift test $p"
+            swift test --package-path "Packages/$p" -Xswiftc -warnings-as-errors 2>&1 | tee "test-$p.log"
+            echo "::endgroup::"
+          done
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build app
+        run: |
+          set -eo pipefail
+          xcodegen generate
+          xcodebuild -project Sonary.xcodeproj -scheme Sonary \
+            -destination 'platform=macOS,arch=arm64' \
+            CODE_SIGNING_ALLOWED=NO SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
+            build 2>&1 | tee build.log
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: "*.log"
+          if-no-files-found: ignore
