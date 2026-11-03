@@ -50,25 +50,30 @@ struct WindowLayoutTests {
 struct QuitGuardTests {
     @Test func firstPressIsSwallowed() {
         var guardian = QuitGuard()
-        #expect(!guardian.shouldQuit(app: "a", at: 10))
+        let r1 = guardian.shouldQuit(app: "a", at: 10)
+        #expect(!r1)
     }
 
     @Test func secondPressInsideWindowQuits() {
         var guardian = QuitGuard(window: 1.5)
         _ = guardian.shouldQuit(app: "a", at: 10)
-        #expect(guardian.shouldQuit(app: "a", at: 11))
+        let r2 = guardian.shouldQuit(app: "a", at: 11)
+        #expect(r2)
     }
 
     @Test func slowSecondPressStartsOver() {
         var guardian = QuitGuard(window: 1.5)
         _ = guardian.shouldQuit(app: "a", at: 10)
-        #expect(!guardian.shouldQuit(app: "a", at: 13))
-        #expect(guardian.shouldQuit(app: "a", at: 13.5))
+        let r3 = guardian.shouldQuit(app: "a", at: 13)
+        #expect(!r3)
+        let r4 = guardian.shouldQuit(app: "a", at: 13.5)
+        #expect(r4)
     }
 
     @Test func otherAppStartsOver() {
         var guardian = QuitGuard()
         _ = guardian.shouldQuit(app: "a", at: 10)
-        #expect(!guardian.shouldQuit(app: "b", at: 10.5))
+        let r5 = guardian.shouldQuit(app: "b", at: 10.5)
+        #expect(!r5)
     }
 }
