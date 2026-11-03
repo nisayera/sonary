@@ -28,7 +28,7 @@
 </p>
 
 > [!NOTE]
-> **Sonary is in early development.** The app shell, module system, the System Monitor, Mouse, Notch, Clipboard and App Management modules are released (v0.6). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
+> **Sonary is in early development.** The app shell, module system, the System Monitor, Mouse, Notch, Clipboard, App Management and Windows modules are released (v0.7). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
 
 ---
 
@@ -51,7 +51,7 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 | 🏝 **Notch / Dynamic Island** | Music, calendar, timers, downloads and accessory batteries around the notch (simulated on displays without one) | ✅ Available |
 | 📋 **Clipboard & Files** | Clipboard history, file shelf, clean tracking parameters from links, plain-text paste, Finder helpers | ✅ Available |
 | 🧹 **App Management** | Cleaner, uninstaller with leftovers, quit and force quit, port manager, Homebrew updates | ✅ Available |
-| 🪟 **Windows & Dock** | Window management and Dock enhancements | 🗓 Planned |
+| 🪟 **Windows** | Window layouts (halves, quarters, thirds, maximize, center) on shortcuts, ⌘Q quit protection | ✅ Available |
 | 🔊 **Sound & Display** | Per-app volume mixer, output switcher, keep awake | 🗓 Planned |
 | 🧰 **Tools** | Command bar, OCR, color picker, screenshots | 🗓 Planned |
 
@@ -88,7 +88,7 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 - [x] **M3 — Notch / Dynamic Island**
 - [x] **M4 — Clipboard & Files**
 - [x] **M5 — App Management**
-- [ ] M6 — Windows & Dock
+- [x] **M6 — Windows** (Dock clicks and app switcher later)
 - [ ] M7 — Sound & Display
 - [ ] M8 — Tools
 

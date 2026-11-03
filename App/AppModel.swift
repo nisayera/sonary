@@ -6,6 +6,7 @@ import Clipboard
 import Mouse
 import Notch
 import SonaryCore
+import Windows
 
 @MainActor
 @Observable
@@ -18,6 +19,7 @@ final class AppModel {
     let notch: NotchModule
     let clipboard: ClipboardModule
     let apps: AppsModule
+    let windows: WindowsModule
     let updates: UpdateModel
     private(set) var onboardingCompleted: Bool
 
@@ -38,7 +40,9 @@ final class AppModel {
         self.clipboard = clipboard
         let apps = AppsModule()
         self.apps = apps
-        self.registry = ModuleRegistry(modules: [monitor, mouse, notch, clipboard, apps], defaults: defaults, permissions: broker)
+        let windows = WindowsModule(defaults: defaults)
+        self.windows = windows
+        self.registry = ModuleRegistry(modules: [monitor, mouse, notch, clipboard, apps, windows], defaults: defaults, permissions: broker)
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
     }
 
