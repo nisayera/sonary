@@ -34,3 +34,35 @@ struct SensorReaderTests {
         #expect(SMCValueDecoder.decode([1, 2, 3, 4], type: "ch8*") == nil)
     }
 }
+
+struct FanReadingTests {
+    @Test func loadSitsBetweenTheEnds() {
+        let fan = FanReading(index: 0, rpm: 3000, minimum: 1000, maximum: 5000)
+        #expect(fan.load == 0.5)
+    }
+
+    @Test func loadNeedsBothEnds() {
+        #expect(FanReading(index: 0, rpm: 3000).load == nil)
+        #expect(FanReading(index: 0, rpm: 3000, minimum: 2000, maximum: 2000).load == nil)
+    }
+
+    @Test func loadStaysInRange() {
+        #expect(FanReading(index: 0, rpm: 9000, minimum: 1000, maximum: 5000).load == 1)
+        #expect(FanReading(index: 0, rpm: 10, minimum: 1000, maximum: 5000).load == 0)
+    }
+
+    @Test func implausibleReadingsAreDropped() {
+        let readings = [FanReading(index: 0, rpm: 0), FanReading(index: 1, rpm: 2400),
+                        FanReading(index: 2, rpm: 65_535)]
+        #expect(plausibleFans(readings).map(\.index) == [1])
+    }
+
+    @Test func formatsTheFastestFan() {
+        #expect(formatFanSpeed([FanReading(index: 0, rpm: 1200), FanReading(index: 1, rpm: 2400.4)]) == "2400 rpm")
+        #expect(formatFanSpeed([]) == "—")
+    }
+
+    @Test func fanlessMacReadsNothing() {
+        #expect(NoFans().fans().isEmpty)
+    }
+}

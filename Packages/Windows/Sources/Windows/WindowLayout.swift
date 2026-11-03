@@ -133,3 +133,13 @@ public func movedFrame(_ frame: CGRect, from source: CGRect, to target: CGRect) 
     return CGRect(x: min(x, target.maxX - width), y: min(y, target.maxY - height),
                   width: width, height: height).integral
 }
+
+/// Apps whose last window just closed, so they can be quit. An app that never had a window
+/// (a menu bar app, a helper) is never quit by this.
+public func appsWithNoWindowsLeft(previous: [Int32: Int], current: [Int32: Int]) -> [Int32] {
+    previous.compactMap { pid, count in
+        guard count > 0, let now = current[pid], now == 0 else { return nil }
+        return pid
+    }
+    .sorted()
+}

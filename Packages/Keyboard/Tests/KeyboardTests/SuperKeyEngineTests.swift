@@ -70,26 +70,33 @@ struct KeyDebouncerTests {
 
     @Test func dropsTheSecondPressInsideTheWindow() {
         var debouncer = KeyDebouncer(milliseconds: 40)
-        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0))
+        let result1 = debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0)
+        #expect(!result1)
         #expect(debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 20 * ms))
     }
 
     @Test func keepsNormalTyping() {
         var debouncer = KeyDebouncer(milliseconds: 40)
-        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0))
-        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 90 * ms))
+        let result2 = debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0)
+        #expect(!result2)
+        let result3 = debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 90 * ms)
+        #expect(!result3)
     }
 
     @Test func otherKeysAreUnaffected() {
         var debouncer = KeyDebouncer(milliseconds: 40)
-        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0))
-        #expect(!debouncer.shouldDrop(keyCode: 5, timestampNanoseconds: 1 * ms))
+        let result4 = debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0)
+        #expect(!result4)
+        let result5 = debouncer.shouldDrop(keyCode: 5, timestampNanoseconds: 1 * ms)
+        #expect(!result5)
     }
 
     @Test func zeroTurnsItOff() {
         var debouncer = KeyDebouncer(milliseconds: 0)
-        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0))
-        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 1))
+        let result6 = debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0)
+        #expect(!result6)
+        let result7 = debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 1)
+        #expect(!result7)
     }
 
     @Test func debounceIsOffByDefault() {

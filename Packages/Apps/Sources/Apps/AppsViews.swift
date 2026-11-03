@@ -158,10 +158,77 @@ struct AppsSettingsView: View {
                 Text(message).font(.caption).foregroundStyle(.secondary)
             }
         }
+        SettingsCard(Text("Scheduled cleaning", bundle: .module)) {
+            SettingsRow(symbol: "calendar.badge.clock", title: Text("Clean caches and logs", bundle: .module),
+                        caption: Text("Runs in the background and moves everything to the Trash.", bundle: .module)) {
+                Picker(selection: Binding(get: { model.settings.cleanSchedule },
+                                          set: { value in model.update { $0.cleanSchedule = value } })) {
+                    ForEach(CleanSchedule.allCases, id: \.self) { Text(scheduleTitle($0), bundle: .module).tag($0) }
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 150)
+            }
+            if let last = model.settings.lastCleaned {
+                Text("Last cleaned \(last.formatted(date: .abbreviated, time: .shortened))", bundle: .module)
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        SettingsCard(Text("Tidy up folders", bundle: .module)) {
+            Text("Sonary moves files out of these folders to the Trash once they are old enough. Good for a messenger's downloads.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            ForEach(model.settings.watchedFolders) { folder in
+                SettingsRow(symbol: "folder.badge.gearshape",
+                            title: Text(verbatim: (folder.path as NSString).abbreviatingWithTildeInPath),
+                            caption: Text("Delete after \(folder.retentionDays) days", bundle: .module)) {
+                    Stepper(value: Binding(
+                        get: { folder.retentionDays },
+                        set: { value in
+                            model.update { settings in
+                                if let index = settings.watchedFolders.firstIndex(where: { $0.path == folder.path }) {
+                                    settings.watchedFolders[index].retentionDays = value
+                                }
+                            }
+                        }), in: 0...365, step: 7) { EmptyView() }
+                        .labelsHidden()
+                    Button(role: .destructive) {
+                        model.update { $0.watchedFolders.removeAll { $0.path == folder.path } }
+                    } label: {
+                        Image(systemName: "minus.circle")
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel(Text("Remove folder", bundle: .module))
+                }
+            }
+            Button { addWatchedFolder() } label: {
+                Label { Text("Add folder…", bundle: .module) } icon: { Image(systemName: "plus") }
+            }
+        }
         SettingsCard(Text("In the menu panel", bundle: .module)) {
             Text("Clean caches and logs, quit or force quit apps, stop processes that block a port and update Homebrew apps from the menu panel's apps tab.",
                  bundle: .module)
                 .font(.callout).foregroundStyle(.secondary)
+        }
+    }
+}
+
+func scheduleTitle(_ schedule: CleanSchedule) -> LocalizedStringKey {
+    switch schedule {
+    case .off: "Never"
+    case .weekly: "Every week"
+    case .monthly: "Every month"
+    }
+}
+
+extension AppsSettingsView {
+    fileprivate func addWatchedFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        model.update { settings in
+            if !settings.watchedFolders.contains(where: { $0.path == url.path }) {
+                settings.watchedFolders.append(WatchedFolder(path: url.path, retentionDays: 30))
+            }
         }
     }
 }

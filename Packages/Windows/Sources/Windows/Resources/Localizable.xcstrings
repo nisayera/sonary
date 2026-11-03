@@ -340,6 +340,36 @@
           }
         }
       }
+    },
+    "Closing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
+          }
+        }
+      }
+    },
+    "Quit an app when its last window closes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App beenden, wenn ihr letztes Fenster schließt"
+          }
+        }
+      }
+    },
+    "Finder and menu bar apps are never quit.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Finder und Menüleisten-Apps werden nie beendet."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

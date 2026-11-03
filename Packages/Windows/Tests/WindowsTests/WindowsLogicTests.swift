@@ -131,8 +131,10 @@ struct WindowSwitcherTests {
 struct ProtectionTests {
     @Test func quitAndCloseAreArmedSeparately() {
         var guardian = QuitGuard()
-        #expect(!guardian.shouldQuit(app: "a", key: .quit, at: 10))
-        #expect(!guardian.shouldQuit(app: "a", key: .close, at: 10.2))
+        let result1 = guardian.shouldQuit(app: "a", key: .quit, at: 10)
+        #expect(!result1)
+        let result2 = guardian.shouldQuit(app: "a", key: .close, at: 10.2)
+        #expect(!result2)
         #expect(guardian.shouldQuit(app: "a", key: .close, at: 10.4))
     }
 
@@ -180,5 +182,23 @@ struct MoveBetweenScreensTests {
         let huge = CGRect(x: 0, y: 0, width: 4000, height: 4000)
         let moved = movedFrame(huge, from: left, to: right)
         #expect(moved.width <= right.width && moved.height <= right.height)
+    }
+}
+
+struct QuitWhenLastWindowClosesTests {
+    @Test func appThatLostItsLastWindowIsQuit() {
+        #expect(appsWithNoWindowsLeft(previous: [1: 2, 2: 1], current: [1: 0, 2: 1]) == [1])
+    }
+
+    @Test func appWithoutWindowsBeforeIsLeftAlone() {
+        #expect(appsWithNoWindowsLeft(previous: [1: 0], current: [1: 0]).isEmpty)
+    }
+
+    @Test func appThatDisappearedIsLeftAlone() {
+        #expect(appsWithNoWindowsLeft(previous: [1: 3], current: [:]).isEmpty)
+    }
+
+    @Test func newAppsAreIgnored() {
+        #expect(appsWithNoWindowsLeft(previous: [:], current: [5: 0]).isEmpty)
     }
 }

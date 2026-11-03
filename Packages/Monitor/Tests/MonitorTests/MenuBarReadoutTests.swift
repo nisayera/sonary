@@ -30,3 +30,24 @@ struct MenuBarReadoutTests {
         #expect(formatReadout(snapshot(network: rates), metrics: [.network]) == "↓1.5 MB/s ↑200 KB/s")
     }
 }
+
+struct FanReadoutTests {
+    private func snapshot() -> MetricsSnapshot {
+        MetricsSnapshot(
+            timestamp: Date(timeIntervalSince1970: 0), cpu: 0.4, gpu: nil,
+            memory: MemoryStats(usedBytes: 50, totalBytes: 100, pressure: .normal),
+            network: .zero, disk: DiskStats(freeBytes: 1, totalBytes: 2),
+            battery: nil, temperatures: [:]
+        )
+    }
+
+    @Test func showsTheFastestFan() {
+        let text = formatReadout(snapshot(), metrics: [.fan], fans: [FanReading(index: 0, rpm: 2400)])
+        #expect(text == "FAN 2400 rpm")
+    }
+
+    @Test func fanlessMacShowsNothing() {
+        #expect(formatReadout(snapshot(), metrics: [.fan], fans: []).isEmpty)
+        #expect(formatReadout(snapshot(), metrics: [.cpu, .fan], fans: []) == "CPU 40%")
+    }
+}

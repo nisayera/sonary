@@ -46,14 +46,80 @@ public final class AppsModel {
     public private(set) var isBrewBusy = false
     public private(set) var uninstallPlan: UninstallPlan?
     public private(set) var message: String?
+    public private(set) var settings = AppsSettings()
 
-    public init() {
+    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private var scheduleTask: Task<Void, Never>?
+
+    public init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        if let data = defaults.data(forKey: "apps.settings"),
+           let stored = try? JSONDecoder().decode(AppsSettings.self, from: data) {
+            settings = stored
+        }
         let library = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library")
         cleanTargets = [
             CleanTarget(id: "caches", folder: library.appendingPathComponent("Caches")),
             CleanTarget(id: "logs", folder: library.appendingPathComponent("Logs")),
             CleanTarget(id: "derivedData", folder: library.appendingPathComponent("Developer/Xcode/DerivedData")),
         ]
+    }
+
+    func start() {
+        guard scheduleTask == nil else { return }
+        scheduleTask = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.runScheduledWork()
+                try? await Task.sleep(for: .seconds(3600))
+            }
+        }
+    }
+
+    func stop() {
+        scheduleTask?.cancel()
+        scheduleTask = nil
+    }
+
+    public func update(_ change: (inout AppsSettings) -> Void) {
+        change(&settings)
+        if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "apps.settings") }
+    }
+
+    /// The scheduled clean and the retention rules, checked once an hour.
+    private func runScheduledWork() async {
+        await tidyWatchedFolders()
+        guard shouldClean(schedule: settings.cleanSchedule, lastCleaned: settings.lastCleaned, now: Date()) else { return }
+        await scan()
+        for target in cleanTargets where (target.size ?? 0) > 0 {
+            await clean(target)
+        }
+        update { $0.lastCleaned = Date() }
+    }
+
+    /// Moves files that outlived their folder's retention rule to the Trash.
+    public func tidyWatchedFolders() async {
+        let folders = settings.watchedFolders
+        guard !folders.isEmpty else { return }
+        let removed = await Task.detached { () -> Int in
+            var removed = 0
+            for folder in folders {
+                let url = URL(fileURLWithPath: folder.path, isDirectory: true)
+                let contents = (try? FileManager.default.contentsOfDirectory(
+                    at: url, includingPropertiesForKeys: [.contentModificationDateKey], options: [.skipsHiddenFiles])) ?? []
+                let files = contents.map { item in
+                    AgedFile(url: item,
+                             modified: (try? item.resourceValues(forKeys: [.contentModificationDateKey]))?
+                                 .contentModificationDate ?? Date())
+                }
+                for file in filesPastRetention(files, days: folder.retentionDays, now: Date()) {
+                    if (try? FileManager.default.trashItem(at: file.url, resultingItemURL: nil)) != nil { removed += 1 }
+                }
+            }
+            return removed
+        }.value
+        if removed > 0 {
+            message = String(localized: "Moved \(removed) old files to the Trash.", bundle: .module)
+        }
     }
 
     // MARK: Cleaner

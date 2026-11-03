@@ -77,6 +77,9 @@ public struct MonitorView: View {
                         .font(.callout)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    if let fastest = module.fans.map(\.rpm).max(), fastest > 0 {
+                        MetricCard(title: "Fans", value: formatFanSpeed(module.fans), symbol: "fan")
+                    }
                     MetricCard(title: "Temperature",
                                value: latest.temperatures.values.max().map { "\(Int($0.rounded()))°" } ?? "—",
                                symbol: "thermometer.medium")

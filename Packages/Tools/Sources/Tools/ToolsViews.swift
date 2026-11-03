@@ -28,14 +28,7 @@ struct ToolsPopoverView: View {
             switch section {
             case .tools: toolsView
             case .toggles: togglesView
-            case .scratchpad:
-                TextEditor(text: Binding(get: { model.settings.scratchpad },
-                                         set: { value in model.update { $0.scratchpad = value } }))
-                    .font(.body)
-                    .frame(height: 300)
-                    .scrollContentBackground(.hidden)
-                    .padding(6)
-                    .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            case .scratchpad: scratchpadView
             case .snippets: snippetsView
             }
             if let result = model.lastResult {
@@ -67,6 +60,45 @@ struct ToolsPopoverView: View {
             }
             Text("Dark mode and the Trash ask once for permission to control the system.", bundle: .module)
                 .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var scratchpadView: some View {
+        let current = model.currentTab
+        return VStack(alignment: .leading, spacing: 6) {
+            ScrollView(.horizontal) {
+                HStack(spacing: 4) {
+                    ForEach(model.tabs) { tab in
+                        Button { model.selectTab(tab.id) } label: {
+                            Text(tab.title).lineLimit(1)
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .background(tab.id == current.id ? Color.sonaryAccent.opacity(0.2) : .clear,
+                                            in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Button { model.addTab() } label: { Image(systemName: "plus") }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(Text("New note", bundle: .module))
+                }
+            }
+            .scrollIndicators(.hidden)
+            TextEditor(text: Binding(get: { current.text }, set: { model.setText($0, for: current.id) }))
+                .font(.body)
+                .frame(height: 260)
+                .scrollContentBackground(.hidden)
+                .padding(6)
+                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            HStack {
+                Button { model.exportTab(current) } label: {
+                    Label { Text("Save as Markdown", bundle: .module) } icon: { Image(systemName: "square.and.arrow.down") }
+                }
+                Spacer()
+                Button(role: .destructive) { model.removeTab(current.id) } label: {
+                    Text("Delete note", bundle: .module)
+                }
+            }
+            .buttonStyle(.borderless)
         }
     }
 

@@ -81,7 +81,7 @@ struct RadialMathTests {
 
     @Test func quickTogglesAreSystemActionsOnly() {
         #expect(quickToggleActions.allSatisfy { ![.commandBar, .textFromScreen, .colorPicker, .screenshot].contains($0) })
-        #expect(quickToggleActions.count == 5)
+        #expect(quickToggleActions.contains(.cleaningMode))
     }
 }
 
@@ -190,5 +190,29 @@ struct ColorFormatTests {
         #expect(Int(hsl(r: 1, g: 0, b: 0).hue.rounded()) == 0)
         #expect(Int(hsl(r: 0, g: 1, b: 0).hue.rounded()) == 120)
         #expect(Int(hsl(r: 0, g: 0, b: 1).hue.rounded()) == 240)
+    }
+}
+
+struct ScratchpadTests {
+    @Test func fileNameLosesAwkwardCharacters() {
+        #expect(exportFileName(for: "Plan: 2026/Q1") == "Plan  2026 Q1.md")
+        #expect(exportFileName(for: "   ") == "Note.md")
+    }
+
+    @Test func fileNameStaysShort() {
+        #expect(exportFileName(for: String(repeating: "a", count: 200)).count == 63)
+    }
+
+    @Test func titleComesFromTheFirstLine() {
+        #expect(suggestedTitle(for: "# Shopping\nmilk", fallback: "Note") == "Shopping")
+        #expect(suggestedTitle(for: "", fallback: "Note") == "Note")
+        #expect(suggestedTitle(for: "\n\nlater", fallback: "Note") == "Note")
+    }
+
+    @Test func tabsCanBeReordered() {
+        let tabs = [ScratchpadTab(title: "a"), ScratchpadTab(title: "b"), ScratchpadTab(title: "c")]
+        #expect(movedTab(tabs, from: 0, to: 2).map(\.title) == ["b", "c", "a"])
+        #expect(movedTab(tabs, from: 5, to: 0).map(\.title) == ["a", "b", "c"])
+        #expect(movedTab(tabs, from: 1, to: 1).map(\.title) == ["a", "b", "c"])
     }
 }

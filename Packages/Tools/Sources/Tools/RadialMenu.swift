@@ -90,6 +90,7 @@ func quickActionTitle(_ action: QuickAction) -> LocalizedStringKey {
     case .emptyTrash: "Empty Trash"
     case .ejectDisks: "Eject disks"
     case .lockScreen: "Lock screen"
+    case .cleaningMode: "Cleaning mode"
     case .commandBar: "Command bar"
     case .textFromScreen: "Copy text from screen"
     case .colorPicker: "Pick a color"

@@ -300,6 +300,26 @@
           }
         }
       }
+    },
+    "Fan speed": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lüfterdrehzahl"
+          }
+        }
+      }
+    },
+    "Fans": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lüfter"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

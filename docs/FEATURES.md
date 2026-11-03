@@ -5,7 +5,7 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.11.0.
+Status checked against the code at version 0.12.0.
 
 ## Audio
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
@@ -16,8 +16,8 @@ Status checked against the code at version 0.11.0.
 
 ## System monitoring
 - [x] CPU, GPU, memory, temperatures, battery, history graphs and the busiest apps
-- [ ] Fan control (manual speed, temperature curves, live RPM)
-- [~] Configurable menu bar readouts — CPU, memory, network, battery, temperature, and battery time in the panel; no fan speed
+- [~] Fan speeds are read and shown, in the panel and the menu bar; no manual speed, no curves
+- [x] Configurable menu bar readouts — CPU, memory, network, battery, temperature and fan speed
 - [~] Network — live traffic, totals for this session and the local address; no speed test
 - [x] Alerts for sustained CPU load, temperature, memory pressure, low disk space and low battery
 
@@ -28,7 +28,7 @@ Status checked against the code at version 0.11.0.
 - [ ] Dock icon click actions
 - [ ] Green button fills the screen without a new Space
 - [ ] Fixed Space order
-- [ ] Quit apps when their last window closes
+- [x] Quit apps when their last window closes
 - [~] ⌘Q and ⌘W protection — press twice, with per-app rules; no hold mode
 
 ## Keyboard and mouse
@@ -64,8 +64,8 @@ Status checked against the code at version 0.11.0.
 - [x] Quick toggles: dark mode, desktop icons, empty Trash, eject disks, lock screen
 - [x] Quit-apps list
 - [~] Radial menu on ⌃⌥R with a free choice of actions; no profiles, no submenus
-- [~] Scratchpad; no tabs, no Markdown preview or export
-- [ ] Cleaning mode (input lock, black screen)
+- [~] Scratchpad with tabs and Markdown export; no preview
+- [x] Cleaning mode: every screen goes black until Escape or a click
 
 ## Capture
 - [ ] Unified capture selector with magnifier
@@ -78,8 +78,8 @@ Status checked against the code at version 0.11.0.
 
 ## App management
 - [~] Update checker — Homebrew formulae and casks; no App Store, no Sparkle feeds of other apps
-- [~] Cleaner for caches, logs and Xcode build data; no schedule
-- [ ] Messaging-app download cleanup with retention rules
+- [x] Cleaner for caches, logs and Xcode build data, weekly or monthly on a schedule
+- [x] Folder tidying with a retention rule per folder, for a messenger's downloads
 - [x] Uninstaller with a review of what is left behind
 - [x] Homebrew manager
 - [x] Port manager with stop

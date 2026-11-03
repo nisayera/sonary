@@ -46,7 +46,7 @@ final class AppModel {
         self.notch = notch
         let clipboard = ClipboardModule(defaults: defaults)
         self.clipboard = clipboard
-        let apps = AppsModule()
+        let apps = AppsModule(defaults: defaults)
         self.apps = apps
         let windows = WindowsModule(defaults: defaults)
         self.windows = windows

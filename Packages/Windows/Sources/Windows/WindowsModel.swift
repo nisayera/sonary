@@ -10,6 +10,10 @@ public struct WindowsSettings: Codable, Equatable, Sendable {
     /// Empty means every app; otherwise only these bundle IDs are protected.
     public var protectedApps: [String] = []
     public var windowSwitcher = true
+    /// Quit an app once its last window is closed.
+    public var quitWhenLastWindowCloses = false
+    /// Apps this never applies to, by bundle ID.
+    public var neverQuitApps: [String] = []
 
     public init() {}
 }
@@ -41,6 +45,8 @@ public final class WindowsModel {
     @ObservationIgnored private var quitGuard = QuitGuard()
     /// The frame a window had before the last layout, so it can be put back.
     @ObservationIgnored private var previousFrames: [pid_t: CGRect] = [:]
+    @ObservationIgnored private var windowCounts: [Int32: Int] = [:]
+    @ObservationIgnored private var watchTask: Task<Void, Never>?
     @ObservationIgnored private var hud: NSPanel?
     @ObservationIgnored private let switcher = WindowSwitcherController()
     @ObservationIgnored private var running = false
@@ -98,10 +104,59 @@ public final class WindowsModel {
             hotKeys.append(key)
         }
         if running, settings.quitProtection || settings.closeProtection { installQuitTap() } else { removeQuitTap() }
+        if running, settings.quitWhenLastWindowCloses { startWatchingWindows() } else { stopWatchingWindows() }
         if !running || !settings.windowSwitcher { switcher.close() }
     }
 
     public func showSwitcher() { switcher.show() }
+
+    // MARK: Quit when the last window closes
+
+    private func startWatchingWindows() {
+        guard watchTask == nil else { return }
+        windowCounts = currentWindowCounts()
+        watchTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(2))
+                self?.checkWindows()
+            }
+        }
+    }
+
+    private func stopWatchingWindows() {
+        watchTask?.cancel()
+        watchTask = nil
+        windowCounts = [:]
+    }
+
+    private func checkWindows() {
+        let current = currentWindowCounts()
+        for pid in appsWithNoWindowsLeft(previous: windowCounts, current: current) {
+            guard let app = NSRunningApplication(processIdentifier: pid),
+                  let bundleID = app.bundleIdentifier,
+                  bundleID != Bundle.main.bundleIdentifier,
+                  bundleID != "com.apple.finder",
+                  !settings.neverQuitApps.contains(bundleID) else { continue }
+            app.terminate()
+        }
+        windowCounts = current
+    }
+
+    /// How many normal windows each running app has on screen.
+    private func currentWindowCounts() -> [Int32: Int] {
+        var counts: [Int32: Int] = [:]
+        for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .regular {
+            counts[app.processIdentifier] = 0
+        }
+        let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+        for window in (raw as? [[String: Any]]) ?? [] {
+            guard (window["kCGWindowLayer"] as? Int) == 0,
+                  let pid = (window["kCGWindowOwnerPID"] as? NSNumber)?.int32Value,
+                  counts[pid] != nil else { continue }
+            counts[pid, default: 0] += 1
+        }
+        return counts
+    }
 
     /// Moves the front window to the next display, keeping its relative place and size.
     public func moveToNextScreen() {

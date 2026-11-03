@@ -360,6 +360,96 @@
           }
         }
       }
+    },
+    "Note": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz"
+          }
+        }
+      }
+    },
+    "New note": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Notiz"
+          }
+        }
+      }
+    },
+    "Save as Markdown": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als Markdown sichern"
+          }
+        }
+      }
+    },
+    "Delete note": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz löschen"
+          }
+        }
+      }
+    },
+    "Saved to %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gesichert als %@"
+          }
+        }
+      }
+    },
+    "Could not save the note.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Notiz konnte nicht gesichert werden."
+          }
+        }
+      }
+    },
+    "Cleaning mode": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Putzmodus"
+          }
+        }
+      }
+    },
+    "Keyboard and screen are locked for cleaning": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastatur und Bildschirm sind zum Putzen gesperrt"
+          }
+        }
+      }
+    },
+    "Press Escape or click to stop": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escape drücken oder klicken zum Beenden"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

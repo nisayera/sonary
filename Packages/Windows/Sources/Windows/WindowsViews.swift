@@ -63,6 +63,12 @@ struct WindowsSettingsView: View {
                     .buttonStyle(.borderless)
             }
         }
+        SettingsCard(Text("Closing", bundle: .module)) {
+            SettingsToggleRow(symbol: "xmark.circle", title: Text("Quit an app when its last window closes", bundle: .module),
+                              caption: Text("Finder and menu bar apps are never quit.", bundle: .module),
+                              isOn: Binding(get: { model.settings.quitWhenLastWindowCloses },
+                                            set: { value in model.update { $0.quitWhenLastWindowCloses = value } }))
+        }
         SettingsCard(Text("Quit protection", bundle: .module)) {
             SettingsToggleRow(symbol: "hand.raised", title: Text("Press ⌘Q twice to quit", bundle: .module),
                               caption: Text("Stops apps from closing by accident. Finder is never affected.", bundle: .module),

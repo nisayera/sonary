@@ -310,6 +310,136 @@
           }
         }
       }
+    },
+    "Scheduled cleaning": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplantes Aufräumen"
+          }
+        }
+      }
+    },
+    "Clean caches and logs": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caches und Protokolle aufräumen"
+          }
+        }
+      }
+    },
+    "Runs in the background and moves everything to the Trash.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läuft im Hintergrund und legt alles in den Papierkorb."
+          }
+        }
+      }
+    },
+    "Never": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie"
+          }
+        }
+      }
+    },
+    "Every week": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jede Woche"
+          }
+        }
+      }
+    },
+    "Every month": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeden Monat"
+          }
+        }
+      }
+    },
+    "Last cleaned %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuletzt aufgeräumt %@"
+          }
+        }
+      }
+    },
+    "Tidy up folders": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner aufräumen"
+          }
+        }
+      }
+    },
+    "Sonary moves files out of these folders to the Trash once they are old enough. Good for a messenger's downloads.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary legt Dateien aus diesen Ordnern in den Papierkorb, sobald sie alt genug sind. Gut für die Downloads eines Messengers."
+          }
+        }
+      }
+    },
+    "Delete after %lld days": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach %lld Tagen löschen"
+          }
+        }
+      }
+    },
+    "Remove folder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner entfernen"
+          }
+        }
+      }
+    },
+    "Add folder…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner hinzufügen …"
+          }
+        }
+      }
+    },
+    "Moved %lld old files to the Trash.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld alte Dateien in den Papierkorb gelegt."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -19,6 +19,7 @@ public final class MonitorModule: SonaryModule {
     public private(set) var showsMenuBarValues: Bool
     public private(set) var totals = NetworkTotals()
     public private(set) var topProcesses: [ProcessUsage] = []
+    public private(set) var fans: [FanReading] = []
     public private(set) var localAddress: String?
     /// Rough time left on battery while it is discharging.
     public private(set) var batteryTime: TimeInterval?
@@ -30,10 +31,14 @@ public final class MonitorModule: SonaryModule {
     @ObservationIgnored private var processTask: Task<Void, Never>?
     @ObservationIgnored private var batterySamples: [(level: Double, at: Date)] = []
 
+    @ObservationIgnored private let fanSource: any FanSource
+
     public init(
         defaults: UserDefaults = .standard,
-        sources: @escaping @Sendable () -> any MetricsSources = { SystemSources(sensors: SystemSensorReader()) }
+        sources: @escaping @Sendable () -> any MetricsSources = { SystemSources(sensors: SystemSensorReader()) },
+        fans: any FanSource = SMCFanReader()
     ) {
+        self.fanSource = fans
         self.defaults = defaults
         self.sourcesFactory = sources
         let stored = defaults.stringArray(forKey: "monitor.readout")?.compactMap(ReadoutMetric.init(rawValue:))
@@ -51,9 +56,11 @@ public final class MonitorModule: SonaryModule {
         localAddress = preferredLocalAddress(systemLocalAddresses())
         processTask = Task { [weak self] in
             while !Task.isCancelled {
-                let processes = await Task.detached { systemTopProcesses(limit: 5) }.value
+                let source = self?.fanSource ?? NoFans()
+                let readings = await Task.detached { (processes: systemTopProcesses(limit: 5), fans: source.fans()) }.value
                 guard let self else { return }
-                self.topProcesses = processes
+                self.topProcesses = readings.processes
+                self.fans = readings.fans
                 try? await Task.sleep(for: .seconds(5))
             }
         }
@@ -93,6 +100,7 @@ public final class MonitorModule: SonaryModule {
         processTask?.cancel()
         processTask = nil
         topProcesses = []
+        fans = []
         task?.cancel()
         task = nil
         await sampler?.stop()
@@ -121,7 +129,7 @@ public final class MonitorModule: SonaryModule {
 
     public func menuBarText() -> String? {
         guard showsMenuBarValues, let latest, !readoutMetrics.isEmpty else { return nil }
-        return formatReadout(latest, metrics: readoutMetrics)
+        return formatReadout(latest, metrics: readoutMetrics, fans: fans)
     }
 
     public func makeSettingsView() -> AnyView { AnyView(MonitorSettingsView(module: self)) }

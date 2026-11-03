@@ -122,6 +122,12 @@ public struct SystemSources: MetricsSources {
     }
 }
 
+/// Reads a C string buffer up to its first zero byte.
+private func text(from buffer: [CChar]) -> String {
+    let bytes = buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }
+    return String(decoding: bytes, as: UTF8.self)
+}
+
 /// Every IPv4 address the machine has, with the interface it belongs to.
 public func systemLocalAddresses() -> [(interface: String, address: String)] {
     var head: UnsafeMutablePointer<ifaddrs>?
@@ -136,8 +142,8 @@ public func systemLocalAddresses() -> [(interface: String, address: String)] {
         var buffer = [CChar](repeating: 0, count: Int(NI_MAXHOST))
         guard getnameinfo(addressPointer, socklen_t(addressPointer.pointee.sa_len), &buffer,
                           socklen_t(buffer.count), nil, 0, NI_NUMERICHOST) == 0 else { continue }
-        let address = String(cString: buffer)
-        let name = String(cString: current.pointee.ifa_name)
+        let address = text(from: buffer)
+        let name = String(validatingCString: current.pointee.ifa_name) ?? ""
         if !address.isEmpty { result.append((interface: name, address: address)) }
     }
     return result

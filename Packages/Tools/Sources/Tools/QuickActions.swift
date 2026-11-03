@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 
 public enum QuickAction: String, CaseIterable, Codable, Sendable, Identifiable {
-    case darkMode, desktopIcons, emptyTrash, ejectDisks, lockScreen
+    case darkMode, desktopIcons, emptyTrash, ejectDisks, lockScreen, cleaningMode
     case commandBar, textFromScreen, colorPicker, screenshot
 
     public var id: String { rawValue }
@@ -14,6 +14,7 @@ public enum QuickAction: String, CaseIterable, Codable, Sendable, Identifiable {
         case .emptyTrash: "trash"
         case .ejectDisks: "eject"
         case .lockScreen: "lock.display"
+        case .cleaningMode: "sparkles"
         case .commandBar: "magnifyingglass"
         case .textFromScreen: "text.viewfinder"
         case .colorPicker: "eyedropper"
@@ -23,7 +24,8 @@ public enum QuickAction: String, CaseIterable, Codable, Sendable, Identifiable {
 }
 
 /// The system actions, kept apart from the model so the UI list and the radial menu agree.
-public let quickToggleActions: [QuickAction] = [.darkMode, .desktopIcons, .emptyTrash, .ejectDisks, .lockScreen]
+public let quickToggleActions: [QuickAction] = [.darkMode, .desktopIcons, .emptyTrash, .ejectDisks, .lockScreen,
+                                               .cleaningMode]
 
 enum SystemActions {
     @discardableResult
