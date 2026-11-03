@@ -1,0 +1,85 @@
+name: Release
+
+# Push a tag like v0.2.0 to build, sign (Sparkle EdDSA) and publish a release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version from tag
+        id: version
+        run: |
+          read -r MARKETING BUILD < <(python3 scripts/release_tools.py version "$GITHUB_REF_NAME")
+          echo "marketing=$MARKETING" >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+
+      - name: Install tools
+        run: |
+          brew install xcodegen
+          python3 -m venv .venv
+          .venv/bin/pip install cryptography
+
+      - name: Build Release app
+        run: |
+          set -eo pipefail
+          xcodegen generate
+          xcodebuild -project Sonary.xcodeproj -scheme Sonary -configuration Release \
+            -destination 'generic/platform=macOS' -derivedDataPath build \
+            MARKETING_VERSION="${{ steps.version.outputs.marketing }}" \
+            CURRENT_PROJECT_VERSION="${{ steps.version.outputs.build }}" \
+            CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES \
+            build 2>&1 | tee build.log
+          APP="build/Build/Products/Release/Sonary.app"
+          test -d "$APP"
+          GOT=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")
+          test "$GOT" = "${{ steps.version.outputs.marketing }}"
+          codesign --verify --deep --strict "$APP"
+
+      - name: Package
+        run: |
+          set -eo pipefail
+          V="${{ steps.version.outputs.marketing }}"
+          APP="build/Build/Products/Release/Sonary.app"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "Sonary-$V.zip"
+          mkdir dmgroot && cp -R "$APP" dmgroot/ && ln -s /Applications dmgroot/Applications
+          hdiutil create -volname "Sonary $V" -srcfolder dmgroot -ov -format UDZO "Sonary-$V.dmg"
+
+      - name: Release notes
+        run: |
+          {
+            echo "Sonary ${{ steps.version.outputs.marketing }}"
+            echo
+            echo "Install: open the DMG and drag Sonary to Applications. Requires macOS 26 on Apple silicon."
+            echo "First launch: this build is not notarized yet. Right-click Sonary, choose Open, then Open again"
+            echo "(or run: xattr -dr com.apple.quarantine /Applications/Sonary.app). Later updates install from inside the app."
+          } > notes.md
+
+      - name: Appcast (Sparkle update feed)
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SPARKLE_ED_PRIVATE_KEY" ]; then
+            echo "::warning::SPARKLE_ED_PRIVATE_KEY secret is missing: publishing WITHOUT an update feed."
+            exit 0
+          fi
+          V="${{ steps.version.outputs.marketing }}"
+          .venv/bin/python scripts/release_tools.py appcast --tag "$GITHUB_REF_NAME" \
+            --archive "Sonary-$V.zip" --repo "$GITHUB_REPOSITORY" --notes notes.md --out appcast.xml
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.version.outputs.marketing }}"
+          FILES=("Sonary-$V.zip" "Sonary-$V.dmg")
+          [ -f appcast.xml ] && FILES+=(appcast.xml)
+          gh release create "$GITHUB_REF_NAME" "${FILES[@]}" --title "Sonary $V" --notes-file notes.md --verify-tag
