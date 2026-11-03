@@ -1,4 +1,5 @@
 import Foundation
+import SonaryCore
 import Testing
 @testable import Sonary
 
@@ -20,6 +21,13 @@ struct AppModelTests {
 
         await first.registry.setEnabled("monitor", false)
         #expect(!first.registry.isEnabled("monitor"))
+    }
+
+    @Test func mouseModuleIsRegisteredAndNeedsAccessibility() {
+        let model = AppModel(defaults: makeDefaults(), startUpdater: false)
+        let module = model.registry.modules.first { $0.id == "mouse" }
+        #expect(module?.requiredPermissions == [.accessibility])
+        #expect(!model.registry.isEnabled("mouse"))
     }
 
     @Test func onboardingFlagPersists() {

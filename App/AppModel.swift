@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import Monitor
+import Mouse
 import SonaryCore
 
 @MainActor
@@ -10,6 +11,7 @@ final class AppModel {
     let broker: PermissionBroker
     let launchAtLogin = LaunchAtLoginModel()
     let monitor: MonitorModule
+    let mouse: MouseModule
     let updates: UpdateModel
     private(set) var onboardingCompleted: Bool
 
@@ -22,7 +24,9 @@ final class AppModel {
         self.updates = UpdateModel(startUpdater: startUpdater)
         let monitor = MonitorModule(defaults: defaults)
         self.monitor = monitor
-        self.registry = ModuleRegistry(modules: [monitor], defaults: defaults, permissions: broker)
+        let mouse = MouseModule(defaults: defaults)
+        self.mouse = mouse
+        self.registry = ModuleRegistry(modules: [monitor, mouse], defaults: defaults, permissions: broker)
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
     }
 

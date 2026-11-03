@@ -13,12 +13,14 @@ packages:
     path: Packages/SonaryUI
   Monitor:
     path: Packages/Monitor
+  Mouse:
+    path: Packages/Mouse
 settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
-    MARKETING_VERSION: "0.2.0"
-    CURRENT_PROJECT_VERSION: 200
+    MARKETING_VERSION: "0.3.0"
+    CURRENT_PROJECT_VERSION: 300
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -30,6 +32,7 @@ targets:
       - package: SonaryCore
       - package: SonaryUI
       - package: Monitor
+      - package: Mouse
       - package: Sparkle
         product: Sparkle
     entitlements:
@@ -63,6 +66,7 @@ targets:
       - target: Sonary
       - package: SonaryCore
       - package: Monitor
+      - package: Mouse
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
