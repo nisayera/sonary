@@ -1,4 +1,5 @@
 import AppKit
+import CoreGraphics
 import Observation
 import SonaryCore
 
