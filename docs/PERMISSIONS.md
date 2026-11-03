@@ -14,6 +14,7 @@ Sonary fragt Berechtigungen erst an, wenn du ein Modul einschaltest, das sie bra
 | Zwischenablage | keine | Liest die Zwischenablage, um den Verlauf zu führen; Passwort-Einträge werden übersprungen |
 | Zwischenablage: Einsetzen als reiner Text | Bedienungshilfen | Drückt ⌘V für dich |
 | Zwischenablage: Finder-Helfer | Automation (Finder) | Pfad kopieren, Terminal öffnen, neue Datei |
+| Apps | keine | Aufräumen und Deinstallieren legen Dateien nur in den Papierkorb; Ports über `lsof`, Updates über Homebrew |
 
 Die Zeigerbeschleunigung wird nur geändert, solange das Modul läuft. Der ursprüngliche Wert wird beim Ausschalten, beim Beenden und beim nächsten Start nach einem Absturz wiederhergestellt.
 

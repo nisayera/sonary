@@ -450,6 +450,16 @@
           }
         }
       }
+    },
+    "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufräumen, Deinstallieren, Beenden und Sofort-Beenden, Port-Manager und Homebrew-Updates."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

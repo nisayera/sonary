@@ -19,12 +19,14 @@ packages:
     path: Packages/Notch
   Clipboard:
     path: Packages/Clipboard
+  Apps:
+    path: Packages/Apps
 settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
-    MARKETING_VERSION: "0.5.0"
-    CURRENT_PROJECT_VERSION: 500
+    MARKETING_VERSION: "0.6.0"
+    CURRENT_PROJECT_VERSION: 600
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -39,6 +41,7 @@ targets:
       - package: Mouse
       - package: Notch
       - package: Clipboard
+      - package: Apps
       - package: Sparkle
         product: Sparkle
     entitlements:
@@ -79,6 +82,7 @@ targets:
       - package: Mouse
       - package: Notch
       - package: Clipboard
+      - package: Apps
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

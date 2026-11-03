@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import Monitor
+import Apps
 import Clipboard
 import Mouse
 import Notch
@@ -16,6 +17,7 @@ final class AppModel {
     let mouse: MouseModule
     let notch: NotchModule
     let clipboard: ClipboardModule
+    let apps: AppsModule
     let updates: UpdateModel
     private(set) var onboardingCompleted: Bool
 
@@ -34,7 +36,9 @@ final class AppModel {
         self.notch = notch
         let clipboard = ClipboardModule(defaults: defaults)
         self.clipboard = clipboard
-        self.registry = ModuleRegistry(modules: [monitor, mouse, notch, clipboard], defaults: defaults, permissions: broker)
+        let apps = AppsModule()
+        self.apps = apps
+        self.registry = ModuleRegistry(modules: [monitor, mouse, notch, clipboard, apps], defaults: defaults, permissions: broker)
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
     }
 
