@@ -41,6 +41,17 @@ struct WindowsSettingsView: View {
                 }
             }
         }
+        SettingsCard(Text("Window switcher", bundle: .module)) {
+            SettingsToggleRow(symbol: "rectangle.stack", title: Text("Window switcher on ⌃⌥Tab", bundle: .module),
+                              caption: Text("Lists every open window with search, and brings the one you pick to the front.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.windowSwitcher },
+                                            set: { value in model.update { $0.windowSwitcher = value } }))
+            if model.settings.windowSwitcher {
+                Button { model.showSwitcher() } label: { Text("Show it now", bundle: .module) }
+                    .buttonStyle(.borderless)
+            }
+        }
         SettingsCard(Text("Quit protection", bundle: .module)) {
             SettingsToggleRow(symbol: "hand.raised", title: Text("Press ⌘Q twice to quit", bundle: .module),
                               caption: Text("Stops apps from closing by accident. Finder is never affected.", bundle: .module),

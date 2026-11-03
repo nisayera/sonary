@@ -12,6 +12,8 @@ enum ModuleInfo {
         case "windows": "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident."
         case "sound": "Switch speakers and microphones, volume, microphone mute on ⌃⌥M and keep awake."
         case "tools": "Command bar, text from screen, color picker, screenshots, scratchpad and snippets."
+        case "keyboard": "Super Key: one key becomes ⌃⌥⇧⌘ while held and runs an action when tapped."
+        case "display": "Brightness for every display, with shortcuts and dimming for displays without hardware control."
         default: ""
         }
     }

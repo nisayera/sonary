@@ -250,6 +250,96 @@
           }
         }
       }
+    },
+    "Toggles": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalter"
+          }
+        }
+      }
+    },
+    "Dark mode": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler Modus"
+          }
+        }
+      }
+    },
+    "Desktop icons": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schreibtischsymbole"
+          }
+        }
+      }
+    },
+    "Empty Trash": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papierkorb leeren"
+          }
+        }
+      }
+    },
+    "Eject disks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes auswerfen"
+          }
+        }
+      }
+    },
+    "Lock screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirm sperren"
+          }
+        }
+      }
+    },
+    "Radial menu": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radial-Menü"
+          }
+        }
+      }
+    },
+    "Dark mode and the Trash ask once for permission to control the system.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler Modus und Papierkorb fragen einmal nach der Erlaubnis, das System zu steuern."
+          }
+        }
+      }
+    },
+    "⌃⌥R opens a ring of actions around the pointer. Pick which ones it holds, up to eight.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃⌥R öffnet einen Ring mit Aktionen um den Zeiger. Wähle aus, welche darin liegen, bis zu acht."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

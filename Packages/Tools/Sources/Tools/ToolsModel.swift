@@ -9,6 +9,7 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var snippets: [Snippet] = [
         Snippet(title: "Date", text: "{date}"),
     ]
+    public var radialActions: [QuickAction] = QuickAction.allCases
     public init() {}
 }
 
@@ -21,6 +22,7 @@ public final class ToolsModel {
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var hotKeys: [HotKey] = []
     @ObservationIgnored private var commandBar: CommandBarController?
+    @ObservationIgnored private let radial = RadialMenuController()
     @ObservationIgnored private var running = false
 
     public init(defaults: UserDefaults) {
@@ -43,6 +45,7 @@ public final class ToolsModel {
         applyShortcuts()
         commandBar?.close()
         commandBar = nil
+        radial.close()
     }
 
     public func update(_ change: (inout ToolsSettings) -> Void) {
@@ -62,6 +65,7 @@ public final class ToolsModel {
             (17, ctrlOpt, { [weak self] in self?.recognizeText() }),          // ⌃⌥T
             (35, ctrlOpt, { [weak self] in self?.pickColor() }),              // ⌃⌥P
             (1, ctrlOpt, { [weak self] in self?.screenshotToClipboard() }),   // ⌃⌥S
+            (15, ctrlOpt, { [weak self] in self?.showRadialMenu() }),         // ⌃⌥R
         ]
         for (key, modifiers, action) in bindings {
             if let hotKey = HotKey(keyCode: key, modifiers: modifiers, action: action) { hotKeys.append(hotKey) }
@@ -143,6 +147,27 @@ public final class ToolsModel {
     }
 
     public func removeSnippet(_ id: UUID) { update { $0.snippets.removeAll { $0.id == id } } }
+
+    // MARK: Quick actions and the radial menu
+
+    public func run(_ action: QuickAction) {
+        switch action {
+        case .darkMode: SystemActions.toggleDarkMode()
+        case .desktopIcons: SystemActions.toggleDesktopIcons()
+        case .emptyTrash: SystemActions.emptyTrash()
+        case .ejectDisks: SystemActions.ejectDisks()
+        case .lockScreen: SystemActions.lockScreen()
+        case .commandBar: showCommandBar()
+        case .textFromScreen: recognizeText()
+        case .colorPicker: pickColor()
+        case .screenshot: screenshotToClipboard()
+        }
+    }
+
+    public func showRadialMenu() {
+        let actions = settings.radialActions.isEmpty ? QuickAction.allCases : settings.radialActions
+        radial.show(actions: Array(actions.prefix(8))) { [weak self] action in self?.run(action) }
+    }
 
     // MARK: Command bar
 

@@ -26,6 +26,7 @@ struct NotchView: View {
         .contentShape(Rectangle())
         .onHover { model.hoverChanged($0) }
         .onTapGesture { model.clicked() }
+        .background(ScrollCatcher { deltaX, deltaY in model.scrolled(deltaX: deltaX, deltaY: deltaY) })
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(sonaryAnimation(reduceMotion), value: expanded)
         .environment(\.colorScheme, .dark)
@@ -231,5 +232,28 @@ private struct BatteriesWidget: View {
                 }
             }
         }
+    }
+}
+
+/// Catches scroll wheel and trackpad scrolling over the island; SwiftUI has no handler for it.
+private struct ScrollCatcher: NSViewRepresentable {
+    let onScroll: (Double, Double) -> Void
+
+    func makeNSView(context: Context) -> ScrollCatchingView {
+        let view = ScrollCatchingView()
+        view.onScroll = onScroll
+        return view
+    }
+
+    func updateNSView(_ view: ScrollCatchingView, context: Context) {
+        view.onScroll = onScroll
+    }
+}
+
+final class ScrollCatchingView: NSView {
+    var onScroll: ((Double, Double) -> Void)?
+
+    override func scrollWheel(with event: NSEvent) {
+        onScroll?(Double(event.scrollingDeltaX), Double(event.scrollingDeltaY))
     }
 }

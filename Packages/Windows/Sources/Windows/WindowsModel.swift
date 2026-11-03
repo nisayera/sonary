@@ -6,6 +6,7 @@ import SwiftUI
 public struct WindowsSettings: Codable, Equatable, Sendable {
     public var layoutShortcuts = true
     public var quitProtection = false
+    public var windowSwitcher = true
 
     public init() {}
 }
@@ -36,6 +37,7 @@ public final class WindowsModel {
     @ObservationIgnored private var quitSource: CFRunLoopSource?
     @ObservationIgnored private var quitGuard = QuitGuard()
     @ObservationIgnored private var hud: NSPanel?
+    @ObservationIgnored private let switcher = WindowSwitcherController()
     @ObservationIgnored private var running = false
 
     public init(defaults: UserDefaults) {
@@ -75,8 +77,16 @@ public final class WindowsModel {
                 }
             }
         }
+        if running, settings.windowSwitcher,
+           // ⌃⌥Tab (key code 48)
+           let key = HotKey(keyCode: 48, modifiers: 4096 | 2048, action: { [weak self] in self?.showSwitcher() }) {
+            hotKeys.append(key)
+        }
         if running, settings.quitProtection { installQuitTap() } else { removeQuitTap() }
+        if !running || !settings.windowSwitcher { switcher.close() }
     }
+
+    public func showSwitcher() { switcher.show() }
 
     // MARK: Layouts
 

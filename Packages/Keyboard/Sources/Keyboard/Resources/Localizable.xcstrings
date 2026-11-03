@@ -1,0 +1,196 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Keyboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastatur"
+          }
+        }
+      }
+    },
+    "Super Key": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super-Taste"
+          }
+        }
+      }
+    },
+    "Turn one key into ⌃⌥⇧⌘": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Taste zu ⌃⌥⇧⌘ machen"
+          }
+        }
+      }
+    },
+    "Held down it adds all four modifiers, so you get shortcuts no app uses.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gedrückt gehalten fügt sie alle vier Sondertasten hinzu, so bekommst du Kürzel, die keine App benutzt."
+          }
+        }
+      }
+    },
+    "Key": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taste"
+          }
+        }
+      }
+    },
+    "Caps Lock": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feststelltaste"
+          }
+        }
+      }
+    },
+    "Right ⌘": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechte ⌘"
+          }
+        }
+      }
+    },
+    "Right ⌥": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechte ⌥"
+          }
+        }
+      }
+    },
+    "Right ⌃": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechte ⌃"
+          }
+        }
+      }
+    },
+    "When tapped on its own": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beim kurzen Antippen"
+          }
+        }
+      }
+    },
+    "Nothing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts"
+          }
+        }
+      }
+    },
+    "Escape": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escape"
+          }
+        }
+      }
+    },
+    "Open the command bar": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Befehlsleiste öffnen"
+          }
+        }
+      }
+    },
+    "Holding": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gehalten"
+          }
+        }
+      }
+    },
+    "Hold the key to test it": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Halte die Taste zum Ausprobieren"
+          }
+        }
+      }
+    },
+    "Exceptions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausnahmen"
+          }
+        }
+      }
+    },
+    "Super Key stays off while one of these apps is in front.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Super-Taste bleibt aus, solange eine dieser Apps vorne ist."
+          }
+        }
+      }
+    },
+    "Remove exception": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausnahme entfernen"
+          }
+        }
+      }
+    },
+    "Add app…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App hinzufügen …"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

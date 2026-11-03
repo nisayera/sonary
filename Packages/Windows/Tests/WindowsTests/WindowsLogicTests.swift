@@ -77,3 +77,52 @@ struct QuitGuardTests {
         #expect(!r5)
     }
 }
+
+struct WindowSwitcherTests {
+    private func window(_ id: Int, _ pid: Int, _ app: String, _ title: String?,
+                        layer: Int = 0, w: Double = 800, h: Double = 600) -> [String: Any] {
+        var dict: [String: Any] = [
+            "kCGWindowNumber": NSNumber(value: id), "kCGWindowOwnerPID": NSNumber(value: pid),
+            "kCGWindowOwnerName": app, "kCGWindowLayer": layer,
+            "kCGWindowBounds": ["Width": NSNumber(value: w), "Height": NSNumber(value: h)],
+        ]
+        if let title { dict["kCGWindowName"] = title }
+        return dict
+    }
+
+    @Test func keepsRealWindowsInOrder() {
+        let entries = switcherEntries(from: [window(1, 10, "Safari", "Start"), window(2, 11, "Mail", "Inbox")],
+                                      excludingPID: 99)
+        #expect(entries.map(\.appName) == ["Safari", "Mail"])
+        #expect(entries.first?.label == "Safari — Start")
+    }
+
+    @Test func skipsMenuBarAndTinyWindows() {
+        let entries = switcherEntries(from: [window(1, 10, "Bar", "x", layer: 25), window(2, 11, "Tiny", "x", w: 40, h: 20)],
+                                      excludingPID: 99)
+        #expect(entries.isEmpty)
+    }
+
+    @Test func skipsOurOwnWindows() {
+        #expect(switcherEntries(from: [window(1, 99, "Sonary", "Panel")], excludingPID: 99).isEmpty)
+    }
+
+    @Test func untitledWindowShowsTheAppName() {
+        let entries = switcherEntries(from: [window(1, 10, "Preview", nil)], excludingPID: 99)
+        #expect(entries.first?.label == "Preview")
+    }
+
+    @Test func selectionWrapsBothWays() {
+        #expect(nextIndex(from: 2, count: 3, forward: true) == 0)
+        #expect(nextIndex(from: 0, count: 3, forward: false) == 2)
+        #expect(nextIndex(from: 0, count: 0, forward: true) == 0)
+    }
+
+    @Test func searchMatchesAppAndTitle() {
+        let entries = [WindowEntry(id: 1, pid: 1, appName: "Safari", title: "News"),
+                       WindowEntry(id: 2, pid: 2, appName: "Mail", title: "Inbox")]
+        #expect(filteredEntries(entries, query: "mail").map(\.id) == [2])
+        #expect(filteredEntries(entries, query: "news").map(\.id) == [1])
+        #expect(filteredEntries(entries, query: " ").count == 2)
+    }
+}

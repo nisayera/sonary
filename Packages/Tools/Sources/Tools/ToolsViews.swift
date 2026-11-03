@@ -2,11 +2,12 @@ import SonaryUI
 import SwiftUI
 
 private enum ToolsSection: String, CaseIterable, Identifiable {
-    case tools, scratchpad, snippets
+    case tools, toggles, scratchpad, snippets
     var id: String { rawValue }
     var title: LocalizedStringKey {
         switch self {
         case .tools: "Tools"
+        case .toggles: "Toggles"
         case .scratchpad: "Scratchpad"
         case .snippets: "Snippets"
         }
@@ -26,6 +27,7 @@ struct ToolsPopoverView: View {
                 .labelsHidden()
             switch section {
             case .tools: toolsView
+            case .toggles: togglesView
             case .scratchpad:
                 TextEditor(text: Binding(get: { model.settings.scratchpad },
                                          set: { value in model.update { $0.scratchpad = value } }))
@@ -48,6 +50,23 @@ struct ToolsPopoverView: View {
             tool("text.viewfinder", "Copy text from screen", "⌃⌥T") { model.recognizeText() }
             tool("eyedropper", "Pick a color", "⌃⌥P") { model.pickColor() }
             tool("camera.viewfinder", "Screenshot to clipboard", "⌃⌥S") { model.screenshotToClipboard() }
+            tool("circle.grid.cross", "Radial menu", "⌃⌥R") { model.showRadialMenu() }
+        }
+    }
+
+    private var togglesView: some View {
+        VStack(spacing: 6) {
+            ForEach(quickToggleActions) { action in
+                Button { model.run(action) } label: {
+                    SettingsRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module)) {
+                        EmptyView()
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            Text("Dark mode and the Trash ask once for permission to control the system.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -84,6 +103,26 @@ struct ToolsSettingsView: View {
             SettingsToggleRow(symbol: "keyboard", title: Text("Keyboard shortcuts", bundle: .module),
                               caption: Text("⌥Space command bar, ⌃⌥T text from screen, ⌃⌥P color picker, ⌃⌥S screenshot.", bundle: .module),
                               isOn: Binding(get: { model.settings.shortcuts }, set: { value in model.update { $0.shortcuts = value } }))
+        }
+        SettingsCard(Text("Radial menu", bundle: .module)) {
+            Text("⌃⌥R opens a ring of actions around the pointer. Pick which ones it holds, up to eight.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            ForEach(QuickAction.allCases) { action in
+                SettingsToggleRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module),
+                                  isOn: Binding(
+                                      get: { model.settings.radialActions.contains(action) },
+                                      set: { on in
+                                          model.update { settings in
+                                              settings.radialActions.removeAll { $0 == action }
+                                              if on {
+                                                  settings.radialActions = QuickAction.allCases.filter {
+                                                      $0 == action || settings.radialActions.contains($0)
+                                                  }
+                                              }
+                                          }
+                                      }))
+            }
         }
         SettingsCard(Text("Snippets", bundle: .module)) {
             Text("Placeholders: {date}, {time} and {clipboard}.", bundle: .module).font(.caption).foregroundStyle(.secondary)

@@ -210,6 +210,56 @@
           }
         }
       }
+    },
+    "Window switcher": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fensterwechsler"
+          }
+        }
+      }
+    },
+    "Window switcher on ⌃⌥Tab": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fensterwechsler mit ⌃⌥Tab"
+          }
+        }
+      }
+    },
+    "Lists every open window with search, and brings the one you pick to the front.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listet jedes offene Fenster mit Suche und holt das gewählte nach vorn."
+          }
+        }
+      }
+    },
+    "Show it now": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jetzt anzeigen"
+          }
+        }
+      }
+    },
+    "Search windows": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster suchen"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

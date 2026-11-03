@@ -1,0 +1,106 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Display": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anzeige"
+          }
+        }
+      }
+    },
+    "Brightness": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helligkeit"
+          }
+        }
+      }
+    },
+    "No display found.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Display gefunden."
+          }
+        }
+      }
+    },
+    "dimmed by Sonary": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "von Sonary abgedunkelt"
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Brightness with ⌃⌥⇧↑ and ⌃⌥⇧↓": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helligkeit mit ⌃⌥⇧↑ und ⌃⌥⇧↓"
+          }
+        }
+      }
+    },
+    "Changes the display the pointer is on.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ändert das Display, auf dem der Zeiger steht."
+          }
+        }
+      }
+    },
+    "Displays": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Displays"
+          }
+        }
+      }
+    },
+    "Hardware brightness": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hardware-Helligkeit"
+          }
+        }
+      }
+    },
+    "No hardware control: Sonary dims it with an overlay instead.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Hardware-Steuerung: Sonary dunkelt stattdessen mit einer Ebene ab."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
