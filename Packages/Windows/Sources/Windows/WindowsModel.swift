@@ -85,7 +85,7 @@ public final class WindowsModel {
         var focused: CFTypeRef?
         guard AXUIElementCopyAttributeValue(axApp, kAXFocusedWindowAttribute as CFString, &focused) == .success,
               let focused, CFGetTypeID(focused) == AXUIElementGetTypeID() else { return }
-        let window = unsafeBitCast(focused, to: AXUIElement.self)
+        let window = unsafeDowncast(focused, to: AXUIElement.self)
         guard let currentAX = frame(of: window) else { return }
         let height = primary.frame.height
         let current = cocoaRect(fromAX: currentAX, primaryScreenHeight: height)
@@ -104,8 +104,8 @@ public final class WindowsModel {
               CFGetTypeID(positionRef) == AXValueGetTypeID(), CFGetTypeID(sizeRef) == AXValueGetTypeID() else { return nil }
         var point = CGPoint.zero
         var size = CGSize.zero
-        AXValueGetValue(unsafeBitCast(positionRef, to: AXValue.self), .cgPoint, &point)
-        AXValueGetValue(unsafeBitCast(sizeRef, to: AXValue.self), .cgSize, &size)
+        AXValueGetValue(unsafeDowncast(positionRef, to: AXValue.self), .cgPoint, &point)
+        AXValueGetValue(unsafeDowncast(sizeRef, to: AXValue.self), .cgSize, &size)
         return CGRect(origin: point, size: size)
     }
 
