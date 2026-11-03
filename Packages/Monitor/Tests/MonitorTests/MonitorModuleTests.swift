@@ -31,11 +31,23 @@ struct MonitorModuleTests {
 }
 
 struct MonitorLocalizationTests {
-    @Test func germanCatalogResolvesMonitorStrings() throws {
-        let path = try #require(MonitorBundle.bundle.path(forResource: "de", ofType: "lproj"))
-        let german = try #require(Bundle(path: path))
-        #expect(german.localizedString(forKey: "Memory", value: nil, table: nil) == "Arbeitsspeicher")
-        #expect(german.localizedString(forKey: "Menu bar", value: nil, table: nil) == "Menüleiste")
-        #expect(german.localizedString(forKey: "Low battery", value: nil, table: nil) == "Akku fast leer")
+    /// `swift test` does not compile String Catalogs into .lproj folders, so the catalog source is checked directly.
+    private func germanValue(for key: String) throws -> String? {
+        let catalog = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Sources/Monitor/Resources/Localizable.xcstrings")
+        let json = try JSONSerialization.jsonObject(with: Data(contentsOf: catalog)) as? [String: Any]
+        let strings = json?["strings"] as? [String: Any]
+        let entry = strings?[key] as? [String: Any]
+        let localizations = entry?["localizations"] as? [String: Any]
+        let german = localizations?["de"] as? [String: Any]
+        return (german?["stringUnit"] as? [String: Any])?["value"] as? String
+    }
+
+    @Test func germanCatalogHasMonitorStrings() throws {
+        #expect(try germanValue(for: "Memory") == "Arbeitsspeicher")
+        #expect(try germanValue(for: "Menu bar") == "Menüleiste")
+        #expect(try germanValue(for: "Low battery") == "Akku fast leer")
+        #expect(try germanValue(for: "Alerts") == "Warnungen")
     }
 }
