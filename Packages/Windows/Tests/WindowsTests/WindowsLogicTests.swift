@@ -135,7 +135,8 @@ struct ProtectionTests {
         #expect(!result1)
         let result2 = guardian.shouldQuit(app: "a", key: .close, at: 10.2)
         #expect(!result2)
-        #expect(guardian.shouldQuit(app: "a", key: .close, at: 10.4))
+        let outcome1 = guardian.shouldQuit(app: "a", key: .close, at: 10.4)
+        #expect(outcome1)
     }
 
     @Test func emptyListProtectsEveryApp() {

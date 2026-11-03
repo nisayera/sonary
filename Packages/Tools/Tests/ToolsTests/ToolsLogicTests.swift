@@ -206,7 +206,8 @@ struct ScratchpadTests {
     @Test func titleComesFromTheFirstLine() {
         #expect(suggestedTitle(for: "# Shopping\nmilk", fallback: "Note") == "Shopping")
         #expect(suggestedTitle(for: "", fallback: "Note") == "Note")
-        #expect(suggestedTitle(for: "\n\nlater", fallback: "Note") == "Note")
+        #expect(suggestedTitle(for: "\n\nlater", fallback: "Note") == "later")
+        #expect(suggestedTitle(for: "\n\n   ", fallback: "Note") == "Note")
     }
 
     @Test func tabsCanBeReordered() {

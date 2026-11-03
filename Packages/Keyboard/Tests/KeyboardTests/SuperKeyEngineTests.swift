@@ -72,7 +72,8 @@ struct KeyDebouncerTests {
         var debouncer = KeyDebouncer(milliseconds: 40)
         let result1 = debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0)
         #expect(!result1)
-        #expect(debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 20 * ms))
+        let outcome1 = debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 20 * ms)
+        #expect(outcome1)
     }
 
     @Test func keepsNormalTyping() {
