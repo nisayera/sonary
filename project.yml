@@ -15,12 +15,14 @@ packages:
     path: Packages/Monitor
   Mouse:
     path: Packages/Mouse
+  Notch:
+    path: Packages/Notch
 settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
-    MARKETING_VERSION: "0.3.2"
-    CURRENT_PROJECT_VERSION: 302
+    MARKETING_VERSION: "0.4.0"
+    CURRENT_PROJECT_VERSION: 400
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -33,12 +35,14 @@ targets:
       - package: SonaryUI
       - package: Monitor
       - package: Mouse
+      - package: Notch
       - package: Sparkle
         product: Sparkle
     entitlements:
       path: App/Sonary.entitlements
       properties:
         com.apple.security.cs.disable-library-validation: true
+        com.apple.security.automation.apple-events: true
     info:
       path: App/Info.plist
       properties:
@@ -50,6 +54,9 @@ targets:
         SUFeedURL: https://github.com/nisayera/sonary/releases/latest/download/appcast.xml
         SUPublicEDKey: nOzXdHJRORv/XYR8k+04/MHvpxSBO13KaP7gO4UHLVw=
         SUEnableAutomaticChecks: true
+        NSAppleEventsUsageDescription: "Sonary controls Music and Spotify from the notch when you press play, pause or skip."
+        NSCalendarsFullAccessUsageDescription: "Sonary shows today's events in the notch when you turn on the calendar widget."
+        NSDownloadsFolderUsageDescription: "Sonary shows your newest downloads in the notch."
         NSHumanReadableCopyright: "GPL-3.0-or-later"
     settings:
       base:
@@ -67,6 +74,7 @@ targets:
       - package: SonaryCore
       - package: Monitor
       - package: Mouse
+      - package: Notch
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

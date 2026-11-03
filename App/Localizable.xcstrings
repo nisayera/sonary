@@ -430,6 +430,16 @@
           }
         }
       }
+    },
+    "An island at the notch with music, calendar, timer, downloads and accessory batteries.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Insel am Notch mit Musik, Kalender, Timer, Downloads und Zubehör-Akkus."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
