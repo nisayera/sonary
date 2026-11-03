@@ -10,4 +10,4 @@ Lizenz-Header. Jede übernommene Datei wird hier eingetragen:
 
 | Datei in Sonary | Quelle (Pfad im Vorssaint-Repo) | Commit der Quelle |
 |---|---|---|
-| (noch keine) | | |
+| Packages/Monitor/Sources/Monitor/SMC/SMCClient.swift (gekürzt auf Lesezugriff, siehe Header) | Sources/Vorssaint/Services/SystemMonitor/SMCClient.swift | a5694c4c2f426fbd0f97ecfba9bbaa5746398dc1 |
