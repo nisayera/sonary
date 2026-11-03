@@ -28,7 +28,7 @@
 </p>
 
 > [!NOTE]
-> **Sonary is in early development.** The app shell, module system and the System Monitor are released (v0.2). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
+> **Sonary is in early development.** The app shell, module system, the System Monitor and the Mouse module are released (v0.3). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
 
 ---
 
@@ -47,7 +47,7 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 | Module | What it will do | Status |
 | --- | --- | --- |
 | 📊 **System Monitor** | CPU, GPU, RAM, network, disk, battery and temperatures in the menu bar, with history and alerts | ✅ Available |
-| 🖱 **Mouse** | Linear or smooth scrolling, acceleration off, button mapping, click filter, per-app exceptions | 🛠 In progress |
+| 🖱 **Mouse** | Linear or smooth scrolling, acceleration off, button mapping, click filter, per-app exceptions | ✅ Available |
 | 🏝 **Notch / Dynamic Island** | Music, calendar, timers and downloads around the notch | 🗓 Planned |
 | 📋 **Clipboard & Files** | Clipboard history, file shelf, clean tracking parameters from URLs | 🗓 Planned |
 | 🧹 **App Management** | Uninstaller, leftover cleaner, port manager | 🗓 Planned |
@@ -84,7 +84,7 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 
 - [x] **M0 — Foundation:** app shell, menu bar extra, module system, settings, onboarding, launch at login, localization, in-app updates
 - [x] **M1 — System Monitor**
-- [ ] **M2 — Mouse** (in progress)
+- [x] **M2 — Mouse**
 - [ ] M3 — Notch / Dynamic Island
 - [ ] M4 — Clipboard & Files
 - [ ] M5 — App Management
