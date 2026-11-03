@@ -6,3 +6,10 @@ DerivedData/
 xcuserdata/
 .superpowers/
 *.log
+__pycache__/
+*.pyc
+.venv/
+build/
+*.dmg
+*.zip
+appcast.xml
