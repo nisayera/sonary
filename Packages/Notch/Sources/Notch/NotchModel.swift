@@ -23,6 +23,7 @@ public final class NotchModel {
     @ObservationIgnored private let store: NotchSettingsStore
     @ObservationIgnored private var batteryTask: Task<Void, Never>?
     @ObservationIgnored private var timerTask: Task<Void, Never>?
+    @ObservationIgnored var gestures = NotchGestureState()
 
     public init(defaults: UserDefaults) {
         store = NotchSettingsStore(defaults: defaults)
@@ -114,5 +115,22 @@ public final class NotchModel {
         timer.cancel()
         timerTask?.cancel()
         timerTask = nil
+    }
+}
+
+extension NotchModel {
+    /// Handles a scroll on the island: open, close or switch widget.
+    func scrolled(deltaX: Double, deltaY: Double) {
+        guard let action = gestures.scrolled(deltaX: deltaX, deltaY: deltaY, presentation: presentation) else { return }
+        switch action {
+        case .open:
+            clicked()
+        case .close:
+            if state.isPinned { clicked() }
+            hoverChanged(false)
+        case .nextWidget, .previousWidget:
+            guard let next = neighbourWidget(selectedWidget, in: settings.widgets, forward: action == .nextWidget) else { return }
+            selectedWidget = next
+        }
     }
 }

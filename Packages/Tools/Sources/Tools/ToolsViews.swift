@@ -2,11 +2,12 @@ import SonaryUI
 import SwiftUI
 
 private enum ToolsSection: String, CaseIterable, Identifiable {
-    case tools, scratchpad, snippets
+    case tools, toggles, scratchpad, snippets
     var id: String { rawValue }
     var title: LocalizedStringKey {
         switch self {
         case .tools: "Tools"
+        case .toggles: "Toggles"
         case .scratchpad: "Scratchpad"
         case .snippets: "Snippets"
         }
@@ -26,14 +27,8 @@ struct ToolsPopoverView: View {
                 .labelsHidden()
             switch section {
             case .tools: toolsView
-            case .scratchpad:
-                TextEditor(text: Binding(get: { model.settings.scratchpad },
-                                         set: { value in model.update { $0.scratchpad = value } }))
-                    .font(.body)
-                    .frame(height: 300)
-                    .scrollContentBackground(.hidden)
-                    .padding(6)
-                    .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            case .toggles: togglesView
+            case .scratchpad: scratchpadView
             case .snippets: snippetsView
             }
             if let result = model.lastResult {
@@ -48,6 +43,62 @@ struct ToolsPopoverView: View {
             tool("text.viewfinder", "Copy text from screen", "⌃⌥T") { model.recognizeText() }
             tool("eyedropper", "Pick a color", "⌃⌥P") { model.pickColor() }
             tool("camera.viewfinder", "Screenshot to clipboard", "⌃⌥S") { model.screenshotToClipboard() }
+            tool("circle.grid.cross", "Radial menu", "⌃⌥R") { model.showRadialMenu() }
+        }
+    }
+
+    private var togglesView: some View {
+        VStack(spacing: 6) {
+            ForEach(quickToggleActions) { action in
+                Button { model.run(action) } label: {
+                    SettingsRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module)) {
+                        EmptyView()
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            Text("Dark mode and the Trash ask once for permission to control the system.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var scratchpadView: some View {
+        let current = model.currentTab
+        return VStack(alignment: .leading, spacing: 6) {
+            ScrollView(.horizontal) {
+                HStack(spacing: 4) {
+                    ForEach(model.tabs) { tab in
+                        Button { model.selectTab(tab.id) } label: {
+                            Text(tab.title).lineLimit(1)
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .background(tab.id == current.id ? Color.sonaryAccent.opacity(0.2) : .clear,
+                                            in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Button { model.addTab() } label: { Image(systemName: "plus") }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(Text("New note", bundle: .module))
+                }
+            }
+            .scrollIndicators(.hidden)
+            TextEditor(text: Binding(get: { current.text }, set: { model.setText($0, for: current.id) }))
+                .font(.body)
+                .frame(height: 260)
+                .scrollContentBackground(.hidden)
+                .padding(6)
+                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            HStack {
+                Button { model.exportTab(current) } label: {
+                    Label { Text("Save as Markdown", bundle: .module) } icon: { Image(systemName: "square.and.arrow.down") }
+                }
+                Spacer()
+                Button(role: .destructive) { model.removeTab(current.id) } label: {
+                    Text("Delete note", bundle: .module)
+                }
+            }
+            .buttonStyle(.borderless)
         }
     }
 
@@ -84,6 +135,37 @@ struct ToolsSettingsView: View {
             SettingsToggleRow(symbol: "keyboard", title: Text("Keyboard shortcuts", bundle: .module),
                               caption: Text("⌥Space command bar, ⌃⌥T text from screen, ⌃⌥P color picker, ⌃⌥S screenshot.", bundle: .module),
                               isOn: Binding(get: { model.settings.shortcuts }, set: { value in model.update { $0.shortcuts = value } }))
+        }
+        SettingsCard(Text("Colour picker", bundle: .module)) {
+            SettingsRow(symbol: "eyedropper", title: Text("Copy colours as", bundle: .module)) {
+                Picker(selection: Binding(get: { model.settings.colorFormat },
+                                          set: { value in model.update { $0.colorFormat = value } })) {
+                    ForEach(ColorFormat.allCases, id: \.self) { format in
+                        Text(verbatim: colorFormatExample(format)).tag(format)
+                    }
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 220)
+            }
+        }
+        SettingsCard(Text("Radial menu", bundle: .module)) {
+            Text("⌃⌥R opens a ring of actions around the pointer. Pick which ones it holds, up to eight.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            ForEach(QuickAction.allCases) { action in
+                SettingsToggleRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module),
+                                  isOn: Binding(
+                                      get: { model.settings.radialActions.contains(action) },
+                                      set: { on in
+                                          model.update { settings in
+                                              settings.radialActions.removeAll { $0 == action }
+                                              if on {
+                                                  settings.radialActions = QuickAction.allCases.filter {
+                                                      $0 == action || settings.radialActions.contains($0)
+                                                  }
+                                              }
+                                          }
+                                      }))
+            }
         }
         SettingsCard(Text("Snippets", bundle: .module)) {
             Text("Placeholders: {date}, {time} and {clipboard}.", bundle: .module).font(.caption).foregroundStyle(.secondary)
@@ -122,4 +204,9 @@ struct ToolsSettingsView: View {
             }
         )
     }
+}
+
+/// Shows each format with the same example colour, so the choice explains itself.
+func colorFormatExample(_ format: ColorFormat) -> String {
+    formatColor(red: 1, green: 0.42, blue: 0.45, format: format)
 }

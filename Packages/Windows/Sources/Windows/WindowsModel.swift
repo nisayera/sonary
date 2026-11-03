@@ -6,6 +6,14 @@ import SwiftUI
 public struct WindowsSettings: Codable, Equatable, Sendable {
     public var layoutShortcuts = true
     public var quitProtection = false
+    public var closeProtection = false
+    /// Empty means every app; otherwise only these bundle IDs are protected.
+    public var protectedApps: [String] = []
+    public var windowSwitcher = true
+    /// Quit an app once its last window is closed.
+    public var quitWhenLastWindowCloses = false
+    /// Apps this never applies to, by bundle ID.
+    public var neverQuitApps: [String] = []
 
     public init() {}
 }
@@ -35,7 +43,12 @@ public final class WindowsModel {
     @ObservationIgnored private var quitTap: CFMachPort?
     @ObservationIgnored private var quitSource: CFRunLoopSource?
     @ObservationIgnored private var quitGuard = QuitGuard()
+    /// The frame a window had before the last layout, so it can be put back.
+    @ObservationIgnored private var previousFrames: [pid_t: CGRect] = [:]
+    @ObservationIgnored private var windowCounts: [Int32: Int] = [:]
+    @ObservationIgnored private var watchTask: Task<Void, Never>?
     @ObservationIgnored private var hud: NSPanel?
+    @ObservationIgnored private let switcher = WindowSwitcherController()
     @ObservationIgnored private var running = false
 
     public init(defaults: UserDefaults) {
@@ -75,12 +88,112 @@ public final class WindowsModel {
                 }
             }
         }
-        if running, settings.quitProtection { installQuitTap() } else { removeQuitTap() }
+        if running, settings.windowSwitcher,
+           // ⌃⌥Tab (key code 48)
+           let key = HotKey(keyCode: 48, modifiers: 4096 | 2048, action: { [weak self] in self?.showSwitcher() }) {
+            hotKeys.append(key)
+        }
+        if running,
+           // ⌃⌥⌫ puts the last moved window back (key code 51)
+           let key = HotKey(keyCode: 51, modifiers: 4096 | 2048, action: { [weak self] in self?.restorePrevious() }) {
+            hotKeys.append(key)
+        }
+        if running,
+           // ⌃⌥→| moves the window to the next display (key code 42, the backslash key)
+           let key = HotKey(keyCode: 42, modifiers: 4096 | 2048, action: { [weak self] in self?.moveToNextScreen() }) {
+            hotKeys.append(key)
+        }
+        if running, settings.quitProtection || settings.closeProtection { installQuitTap() } else { removeQuitTap() }
+        if running, settings.quitWhenLastWindowCloses { startWatchingWindows() } else { stopWatchingWindows() }
+        if !running || !settings.windowSwitcher { switcher.close() }
+    }
+
+    public func showSwitcher() { switcher.show() }
+
+    // MARK: Quit when the last window closes
+
+    private func startWatchingWindows() {
+        guard watchTask == nil else { return }
+        windowCounts = currentWindowCounts()
+        watchTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(2))
+                self?.checkWindows()
+            }
+        }
+    }
+
+    private func stopWatchingWindows() {
+        watchTask?.cancel()
+        watchTask = nil
+        windowCounts = [:]
+    }
+
+    private func checkWindows() {
+        let current = currentWindowCounts()
+        for pid in appsWithNoWindowsLeft(previous: windowCounts, current: current) {
+            guard let app = NSRunningApplication(processIdentifier: pid),
+                  let bundleID = app.bundleIdentifier,
+                  bundleID != Bundle.main.bundleIdentifier,
+                  bundleID != "com.apple.finder",
+                  !settings.neverQuitApps.contains(bundleID) else { continue }
+            app.terminate()
+        }
+        windowCounts = current
+    }
+
+    /// How many normal windows each running app has on screen.
+    private func currentWindowCounts() -> [Int32: Int] {
+        var counts: [Int32: Int] = [:]
+        for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .regular {
+            counts[app.processIdentifier] = 0
+        }
+        let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+        for window in (raw as? [[String: Any]]) ?? [] {
+            guard (window["kCGWindowLayer"] as? Int) == 0,
+                  let pid = (window["kCGWindowOwnerPID"] as? NSNumber)?.int32Value,
+                  counts[pid] != nil else { continue }
+            counts[pid, default: 0] += 1
+        }
+        return counts
+    }
+
+    /// Moves the front window to the next display, keeping its relative place and size.
+    public func moveToNextScreen() {
+        withFrontWindow { window, current, primaryHeight in
+            let cocoa = cocoaRect(fromAX: current, primaryScreenHeight: primaryHeight)
+            let screens = NSScreen.screens.map(\.visibleFrame)
+            guard let target = nextScreen(after: cocoa, screens: screens),
+                  let source = screens.first(where: { $0.contains(CGPoint(x: cocoa.midX, y: cocoa.midY)) }) ?? screens.first
+            else { return nil }
+            return axRect(fromCocoa: movedFrame(cocoa, from: source, to: target), primaryScreenHeight: primaryHeight)
+        }
+    }
+
+    /// Puts the front window back where it was before the last move.
+    public func restorePrevious() {
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
+              let saved = previousFrames[pid] else { return }
+        withFrontWindow { _, _, _ in saved }
+        previousFrames[pid] = nil
     }
 
     // MARK: Layouts
 
     public func perform(_ action: LayoutAction) {
+        withFrontWindow { _, currentAX, height in
+            let current = cocoaRect(fromAX: currentAX, primaryScreenHeight: height)
+            let center = CGPoint(x: current.midX, y: current.midY)
+            let screen = NSScreen.screens.first { $0.frame.contains(center) } ?? NSScreen.main
+            guard let screen else { return nil }
+            return axRect(fromCocoa: layoutFrame(action, visible: screen.visibleFrame, current: current),
+                          primaryScreenHeight: height)
+        }
+    }
+
+    /// Runs `newFrame` with the front window's current frame and applies what it returns,
+    /// remembering where the window was so it can be put back.
+    private func withFrontWindow(_ newFrame: (AXUIElement, CGRect, CGFloat) -> CGRect?) {
         guard AXIsProcessTrusted() else {
             _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
             return
@@ -94,11 +207,9 @@ public final class WindowsModel {
         let window = unsafeDowncast(focused, to: AXUIElement.self)
         guard let currentAX = frame(of: window) else { return }
         let height = primary.frame.height
-        let current = cocoaRect(fromAX: currentAX, primaryScreenHeight: height)
-        let center = CGPoint(x: current.midX, y: current.midY)
-        let screen = NSScreen.screens.first { $0.frame.contains(center) } ?? NSScreen.main ?? primary
-        let target = layoutFrame(action, visible: screen.visibleFrame, current: current)
-        setFrame(axRect(fromCocoa: target, primaryScreenHeight: height), of: window)
+        guard let target = newFrame(window, currentAX, height), target != currentAX else { return }
+        previousFrames[app.processIdentifier] = currentAX
+        setFrame(target, of: window)
     }
 
     private func frame(of window: AXUIElement) -> CGRect? {
@@ -156,24 +267,31 @@ public final class WindowsModel {
             if let quitTap { CGEvent.tapEnable(tap: quitTap, enable: true) }
             return true
         }
-        let isCommandQ = keyCode == 12
-            && flags.contains(.maskCommand)
+        let plainCommand = flags.contains(.maskCommand)
             && !flags.contains(.maskShift) && !flags.contains(.maskAlternate) && !flags.contains(.maskControl)
-        guard type == .keyDown, isCommandQ, !isRepeat,
+        let key: ProtectedKey? = switch keyCode {
+        case 12 where settings.quitProtection: .quit
+        case 13 where settings.closeProtection: .close
+        default: nil
+        }
+        guard type == .keyDown, plainCommand, let key, !isRepeat,
               let app = NSWorkspace.shared.frontmostApplication,
-              let bundleID = app.bundleIdentifier, bundleID != "com.apple.finder" else {
+              let bundleID = app.bundleIdentifier, bundleID != "com.apple.finder",
+              isProtected(bundleID: bundleID, onlyApps: settings.protectedApps) else {
             return true
         }
-        if quitGuard.shouldQuit(app: bundleID, at: ProcessInfo.processInfo.systemUptime) {
+        if quitGuard.shouldQuit(app: bundleID, key: key, at: ProcessInfo.processInfo.systemUptime) {
             return true
         }
-        showHUD(appName: app.localizedName ?? bundleID)
+        showHUD(appName: app.localizedName ?? bundleID, key: key)
         return false
     }
 
-    private func showHUD(appName: String) {
+    private func showHUD(appName: String, key: ProtectedKey) {
         hud?.orderOut(nil)
-        let text = String(localized: "Press ⌘Q again to quit \(appName)", bundle: .module)
+        let text = key == .quit
+            ? String(localized: "Press ⌘Q again to quit \(appName)", bundle: .module)
+            : String(localized: "Press ⌘W again to close this window", bundle: .module)
         let view = Text(text)
             .font(.title3.weight(.semibold))
             .padding(.horizontal, 22)

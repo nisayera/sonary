@@ -12,6 +12,7 @@ public actor MetricsSampler {
     private var previousTicks: CPUTicks?
     private var previousNetwork: NetworkCounters?
     private var previousTime: Date?
+    private var sessionTotals = NetworkTotals()
 
     public init(
         sources: any MetricsSources,
@@ -42,6 +43,9 @@ public actor MetricsSampler {
     }
 
     public func history() -> [MetricsSnapshot] { buffer.elements }
+
+    /// Bytes in and out since this sampler started.
+    public func totals() -> NetworkTotals { sessionTotals }
 
     public func stop() {
         loop?.cancel()
@@ -75,6 +79,7 @@ public actor MetricsSampler {
         if let previousNetwork, let previousTime {
             rates = networkRates(previous: previousNetwork, current: counters,
                                  interval: time.timeIntervalSince(previousTime))
+            sessionTotals.add(previous: previousNetwork, current: counters)
         } else {
             rates = .zero
         }

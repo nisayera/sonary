@@ -28,7 +28,7 @@
 </p>
 
 > [!NOTE]
-> **Sonary is in early development.** The app shell, module system, the System Monitor, Mouse, Notch, Clipboard, App Management, Windows, Sound and Tools modules are released (v0.9). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
+> **Sonary is in early development.** The app shell, module system, the System Monitor, Mouse, Notch, Clipboard, App Management, Windows, Sound, Tools, Keyboard and Display modules are released (v0.12). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
 
 ---
 
@@ -53,6 +53,8 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 | 🧹 **App Management** | Cleaner, uninstaller with leftovers, quit and force quit, port manager, Homebrew updates | ✅ Available |
 | 🪟 **Windows** | Window layouts (halves, quarters, thirds, maximize, center) on shortcuts, ⌘Q quit protection | ✅ Available |
 | 🔊 **Sound** | Output and input switcher, volume, microphone mute shortcut, keep awake | ✅ Available |
+| ⌨️ **Keyboard** | Super Key: hold one key for ⌃⌥⇧⌘, tap it for an action, with per-app exceptions | ✅ Available |
+| ☀️ **Display** | Per-display brightness with shortcuts, software dimming where macOS offers no control | ✅ Available |
 | 🧰 **Tools** | Command bar, text from screen (OCR), color picker, screenshots, scratchpad, snippets | ✅ Available |
 
 ## Install
@@ -91,8 +93,14 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 - [x] **M6 — Windows** (Dock clicks and app switcher later)
 - [x] **M7 — Sound** (per-app mixer and display brightness later)
 - [x] **M8 — Tools**
+- [x] **0.10 — Super Key, notch gestures, window switcher, brightness, quick toggles, radial menu**
+- [x] **0.12 — clipboard images and auto-clear, busiest apps and fans, horizontal scroll, key debounce, scheduled cleaning, scratchpad tabs, cleaning mode**
 
 Every milestone ships as its own release: M2 is 0.3.0, M8 is 0.9.0, and 1.0 arrives when the plan is done.
+
+## Feature checklist
+
+What is done, partly done and still open: [docs/FEATURES.md](docs/FEATURES.md).
 
 ## Privacy
 

@@ -26,12 +26,17 @@ jobs:
 
       - name: Test packages
         run: |
-          set -eo pipefail
-          for p in SonaryCore SonaryUI Monitor Mouse Notch Clipboard Apps Windows Sound Tools; do
+          set -o pipefail
+          failed=""
+          for p in SonaryCore SonaryUI Monitor Mouse Notch Clipboard Apps Windows Sound Tools Keyboard Display; do
             echo "::group::swift test $p"
-            swift test --package-path "Packages/$p" -Xswiftc -warnings-as-errors 2>&1 | tee "test-$p.log"
+            swift test --package-path "Packages/$p" -Xswiftc -warnings-as-errors 2>&1 | tee "test-$p.log" || failed="$failed $p"
             echo "::endgroup::"
           done
+          if [ -n "$failed" ]; then
+            echo "::error::failing packages:$failed"
+            exit 1
+          fi
 
       - name: Install XcodeGen
         run: brew install xcodegen

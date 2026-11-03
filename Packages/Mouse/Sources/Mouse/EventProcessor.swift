@@ -38,6 +38,7 @@ public struct EventProcessor: Sendable {
             var result = sample
             if effective.linearScroll { result = linearized(result, linesPerStep: effective.scrollLinesPerStep) }
             if effective.reverseScroll { result = reversed(result) }
+            result = horizontalized(result, whileHolding: effective.horizontalScrollModifier)
             if effective.smoothScroll { return .injectSmooth(result) }
             return result == sample ? .passThrough : .replaceScroll(result)
         case let .buttonDown(button, timestamp):

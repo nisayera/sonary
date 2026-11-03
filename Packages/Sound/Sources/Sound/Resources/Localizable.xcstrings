@@ -180,6 +180,56 @@
           }
         }
       }
+    },
+    "Headphones": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopfhörer"
+          }
+        }
+      }
+    },
+    "Switch output with ⌃⌥O": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgabe mit ⌃⌥O wechseln"
+          }
+        }
+      }
+    },
+    "Moves to the next speaker or headphones.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wechselt zum nächsten Lautsprecher oder Kopfhörer."
+          }
+        }
+      }
+    },
+    "Turn the volume down when headphones are unplugged": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lautstärke senken, wenn Kopfhörer getrennt werden"
+          }
+        }
+      }
+    },
+    "Keeps the speakers from suddenly blaring.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verhindert, dass die Lautsprecher plötzlich losbrüllen."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

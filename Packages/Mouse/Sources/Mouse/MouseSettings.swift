@@ -23,6 +23,8 @@ public struct MouseSettings: Codable, Equatable, Sendable {
     public var disableAcceleration = false
     public var buttonMappings: [ButtonMapping] = []
     public var clickFilterMilliseconds = 0
+    /// While this key is held, the wheel scrolls sideways.
+    public var horizontalScrollModifier: ScrollModifier = .none
     public var appOverrides: [String: AppOverride] = [:]
 
     public init() {}

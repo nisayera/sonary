@@ -1,5 +1,29 @@
 import Foundation
 
+public struct ScrollModifierSet: OptionSet, Sendable, Equatable {
+    public let rawValue: Int
+    public init(rawValue: Int) { self.rawValue = rawValue }
+
+    public static let shift = ScrollModifierSet(rawValue: 1 << 0)
+    public static let control = ScrollModifierSet(rawValue: 1 << 1)
+    public static let option = ScrollModifierSet(rawValue: 1 << 2)
+    public static let command = ScrollModifierSet(rawValue: 1 << 3)
+}
+
+public enum ScrollModifier: String, CaseIterable, Codable, Sendable {
+    case none, shift, control, option, command
+
+    var set: ScrollModifierSet? {
+        switch self {
+        case .none: nil
+        case .shift: .shift
+        case .control: .control
+        case .option: .option
+        case .command: .command
+        }
+    }
+}
+
 /// The parts of a scroll event the mouse module cares about.
 public struct ScrollSample: Equatable, Sendable {
     public var deltaY: Double
@@ -7,13 +31,16 @@ public struct ScrollSample: Equatable, Sendable {
     public var isContinuous: Bool
     public var scrollPhase: Int
     public var momentumPhase: Int
+    public var modifiers: ScrollModifierSet
 
-    public init(deltaY: Double, deltaX: Double = 0, isContinuous: Bool = false, scrollPhase: Int = 0, momentumPhase: Int = 0) {
+    public init(deltaY: Double, deltaX: Double = 0, isContinuous: Bool = false, scrollPhase: Int = 0,
+                momentumPhase: Int = 0, modifiers: ScrollModifierSet = []) {
         self.deltaY = deltaY
         self.deltaX = deltaX
         self.isContinuous = isContinuous
         self.scrollPhase = scrollPhase
         self.momentumPhase = momentumPhase
+        self.modifiers = modifiers
     }
 }
 
@@ -43,5 +70,15 @@ public func reversed(_ sample: ScrollSample) -> ScrollSample {
     var result = sample
     result.deltaY = -sample.deltaY
     result.deltaX = -sample.deltaX
+    return result
+}
+
+/// Turns a wheel's vertical scrolling into horizontal scrolling while the chosen key is held.
+public func horizontalized(_ sample: ScrollSample, whileHolding modifier: ScrollModifier) -> ScrollSample {
+    guard isWheelEvent(sample), let wanted = modifier.set, sample.modifiers.contains(wanted),
+          sample.deltaY != 0 else { return sample }
+    var result = sample
+    result.deltaX = sample.deltaY
+    result.deltaY = 0
     return result
 }

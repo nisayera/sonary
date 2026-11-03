@@ -75,6 +75,16 @@ struct MouseSettingsView: View {
             SettingsToggleRow(symbol: "arrow.up.arrow.down", title: Text("Reverse mouse wheel direction", bundle: .module),
                               caption: Text("Trackpads and Magic Mouse are not changed.", bundle: .module),
                               isOn: binding(\.reverseScroll))
+            Divider()
+            SettingsRow(symbol: "arrow.left.and.right",
+                        title: Text("Scroll sideways while holding", bundle: .module)) {
+                Picker(selection: binding(\.horizontalScrollModifier)) {
+                    ForEach(ScrollModifier.allCases, id: \.self) { modifier in
+                        Text(modifierTitle(modifier), bundle: .module).tag(modifier)
+                    }
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 150)
+            }
         }
 
         SettingsCard(Text("Pointer", bundle: .module)) {
@@ -171,5 +181,15 @@ struct MouseSettingsView: View {
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url, let id = Bundle(url: url)?.bundleIdentifier else { return }
         module.update { $0.appOverrides[id, default: AppOverride()].disabled = true }
+    }
+}
+
+func modifierTitle(_ modifier: ScrollModifier) -> LocalizedStringKey {
+    switch modifier {
+    case .none: "Off"
+    case .shift: "Shift"
+    case .control: "Control"
+    case .option: "Option"
+    case .command: "Command"
     }
 }

@@ -80,3 +80,42 @@ struct SizeTests {
         #expect(allocatedSize(of: URL(fileURLWithPath: "/nonexistent-\(UUID().uuidString)")) == 0)
     }
 }
+
+struct HousekeepingTests {
+    private let now = Date(timeIntervalSince1970: 1_000_000)
+
+    @Test func offNeverRuns() {
+        #expect(!shouldClean(schedule: .off, lastCleaned: nil, now: now))
+    }
+
+    @Test func neverCleanedIsDueAtOnce() {
+        #expect(shouldClean(schedule: .weekly, lastCleaned: nil, now: now))
+    }
+
+    @Test func weeklyWaitsSevenDays() {
+        #expect(!shouldClean(schedule: .weekly, lastCleaned: now.addingTimeInterval(-6 * 86_400), now: now))
+        #expect(shouldClean(schedule: .weekly, lastCleaned: now.addingTimeInterval(-8 * 86_400), now: now))
+    }
+
+    @Test func monthlyWaitsLonger() {
+        #expect(!shouldClean(schedule: .monthly, lastCleaned: now.addingTimeInterval(-20 * 86_400), now: now))
+        #expect(shouldClean(schedule: .monthly, lastCleaned: now.addingTimeInterval(-31 * 86_400), now: now))
+    }
+
+    @Test func retentionDropsOnlyOldFiles() {
+        let files = [AgedFile(url: URL(fileURLWithPath: "/tmp/old"), modified: now.addingTimeInterval(-40 * 86_400)),
+                     AgedFile(url: URL(fileURLWithPath: "/tmp/new"), modified: now.addingTimeInterval(-1 * 86_400))]
+        #expect(filesPastRetention(files, days: 30, now: now).map(\.url.lastPathComponent) == ["old"])
+    }
+
+    @Test func zeroDaysKeepsEverything() {
+        let files = [AgedFile(url: URL(fileURLWithPath: "/tmp/ancient"), modified: Date(timeIntervalSince1970: 0))]
+        #expect(filesPastRetention(files, days: 0, now: now).isEmpty)
+    }
+
+    @Test func defaultsDoNothingUntilAsked() {
+        let settings = AppsSettings()
+        #expect(settings.cleanSchedule == .off)
+        #expect(settings.watchedFolders.isEmpty)
+    }
+}

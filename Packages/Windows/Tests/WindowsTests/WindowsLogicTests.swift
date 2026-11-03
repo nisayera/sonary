@@ -1,3 +1,4 @@
+import Foundation
 import CoreGraphics
 import Testing
 @testable import Windows
@@ -75,5 +76,130 @@ struct QuitGuardTests {
         _ = guardian.shouldQuit(app: "a", at: 10)
         let r5 = guardian.shouldQuit(app: "b", at: 10.5)
         #expect(!r5)
+    }
+}
+
+struct WindowSwitcherTests {
+    private func window(_ id: Int, _ pid: Int, _ app: String, _ title: String?,
+                        layer: Int = 0, w: Double = 800, h: Double = 600) -> [String: Any] {
+        var dict: [String: Any] = [
+            "kCGWindowNumber": NSNumber(value: id), "kCGWindowOwnerPID": NSNumber(value: pid),
+            "kCGWindowOwnerName": app, "kCGWindowLayer": layer,
+            "kCGWindowBounds": ["Width": NSNumber(value: w), "Height": NSNumber(value: h)],
+        ]
+        if let title { dict["kCGWindowName"] = title }
+        return dict
+    }
+
+    @Test func keepsRealWindowsInOrder() {
+        let entries = switcherEntries(from: [window(1, 10, "Safari", "Start"), window(2, 11, "Mail", "Inbox")],
+                                      excludingPID: 99)
+        #expect(entries.map(\.appName) == ["Safari", "Mail"])
+        #expect(entries.first?.label == "Safari — Start")
+    }
+
+    @Test func skipsMenuBarAndTinyWindows() {
+        let entries = switcherEntries(from: [window(1, 10, "Bar", "x", layer: 25), window(2, 11, "Tiny", "x", w: 40, h: 20)],
+                                      excludingPID: 99)
+        #expect(entries.isEmpty)
+    }
+
+    @Test func skipsOurOwnWindows() {
+        #expect(switcherEntries(from: [window(1, 99, "Sonary", "Panel")], excludingPID: 99).isEmpty)
+    }
+
+    @Test func untitledWindowShowsTheAppName() {
+        let entries = switcherEntries(from: [window(1, 10, "Preview", nil)], excludingPID: 99)
+        #expect(entries.first?.label == "Preview")
+    }
+
+    @Test func selectionWrapsBothWays() {
+        #expect(nextIndex(from: 2, count: 3, forward: true) == 0)
+        #expect(nextIndex(from: 0, count: 3, forward: false) == 2)
+        #expect(nextIndex(from: 0, count: 0, forward: true) == 0)
+    }
+
+    @Test func searchMatchesAppAndTitle() {
+        let entries = [WindowEntry(id: 1, pid: 1, appName: "Safari", title: "News"),
+                       WindowEntry(id: 2, pid: 2, appName: "Mail", title: "Inbox")]
+        #expect(filteredEntries(entries, query: "mail").map(\.id) == [2])
+        #expect(filteredEntries(entries, query: "news").map(\.id) == [1])
+        #expect(filteredEntries(entries, query: " ").count == 2)
+    }
+}
+
+struct ProtectionTests {
+    @Test func quitAndCloseAreArmedSeparately() {
+        var guardian = QuitGuard()
+        let result1 = guardian.shouldQuit(app: "a", key: .quit, at: 10)
+        #expect(!result1)
+        let result2 = guardian.shouldQuit(app: "a", key: .close, at: 10.2)
+        #expect(!result2)
+        let outcome1 = guardian.shouldQuit(app: "a", key: .close, at: 10.4)
+        #expect(outcome1)
+    }
+
+    @Test func emptyListProtectsEveryApp() {
+        #expect(isProtected(bundleID: "com.any.app", onlyApps: []))
+    }
+
+    @Test func aListProtectsOnlyItsApps() {
+        #expect(isProtected(bundleID: "com.a", onlyApps: ["com.a"]))
+        #expect(!isProtected(bundleID: "com.b", onlyApps: ["com.a"]))
+    }
+}
+
+struct MoveBetweenScreensTests {
+    private let left = CGRect(x: 0, y: 0, width: 1000, height: 800)
+    private let right = CGRect(x: 1000, y: 0, width: 2000, height: 1000)
+
+    @Test func wrapsThroughTheScreens() {
+        let onLeft = CGRect(x: 100, y: 100, width: 400, height: 300)
+        #expect(nextScreen(after: onLeft, screens: [left, right]) == right)
+        let onRight = CGRect(x: 1200, y: 100, width: 400, height: 300)
+        #expect(nextScreen(after: onRight, screens: [left, right]) == left)
+    }
+
+    @Test func oneScreenHasNoNext() {
+        #expect(nextScreen(after: CGRect(x: 0, y: 0, width: 10, height: 10), screens: [left]) == nil)
+    }
+
+    @Test func keepsTheRelativePlaceAndSize() {
+        let frame = CGRect(x: 500, y: 400, width: 500, height: 400)
+        let moved = movedFrame(frame, from: left, to: right)
+        #expect(moved.minX == 2000)
+        #expect(moved.width == 1000)
+        #expect(moved.height == 500)
+    }
+
+    @Test func staysInsideTheTargetScreen() {
+        let frame = CGRect(x: 900, y: 700, width: 400, height: 300)
+        let moved = movedFrame(frame, from: left, to: right)
+        #expect(moved.maxX <= right.maxX)
+        #expect(moved.maxY <= right.maxY)
+    }
+
+    @Test func aWindowBiggerThanItsScreenIsNotGrownFurther() {
+        let huge = CGRect(x: 0, y: 0, width: 4000, height: 4000)
+        let moved = movedFrame(huge, from: left, to: right)
+        #expect(moved.width <= right.width && moved.height <= right.height)
+    }
+}
+
+struct QuitWhenLastWindowClosesTests {
+    @Test func appThatLostItsLastWindowIsQuit() {
+        #expect(appsWithNoWindowsLeft(previous: [1: 2, 2: 1], current: [1: 0, 2: 1]) == [1])
+    }
+
+    @Test func appWithoutWindowsBeforeIsLeftAlone() {
+        #expect(appsWithNoWindowsLeft(previous: [1: 0], current: [1: 0]).isEmpty)
+    }
+
+    @Test func appThatDisappearedIsLeftAlone() {
+        #expect(appsWithNoWindowsLeft(previous: [1: 3], current: [:]).isEmpty)
+    }
+
+    @Test func newAppsAreIgnored() {
+        #expect(appsWithNoWindowsLeft(previous: [:], current: [5: 0]).isEmpty)
     }
 }

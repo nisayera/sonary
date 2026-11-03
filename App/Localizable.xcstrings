@@ -490,6 +490,26 @@
           }
         }
       }
+    },
+    "Super Key: one key becomes ⌃⌥⇧⌘ while held and runs an action when tapped.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super-Taste: Eine Taste wird gehalten zu ⌃⌥⇧⌘ und löst beim Antippen eine Aktion aus."
+          }
+        }
+      }
+    },
+    "Brightness for every display, with shortcuts and dimming for displays without hardware control.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helligkeit für jedes Display, mit Kurzbefehlen und Abdunkeln für Displays ohne Hardware-Steuerung."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

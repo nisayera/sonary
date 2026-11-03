@@ -1,8 +1,10 @@
 import Foundation
 import Observation
+import Keyboard
 import Monitor
 import Apps
 import Clipboard
+import Display
 import Mouse
 import Notch
 import SonaryCore
@@ -24,6 +26,8 @@ final class AppModel {
     let windows: WindowsModule
     let sound: SoundModule
     let tools: ToolsModule
+    let keyboard: KeyboardModule
+    let display: DisplayModule
     let updates: UpdateModel
     private(set) var onboardingCompleted: Bool
 
@@ -42,7 +46,7 @@ final class AppModel {
         self.notch = notch
         let clipboard = ClipboardModule(defaults: defaults)
         self.clipboard = clipboard
-        let apps = AppsModule()
+        let apps = AppsModule(defaults: defaults)
         self.apps = apps
         let windows = WindowsModule(defaults: defaults)
         self.windows = windows
@@ -50,7 +54,13 @@ final class AppModel {
         self.sound = sound
         let tools = ToolsModule(defaults: defaults)
         self.tools = tools
-        self.registry = ModuleRegistry(modules: [monitor, mouse, notch, clipboard, apps, windows, sound, tools], defaults: defaults, permissions: broker)
+        let keyboard = KeyboardModule(defaults: defaults)
+        self.keyboard = keyboard
+        // The Super Key's tap action can open the command bar, which the tools module owns.
+        keyboard.model.commandBarAction = { [weak tools] in tools?.model.showCommandBar() }
+        let display = DisplayModule(defaults: defaults)
+        self.display = display
+        self.registry = ModuleRegistry(modules: [monitor, mouse, keyboard, notch, clipboard, apps, windows, display, sound, tools], defaults: defaults, permissions: broker)
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
     }
 

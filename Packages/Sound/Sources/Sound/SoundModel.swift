@@ -6,6 +6,9 @@ import SonaryCore
 
 public struct SoundSettings: Codable, Equatable, Sendable {
     public var micMuteShortcut = true
+    public var outputSwitchShortcut = true
+    /// Turn the volume down to this when headphones are unplugged; 0 leaves it alone.
+    public var volumeAfterUnplug = 0.25
     public init() {}
 }
 
@@ -27,6 +30,8 @@ public final class SoundModel {
     @ObservationIgnored private var assertion: IOPMAssertionID = 0
     @ObservationIgnored private var keepAwakeTask: Task<Void, Never>?
     @ObservationIgnored private var micKey: HotKey?
+    @ObservationIgnored private var outputKey: HotKey?
+    @ObservationIgnored private var lastOutputName: String?
     @ObservationIgnored private var volumeBeforeMute: Double?
     @ObservationIgnored private var listening = false
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
@@ -75,9 +80,18 @@ public final class SoundModel {
         let all = AudioSystem.allDevices()
         outputs = devices(all, output: true)
         inputs = devices(all, output: false)
+        let previousName = lastOutputName
         defaultOutput = AudioSystem.defaultDevice(output: true)
         defaultInput = AudioSystem.defaultDevice(output: false)
+        let currentName = outputs.first { $0.id == defaultOutput }?.name
+        lastOutputName = currentName
         refreshLevels()
+        // Headphones gone and the speakers took over: turn the volume down before it startles anyone.
+        if settings.volumeAfterUnplug > 0, let previousName, isHeadphoneLike(previousName),
+           let currentName, !isHeadphoneLike(currentName), let volume = outputVolume {
+            let wanted = volumeAfterUnplug(current: volume, limit: settings.volumeAfterUnplug)
+            if wanted < volume { setOutputVolume(wanted) }
+        }
     }
 
     private func refreshLevels() {
@@ -88,6 +102,12 @@ public final class SoundModel {
     }
 
     public func selectOutput(_ id: UInt32) { AudioSystem.setDefaultDevice(id, output: true); refresh() }
+
+    /// Moves to the next output device, for the keyboard shortcut.
+    public func cycleOutput() {
+        guard let next = nextOutputDevice(after: defaultOutput, in: outputs) else { return }
+        selectOutput(next.id)
+    }
     public func selectInput(_ id: UInt32) { AudioSystem.setDefaultDevice(id, output: false); refresh() }
 
     public func setOutputVolume(_ value: Double) {
@@ -120,9 +140,17 @@ public final class SoundModel {
     private func applyShortcut(running: Bool) {
         micKey?.unregister()
         micKey = nil
-        guard running, settings.micMuteShortcut else { return }
-        // ⌃⌥M (key code 46).
-        micKey = HotKey(keyCode: 46, modifiers: 4096 | 2048) { [weak self] in self?.toggleMicMute() }
+        outputKey?.unregister()
+        outputKey = nil
+        guard running else { return }
+        if settings.micMuteShortcut {
+            // ⌃⌥M (key code 46).
+            micKey = HotKey(keyCode: 46, modifiers: 4096 | 2048) { [weak self] in self?.toggleMicMute() }
+        }
+        if settings.outputSwitchShortcut {
+            // ⌃⌥O (key code 31).
+            outputKey = HotKey(keyCode: 31, modifiers: 4096 | 2048) { [weak self] in self?.cycleOutput() }
+        }
     }
 
     // MARK: Keep awake

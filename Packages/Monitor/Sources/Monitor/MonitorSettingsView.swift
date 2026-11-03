@@ -47,6 +47,7 @@ struct MonitorSettingsView: View {
         case .network: "Network"
         case .battery: "Battery"
         case .temperature: "Temperature"
+        case .fan: "Fan speed"
         }
     }
 
@@ -57,6 +58,7 @@ struct MonitorSettingsView: View {
         case .network: "network"
         case .battery: "battery.75percent"
         case .temperature: "thermometer.medium"
+        case .fan: "fan"
         }
     }
 }

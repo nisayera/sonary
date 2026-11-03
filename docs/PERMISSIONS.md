@@ -18,6 +18,10 @@ Sonary fragt Berechtigungen erst an, wenn du ein Modul einschaltest, das sie bra
 | Fenster | Bedienungshilfen | Verschiebt Fenster per Tastenkürzel; ⌘Q-Schutz liest Tastendrücke |
 | Ton | keine | Wechselt Audiogeräte über Core Audio; Wachhalten über eine Energie-Zusicherung |
 | Werkzeuge: Bildschirmfoto, Text vom Bildschirm | Bildschirmaufnahme | Nutzt das Systemwerkzeug `screencapture`; macOS fragt beim ersten Mal |
+| Tastatur (Super-Taste) | Bedienungshilfen | Liest und verändert Tastendrücke, solange die Taste gehalten wird |
+| Fenster (Fensterwechsler) | Bedienungshilfen | Holt das gewählte Fenster nach vorn |
+| Anzeige | keine | Helligkeit über die Systemschnittstelle; ohne Hardware-Steuerung dunkelt eine eigene Ebene ab |
+| Werkzeuge (Schalter) | Automation (Systemereignisse, Finder) | Dunkler Modus, Papierkorb, Auswerfen |
 
 Die Zeigerbeschleunigung wird nur geändert, solange das Modul läuft. Der ursprüngliche Wert wird beim Ausschalten, beim Beenden und beim nächsten Start nach einem Absturz wiederhergestellt.
 

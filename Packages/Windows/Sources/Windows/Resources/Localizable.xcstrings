@@ -210,6 +210,166 @@
           }
         }
       }
+    },
+    "Window switcher": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fensterwechsler"
+          }
+        }
+      }
+    },
+    "Window switcher on ⌃⌥Tab": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fensterwechsler mit ⌃⌥Tab"
+          }
+        }
+      }
+    },
+    "Lists every open window with search, and brings the one you pick to the front.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listet jedes offene Fenster mit Suche und holt das gewählte nach vorn."
+          }
+        }
+      }
+    },
+    "Show it now": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jetzt anzeigen"
+          }
+        }
+      }
+    },
+    "Search windows": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster suchen"
+          }
+        }
+      }
+    },
+    "Press ⌘W twice to close a window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘W zweimal drücken zum Schließen"
+          }
+        }
+      }
+    },
+    "Press ⌘W again to close this window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drücke erneut ⌘W, um dieses Fenster zu schließen"
+          }
+        }
+      }
+    },
+    "Every app is protected. Add apps to protect only those.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Apps sind geschützt. Füge Apps hinzu, um nur diese zu schützen."
+          }
+        }
+      }
+    },
+    "Only these apps are protected.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur diese Apps sind geschützt."
+          }
+        }
+      }
+    },
+    "Remove app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App entfernen"
+          }
+        }
+      }
+    },
+    "Add app…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App hinzufügen …"
+          }
+        }
+      }
+    },
+    "Move to the next display": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf das nächste Display"
+          }
+        }
+      }
+    },
+    "Put the window back": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster zurücksetzen"
+          }
+        }
+      }
+    },
+    "Closing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
+          }
+        }
+      }
+    },
+    "Quit an app when its last window closes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App beenden, wenn ihr letztes Fenster schließt"
+          }
+        }
+      }
+    },
+    "Finder and menu bar apps are never quit.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Finder und Menüleisten-Apps werden nie beendet."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

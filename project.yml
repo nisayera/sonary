@@ -27,12 +27,16 @@ packages:
     path: Packages/Sound
   Tools:
     path: Packages/Tools
+  Keyboard:
+    path: Packages/Keyboard
+  Display:
+    path: Packages/Display
 settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
-    MARKETING_VERSION: "0.9.0"
-    CURRENT_PROJECT_VERSION: 900
+    MARKETING_VERSION: "0.12.0"
+    CURRENT_PROJECT_VERSION: 1200
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -51,6 +55,8 @@ targets:
       - package: Windows
       - package: Sound
       - package: Tools
+      - package: Keyboard
+      - package: Display
       - package: Sparkle
         product: Sparkle
     entitlements:
@@ -95,6 +101,8 @@ targets:
       - package: Windows
       - package: Sound
       - package: Tools
+      - package: Keyboard
+      - package: Display
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

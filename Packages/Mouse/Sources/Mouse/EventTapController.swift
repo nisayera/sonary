@@ -110,7 +110,8 @@ final class EventTapController: @unchecked Sendable {
             deltaX: event.getDoubleValueField(.scrollWheelEventDeltaAxis2),
             isContinuous: event.getIntegerValueField(.scrollWheelEventIsContinuous) != 0,
             scrollPhase: Int(event.getIntegerValueField(.scrollWheelEventScrollPhase)),
-            momentumPhase: Int(event.getIntegerValueField(.scrollWheelEventMomentumPhase))
+            momentumPhase: Int(event.getIntegerValueField(.scrollWheelEventMomentumPhase)),
+            modifiers: modifierSet(from: event.flags)
         )
         let bundleID = frontmost.bundleID
         let decision = processor.withValue { $0.process(.scroll(sample), bundleID: bundleID) }
@@ -133,6 +134,15 @@ final class EventTapController: @unchecked Sendable {
         case .swallow, .perform:
             return nil
         }
+    }
+
+    private func modifierSet(from flags: CGEventFlags) -> ScrollModifierSet {
+        var set = ScrollModifierSet()
+        if flags.contains(.maskShift) { set.insert(.shift) }
+        if flags.contains(.maskControl) { set.insert(.control) }
+        if flags.contains(.maskAlternate) { set.insert(.option) }
+        if flags.contains(.maskCommand) { set.insert(.command) }
+        return set
     }
 
     private func handleDown(_ event: CGEvent) -> Unmanaged<CGEvent>? {

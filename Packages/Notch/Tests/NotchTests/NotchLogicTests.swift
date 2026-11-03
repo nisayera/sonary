@@ -187,3 +187,50 @@ struct NotchSettingsTests {
         #expect(store.load().widgets == [.calendar, .timer, .downloads, .batteries])
     }
 }
+
+struct NotchGestureTests {
+    @Test func smallScrollsDoNothingUntilTheyAddUp() {
+        var state = NotchGestureState(threshold: 12)
+        #expect(state.scrolled(deltaX: 0, deltaY: -5, presentation: .collapsed) == nil)
+        #expect(state.scrolled(deltaX: 0, deltaY: -5, presentation: .collapsed) == nil)
+        #expect(state.scrolled(deltaX: 0, deltaY: -5, presentation: .collapsed) == .open)
+    }
+
+    @Test func scrollingUpOnTheClosedIslandDoesNothing() {
+        var state = NotchGestureState(threshold: 12)
+        #expect(state.scrolled(deltaX: 0, deltaY: 30, presentation: .collapsed) == nil)
+    }
+
+    @Test func scrollingUpClosesTheOpenIsland() {
+        var state = NotchGestureState(threshold: 12)
+        #expect(state.scrolled(deltaX: 0, deltaY: 20, presentation: .expanded) == .close)
+    }
+
+    @Test func sidewaysSwitchesWidgetsOnlyWhenOpen() {
+        var state = NotchGestureState(threshold: 12)
+        #expect(state.scrolled(deltaX: -20, deltaY: 0, presentation: .collapsed) == nil)
+        state.reset()
+        #expect(state.scrolled(deltaX: -20, deltaY: 0, presentation: .expanded) == .nextWidget)
+        #expect(state.scrolled(deltaX: 20, deltaY: 0, presentation: .expanded) == .previousWidget)
+    }
+
+    @Test func theBiggerDirectionWins() {
+        var state = NotchGestureState(threshold: 12)
+        #expect(state.scrolled(deltaX: -20, deltaY: -14, presentation: .expanded) == .nextWidget)
+    }
+
+    @Test func actionResetsTheCollectedMovement() {
+        var state = NotchGestureState(threshold: 12)
+        #expect(state.scrolled(deltaX: 0, deltaY: -20, presentation: .collapsed) == .open)
+        #expect(state.scrolled(deltaX: 0, deltaY: -5, presentation: .expanded) == nil)
+    }
+
+    @Test func neighbourWrapsAround() {
+        let widgets: [NotchWidget] = [.music, .timer, .downloads]
+        #expect(neighbourWidget(.music, in: widgets, forward: true) == .timer)
+        #expect(neighbourWidget(.downloads, in: widgets, forward: true) == .music)
+        #expect(neighbourWidget(.music, in: widgets, forward: false) == .downloads)
+        #expect(neighbourWidget(.music, in: [.music], forward: true) == nil)
+        #expect(neighbourWidget(.calendar, in: widgets, forward: true) == .music)
+    }
+}

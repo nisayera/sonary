@@ -1,7 +1,7 @@
 import Foundation
 
 public enum ReadoutMetric: String, CaseIterable, Codable, Sendable {
-    case cpu, memory, network, battery, temperature
+    case cpu, memory, network, battery, temperature, fan
 }
 
 /// Human-readable transfer rate: "812 B/s", "200 KB/s", "1.5 MB/s". Decimal point is always ".".
@@ -12,8 +12,9 @@ public func formatRate(_ bytesPerSecond: Double) -> String {
     return String(format: "%.1f MB/s", value / 1_000_000)
 }
 
-/// Text for the menu bar, e.g. "CPU 42% · RAM 61%". Missing values show "—"; battery is omitted on Macs without one.
-public func formatReadout(_ snapshot: MetricsSnapshot, metrics: [ReadoutMetric]) -> String {
+/// Text for the menu bar, e.g. "CPU 42% · RAM 61%". Missing values show "—"; battery and fans are
+/// omitted on Macs without them.
+public func formatReadout(_ snapshot: MetricsSnapshot, metrics: [ReadoutMetric], fans: [FanReading] = []) -> String {
     metrics.compactMap { metric -> String? in
         switch metric {
         case .cpu:
@@ -28,6 +29,9 @@ public func formatReadout(_ snapshot: MetricsSnapshot, metrics: [ReadoutMetric])
         case .temperature:
             guard let hottest = snapshot.temperatures.values.max() else { return "TEMP —" }
             return "TEMP \(Int(hottest.rounded()))°"
+        case .fan:
+            guard !fans.isEmpty else { return nil }
+            return "FAN \(formatFanSpeed(fans))"
         }
     }
     .joined(separator: " · ")
