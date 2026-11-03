@@ -9,4 +9,10 @@ public protocol SonaryModule: AnyObject {
     func start() async throws
     func stop() async
     func makeSettingsView() -> AnyView
+    /// Optional content shown in the menu bar popover while the module is enabled.
+    func makePopoverView() -> AnyView?
+}
+
+public extension SonaryModule {
+    func makePopoverView() -> AnyView? { nil }
 }
