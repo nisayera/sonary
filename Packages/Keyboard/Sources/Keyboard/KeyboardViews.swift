@@ -58,6 +58,18 @@ struct KeyboardSettingsView: View {
                 }
             }
         }
+        SettingsCard(Text("Debounce", bundle: .module)) {
+            SettingsRow(symbol: "keyboard.badge.ellipsis",
+                        title: model.settings.debounceMilliseconds == 0
+                            ? Text("Key debounce: off", bundle: .module)
+                            : Text("Ignore a repeated key within \(model.settings.debounceMilliseconds) ms", bundle: .module),
+                        caption: Text("For keyboards whose switches send a letter twice.", bundle: .module)) {
+                Stepper(value: Binding(get: { model.settings.debounceMilliseconds },
+                                       set: { value in model.update { $0.debounceMilliseconds = value } }),
+                        in: 0...120, step: 10) { EmptyView() }
+                    .labelsHidden()
+            }
+        }
         if model.settings.superKeyEnabled {
             SettingsCard(Text("Exceptions", bundle: .module)) {
                 Text("Super Key stays off while one of these apps is in front.", bundle: .module)

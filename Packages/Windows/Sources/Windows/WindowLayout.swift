@@ -80,23 +80,56 @@ public func cocoaRect(fromAX rect: CGRect, primaryScreenHeight: CGFloat) -> CGRe
 
 // MARK: - Quit protection
 
-/// ⌘Q has to be pressed twice within `window` seconds to quit.
+public enum ProtectedKey: String, Sendable, Equatable {
+    case quit
+    case close
+}
+
+/// The shortcut has to be pressed twice within `window` seconds to go through.
 public struct QuitGuard: Sendable {
     public var window: Double
     private var armedAt: Double?
-    private var armedApp: String?
+    private var armed: String?
 
     public init(window: Double = 1.5) { self.window = window }
 
-    /// Returns true when this ⌘Q may pass through to the app.
-    public mutating func shouldQuit(app: String, at time: Double) -> Bool {
-        if let armedAt, armedApp == app, time - armedAt >= 0, time - armedAt <= window {
+    /// Returns true when this press may pass through to the app.
+    public mutating func shouldQuit(app: String, key: ProtectedKey = .quit, at time: Double) -> Bool {
+        let identity = "\(app)#\(key.rawValue)"
+        if let armedAt, armed == identity, time - armedAt >= 0, time - armedAt <= window {
             self.armedAt = nil
-            armedApp = nil
+            armed = nil
             return true
         }
         armedAt = time
-        armedApp = app
+        armed = identity
         return false
     }
+}
+
+/// Empty list means every app is protected; otherwise only the listed ones are.
+public func isProtected(bundleID: String, onlyApps: [String]) -> Bool {
+    onlyApps.isEmpty || onlyApps.contains(bundleID)
+}
+
+/// The visible frame of the screen after the one the window is on, wrapping around.
+/// Nil when there is only one screen.
+public func nextScreen(after frame: CGRect, screens: [CGRect]) -> CGRect? {
+    guard screens.count > 1 else { return nil }
+    let centre = CGPoint(x: frame.midX, y: frame.midY)
+    let index = screens.firstIndex { $0.contains(centre) } ?? 0
+    return screens[(index + 1) % screens.count]
+}
+
+/// Keeps a window's place and size relative to its screen when it moves to another one.
+public func movedFrame(_ frame: CGRect, from source: CGRect, to target: CGRect) -> CGRect {
+    guard source.width > 0, source.height > 0 else { return frame }
+    let relativeX = (frame.minX - source.minX) / source.width
+    let relativeY = (frame.minY - source.minY) / source.height
+    let width = min(frame.width / source.width, 1) * target.width
+    let height = min(frame.height / source.height, 1) * target.height
+    let x = target.minX + min(max(relativeX, 0), 1) * target.width
+    let y = target.minY + min(max(relativeY, 0), 1) * target.height
+    return CGRect(x: min(x, target.maxX - width), y: min(y, target.maxY - height),
+                  width: width, height: height).integral
 }

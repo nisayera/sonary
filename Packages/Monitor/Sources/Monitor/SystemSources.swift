@@ -121,3 +121,39 @@ public struct SystemSources: MetricsSources {
         }
     }
 }
+
+/// Every IPv4 address the machine has, with the interface it belongs to.
+public func systemLocalAddresses() -> [(interface: String, address: String)] {
+    var head: UnsafeMutablePointer<ifaddrs>?
+    guard getifaddrs(&head) == 0, let first = head else { return [] }
+    defer { freeifaddrs(head) }
+    var result: [(interface: String, address: String)] = []
+    var pointer: UnsafeMutablePointer<ifaddrs>? = first
+    while let current = pointer {
+        defer { pointer = current.pointee.ifa_next }
+        guard let addressPointer = current.pointee.ifa_addr,
+              addressPointer.pointee.sa_family == UInt8(AF_INET) else { continue }
+        var buffer = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+        guard getnameinfo(addressPointer, socklen_t(addressPointer.pointee.sa_len), &buffer,
+                          socklen_t(buffer.count), nil, 0, NI_NUMERICHOST) == 0 else { continue }
+        let address = String(cString: buffer)
+        let name = String(cString: current.pointee.ifa_name)
+        if !address.isEmpty { result.append((interface: name, address: address)) }
+    }
+    return result
+}
+
+/// The busiest processes right now, read from `ps`.
+public func systemTopProcesses(limit: Int) -> [ProcessUsage] {
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: "/bin/ps")
+    process.arguments = ["-Aco", "pid=,pcpu=,comm=", "-r"]
+    let pipe = Pipe()
+    process.standardOutput = pipe
+    process.standardError = Pipe()
+    do { try process.run() } catch { return [] }
+    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+    process.waitUntilExit()
+    return parseProcessUsage(String(decoding: data, as: UTF8.self), limit: limit,
+                             excluding: ProcessInfo.processInfo.processIdentifier)
+}

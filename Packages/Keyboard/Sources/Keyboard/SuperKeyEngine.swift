@@ -81,6 +81,8 @@ public struct KeyboardSettings: Codable, Equatable, Sendable {
     public var source: SuperKeySource = .capsLock
     public var tapAction: SuperKeyTapAction = .escape
     public var excludedApps: [String] = []
+    /// Ignores a second press of the same key within this many milliseconds; 0 is off.
+    public var debounceMilliseconds = 0
 
     public init() {}
 }
@@ -90,4 +92,25 @@ public func superKeyActive(_ settings: KeyboardSettings, bundleID: String?) -> B
     guard settings.superKeyEnabled else { return false }
     guard let bundleID else { return true }
     return !settings.excludedApps.contains(bundleID)
+}
+
+/// Drops key presses that repeat faster than a person can type, for keyboards whose
+/// switches bounce and send a letter twice.
+public struct KeyDebouncer: Sendable {
+    private let windowNanoseconds: UInt64
+    private var lastPress: [Int64: UInt64] = [:]
+
+    public init(milliseconds: Int) {
+        windowNanoseconds = UInt64(max(milliseconds, 0)) * 1_000_000
+    }
+
+    public mutating func shouldDrop(keyCode: Int64, timestampNanoseconds: UInt64) -> Bool {
+        guard windowNanoseconds > 0 else { return false }
+        if let last = lastPress[keyCode], timestampNanoseconds >= last,
+           timestampNanoseconds - last < windowNanoseconds {
+            return true
+        }
+        lastPress[keyCode] = timestampNanoseconds
+        return false
+    }
 }

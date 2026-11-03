@@ -190,6 +190,46 @@
           }
         }
       }
+    },
+    "Debounce": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entprellen"
+          }
+        }
+      }
+    },
+    "Key debounce: off": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasten-Entprellen: aus"
+          }
+        }
+      }
+    },
+    "Ignore a repeated key within %lld ms": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederholte Taste innerhalb von %lld ms ignorieren"
+          }
+        }
+      }
+    },
+    "For keyboards whose switches send a letter twice.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Tastaturen, deren Schalter einen Buchstaben doppelt senden."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

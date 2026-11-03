@@ -33,6 +33,7 @@ public final class KeyboardModel {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var engine = SuperKeyEngine()
+    @ObservationIgnored private var debouncer = KeyDebouncer(milliseconds: 0)
     @ObservationIgnored private var tap: CFMachPort?
     @ObservationIgnored private var source: CFRunLoopSource?
     @ObservationIgnored private var running = false
@@ -68,7 +69,8 @@ public final class KeyboardModel {
     private func apply() {
         engine.reset()
         isHolding = false
-        let wanted = running && settings.superKeyEnabled
+        debouncer = KeyDebouncer(milliseconds: settings.debounceMilliseconds)
+        let wanted = running && (settings.superKeyEnabled || settings.debounceMilliseconds > 0)
         if wanted { installTap() } else { removeTap() }
     }
 
@@ -103,9 +105,12 @@ public final class KeyboardModel {
             isHolding = false
             return .pass
         }
-        guard superKeyActive(settings, bundleID: NSWorkspace.shared.frontmostApplication?.bundleIdentifier) else {
-            return .pass
+        let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        if type == .keyDown, settings.debounceMilliseconds > 0,
+           debouncer.shouldDrop(keyCode: keyCode, timestampNanoseconds: UInt64(max(0, ProcessInfo.processInfo.systemUptime) * 1_000_000_000)) {
+            return .swallow
         }
+        guard superKeyActive(settings, bundleID: frontmost) else { return .pass }
         let now = ProcessInfo.processInfo.systemUptime
         if keyCode == settings.source.keyCode, type == .flagsChanged {
             let pressed = isPressed(flags: flags)

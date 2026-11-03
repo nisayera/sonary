@@ -1,3 +1,4 @@
+import AppKit
 import SonaryUI
 import SwiftUI
 
@@ -38,6 +39,16 @@ struct WindowsSettingsView: View {
                             Text(verbatim: action.shortcutLabel).font(.body.monospaced()).foregroundStyle(.secondary)
                         }
                     }
+                    HStack {
+                        Text("Move to the next display", bundle: .module)
+                        Spacer()
+                        Text(verbatim: "⌃⌥\\").font(.body.monospaced()).foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("Put the window back", bundle: .module)
+                        Spacer()
+                        Text(verbatim: "⌃⌥⌫").font(.body.monospaced()).foregroundStyle(.secondary)
+                    }
                 }
             }
         }
@@ -57,6 +68,44 @@ struct WindowsSettingsView: View {
                               caption: Text("Stops apps from closing by accident. Finder is never affected.", bundle: .module),
                               isOn: Binding(get: { model.settings.quitProtection },
                                             set: { value in model.update { $0.quitProtection = value } }))
+            SettingsToggleRow(symbol: "xmark.square", title: Text("Press ⌘W twice to close a window", bundle: .module),
+                              isOn: Binding(get: { model.settings.closeProtection },
+                                            set: { value in model.update { $0.closeProtection = value } }))
+            if model.settings.quitProtection || model.settings.closeProtection {
+                Divider()
+                Group {
+                    if model.settings.protectedApps.isEmpty {
+                        Text("Every app is protected. Add apps to protect only those.", bundle: .module)
+                    } else {
+                        Text("Only these apps are protected.", bundle: .module)
+                    }
+                }
+                .font(.caption).foregroundStyle(.secondary)
+                ForEach(model.settings.protectedApps, id: \.self) { bundleID in
+                    SettingsRow(symbol: "app.dashed", title: Text(verbatim: bundleID)) {
+                        Button(role: .destructive) {
+                            model.update { $0.protectedApps.removeAll { $0 == bundleID } }
+                        } label: {
+                            Image(systemName: "minus.circle")
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(Text("Remove app", bundle: .module))
+                    }
+                }
+                Button { addProtectedApp() } label: {
+                    Label { Text("Add app…", bundle: .module) } icon: { Image(systemName: "plus") }
+                }
+            }
         }
+    }
+}
+
+extension WindowsSettingsView {
+    fileprivate func addProtectedApp() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.application]
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        guard panel.runModal() == .OK, let url = panel.url, let id = Bundle(url: url)?.bundleIdentifier else { return }
+        model.update { if !$0.protectedApps.contains(id) { $0.protectedApps.append(id) } }
     }
 }

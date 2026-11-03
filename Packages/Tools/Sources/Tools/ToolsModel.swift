@@ -10,6 +10,7 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
         Snippet(title: "Date", text: "{date}"),
     ]
     public var radialActions: [QuickAction] = QuickAction.allCases
+    public var colorFormat: ColorFormat = .hex
     public init() {}
 }
 
@@ -19,6 +20,12 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
 public final class ToolsModel {
     public private(set) var settings: ToolsSettings
     public private(set) var lastResult: String?
+
+    /// The command bar reports what it copied through this.
+    var lastResultText: String? {
+        get { lastResult }
+        set { lastResult = newValue }
+    }
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var hotKeys: [HotKey] = []
     @ObservationIgnored private var commandBar: CommandBarController?
@@ -82,10 +89,13 @@ public final class ToolsModel {
     public func pickColor() {
         NSColorSampler().show { [weak self] color in
             guard let color = color?.usingColorSpace(.sRGB) else { return }
-            let hex = hexColor(red: Double(color.redComponent), green: Double(color.greenComponent), blue: Double(color.blueComponent))
+            // NSColor is not Sendable, so only the numbers cross into the main actor.
+            let red = Double(color.redComponent), green = Double(color.greenComponent), blue = Double(color.blueComponent)
             Task { @MainActor in
-                self?.copy(hex)
-                self?.lastResult = String(localized: "Copied \(hex)", bundle: .module)
+                guard let self else { return }
+                let value = formatColor(red: red, green: green, blue: blue, format: self.settings.colorFormat)
+                self.copy(value)
+                self.lastResult = String(localized: "Copied \(value)", bundle: .module)
             }
         }
     }
@@ -105,10 +115,16 @@ public final class ToolsModel {
             defer { try? FileManager.default.removeItem(at: file) }
             let text = await Task.detached { () -> String in
                 guard let image = NSImage(contentsOf: file)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return "" }
+                let handler = VNImageRequestHandler(cgImage: image)
+                // A QR code or barcode in the selection is what the user is after, so it wins over loose text.
+                let barcodes = VNDetectBarcodesRequest()
+                try? handler.perform([barcodes])
+                let payloads = (barcodes.results ?? []).compactMap(\.payloadStringValue)
+                if !payloads.isEmpty { return joinRecognizedLines(payloads) }
                 let request = VNRecognizeTextRequest()
                 request.recognitionLevel = .accurate
                 request.usesLanguageCorrection = true
-                try? VNImageRequestHandler(cgImage: image).perform([request])
+                try? handler.perform([request])
                 let lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
                 return joinRecognizedLines(lines)
             }.value

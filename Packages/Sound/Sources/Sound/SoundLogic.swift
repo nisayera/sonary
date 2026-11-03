@@ -37,3 +37,22 @@ public func keepAwakeRemaining(endsAt: Date?, now: Date) -> TimeInterval? {
     guard let endsAt else { return nil }
     return max(0, endsAt.timeIntervalSince(now))
 }
+
+/// The device after the current one, wrapping around. Nil when there is nothing to switch to.
+public func nextOutputDevice(after current: UInt32?, in devices: [AudioDevice]) -> AudioDevice? {
+    guard devices.count > 1 else { return nil }
+    guard let current, let index = devices.firstIndex(where: { $0.id == current }) else { return devices.first }
+    return devices[(index + 1) % devices.count]
+}
+
+/// Names that tell us a device is worn on the head, so unplugging it should not blast the speakers.
+public func isHeadphoneLike(_ name: String) -> Bool {
+    let lowered = name.lowercased()
+    return ["airpods", "headphone", "kopfhörer", "headset", "beats", "earbuds", "buds", "wh-", "wf-"]
+        .contains { lowered.contains($0) }
+}
+
+/// How loud the speakers may be right after headphones were disconnected.
+public func volumeAfterUnplug(current: Double, limit: Double) -> Double {
+    min(clampedVolume(current), clampedVolume(limit))
+}

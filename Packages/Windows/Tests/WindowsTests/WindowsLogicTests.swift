@@ -127,3 +127,58 @@ struct WindowSwitcherTests {
         #expect(filteredEntries(entries, query: " ").count == 2)
     }
 }
+
+struct ProtectionTests {
+    @Test func quitAndCloseAreArmedSeparately() {
+        var guardian = QuitGuard()
+        #expect(!guardian.shouldQuit(app: "a", key: .quit, at: 10))
+        #expect(!guardian.shouldQuit(app: "a", key: .close, at: 10.2))
+        #expect(guardian.shouldQuit(app: "a", key: .close, at: 10.4))
+    }
+
+    @Test func emptyListProtectsEveryApp() {
+        #expect(isProtected(bundleID: "com.any.app", onlyApps: []))
+    }
+
+    @Test func aListProtectsOnlyItsApps() {
+        #expect(isProtected(bundleID: "com.a", onlyApps: ["com.a"]))
+        #expect(!isProtected(bundleID: "com.b", onlyApps: ["com.a"]))
+    }
+}
+
+struct MoveBetweenScreensTests {
+    private let left = CGRect(x: 0, y: 0, width: 1000, height: 800)
+    private let right = CGRect(x: 1000, y: 0, width: 2000, height: 1000)
+
+    @Test func wrapsThroughTheScreens() {
+        let onLeft = CGRect(x: 100, y: 100, width: 400, height: 300)
+        #expect(nextScreen(after: onLeft, screens: [left, right]) == right)
+        let onRight = CGRect(x: 1200, y: 100, width: 400, height: 300)
+        #expect(nextScreen(after: onRight, screens: [left, right]) == left)
+    }
+
+    @Test func oneScreenHasNoNext() {
+        #expect(nextScreen(after: CGRect(x: 0, y: 0, width: 10, height: 10), screens: [left]) == nil)
+    }
+
+    @Test func keepsTheRelativePlaceAndSize() {
+        let frame = CGRect(x: 500, y: 400, width: 500, height: 400)
+        let moved = movedFrame(frame, from: left, to: right)
+        #expect(moved.minX == 2000)
+        #expect(moved.width == 1000)
+        #expect(moved.height == 500)
+    }
+
+    @Test func staysInsideTheTargetScreen() {
+        let frame = CGRect(x: 900, y: 700, width: 400, height: 300)
+        let moved = movedFrame(frame, from: left, to: right)
+        #expect(moved.maxX <= right.maxX)
+        #expect(moved.maxY <= right.maxY)
+    }
+
+    @Test func aWindowBiggerThanItsScreenIsNotGrownFurther() {
+        let huge = CGRect(x: 0, y: 0, width: 4000, height: 4000)
+        let moved = movedFrame(huge, from: left, to: right)
+        #expect(moved.width <= right.width && moved.height <= right.height)
+    }
+}

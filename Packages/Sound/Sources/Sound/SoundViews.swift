@@ -75,6 +75,17 @@ struct SoundSettingsView: View {
                               isOn: Binding(get: { model.settings.micMuteShortcut },
                                             set: { value in model.update { $0.micMuteShortcut = value } }))
         }
+        SettingsCard(Text("Headphones", bundle: .module)) {
+            SettingsToggleRow(symbol: "speaker.wave.2", title: Text("Switch output with ⌃⌥O", bundle: .module),
+                              caption: Text("Moves to the next speaker or headphones.", bundle: .module),
+                              isOn: Binding(get: { model.settings.outputSwitchShortcut },
+                                            set: { value in model.update { $0.outputSwitchShortcut = value } }))
+            SettingsToggleRow(symbol: "speaker.slash",
+                              title: Text("Turn the volume down when headphones are unplugged", bundle: .module),
+                              caption: Text("Keeps the speakers from suddenly blaring.", bundle: .module),
+                              isOn: Binding(get: { model.settings.volumeAfterUnplug > 0 },
+                                            set: { value in model.update { $0.volumeAfterUnplug = value ? 0.25 : 0 } }))
+        }
         SettingsCard(Text("In the menu panel", bundle: .module)) {
             Text("Switch speakers and microphones, change the volume, mute the microphone and keep your Mac awake from the menu panel's sound tab.",
                  bundle: .module)

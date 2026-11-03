@@ -84,3 +84,111 @@ struct RadialMathTests {
         #expect(quickToggleActions.count == 5)
     }
 }
+
+struct CalculatorTests {
+    @Test func doesArithmetic() {
+        #expect(evaluateExpression("2+2") == "4")
+        #expect(evaluateExpression("12*(3+4)/2") == "42")
+        #expect(evaluateExpression("10/4") == "2.5")
+    }
+
+    @Test func leavesNonMathsAlone() {
+        #expect(evaluateExpression("safari") == nil)
+        #expect(evaluateExpression("2") == nil)
+        #expect(evaluateExpression("rm -rf /") == nil)
+        #expect(evaluateExpression("open -a Mail") == nil)
+    }
+
+    @Test func survivesDivisionByZero() {
+        #expect(evaluateExpression("5/0") == nil)
+    }
+
+    @Test func formatsWithoutTrailingZeros() {
+        #expect(formatNumber(3.0) == "3")
+        #expect(formatNumber(3.5000) == "3.5")
+        #expect(formatNumber(2.0 / 3.0) == "0.666667")
+    }
+}
+
+struct UnitConversionTests {
+    @Test func convertsLengthAndMass() {
+        #expect(convertUnits("10 km in mi")?.hasPrefix("6.21") == true)
+        #expect(convertUnits("5 lb in kg")?.hasPrefix("2.26") == true)
+    }
+
+    @Test func convertsTemperature() {
+        #expect(convertUnits("20 c to f")?.hasPrefix("68") == true)
+    }
+
+    @Test func convertsDataSizes() {
+        #expect(convertUnits("1 gb in mb")?.hasPrefix("1000") == true)
+    }
+
+    @Test func ignoresWhatIsNotAConversion() {
+        #expect(convertUnits("hello world") == nil)
+        #expect(convertUnits("10 km in bananas") == nil)
+        #expect(convertUnits("km in mi") == nil)
+    }
+}
+
+struct EmojiSearchTests {
+    @Test func findsByName() {
+        #expect(searchEmoji("rocket").first?.emoji == "🚀")
+        #expect(searchEmoji("thumbs").contains { $0.emoji == "👍" })
+    }
+
+    @Test func needsTwoLetters() {
+        #expect(searchEmoji("r").isEmpty)
+        #expect(searchEmoji("").isEmpty)
+    }
+
+    @Test func unknownWordFindsNothing() {
+        #expect(searchEmoji("qqqq").isEmpty)
+    }
+}
+
+struct CalculatorRobustnessTests {
+    @Test func handlesParenthesesAndPrecedence() {
+        #expect(evaluateExpression("2+3*4") == "14")
+        #expect(evaluateExpression("(2+3)*4") == "20")
+        #expect(evaluateExpression("2^3^2") == "512")
+    }
+
+    @Test func handlesNegativeNumbers() {
+        #expect(evaluateExpression("-5+2") == "-3")
+        #expect(evaluateExpression("3*-2") == "-6")
+    }
+
+    @Test func rejectsBrokenInputInsteadOfCrashing() {
+        for broken in ["((2+3", "2++", "*5", "()+1", "2+)3(", "1/(2-2)", "-+*/"] {
+            #expect(evaluateExpression(broken) == nil, "should refuse \(broken)")
+        }
+    }
+
+    @Test func acceptsCommaAsDecimalSeparator() {
+        #expect(evaluateExpression("1,5*2") == "3")
+    }
+}
+
+struct ColorFormatTests {
+    @Test func writesEveryFormat() {
+        #expect(formatColor(red: 1, green: 0.5, blue: 0, format: .hex) == "#FF8000")
+        #expect(formatColor(red: 1, green: 0.5, blue: 0, format: .rgb) == "rgb(255, 128, 0)")
+        #expect(formatColor(red: 1, green: 0.5, blue: 0, format: .hsl) == "hsl(30, 100%, 50%)")
+        #expect(formatColor(red: 1, green: 0.5, blue: 0, format: .swiftUI) == "Color(red: 1, green: 0.5, blue: 0)")
+    }
+
+    @Test func greyHasNoHue() {
+        #expect(formatColor(red: 0.5, green: 0.5, blue: 0.5, format: .hsl) == "hsl(0, 0%, 50%)")
+    }
+
+    @Test func clampsOutOfRangeValues() {
+        #expect(formatColor(red: 2, green: -1, blue: 0.5, format: .rgb) == "rgb(255, 0, 128)")
+    }
+
+    @Test func hueFollowsTheColourWheel() {
+        #expect(Int(hsl(r: 1, g: 0, b: 0).hue.rounded()) == 0)
+        #expect(Int(hsl(r: 0, g: 1, b: 0).hue.rounded()) == 120)
+        #expect(Int(hsl(r: 0, g: 0, b: 1).hue.rounded()) == 240)
+    }
+}

@@ -340,6 +340,26 @@
           }
         }
       }
+    },
+    "Colour picker": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farbaufnahme"
+          }
+        }
+      }
+    },
+    "Copy colours as": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farben kopieren als"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

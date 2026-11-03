@@ -10,6 +10,7 @@ public func effectiveSettings(_ base: MouseSettings, bundleID: String?) -> Mouse
         result.reverseScroll = false
         result.buttonMappings = []
         result.clickFilterMilliseconds = 0
+        result.horizontalScrollModifier = .none
         return result
     }
     if let value = rule.linearScroll { result.linearScroll = value }

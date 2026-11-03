@@ -3,7 +3,7 @@ import SonaryUI
 import SwiftUI
 
 struct CommandItem: Identifiable {
-    enum Kind { case app(URL), snippet(Snippet), action(() -> Void) }
+    enum Kind { case app(URL), snippet(Snippet), action(() -> Void), copyText(String) }
     let id: String
     let title: String
     let symbol: String?
@@ -75,6 +75,9 @@ final class CommandBarController {
         case let .app(url): NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
         case let .snippet(snippet): model.insert(snippet)
         case let .action(action): action()
+        case let .copyText(text):
+            model.copy(text)
+            model.lastResultText = String(localized: "Copied \(text)", bundle: .module)
         }
     }
 
@@ -103,13 +106,33 @@ struct CommandBarView: View {
     @State private var selected = 0
     @FocusState private var focused: Bool
 
+    /// Maths, unit conversions and emoji come first; they only appear when the query really is one.
+    private var instantResults: [CommandItem] {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        var found: [CommandItem] = []
+        if let value = evaluateExpression(q) {
+            found.append(CommandItem(id: "calc", title: "\(q) = \(value)", symbol: "equal.square",
+                                     kind: .copyText(value)))
+        }
+        if let value = convertUnits(q) {
+            found.append(CommandItem(id: "unit", title: "\(q) = \(value)", symbol: "arrow.left.arrow.right",
+                                     kind: .copyText(value)))
+        }
+        for item in searchEmoji(q).prefix(5) {
+            found.append(CommandItem(id: "emoji-\(item.emoji)", title: "\(item.emoji)  \(item.name)", symbol: nil,
+                                     kind: .copyText(item.emoji)))
+        }
+        return found
+    }
+
     private var results: [CommandItem] {
         let q = query.trimmingCharacters(in: .whitespaces)
         guard !q.isEmpty else { return Array(items.prefix(8)) }
-        return items.compactMap { item in matchScore(q, in: item.title).map { (item, $0) } }
+        let matches = items.compactMap { item in matchScore(q, in: item.title).map { (item, $0) } }
             .sorted { $0.1 > $1.1 }
-            .prefix(8)
             .map(\.0)
+        let instant = instantResults
+        return Array((instant + matches).prefix(8))
     }
 
     var body: some View {
@@ -150,6 +173,8 @@ struct CommandBarView: View {
     private func icon(for item: CommandItem) -> some View {
         if case let .app(url) = item.kind {
             Image(nsImage: NSWorkspace.shared.icon(forFile: url.path)).resizable()
+        } else if item.symbol == nil {
+            Text(String(item.title.prefix(2))).font(.system(size: 18))
         } else {
             Image(systemName: item.symbol ?? "sparkles").foregroundStyle(Color.sonaryAccent)
         }

@@ -104,6 +104,17 @@ struct ToolsSettingsView: View {
                               caption: Text("⌥Space command bar, ⌃⌥T text from screen, ⌃⌥P color picker, ⌃⌥S screenshot.", bundle: .module),
                               isOn: Binding(get: { model.settings.shortcuts }, set: { value in model.update { $0.shortcuts = value } }))
         }
+        SettingsCard(Text("Colour picker", bundle: .module)) {
+            SettingsRow(symbol: "eyedropper", title: Text("Copy colours as", bundle: .module)) {
+                Picker(selection: Binding(get: { model.settings.colorFormat },
+                                          set: { value in model.update { $0.colorFormat = value } })) {
+                    ForEach(ColorFormat.allCases, id: \.self) { format in
+                        Text(verbatim: colorFormatExample(format)).tag(format)
+                    }
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 220)
+            }
+        }
         SettingsCard(Text("Radial menu", bundle: .module)) {
             Text("⌃⌥R opens a ring of actions around the pointer. Pick which ones it holds, up to eight.",
                  bundle: .module)
@@ -161,4 +172,9 @@ struct ToolsSettingsView: View {
             }
         )
     }
+}
+
+/// Shows each format with the same example colour, so the choice explains itself.
+func colorFormatExample(_ format: ColorFormat) -> String {
+    formatColor(red: 1, green: 0.42, blue: 0.45, format: format)
 }

@@ -38,3 +38,31 @@ struct ScrollMathTests {
         #expect(reversed(ScrollSample(deltaY: 0)).deltaY == 0)
     }
 }
+
+struct HorizontalScrollTests {
+    @Test func holdingTheKeyTurnsTheWheelSideways() {
+        let sample = ScrollSample(deltaY: 3, modifiers: .shift)
+        let result = horizontalized(sample, whileHolding: .shift)
+        #expect(result.deltaX == 3 && result.deltaY == 0)
+    }
+
+    @Test func withoutTheKeyNothingChanges() {
+        let sample = ScrollSample(deltaY: 3)
+        #expect(horizontalized(sample, whileHolding: .shift) == sample)
+    }
+
+    @Test func turnedOffNothingChanges() {
+        let sample = ScrollSample(deltaY: 3, modifiers: .shift)
+        #expect(horizontalized(sample, whileHolding: .none) == sample)
+    }
+
+    @Test func trackpadsAreLeftAlone() {
+        let trackpad = ScrollSample(deltaY: 3, isContinuous: true, modifiers: .option)
+        #expect(horizontalized(trackpad, whileHolding: .option) == trackpad)
+    }
+
+    @Test func anotherKeyDoesNotCount() {
+        let sample = ScrollSample(deltaY: 3, modifiers: .command)
+        #expect(horizontalized(sample, whileHolding: .option) == sample)
+    }
+}

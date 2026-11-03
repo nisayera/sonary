@@ -64,3 +64,35 @@ struct SuperKeyEngineTests {
         #expect(!superKeyActive(settings, bundleID: "com.other"))
     }
 }
+
+struct KeyDebouncerTests {
+    private let ms: UInt64 = 1_000_000
+
+    @Test func dropsTheSecondPressInsideTheWindow() {
+        var debouncer = KeyDebouncer(milliseconds: 40)
+        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0))
+        #expect(debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 20 * ms))
+    }
+
+    @Test func keepsNormalTyping() {
+        var debouncer = KeyDebouncer(milliseconds: 40)
+        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0))
+        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 90 * ms))
+    }
+
+    @Test func otherKeysAreUnaffected() {
+        var debouncer = KeyDebouncer(milliseconds: 40)
+        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0))
+        #expect(!debouncer.shouldDrop(keyCode: 5, timestampNanoseconds: 1 * ms))
+    }
+
+    @Test func zeroTurnsItOff() {
+        var debouncer = KeyDebouncer(milliseconds: 0)
+        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 0))
+        #expect(!debouncer.shouldDrop(keyCode: 4, timestampNanoseconds: 1))
+    }
+
+    @Test func debounceIsOffByDefault() {
+        #expect(KeyboardSettings().debounceMilliseconds == 0)
+    }
+}
