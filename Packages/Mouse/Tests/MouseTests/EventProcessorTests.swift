@@ -13,32 +13,38 @@ struct EventProcessorTests {
     @Test func trackpadScrollPassesThrough() {
         var p = processor { $0.linearScroll = true; $0.reverseScroll = true }
         let trackpad = ScrollSample(deltaY: 4, isContinuous: true, scrollPhase: 2)
-        #expect(p.process(.scroll(trackpad), bundleID: nil) == .passThrough)
+        let decision = p.process(.scroll(trackpad), bundleID: nil)
+        #expect(decision == .passThrough)
     }
 
     @Test func wheelIsLinearized() {
         var p = processor { $0.linearScroll = true }
-        #expect(p.process(.scroll(ScrollSample(deltaY: 7)), bundleID: nil) == .replaceScroll(ScrollSample(deltaY: 3)))
+        let decision = p.process(.scroll(ScrollSample(deltaY: 7)), bundleID: nil)
+        #expect(decision == .replaceScroll(ScrollSample(deltaY: 3)))
     }
 
     @Test func wheelIsReversed() {
         var p = processor { $0.reverseScroll = true }
-        #expect(p.process(.scroll(ScrollSample(deltaY: 2)), bundleID: nil) == .replaceScroll(ScrollSample(deltaY: -2)))
+        let decision = p.process(.scroll(ScrollSample(deltaY: 2)), bundleID: nil)
+        #expect(decision == .replaceScroll(ScrollSample(deltaY: -2)))
     }
 
     @Test func reverseThenLinearKeepsSizeAndFlipsSign() {
         var p = processor { $0.linearScroll = true; $0.reverseScroll = true }
-        #expect(p.process(.scroll(ScrollSample(deltaY: 9)), bundleID: nil) == .replaceScroll(ScrollSample(deltaY: -3)))
+        let decision = p.process(.scroll(ScrollSample(deltaY: 9)), bundleID: nil)
+        #expect(decision == .replaceScroll(ScrollSample(deltaY: -3)))
     }
 
     @Test func plainWheelWithNoFeaturesPassesThrough() {
         var p = processor { _ in }
-        #expect(p.process(.scroll(ScrollSample(deltaY: 2)), bundleID: nil) == .passThrough)
+        let decision = p.process(.scroll(ScrollSample(deltaY: 2)), bundleID: nil)
+        #expect(decision == .passThrough)
     }
 
     @Test func smoothScrollSwallowsAndInjects() {
         var p = processor { $0.smoothScroll = true; $0.linearScroll = true }
-        #expect(p.process(.scroll(ScrollSample(deltaY: 1)), bundleID: nil) == .injectSmooth(ScrollSample(deltaY: 3)))
+        let decision = p.process(.scroll(ScrollSample(deltaY: 1)), bundleID: nil)
+        #expect(decision == .injectSmooth(ScrollSample(deltaY: 3)))
     }
 
     @Test func disabledAppPassesEverythingThrough() {
@@ -46,27 +52,33 @@ struct EventProcessorTests {
             $0.linearScroll = true
             $0.appOverrides = ["com.example.off": AppOverride(disabled: true)]
         }
-        #expect(p.process(.scroll(ScrollSample(deltaY: 7)), bundleID: "com.example.off") == .passThrough)
+        let decision = p.process(.scroll(ScrollSample(deltaY: 7)), bundleID: "com.example.off")
+        #expect(decision == .passThrough)
     }
 
     @Test func nilBundlePassesWithGlobalSettings() {
         var p = processor { $0.linearScroll = true }
-        #expect(p.process(.scroll(ScrollSample(deltaY: 7)), bundleID: nil) == .replaceScroll(ScrollSample(deltaY: 3)))
+        let decision = p.process(.scroll(ScrollSample(deltaY: 7)), bundleID: nil)
+        #expect(decision == .replaceScroll(ScrollSample(deltaY: 3)))
     }
 
     @Test func mappedButtonPerformsAction() {
         var p = processor { $0.buttonMappings = [ButtonMapping(button: 3, action: .back)] }
-        #expect(p.process(.buttonDown(button: 3, timestampNanoseconds: 0), bundleID: nil) == .perform(.back))
+        let decision = p.process(.buttonDown(button: 3, timestampNanoseconds: 0), bundleID: nil)
+        #expect(decision == .perform(.back))
     }
 
     @Test func unmappedButtonPassesThrough() {
         var p = processor { _ in }
-        #expect(p.process(.buttonDown(button: 3, timestampNanoseconds: 0), bundleID: nil) == .passThrough)
+        let decision = p.process(.buttonDown(button: 3, timestampNanoseconds: 0), bundleID: nil)
+        #expect(decision == .passThrough)
     }
 
     @Test func fastSecondClickIsSwallowed() {
         var p = processor { $0.clickFilterMilliseconds = 50 }
-        #expect(p.process(.buttonDown(button: 0, timestampNanoseconds: 0), bundleID: nil) == .passThrough)
-        #expect(p.process(.buttonDown(button: 0, timestampNanoseconds: 20 * ms), bundleID: nil) == .swallow)
+        let decision = p.process(.buttonDown(button: 0, timestampNanoseconds: 0), bundleID: nil)
+        #expect(decision == .passThrough)
+        let decision2 = p.process(.buttonDown(button: 0, timestampNanoseconds: 20 * ms), bundleID: nil)
+        #expect(decision2 == .swallow)
     }
 }

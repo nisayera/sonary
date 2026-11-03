@@ -49,6 +49,7 @@ struct SmoothScrollerTests {
     @Test func idleWhenEmpty() {
         var scroller = SmoothScroller(smoothness: 0.5)
         #expect(scroller.isIdle)
-        #expect(scroller.step(dt: 1.0 / 60) == (0, 0))
+        let step = scroller.step(dt: 1.0 / 60)
+        #expect(step.dy == 0 && step.dx == 0)
     }
 }
