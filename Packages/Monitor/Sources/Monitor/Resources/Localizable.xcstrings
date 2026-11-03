@@ -210,6 +210,36 @@
           }
         }
       }
+    },
+    "Show values in the menu bar": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werte in der Menüleiste zeigen"
+          }
+        }
+      }
+    },
+    "Next to the Sonary icon. Off shows only the icon.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neben dem Sonary-Icon. Aus zeigt nur das Icon."
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitteilungen"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

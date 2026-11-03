@@ -11,6 +11,19 @@ final class CallCounter: @unchecked Sendable {
 
 @MainActor
 struct MonitorModuleTests {
+    @Test func menuBarValuesAreOptInAndPersist() {
+        let defaults = UserDefaults(suiteName: "sonary.monitortests.\(UUID().uuidString)")!
+        let sources: @Sendable () -> any MetricsSources = {
+            FakeSources(ticks: [CPUTicks(user: 1, system: 1, idle: 1, nice: 0)],
+                        counters: [NetworkCounters(bytesIn: 0, bytesOut: 0)])
+        }
+        let module = MonitorModule(defaults: defaults, sources: sources)
+        #expect(!module.showsMenuBarValues)
+        #expect(module.menuBarText() == nil)
+        module.setShowsMenuBarValues(true)
+        #expect(MonitorModule(defaults: defaults, sources: sources).showsMenuBarValues)
+    }
+
     @Test func concurrentStartCreatesOnlyOneSampler() async throws {
         let counter = CallCounter()
         let ticks = CPUTicks(user: 1, system: 1, idle: 1, nice: 0)

@@ -1,94 +1,196 @@
-import SwiftUI
 import SonaryCore
 import SonaryUI
+import SwiftUI
 
+private enum SettingsPageID: Hashable {
+    case general
+    case updates
+    case about
+    case module(String)
+}
+
+/// Settings window: sidebar with Sonary's own pages and one page per module; each page is a header plus cards.
 struct SettingsView: View {
     let model: AppModel
-    @State private var selection: String? = "general"
+    @State private var selection: SettingsPageID? = .general
 
     var body: some View {
         NavigationSplitView {
             List(selection: $selection) {
-                Label("General", systemImage: "gearshape").tag("general" as String?)
+                Section("Sonary") {
+                    sidebarRow(.general, symbol: "gearshape", title: Text("General"))
+                    sidebarRow(.updates, symbol: "arrow.down.circle", title: Text("Updates"))
+                    sidebarRow(.about, symbol: "info.circle", title: Text("About"))
+                }
                 Section("Modules") {
                     ForEach(model.registry.modules, id: \.id) { module in
-                        Label {
-                            Text(module.title)
-                        } icon: {
-                            Image(systemName: module.symbol)
-                        }
-                        .tag(module.id as String?)
+                        sidebarRow(.module(module.id), symbol: module.symbol, title: Text(module.title),
+                                   isOn: model.registry.isEnabled(module.id))
                     }
                 }
             }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+            .listStyle(.sidebar)
+            .navigationSplitViewColumnWidth(min: 200, ideal: 214, max: 260)
         } detail: {
             detail
         }
-        .frame(minWidth: 640, minHeight: 420)
+        .frame(minWidth: 760, minHeight: 520)
+        .tint(Color.sonaryAccent)
+    }
+
+    private func sidebarRow(_ id: SettingsPageID, symbol: String, title: Text, isOn: Bool? = nil) -> some View {
+        HStack(spacing: 9) {
+            Image(systemName: symbol)
+                .foregroundStyle(selection == id ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.sonaryAccent))
+                .frame(width: 18)
+            title
+            Spacer(minLength: 4)
+            if let isOn {
+                Circle()
+                    .fill(isOn ? Color.green : Color.secondary.opacity(0.35))
+                    .frame(width: 7, height: 7)
+                    .accessibilityLabel(isOn ? Text("On") : Text("Off"))
+            }
+        }
+        .tag(id)
     }
 
     @ViewBuilder
     private var detail: some View {
-        if let id = selection, id != "general",
-           let module = model.registry.modules.first(where: { $0.id == id }) {
-            ModuleSettingsContainer(model: model, module: module)
-        } else {
-            GeneralSettings(model: model)
+        switch selection ?? .general {
+        case .general: GeneralPage(model: model)
+        case .updates: UpdatesPage(model: model)
+        case .about: AboutPage()
+        case let .module(id):
+            if let module = model.registry.modules.first(where: { $0.id == id }) {
+                ModulePage(model: model, module: module)
+            } else {
+                GeneralPage(model: model)
+            }
         }
     }
 }
 
-private struct ModuleSettingsContainer: View {
+private struct ModulePage: View {
     let model: AppModel
     let module: any SonaryModule
 
     var body: some View {
-        Form {
-            Section {
+        SettingsPage {
+            SettingsPageHeader(symbol: module.symbol, title: Text(module.title),
+                               subtitle: Text(ModuleInfo.summary(for: module.id))) {
                 Toggle(isOn: Binding(
                     get: { model.registry.isEnabled(module.id) },
                     set: { on in Task { await model.registry.setEnabled(module.id, on) } }
-                )) {
-                    Text(module.title)
+                )) { Text(module.title) }
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+            }
+        } content: {
+            if let failure = model.registry.failures[module.id] {
+                SettingsCard {
+                    Label(failure, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
                 }
-                if let failure = model.registry.failures[module.id] {
-                    Text(failure).foregroundStyle(.red)
+            }
+            if !module.requiredPermissions.isEmpty {
+                SettingsCard(Text("Permissions")) {
+                    ForEach(module.requiredPermissions, id: \.self) { permission in
+                        SettingsRow(symbol: "lock.shield", title: Text(permissionName(permission)),
+                                    caption: Text("Asked for when you turn the module on.")) { EmptyView() }
+                    }
                 }
             }
             module.makeSettingsView()
         }
-        .formStyle(.grouped)
+    }
+
+    private func permissionName(_ permission: SonaryPermission) -> LocalizedStringKey {
+        switch permission {
+        case .accessibility: "Accessibility"
+        case .inputMonitoring: "Input Monitoring"
+        case .screenRecording: "Screen Recording"
+        case .fullDiskAccess: "Full Disk Access"
+        case .notifications: "Notifications"
+        case .calendars: "Calendars"
+        }
     }
 }
 
-private struct GeneralSettings: View {
+private struct GeneralPage: View {
     let model: AppModel
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Form {
-            Toggle("Open at login", isOn: Binding(
-                get: { model.launchAtLogin.isEnabled },
-                set: { model.launchAtLogin.set($0) }
-            ))
-            if let error = model.launchAtLogin.errorMessage {
-                Text(error).foregroundStyle(.red)
+        SettingsPage {
+            SettingsPageHeader(symbol: "gearshape", title: Text("General"),
+                               subtitle: Text("How Sonary starts and behaves."))
+        } content: {
+            SettingsCard(Text("Startup")) {
+                SettingsToggleRow(symbol: "power", title: Text("Open at login"),
+                                  caption: model.launchAtLogin.errorMessage.map { Text($0) },
+                                  isOn: Binding(get: { model.launchAtLogin.isEnabled },
+                                                set: { model.launchAtLogin.set($0) }))
             }
-            Section("Updates") {
-                Toggle("Check for updates automatically", isOn: Binding(
-                    get: { model.updates.automaticallyChecks },
-                    set: { model.updates.setAutomaticallyChecks($0) }
-                ))
-                Button("Check for Updates…") { model.updates.checkForUpdates() }
-                    .disabled(!model.updates.canCheckForUpdates)
-                LabeledContent("Version", value: UpdateModel.versionString)
-            }
-            Button("Show onboarding again") {
-                model.resetOnboarding()
-                openWindow(id: "onboarding")
+            SettingsCard(Text("Introduction")) {
+                SettingsRow(symbol: "hand.wave", title: Text("Welcome window"),
+                            caption: Text("Explains Sonary and the permissions of your modules.")) {
+                    Button("Show onboarding again") {
+                        model.resetOnboarding()
+                        openWindow(id: "onboarding")
+                    }
+                }
             }
         }
-        .formStyle(.grouped)
+    }
+}
+
+private struct UpdatesPage: View {
+    let model: AppModel
+
+    var body: some View {
+        SettingsPage {
+            SettingsPageHeader(symbol: "arrow.down.circle", title: Text("Updates"),
+                               subtitle: Text("Sonary updates itself from its GitHub releases."))
+        } content: {
+            SettingsCard {
+                SettingsToggleRow(symbol: "clock.arrow.circlepath", title: Text("Check for updates automatically"),
+                                  isOn: Binding(get: { model.updates.automaticallyChecks },
+                                                set: { model.updates.setAutomaticallyChecks($0) }))
+                Divider()
+                SettingsRow(symbol: "arrow.down.circle", title: Text("Version"),
+                            caption: Text(UpdateModel.versionString)) {
+                    Button("Check for Updates…") { model.updates.checkForUpdates() }
+                        .disabled(!model.updates.canCheckForUpdates)
+                }
+            }
+        }
+    }
+}
+
+private struct AboutPage: View {
+    var body: some View {
+        SettingsPage {
+            SettingsPageHeader(symbol: "info.circle", title: Text("About"),
+                               subtitle: Text("Your Mac's menu bar toolbox. Open source, modular, native for macOS 26."))
+        } content: {
+            SettingsCard {
+                SettingsRow(symbol: "number", title: Text("Version"), caption: Text(UpdateModel.versionString)) {
+                    EmptyView()
+                }
+                Divider()
+                SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: Text("Source code"),
+                            caption: Text(verbatim: "github.com/nisayera/sonary")) {
+                    if let url = URL(string: "https://github.com/nisayera/sonary") {
+                        Link("Open", destination: url)
+                    }
+                }
+                Divider()
+                SettingsRow(symbol: "doc.text", title: Text("License"),
+                            caption: Text(verbatim: "GNU GPL v3.0 or later")) {
+                    EmptyView()
+                }
+            }
+        }
     }
 }

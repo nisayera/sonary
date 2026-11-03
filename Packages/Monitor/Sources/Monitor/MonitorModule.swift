@@ -15,6 +15,8 @@ public final class MonitorModule: SonaryModule {
     public private(set) var history: [MetricsSnapshot] = []
     public private(set) var readoutMetrics: [ReadoutMetric]
     public private(set) var alertsEnabled: Bool
+    /// Off by default: the menu bar shows the Sonary icon, values only when the user asks for them.
+    public private(set) var showsMenuBarValues: Bool
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let sourcesFactory: @Sendable () -> any MetricsSources
@@ -30,6 +32,7 @@ public final class MonitorModule: SonaryModule {
         let stored = defaults.stringArray(forKey: "monitor.readout")?.compactMap(ReadoutMetric.init(rawValue:))
         self.readoutMetrics = stored ?? [.cpu, .memory]
         self.alertsEnabled = defaults.bool(forKey: "monitor.alerts")
+        self.showsMenuBarValues = defaults.bool(forKey: "monitor.menubar.values")
     }
 
     public func start() async throws {
@@ -76,8 +79,13 @@ public final class MonitorModule: SonaryModule {
         defaults.set(enabled, forKey: "monitor.alerts")
     }
 
+    public func setShowsMenuBarValues(_ show: Bool) {
+        showsMenuBarValues = show
+        defaults.set(show, forKey: "monitor.menubar.values")
+    }
+
     public func menuBarText() -> String? {
-        guard let latest, !readoutMetrics.isEmpty else { return nil }
+        guard showsMenuBarValues, let latest, !readoutMetrics.isEmpty else { return nil }
         return formatReadout(latest, metrics: readoutMetrics)
     }
 

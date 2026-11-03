@@ -1,26 +1,63 @@
 name: Release
 
-# Push a tag like v0.2.0 to build, sign (Sparkle EdDSA) and publish a release.
+# Every merge to main whose version in project.yml has no release yet is built, signed (Sparkle EdDSA)
+# and published automatically. Pushing a tag like v0.3.0 (or publishing a release in the web UI) still works.
 on:
   push:
+    branches: [main]
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.decide.outputs.tag }}
+      marketing: ${{ steps.decide.outputs.marketing }}
+      build: ${{ steps.decide.outputs.build }}
+      publish: ${{ steps.decide.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decide whether this version needs a release
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eo pipefail
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            V=$(sed -n 's/^ *MARKETING_VERSION: *"\{0,1\}\([0-9.]*\)"\{0,1\}.*/\1/p' project.yml | head -1)
+            TAG="v$V"
+          fi
+          read -r MARKETING BUILD < <(python3 scripts/release_tools.py version "$TAG")
+          PUBLISH=true
+          ASSETS=$(gh release view "$TAG" --json assets --jq '.assets | length' 2>/dev/null || echo 0)
+          if [ "$ASSETS" -gt 0 ]; then
+            echo "Release $TAG already has its files, nothing to do."
+            PUBLISH=false
+          fi
+          {
+            echo "tag=$TAG"
+            echo "marketing=$MARKETING"
+            echo "build=$BUILD"
+            echo "publish=$PUBLISH"
+          } >> "$GITHUB_OUTPUT"
+
   release:
+    needs: check
+    if: needs.check.outputs.publish == 'true'
     runs-on: macos-26
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
-      - name: Version from tag
-        id: version
-        run: |
-          read -r MARKETING BUILD < <(python3 scripts/release_tools.py version "$GITHUB_REF_NAME")
-          echo "marketing=$MARKETING" >> "$GITHUB_OUTPUT"
-          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
 
       - name: Install tools
         run: |
@@ -34,20 +71,20 @@ jobs:
           xcodegen generate
           xcodebuild -project Sonary.xcodeproj -scheme Sonary -configuration Release \
             -destination 'generic/platform=macOS' -derivedDataPath build \
-            MARKETING_VERSION="${{ steps.version.outputs.marketing }}" \
-            CURRENT_PROJECT_VERSION="${{ steps.version.outputs.build }}" \
+            MARKETING_VERSION="${{ needs.check.outputs.marketing }}" \
+            CURRENT_PROJECT_VERSION="${{ needs.check.outputs.build }}" \
             CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES \
             build 2>&1 | tee build.log
           APP="build/Build/Products/Release/Sonary.app"
           test -d "$APP"
           GOT=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")
-          test "$GOT" = "${{ steps.version.outputs.marketing }}"
+          test "$GOT" = "${{ needs.check.outputs.marketing }}"
           codesign --verify --deep --strict "$APP"
 
       - name: Package
         run: |
           set -eo pipefail
-          V="${{ steps.version.outputs.marketing }}"
+          V="${{ needs.check.outputs.marketing }}"
           APP="build/Build/Products/Release/Sonary.app"
           ditto -c -k --sequesterRsrc --keepParent "$APP" "Sonary-$V.zip"
           mkdir dmgroot && cp -R "$APP" dmgroot/ && ln -s /Applications dmgroot/Applications
@@ -56,7 +93,7 @@ jobs:
       - name: Release notes
         run: |
           {
-            echo "Sonary ${{ steps.version.outputs.marketing }}"
+            echo "Sonary ${{ needs.check.outputs.marketing }}"
             echo
             echo "Install: open the DMG and drag Sonary to Applications. Requires macOS 26 on Apple silicon."
             echo "First launch: this build is not notarized yet. Right-click Sonary, choose Open, then Open again"
@@ -71,21 +108,22 @@ jobs:
             echo "::error::SPARKLE_ED_PRIVATE_KEY secret is missing: refusing to publish a release without an update feed."
             exit 1
           fi
-          V="${{ steps.version.outputs.marketing }}"
-          .venv/bin/python scripts/release_tools.py appcast --tag "$GITHUB_REF_NAME" \
+          V="${{ needs.check.outputs.marketing }}"
+          .venv/bin/python scripts/release_tools.py appcast --tag "${{ needs.check.outputs.tag }}" \
             --archive "Sonary-$V.zip" --repo "$GITHUB_REPOSITORY" --notes notes.md --out appcast.xml
 
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          V="${{ steps.version.outputs.marketing }}"
+          V="${{ needs.check.outputs.marketing }}"
           FILES=("Sonary-$V.zip" "Sonary-$V.dmg")
           [ -f appcast.xml ] && FILES+=(appcast.xml)
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            # A release for this tag already exists (e.g. created in the web UI): fill it in.
-            gh release upload "$GITHUB_REF_NAME" "${FILES[@]}" --clobber
-            gh release edit "$GITHUB_REF_NAME" --title "Sonary $V" --notes-file notes.md
+          TAG="${{ needs.check.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # A release for this tag already exists (e.g. created in the web UI): fill it in and publish it.
+            gh release upload "$TAG" "${FILES[@]}" --clobber
+            gh release edit "$TAG" --title "Sonary $V" --notes-file notes.md --draft=false
           else
-            gh release create "$GITHUB_REF_NAME" "${FILES[@]}" --title "Sonary $V" --notes-file notes.md --verify-tag
+            gh release create "$TAG" "${FILES[@]}" --title "Sonary $V" --notes-file notes.md --target "$GITHUB_SHA"
           fi

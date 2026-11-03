@@ -290,6 +290,26 @@
           }
         }
       }
+    },
+    "Every wheel step scrolls the same distance.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeder Rasterschritt scrollt gleich weit."
+          }
+        }
+      }
+    },
+    "Helps with worn mouse buttons that double-click by themselves.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hilft bei abgenutzten Maustasten, die von selbst doppelt klicken."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
