@@ -26,10 +26,10 @@ public struct SystemSources: MetricsSources {
         let stride = Int(CPU_STATE_MAX)
         for cpu in 0..<Int(cpuCount) {
             let base = stride * cpu
-            ticks.user += UInt64(info[base + Int(CPU_STATE_USER)])
-            ticks.system += UInt64(info[base + Int(CPU_STATE_SYSTEM)])
-            ticks.idle += UInt64(info[base + Int(CPU_STATE_IDLE)])
-            ticks.nice += UInt64(info[base + Int(CPU_STATE_NICE)])
+            ticks.user += tickCount(info[base + Int(CPU_STATE_USER)])
+            ticks.system += tickCount(info[base + Int(CPU_STATE_SYSTEM)])
+            ticks.idle += tickCount(info[base + Int(CPU_STATE_IDLE)])
+            ticks.nice += tickCount(info[base + Int(CPU_STATE_NICE)])
         }
         return ticks
     }

@@ -7,7 +7,7 @@ public enum AlertKind: Sendable, Equatable, Hashable, CaseIterable {
 public struct AlertThresholds: Sendable, Equatable {
     public var cpu: Double = 0.9
     public var cpuDuration: TimeInterval = 30
-    public var temperature: Double = 95
+    public var temperature: Double = 100
     public var diskFreeFraction: Double = 0.05
     public var batteryLevel: Double = 0.2
     public var cooldown: TimeInterval = 600
@@ -20,6 +20,7 @@ public struct AlertEvaluator: Sendable {
     private let thresholds: AlertThresholds
     private var active: Set<AlertKind> = []
     private var cpuHighSince: Date?
+    private var lastFired: [AlertKind: Date] = [:]
 
     public init(thresholds: AlertThresholds = .init()) {
         self.thresholds = thresholds
@@ -49,7 +50,12 @@ public struct AlertEvaluator: Sendable {
             now.insert(.lowBattery)
         }
 
-        let fired = AlertKind.allCases.filter { now.contains($0) && !active.contains($0) }
+        let fired = AlertKind.allCases.filter { kind in
+            guard now.contains(kind), !active.contains(kind) else { return false }
+            guard let last = lastFired[kind] else { return true }
+            return snapshot.timestamp.timeIntervalSince(last) >= thresholds.cooldown
+        }
+        for kind in fired { lastFired[kind] = snapshot.timestamp }
         active = now
         return fired
     }

@@ -13,7 +13,8 @@ struct MetricCard: View {
         GlassCard {
             VStack(alignment: .leading, spacing: Spacing.s) {
                 HStack {
-                    Label(title, systemImage: symbol).font(.subheadline).foregroundStyle(.secondary)
+                    Label { Text(title, bundle: .module) } icon: { Image(systemName: symbol) }
+                        .font(.subheadline).foregroundStyle(.secondary)
                     Spacer()
                     Text(value).font(.headline.monospacedDigit()).contentTransition(.numericText())
                 }

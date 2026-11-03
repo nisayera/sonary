@@ -9,6 +9,7 @@ public final class ModuleRegistry {
 
     private var enabled: Set<String>
     private var running: Set<String> = []
+    private var chains: [String: Task<Void, Never>] = [:]
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let permissions: any PermissionGate
 
@@ -23,20 +24,33 @@ public final class ModuleRegistry {
 
     public func setEnabled(_ id: String, _ on: Bool) async {
         guard let module = modules.first(where: { $0.id == id }) else { return }
-        if on {
-            await activate(module)
-        } else {
-            await deactivate(module)
+        await serialized(id) { [self] in
+            if on {
+                await activate(module)
+            } else {
+                await deactivate(module)
+            }
         }
     }
 
     public func startEnabled() async {
-        for module in modules where enabled.contains(module.id) && !running.contains(module.id) {
-            await activate(module)
+        for module in modules where enabled.contains(module.id) {
+            await serialized(module.id) { [self] in await activate(module) }
         }
     }
 
     // MARK: - Private
+
+    /// Runs start/stop work for one module strictly one after another, so overlapping calls cannot interleave.
+    private func serialized(_ id: String, _ work: @escaping @MainActor () async -> Void) async {
+        let previous = chains[id]
+        let task = Task { @MainActor in
+            await previous?.value
+            await work()
+        }
+        chains[id] = task
+        await task.value
+    }
 
     private func activate(_ module: any SonaryModule) async {
         let id = module.id

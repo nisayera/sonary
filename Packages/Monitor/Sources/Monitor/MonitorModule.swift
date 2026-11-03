@@ -33,10 +33,11 @@ public final class MonitorModule: SonaryModule {
     }
 
     public func start() async throws {
-        guard task == nil else { return }
+        guard sampler == nil else { return }
         let sampler = MetricsSampler(sources: sourcesFactory())
         self.sampler = sampler
         let stream = await sampler.snapshots()
+        guard self.sampler === sampler else { return }
         task = Task { [weak self] in
             var evaluator = AlertEvaluator()
             let notifier = AlertNotifier()
