@@ -460,6 +460,36 @@
           }
         }
       }
+    },
+    "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fensteranordnung per ⌃⌥-Kürzel und Schutz vor versehentlichem Beenden."
+          }
+        }
+      }
+    },
+    "Switch speakers and microphones, volume, microphone mute on ⌃⌥M and keep awake.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lautsprecher und Mikrofone wechseln, Lautstärke, Mikrofon stumm per ⌃⌥M und Wachhalten."
+          }
+        }
+      }
+    },
+    "Command bar, text from screen, color picker, screenshots, scratchpad and snippets.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Befehlsleiste, Text vom Bildschirm, Farbaufnahme, Bildschirmfotos, Notizblock und Textbausteine."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

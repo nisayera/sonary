@@ -15,6 +15,9 @@ Sonary fragt Berechtigungen erst an, wenn du ein Modul einschaltest, das sie bra
 | Zwischenablage: Einsetzen als reiner Text | Bedienungshilfen | Drückt ⌘V für dich |
 | Zwischenablage: Finder-Helfer | Automation (Finder) | Pfad kopieren, Terminal öffnen, neue Datei |
 | Apps | keine | Aufräumen und Deinstallieren legen Dateien nur in den Papierkorb; Ports über `lsof`, Updates über Homebrew |
+| Fenster | Bedienungshilfen | Verschiebt Fenster per Tastenkürzel; ⌘Q-Schutz liest Tastendrücke |
+| Ton | keine | Wechselt Audiogeräte über Core Audio; Wachhalten über eine Energie-Zusicherung |
+| Werkzeuge: Bildschirmfoto, Text vom Bildschirm | Bildschirmaufnahme | Nutzt das Systemwerkzeug `screencapture`; macOS fragt beim ersten Mal |
 
 Die Zeigerbeschleunigung wird nur geändert, solange das Modul läuft. Der ursprüngliche Wert wird beim Ausschalten, beim Beenden und beim nächsten Start nach einem Absturz wiederhergestellt.
 

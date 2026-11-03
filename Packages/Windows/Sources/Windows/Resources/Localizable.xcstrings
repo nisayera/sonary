@@ -1,0 +1,216 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Windows": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster"
+          }
+        }
+      }
+    },
+    "Left half": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linke Hälfte"
+          }
+        }
+      }
+    },
+    "Right half": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechte Hälfte"
+          }
+        }
+      }
+    },
+    "Top half": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obere Hälfte"
+          }
+        }
+      }
+    },
+    "Bottom half": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untere Hälfte"
+          }
+        }
+      }
+    },
+    "Top left quarter": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oben links"
+          }
+        }
+      }
+    },
+    "Top right quarter": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oben rechts"
+          }
+        }
+      }
+    },
+    "Bottom left quarter": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unten links"
+          }
+        }
+      }
+    },
+    "Bottom right quarter": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unten rechts"
+          }
+        }
+      }
+    },
+    "Left third": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linkes Drittel"
+          }
+        }
+      }
+    },
+    "Center third": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mittleres Drittel"
+          }
+        }
+      }
+    },
+    "Right third": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechtes Drittel"
+          }
+        }
+      }
+    },
+    "Maximize": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maximieren"
+          }
+        }
+      }
+    },
+    "Center": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zentrieren"
+          }
+        }
+      }
+    },
+    "Window layouts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fensteranordnung"
+          }
+        }
+      }
+    },
+    "Keyboard shortcuts for window layouts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastenkürzel für die Fensteranordnung"
+          }
+        }
+      }
+    },
+    "Moves and resizes the front window.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verschiebt das vorderste Fenster und ändert seine Größe."
+          }
+        }
+      }
+    },
+    "Quit protection": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beenden-Schutz"
+          }
+        }
+      }
+    },
+    "Press ⌘Q twice to quit": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘Q zweimal drücken zum Beenden"
+          }
+        }
+      }
+    },
+    "Stops apps from closing by accident. Finder is never affected.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verhindert, dass Apps versehentlich beendet werden. Der Finder ist nie betroffen."
+          }
+        }
+      }
+    },
+    "Press ⌘Q again to quit %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drücke erneut ⌘Q, um %@ zu beenden"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

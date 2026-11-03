@@ -2,7 +2,7 @@ import Carbon.HIToolbox
 
 /// A system-wide keyboard shortcut through Carbon's hot key API (no permission needed).
 @MainActor
-final class HotKey {
+public final class HotKey {
     private static var actions: [UInt32: () -> Void] = [:]
     private static var handlerInstalled = false
     private static var nextID: UInt32 = 1
@@ -10,7 +10,8 @@ final class HotKey {
     private var reference: EventHotKeyRef?
     private let id: UInt32
 
-    init?(keyCode: Int, modifiers: Int, action: @escaping () -> Void) {
+    /// `modifiers` uses Carbon flags: cmdKey 256, shiftKey 512, optionKey 2048, controlKey 4096.
+    public init?(keyCode: Int, modifiers: Int, action: @escaping () -> Void) {
         Self.installHandlerIfNeeded()
         id = Self.nextID
         Self.nextID += 1
@@ -22,7 +23,7 @@ final class HotKey {
         Self.actions[id] = action
     }
 
-    func unregister() {
+    public func unregister() {
         if let reference { UnregisterEventHotKey(reference) }
         reference = nil
         Self.actions[id] = nil

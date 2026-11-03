@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import SonaryCore
 
 /// Records text copies (polling the pasteboard), cleans links, keeps a file shelf and offers Finder helpers.
 @MainActor

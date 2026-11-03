@@ -21,12 +21,18 @@ packages:
     path: Packages/Clipboard
   Apps:
     path: Packages/Apps
+  Windows:
+    path: Packages/Windows
+  Sound:
+    path: Packages/Sound
+  Tools:
+    path: Packages/Tools
 settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
-    MARKETING_VERSION: "0.6.0"
-    CURRENT_PROJECT_VERSION: 600
+    MARKETING_VERSION: "0.9.0"
+    CURRENT_PROJECT_VERSION: 900
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -42,6 +48,9 @@ targets:
       - package: Notch
       - package: Clipboard
       - package: Apps
+      - package: Windows
+      - package: Sound
+      - package: Tools
       - package: Sparkle
         product: Sparkle
     entitlements:
@@ -83,6 +92,9 @@ targets:
       - package: Notch
       - package: Clipboard
       - package: Apps
+      - package: Windows
+      - package: Sound
+      - package: Tools
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
