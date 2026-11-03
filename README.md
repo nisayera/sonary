@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.png" width="128" alt="Sonary"></p>
+
 # Sonary
 
 Eine native, quelloffene Mac-Menüleisten-App (Swift 6, SwiftUI, Liquid Glass auf macOS 26, nur Apple Silicon).
