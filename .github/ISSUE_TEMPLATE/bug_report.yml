@@ -1,0 +1,17 @@
+name: Bug report
+description: Something isn't working
+labels: [bug]
+body:
+  - type: textarea
+    attributes: {label: What happened?, description: Steps to reproduce and what you expected.}
+    validations: {required: true}
+  - type: input
+    attributes: {label: Module, placeholder: e.g. System Monitor}
+  - type: input
+    attributes: {label: Sonary version}
+    validations: {required: true}
+  - type: input
+    attributes: {label: macOS version, placeholder: e.g. 26.1}
+    validations: {required: true}
+  - type: textarea
+    attributes: {label: Logs or screenshots}

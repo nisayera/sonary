@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest an idea or a new module
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes: {label: What problem would this solve?}
+    validations: {required: true}
+  - type: textarea
+    attributes: {label: Proposed solution}
+  - type: input
+    attributes: {label: Related module, placeholder: e.g. Clipboard & Files}
