@@ -11,6 +11,9 @@ Sonary fragt Berechtigungen erst an, wenn du ein Modul einschaltest, das sie bra
 | Notch: Musik | Automation (Music/Spotify) | Abspielen, Pause, Überspringen; macOS fragt beim ersten Klick |
 | Notch: Kalender | Kalender (Vollzugriff) | Heutige Termine; wird beim Einschalten des Kalender-Widgets angefragt |
 | Notch: Downloads | Ordner „Downloads" | Zeigt die neuesten Dateien; macOS fragt beim ersten Zugriff |
+| Zwischenablage | keine | Liest die Zwischenablage, um den Verlauf zu führen; Passwort-Einträge werden übersprungen |
+| Zwischenablage: Einsetzen als reiner Text | Bedienungshilfen | Drückt ⌘V für dich |
+| Zwischenablage: Finder-Helfer | Automation (Finder) | Pfad kopieren, Terminal öffnen, neue Datei |
 
 Die Zeigerbeschleunigung wird nur geändert, solange das Modul läuft. Der ursprüngliche Wert wird beim Ausschalten, beim Beenden und beim nächsten Start nach einem Absturz wiederhergestellt.
 

@@ -1,0 +1,296 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Clipboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwischenablage"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verlauf"
+          }
+        }
+      }
+    },
+    "Shelf": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablage"
+          }
+        }
+      }
+    },
+    "Finder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suchen"
+          }
+        }
+      }
+    },
+    "Copied text appears here.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopierter Text erscheint hier."
+          }
+        }
+      }
+    },
+    "Copy again": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneut kopieren"
+          }
+        }
+      }
+    },
+    "Unpin": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lösen"
+          }
+        }
+      }
+    },
+    "Pin": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anheften"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen"
+          }
+        }
+      }
+    },
+    "Clear history (keeps pinned)": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verlauf leeren (Angeheftetes bleibt)"
+          }
+        }
+      }
+    },
+    "Drop files here to keep them handy": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dateien hier ablegen, um sie griffbereit zu haben"
+          }
+        }
+      }
+    },
+    "Drag files out of the shelf to move or copy them.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ziehe Dateien aus der Ablage, um sie zu verschieben oder zu kopieren."
+          }
+        }
+      }
+    },
+    "Copy path of selected items": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfad der ausgewählten Objekte kopieren"
+          }
+        }
+      }
+    },
+    "Open Terminal in current folder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal im aktuellen Ordner öffnen"
+          }
+        }
+      }
+    },
+    "New text file in current folder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Textdatei im aktuellen Ordner"
+          }
+        }
+      }
+    },
+    "Keep the last %lld copies": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die letzten %lld Kopien behalten"
+          }
+        }
+      }
+    },
+    "Pinned entries are always kept. Passwords from password managers are never recorded.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angeheftete Einträge bleiben immer. Passwörter aus Passwort-Managern werden nie gespeichert."
+          }
+        }
+      }
+    },
+    "Copying and pasting": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieren und Einsetzen"
+          }
+        }
+      }
+    },
+    "Clean links": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Links bereinigen"
+          }
+        }
+      }
+    },
+    "Removes tracking parameters such as utm_source or fbclid from copied links.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernt Tracking-Parameter wie utm_source oder fbclid aus kopierten Links."
+          }
+        }
+      }
+    },
+    "Paste as plain text with ⌘⌥⇧V": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit ⌘⌥⇧V als reinen Text einsetzen"
+          }
+        }
+      }
+    },
+    "Strips formatting and pastes. Needs the Accessibility permission.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernt die Formatierung und setzt ein. Braucht die Berechtigung Bedienungshilfen."
+          }
+        }
+      }
+    },
+    "Shelf and Finder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablage und Finder"
+          }
+        }
+      }
+    },
+    "Open the menu panel's clipboard tab to use the file shelf and the Finder helpers. The Finder helpers ask once for permission to control Finder.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Ablage und die Finder-Helfer findest du im Zwischenablage-Tab des Menüs. Die Finder-Helfer fragen einmal nach der Erlaubnis, Finder zu steuern."
+          }
+        }
+      }
+    },
+    "Select files in Finder first.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle zuerst Dateien im Finder aus."
+          }
+        }
+      }
+    },
+    "Path copied.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfad kopiert."
+          }
+        }
+      }
+    },
+    "Untitled": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Titel"
+          }
+        }
+      }
+    },
+    "Allow Sonary to control Finder in System Settings > Privacy & Security > Automation.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlaube Sonary unter Systemeinstellungen > Datenschutz & Sicherheit > Automation, den Finder zu steuern."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

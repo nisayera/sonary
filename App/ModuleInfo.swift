@@ -7,6 +7,7 @@ enum ModuleInfo {
         case "monitor": "CPU, GPU, memory, network, disk, battery and temperatures, with history and alerts."
         case "mouse": "Linear or smooth scrolling, pointer acceleration, extra buttons, click filter and app exceptions."
         case "notch": "An island at the notch with music, calendar, timer, downloads and accessory batteries."
+        case "clipboard": "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers."
         default: ""
         }
     }
