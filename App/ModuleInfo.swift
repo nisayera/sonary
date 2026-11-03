@@ -10,6 +10,7 @@ enum ModuleInfo {
         case "clipboard": "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers."
         case "apps": "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates."
         case "windows": "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident."
+        case "sound": "Switch speakers and microphones, volume, microphone mute on ⌃⌥M and keep awake."
         default: ""
         }
     }

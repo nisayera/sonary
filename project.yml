@@ -23,12 +23,14 @@ packages:
     path: Packages/Apps
   Windows:
     path: Packages/Windows
+  Sound:
+    path: Packages/Sound
 settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
-    MARKETING_VERSION: "0.7.0"
-    CURRENT_PROJECT_VERSION: 700
+    MARKETING_VERSION: "0.8.0"
+    CURRENT_PROJECT_VERSION: 800
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -45,6 +47,7 @@ targets:
       - package: Clipboard
       - package: Apps
       - package: Windows
+      - package: Sound
       - package: Sparkle
         product: Sparkle
     entitlements:
@@ -87,6 +90,7 @@ targets:
       - package: Clipboard
       - package: Apps
       - package: Windows
+      - package: Sound
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
