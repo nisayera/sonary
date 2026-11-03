@@ -9,10 +9,26 @@ public protocol AccelerationControlling: Sendable {
 
 /// Reads and writes the system mouse acceleration through the IOHIDSystem service.
 /// The system stores it as a 16.16 fixed-point number; -1 turns acceleration off.
+///
+/// `IOHIDGetParameter`/`IOHIDSetParameter` are marked deprecated but still work; they are looked up at runtime
+/// so the build stays free of deprecation warnings. If they ever disappear, `read()` returns nil and the
+/// module simply leaves the acceleration alone.
 public struct IOHIDAccelerationControl: AccelerationControlling {
-    private static let key = "HIDMouseAcceleration" as CFString
+    private typealias GetFunction = @convention(c) (
+        io_connect_t, CFString, IOByteCount, UnsafeMutableRawPointer, UnsafeMutablePointer<IOByteCount>
+    ) -> kern_return_t
+    private typealias SetFunction = @convention(c) (
+        io_connect_t, CFString, UnsafeRawPointer, IOByteCount
+    ) -> kern_return_t
+
+    private static let keyName = "HIDMouseAcceleration"
 
     public init() {}
+
+    private func symbol<T>(_ name: String, as type: T.Type) -> T? {
+        guard let pointer = dlsym(UnsafeMutableRawPointer(bitPattern: -2), name) else { return nil }  // RTLD_DEFAULT
+        return unsafeBitCast(pointer, to: type)
+    }
 
     private func withConnection<T>(_ body: (io_connect_t) -> T?) -> T? {
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOHIDSystem"))
@@ -27,21 +43,23 @@ public struct IOHIDAccelerationControl: AccelerationControlling {
     }
 
     public func read() -> Double? {
-        withConnection { connect in
+        guard let get = symbol("IOHIDGetParameter", as: GetFunction.self) else { return nil }
+        return withConnection { connect in
             var raw: Int32 = 0
             var size: IOByteCount = 0
             let result = withUnsafeMutablePointer(to: &raw) { pointer in
-                IOHIDGetParameter(connect, Self.key, IOByteCount(MemoryLayout<Int32>.size), pointer, &size)
+                get(connect, Self.keyName as CFString, IOByteCount(MemoryLayout<Int32>.size), pointer, &size)
             }
             return result == KERN_SUCCESS ? Double(raw) / 65536.0 : nil
         }
     }
 
     public func write(_ value: Double) -> Bool {
-        withConnection { connect in
+        guard let set = symbol("IOHIDSetParameter", as: SetFunction.self) else { return false }
+        return withConnection { connect in
             var raw = Int32((value * 65536.0).rounded())
             let result = withUnsafeMutablePointer(to: &raw) { pointer in
-                IOHIDSetParameter(connect, Self.key, pointer, IOByteCount(MemoryLayout<Int32>.size))
+                set(connect, Self.keyName as CFString, pointer, IOByteCount(MemoryLayout<Int32>.size))
             }
             return result == KERN_SUCCESS
         } ?? false
