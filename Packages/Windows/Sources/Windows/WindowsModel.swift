@@ -15,7 +15,13 @@ private func quitTapCallback(
 ) -> Unmanaged<CGEvent>? {
     guard let userInfo else { return Unmanaged.passUnretained(event) }
     let model = Unmanaged<WindowsModel>.fromOpaque(userInfo).takeUnretainedValue()
-    let pass = MainActor.assumeIsolated { model.shouldPass(type: type, event: event) }
+    // Read the event on the tap thread; only Sendable values cross into the main actor.
+    let flags = event.flags
+    let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+    let isRepeat = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
+    let pass = MainActor.assumeIsolated {
+        model.shouldPass(type: type, flags: flags, keyCode: keyCode, isRepeat: isRepeat)
+    }
     return pass ? Unmanaged.passUnretained(event) : nil
 }
 
@@ -145,16 +151,15 @@ public final class WindowsModel {
     }
 
     /// False swallows the key press.
-    func shouldPass(type: CGEventType, event: CGEvent) -> Bool {
+    func shouldPass(type: CGEventType, flags: CGEventFlags, keyCode: Int64, isRepeat: Bool) -> Bool {
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let quitTap { CGEvent.tapEnable(tap: quitTap, enable: true) }
             return true
         }
-        let flags = event.flags
-        let isCommandQ = event.getIntegerValueField(.keyboardEventKeycode) == 12
+        let isCommandQ = keyCode == 12
             && flags.contains(.maskCommand)
             && !flags.contains(.maskShift) && !flags.contains(.maskAlternate) && !flags.contains(.maskControl)
-        guard type == .keyDown, isCommandQ, event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
+        guard type == .keyDown, isCommandQ, !isRepeat,
               let app = NSWorkspace.shared.frontmostApplication,
               let bundleID = app.bundleIdentifier, bundleID != "com.apple.finder" else {
             return true
