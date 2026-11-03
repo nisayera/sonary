@@ -4,7 +4,7 @@
 // Taken from vorssaint-utils (Sources/Vorssaint/Services/SystemMonitor/SMCClient.swift,
 // commit a5694c4c2f426fbd0f97ecfba9bbaa5746398dc1) and modified for Sonary:
 // reduced to the read-only subset (write support and SMCValueCodec removed),
-// value decoding lives in SMCValueDecoder.swift, task_self_trap() replaced by task_self_trap().
+// value decoding lives in SMCValueDecoder.swift, mach_task_self_ replaced by task_self_trap().
 
 import Foundation
 import IOKit
