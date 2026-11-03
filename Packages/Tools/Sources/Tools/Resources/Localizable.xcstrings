@@ -1,0 +1,256 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Tools": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werkzeuge"
+          }
+        }
+      }
+    },
+    "Scratchpad": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notizblock"
+          }
+        }
+      }
+    },
+    "Snippets": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbausteine"
+          }
+        }
+      }
+    },
+    "Command bar": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Befehlsleiste"
+          }
+        }
+      }
+    },
+    "Copy text from screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text vom Bildschirm kopieren"
+          }
+        }
+      }
+    },
+    "Pick a color": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farbe aufnehmen"
+          }
+        }
+      }
+    },
+    "Screenshot to clipboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto in die Zwischenablage"
+          }
+        }
+      }
+    },
+    "Edit snippets in Sonary's settings.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbausteine bearbeitest du in den Einstellungen von Sonary."
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Keyboard shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastenkürzel"
+          }
+        }
+      }
+    },
+    "⌥Space command bar, ⌃⌥T text from screen, ⌃⌥P color picker, ⌃⌥S screenshot.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥Leertaste Befehlsleiste, ⌃⌥T Text vom Bildschirm, ⌃⌥P Farbe, ⌃⌥S Bildschirmfoto."
+          }
+        }
+      }
+    },
+    "Placeholders: {date}, {time} and {clipboard}.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platzhalter: {date}, {time} und {clipboard}."
+          }
+        }
+      }
+    },
+    "Title": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titel"
+          }
+        }
+      }
+    },
+    "Text": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text"
+          }
+        }
+      }
+    },
+    "Remove snippet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbaustein entfernen"
+          }
+        }
+      }
+    },
+    "Add snippet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbaustein hinzufügen"
+          }
+        }
+      }
+    },
+    "Permissions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berechtigungen"
+          }
+        }
+      }
+    },
+    "Screenshots and text from screen ask once for the Screen Recording permission.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfotos und Text vom Bildschirm fragen einmal nach der Berechtigung Bildschirmaufnahme."
+          }
+        }
+      }
+    },
+    "Copied %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kopiert"
+          }
+        }
+      }
+    },
+    "Screenshot copied to the clipboard.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto in die Zwischenablage kopiert."
+          }
+        }
+      }
+    },
+    "No text found.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Text gefunden."
+          }
+        }
+      }
+    },
+    "Text copied to the clipboard.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text in die Zwischenablage kopiert."
+          }
+        }
+      }
+    },
+    "Snippet copied. Press ⌘V to paste it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbaustein kopiert. Mit ⌘V einsetzen."
+          }
+        }
+      }
+    },
+    "New snippet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neuer Textbaustein"
+          }
+        }
+      }
+    },
+    "Search apps, snippets and tools": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps, Textbausteine und Werkzeuge suchen"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

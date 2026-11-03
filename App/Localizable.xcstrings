@@ -480,6 +480,16 @@
           }
         }
       }
+    },
+    "Command bar, text from screen, color picker, screenshots, scratchpad and snippets.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Befehlsleiste, Text vom Bildschirm, Farbaufnahme, Bildschirmfotos, Notizblock und Textbausteine."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

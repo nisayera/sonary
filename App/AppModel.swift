@@ -7,6 +7,7 @@ import Mouse
 import Notch
 import SonaryCore
 import Sound
+import Tools
 import Windows
 
 @MainActor
@@ -22,6 +23,7 @@ final class AppModel {
     let apps: AppsModule
     let windows: WindowsModule
     let sound: SoundModule
+    let tools: ToolsModule
     let updates: UpdateModel
     private(set) var onboardingCompleted: Bool
 
@@ -46,7 +48,9 @@ final class AppModel {
         self.windows = windows
         let sound = SoundModule(defaults: defaults)
         self.sound = sound
-        self.registry = ModuleRegistry(modules: [monitor, mouse, notch, clipboard, apps, windows, sound], defaults: defaults, permissions: broker)
+        let tools = ToolsModule(defaults: defaults)
+        self.tools = tools
+        self.registry = ModuleRegistry(modules: [monitor, mouse, notch, clipboard, apps, windows, sound, tools], defaults: defaults, permissions: broker)
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
     }
 

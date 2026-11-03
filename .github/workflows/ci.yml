@@ -27,7 +27,7 @@ jobs:
       - name: Test packages
         run: |
           set -eo pipefail
-          for p in SonaryCore SonaryUI Monitor Mouse Notch Clipboard Apps Windows Sound; do
+          for p in SonaryCore SonaryUI Monitor Mouse Notch Clipboard Apps Windows Sound Tools; do
             echo "::group::swift test $p"
             swift test --package-path "Packages/$p" -Xswiftc -warnings-as-errors 2>&1 | tee "test-$p.log"
             echo "::endgroup::"

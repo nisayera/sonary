@@ -28,7 +28,7 @@
 </p>
 
 > [!NOTE]
-> **Sonary is in early development.** The app shell, module system, the System Monitor, Mouse, Notch, Clipboard, App Management, Windows and Sound modules are released (v0.8). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
+> **Sonary is in early development.** The app shell, module system, the System Monitor, Mouse, Notch, Clipboard, App Management, Windows, Sound and Tools modules are released (v0.9). The other modules below are the plan, not finished features. Star or watch the repo to follow along.
 
 ---
 
@@ -53,7 +53,7 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 | 🧹 **App Management** | Cleaner, uninstaller with leftovers, quit and force quit, port manager, Homebrew updates | ✅ Available |
 | 🪟 **Windows** | Window layouts (halves, quarters, thirds, maximize, center) on shortcuts, ⌘Q quit protection | ✅ Available |
 | 🔊 **Sound** | Output and input switcher, volume, microphone mute shortcut, keep awake | ✅ Available |
-| 🧰 **Tools** | Command bar, OCR, color picker, screenshots | 🗓 Planned |
+| 🧰 **Tools** | Command bar, text from screen (OCR), color picker, screenshots, scratchpad, snippets | ✅ Available |
 
 ## Install
 
@@ -90,7 +90,7 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 - [x] **M5 — App Management**
 - [x] **M6 — Windows** (Dock clicks and app switcher later)
 - [x] **M7 — Sound** (per-app mixer and display brightness later)
-- [ ] M8 — Tools
+- [x] **M8 — Tools**
 
 Every milestone ships as its own release: M2 is 0.3.0, M8 is 0.9.0, and 1.0 arrives when the plan is done.
 

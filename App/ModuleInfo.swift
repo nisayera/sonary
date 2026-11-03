@@ -11,6 +11,7 @@ enum ModuleInfo {
         case "apps": "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates."
         case "windows": "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident."
         case "sound": "Switch speakers and microphones, volume, microphone mute on ⌃⌥M and keep awake."
+        case "tools": "Command bar, text from screen, color picker, screenshots, scratchpad and snippets."
         default: ""
         }
     }
