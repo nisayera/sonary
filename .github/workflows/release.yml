@@ -81,6 +81,34 @@ jobs:
           test "$GOT" = "${{ needs.check.outputs.marketing }}"
           codesign --verify --deep --strict "$APP"
 
+      - name: Re-sign with the stable self-signed certificate
+        # A fixed signing identity keeps macOS privacy permissions (Accessibility, Screen Recording, ...)
+        # across updates. Ad-hoc signatures change with every build, so macOS treated each update as a new app.
+        env:
+          P12: ${{ secrets.SIGNING_CERT_P12 }}
+          P12_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+          CERT_SHA1: ${{ secrets.SIGNING_CERT_SHA1 }}
+        run: |
+          set -eo pipefail
+          if [ -z "$P12" ] || [ -z "$CERT_SHA1" ]; then
+            echo "::error::SIGNING_CERT_P12 / SIGNING_CERT_SHA1 secrets are missing"; exit 1
+          fi
+          KC="$RUNNER_TEMP/signing.keychain-db"
+          KC_PW=$(openssl rand -hex 16)
+          echo "$P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KC_PW" "$KC"
+          security set-keychain-settings -lut 3600 "$KC"
+          security unlock-keychain -p "$KC_PW" "$KC"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PW" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          APP="build/Build/Products/Release/Sonary.app"
+          codesign --force --deep --keychain "$KC" --sign "$CERT_SHA1" \
+            --preserve-metadata=entitlements,flags "$APP"
+          codesign --verify --deep --strict "$APP"
+          codesign -dvv "$APP" 2>&1 | grep -E "Authority|Identifier"
+          rm -f "$RUNNER_TEMP/cert.p12"
+
       - name: Package
         run: |
           set -eo pipefail
