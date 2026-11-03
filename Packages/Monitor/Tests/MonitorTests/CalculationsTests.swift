@@ -40,3 +40,11 @@ struct CalculationsTests {
         #expect(networkRates(previous: a, current: b, interval: 0) == .zero)
     }
 }
+
+struct TickCountTests {
+    @Test func tickCountTreatsNegativeRawValuesAsWrappedUnsigned() {
+        #expect(tickCount(-1) == 4_294_967_295)
+        #expect(tickCount(Int32.min) == 2_147_483_648)
+        #expect(tickCount(5) == 5)
+    }
+}

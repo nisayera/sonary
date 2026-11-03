@@ -10,6 +10,7 @@ public struct AlertThresholds: Sendable, Equatable {
     public var temperature: Double = 95
     public var diskFreeFraction: Double = 0.05
     public var batteryLevel: Double = 0.2
+    public var cooldown: TimeInterval = 600
 
     public init() {}
 }

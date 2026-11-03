@@ -66,3 +66,34 @@ final class FakeChecker: PermissionChecking, @unchecked Sendable {
 func makeDefaults() -> UserDefaults {
     UserDefaults(suiteName: "sonary.tests.\(UUID().uuidString)")!
 }
+
+/// A module whose start() suspends until `open()` is called; afterwards starts pass straight through.
+@MainActor
+final class GatedModule: SonaryModule {
+    let id: String
+    let title = LocalizedStringResource("Gated")
+    let symbol = "star"
+    let requiredPermissions: [SonaryPermission] = []
+    private(set) var startCount = 0
+    private(set) var stopCount = 0
+    private var isOpen = false
+    private var waiting: [CheckedContinuation<Void, Never>] = []
+
+    init(id: String) { self.id = id }
+
+    func start() async throws {
+        startCount += 1
+        if isOpen { return }
+        await withCheckedContinuation { waiting.append($0) }
+    }
+
+    func stop() async { stopCount += 1 }
+    func makeSettingsView() -> AnyView { AnyView(EmptyView()) }
+
+    func open() {
+        isOpen = true
+        let pending = waiting
+        waiting = []
+        for continuation in pending { continuation.resume() }
+    }
+}

@@ -59,4 +59,34 @@ struct ModuleRegistryTests {
         #expect(module.startCount == 0)
         #expect(registry.failures["a"] != nil)
     }
+
+    @Test func overlappingEnableStartsModuleOnce() async {
+        let module = GatedModule(id: "a")
+        let registry = ModuleRegistry(modules: [module], defaults: makeDefaults(), permissions: FakeGate(result: true))
+        let first = Task { await registry.setEnabled("a", true) }
+        let second = Task { await registry.setEnabled("a", true) }
+        while module.startCount == 0 { await Task.yield() }
+        for _ in 0..<20 { await Task.yield() }
+        module.open()
+        await first.value
+        await second.value
+        #expect(module.startCount == 1)
+        #expect(registry.isEnabled("a"))
+    }
+
+    @Test func disableWhileStartIsPendingStopsModuleAndStaysOff() async {
+        let module = GatedModule(id: "a")
+        let defaults = makeDefaults()
+        let registry = ModuleRegistry(modules: [module], defaults: defaults, permissions: FakeGate(result: true))
+        let enable = Task { await registry.setEnabled("a", true) }
+        while module.startCount == 0 { await Task.yield() }
+        let disable = Task { await registry.setEnabled("a", false) }
+        for _ in 0..<20 { await Task.yield() }
+        module.open()
+        await enable.value
+        await disable.value
+        #expect(!registry.isEnabled("a"))
+        #expect(module.stopCount == 1)
+        #expect(defaults.bool(forKey: "module.a.enabled") == false)
+    }
 }

@@ -25,6 +25,9 @@ public func cpuUsage(previous: CPUTicks, current: CPUTicks) -> Double {
     return min(1, Double(busy) / Double(total))
 }
 
+/// Converts a raw `integer_t` tick counter (a 32-bit value that wraps) to an unsigned count.
+func tickCount(_ raw: Int32) -> UInt64 { UInt64(max(0, raw)) }
+
 public struct NetworkCounters: Sendable, Equatable {
     public var bytesIn: UInt64
     public var bytesOut: UInt64

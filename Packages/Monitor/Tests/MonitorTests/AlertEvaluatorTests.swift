@@ -27,10 +27,13 @@ struct AlertEvaluatorTests {
 
     @Test func alertFiresOncePerEpisode() {
         var evaluator = AlertEvaluator()
-        #expect(evaluator.evaluate(snapshot(at: 0, temperatures: ["CPU": 99])) == [.highTemperature])
-        #expect(evaluator.evaluate(snapshot(at: 1, temperatures: ["CPU": 99])).isEmpty)
+        var thresholds = AlertThresholds()
+        thresholds.cooldown = 2
+        evaluator = AlertEvaluator(thresholds: thresholds)
+        #expect(evaluator.evaluate(snapshot(at: 0, temperatures: ["CPU": 105])) == [.highTemperature])
+        #expect(evaluator.evaluate(snapshot(at: 1, temperatures: ["CPU": 105])).isEmpty)
         #expect(evaluator.evaluate(snapshot(at: 2, temperatures: ["CPU": 50])).isEmpty)
-        #expect(evaluator.evaluate(snapshot(at: 3, temperatures: ["CPU": 99])) == [.highTemperature])
+        #expect(evaluator.evaluate(snapshot(at: 3, temperatures: ["CPU": 105])) == [.highTemperature])
     }
 
     @Test func lowBatteryIgnoredWhenChargingOrNoBattery() {
@@ -42,7 +45,27 @@ struct AlertEvaluatorTests {
 
     @Test func highTemperatureUsesMaxOfSensors() {
         var evaluator = AlertEvaluator()
-        #expect(evaluator.evaluate(snapshot(at: 0, temperatures: ["CPU": 60, "GPU": 96])) == [.highTemperature])
+        #expect(evaluator.evaluate(snapshot(at: 0, temperatures: ["CPU": 60, "GPU": 101])) == [.highTemperature])
+    }
+
+    @Test func flappingAroundThresholdFiresOnceWithinCooldown() {
+        var evaluator = AlertEvaluator()
+        #expect(evaluator.evaluate(snapshot(at: 0, temperatures: ["CPU": 105])) == [.highTemperature])
+        #expect(evaluator.evaluate(snapshot(at: 5, temperatures: ["CPU": 90])).isEmpty)
+        #expect(evaluator.evaluate(snapshot(at: 10, temperatures: ["CPU": 105])).isEmpty)
+        #expect(evaluator.evaluate(snapshot(at: 15, temperatures: ["CPU": 90])).isEmpty)
+        #expect(evaluator.evaluate(snapshot(at: 20, temperatures: ["CPU": 105])).isEmpty)
+    }
+
+    @Test func alertFiresAgainAfterCooldown() {
+        var evaluator = AlertEvaluator()
+        #expect(evaluator.evaluate(snapshot(at: 0, temperatures: ["CPU": 105])) == [.highTemperature])
+        #expect(evaluator.evaluate(snapshot(at: 60, temperatures: ["CPU": 90])).isEmpty)
+        #expect(evaluator.evaluate(snapshot(at: 601, temperatures: ["CPU": 105])) == [.highTemperature])
+    }
+
+    @Test func defaultTemperatureThresholdIs100() {
+        #expect(AlertThresholds().temperature == 100)
     }
 
     @Test func memoryPressureCriticalFires() {
