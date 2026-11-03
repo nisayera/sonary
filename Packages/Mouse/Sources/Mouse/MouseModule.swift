@@ -56,4 +56,5 @@ public final class MouseModule: SonaryModule {
     }
 
     public func makeSettingsView() -> AnyView { AnyView(MouseSettingsView(module: self)) }
+    public func makePopoverView() -> AnyView? { AnyView(MousePopoverView(module: self)) }
 }

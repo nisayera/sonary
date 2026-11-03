@@ -10,7 +10,7 @@ Sonary ist eine native, quelloffene Mac-Menüleisten-App („Mac-Werkzeugkasten"
 - Sprache/UI: Swift 6 (strict concurrency), SwiftUI, AppKit nur wo nötig
 - Plattform: **nur macOS 26 (Tahoe) und nur Apple Silicon**
 - Lizenz: **GPL-3.0-or-later**. Code aus Vorssaint (GPL-3.0) darf übernommen werden; in jeder übernommenen Datei bleiben die **originalen Copyright- und Lizenz-Header erhalten** (GPL-Pflicht); zusätzlich dokumentiert `NOTICE` Herkunft (Pfad, Commit) jeder übernommenen Datei.
-- Nicht übernommen: Name, Logo und Look von Vorssaint (separat per TRADEMARKS.md geschützt). Sonary hat eigenes Branding und Design. Der Name „Vorssaint" wird nicht in Werbung, Store-/Landingpage-Texten oder der App-UI verwendet, nur als sachliche Quellenangabe in `NOTICE`/`README`.
+- Nicht übernommen: Name, Logo, Icon und Branding von Vorssaint (separat per TRADEMARKS.md geschützt). Der Aufbau von Menü und Einstellungen (Icon-Tabs, Seitenleiste, Karten) ist an Vorssaint angelehnt (Entscheidung des Projektinhabers, 2026-11-03); Farben, Icon und Name sind Sonarys eigene. Der Name „Vorssaint" wird nicht in Werbung, Store-/Landingpage-Texten oder der App-UI verwendet, nur als sachliche Quellenangabe in `NOTICE`/`README`.
 - Verteilung: GitHub-Release (DMG, signiert + notarisiert), Sparkle-Updates, Homebrew-Cask. Kein Bezahlmodell.
 - Signierung/Notarisierung braucht ein **Apple Developer Program-Konto (99 $/Jahr)** (Developer-ID-Zertifikat). Für Entwicklung und Selbstbau aus dem Quellcode ist das nicht nötig.
 - Sprachen der UI: Englisch + Deutsch.

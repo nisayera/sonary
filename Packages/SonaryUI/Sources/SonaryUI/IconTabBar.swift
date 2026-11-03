@@ -1,0 +1,58 @@
+import SwiftUI
+
+public struct IconTab<ID: Hashable>: Identifiable {
+    public let id: ID
+    public let symbol: String
+    public let title: Text
+
+    public init(id: ID, symbol: String, title: Text) {
+        self.id = id
+        self.symbol = symbol
+        self.title = title
+    }
+}
+
+/// A row of icon-only tabs in a rounded bar; the active one is tinted. VoiceOver reads each tab's title.
+public struct IconTabBar<ID: Hashable>: View {
+    private let tabs: [IconTab<ID>]
+    @Binding private var selection: ID
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    public init(tabs: [IconTab<ID>], selection: Binding<ID>) {
+        self.tabs = tabs
+        self._selection = selection
+    }
+
+    public var body: some View {
+        HStack(spacing: 2) {
+            ForEach(tabs) { tab in
+                let isActive = tab.id == selection
+                Button {
+                    withAnimation(sonaryAnimation(reduceMotion)) { selection = tab.id }
+                } label: {
+                    Image(systemName: tab.symbol)
+                        .font(.system(size: 13.5, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 30)
+                        .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(isActive ? Color.sonaryAccent : Color.secondary)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(isActive ? Color.sonaryAccent.opacity(colorScheme == .light ? 0.14 : 0.22) : .clear)
+                )
+                .help(tab.title)
+                .accessibilityLabel(tab.title)
+                .accessibilityAddTraits(isActive ? .isSelected : [])
+            }
+        }
+        .padding(4)
+        .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(.separator.opacity(0.6), lineWidth: 0.7)
+        )
+    }
+}

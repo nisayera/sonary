@@ -1,4 +1,5 @@
 import AppKit
+import SonaryUI
 import SwiftUI
 
 private enum ActionChoice: String, CaseIterable, Identifiable {
@@ -50,71 +51,76 @@ struct MouseSettingsView: View {
     let module: MouseModule
 
     var body: some View {
-        Section {
-            Toggle(isOn: binding(\.linearScroll)) { Text("Linear scrolling", bundle: .module) }
+        SettingsCard(Text("Scrolling", bundle: .module)) {
+            SettingsToggleRow(symbol: "arrow.up.and.down.text.horizontal",
+                              title: Text("Linear scrolling", bundle: .module),
+                              caption: Text("Every wheel step scrolls the same distance.", bundle: .module),
+                              isOn: binding(\.linearScroll))
             if module.settings.linearScroll {
-                Stepper(value: binding(\.scrollLinesPerStep), in: 1...20) {
-                    Text("Lines per wheel step: \(module.settings.scrollLinesPerStep)", bundle: .module)
+                SettingsRow(symbol: "list.number",
+                            title: Text("Lines per wheel step: \(module.settings.scrollLinesPerStep)", bundle: .module)) {
+                    Stepper(value: binding(\.scrollLinesPerStep), in: 1...20) { EmptyView() }
+                        .labelsHidden()
                 }
             }
-            Toggle(isOn: binding(\.smoothScroll)) { Text("Smooth scrolling", bundle: .module) }
+            Divider()
+            SettingsToggleRow(symbol: "water.waves", title: Text("Smooth scrolling", bundle: .module),
+                              isOn: binding(\.smoothScroll))
             if module.settings.smoothScroll {
-                LabeledContent {
-                    Slider(value: binding(\.smoothness), in: 0...1)
-                } label: {
-                    Text("Smoothness", bundle: .module)
+                SettingsRow(symbol: "slider.horizontal.3", title: Text("Smoothness", bundle: .module)) {
+                    Slider(value: binding(\.smoothness), in: 0...1).frame(width: 160)
                 }
             }
-            Toggle(isOn: binding(\.reverseScroll)) { Text("Reverse mouse wheel direction", bundle: .module) }
-        } header: {
-            Text("Scrolling", bundle: .module)
-        } footer: {
-            Text("Trackpads and Magic Mouse are not changed.", bundle: .module)
+            Divider()
+            SettingsToggleRow(symbol: "arrow.up.arrow.down", title: Text("Reverse mouse wheel direction", bundle: .module),
+                              caption: Text("Trackpads and Magic Mouse are not changed.", bundle: .module),
+                              isOn: binding(\.reverseScroll))
         }
 
-        Section {
-            Toggle(isOn: binding(\.disableAcceleration)) { Text("Turn off pointer acceleration", bundle: .module) }
-        } header: {
-            Text("Pointer", bundle: .module)
-        } footer: {
-            Text("The original setting is restored when the module is turned off or Sonary quits.", bundle: .module)
+        SettingsCard(Text("Pointer", bundle: .module)) {
+            SettingsToggleRow(symbol: "cursorarrow.motionlines",
+                              title: Text("Turn off pointer acceleration", bundle: .module),
+                              caption: Text("The original setting is restored when the module is turned off or Sonary quits.", bundle: .module),
+                              isOn: binding(\.disableAcceleration))
         }
 
-        Section {
+        SettingsCard(Text("Extra buttons", bundle: .module)) {
             ForEach([3, 4, 5], id: \.self) { button in
-                Picker(selection: mappingBinding(for: button)) {
-                    ForEach(ActionChoice.allCases) { choice in
-                        Text(choice.label, bundle: .module).tag(choice)
+                SettingsRow(symbol: "computermouse", title: Text("Button \(button + 1)", bundle: .module)) {
+                    Picker(selection: mappingBinding(for: button)) {
+                        ForEach(ActionChoice.allCases) { choice in
+                            Text(choice.label, bundle: .module).tag(choice)
+                        }
+                    } label: {
+                        EmptyView()
                     }
-                } label: {
-                    Text("Button \(button + 1)", bundle: .module)
+                    .labelsHidden()
+                    .frame(width: 180)
                 }
             }
-        } header: {
-            Text("Extra buttons", bundle: .module)
         }
 
-        Section {
-            Stepper(value: binding(\.clickFilterMilliseconds), in: 0...500, step: 10) {
-                if module.settings.clickFilterMilliseconds == 0 {
-                    Text("Click filter: off", bundle: .module)
-                } else {
-                    Text("Ignore repeat clicks within \(module.settings.clickFilterMilliseconds) ms", bundle: .module)
-                }
+        SettingsCard(Text("Click filter", bundle: .module)) {
+            SettingsRow(symbol: "hand.tap",
+                        title: module.settings.clickFilterMilliseconds == 0
+                            ? Text("Click filter: off", bundle: .module)
+                            : Text("Ignore repeat clicks within \(module.settings.clickFilterMilliseconds) ms", bundle: .module),
+                        caption: Text("Helps with worn mouse buttons that double-click by themselves.", bundle: .module)) {
+                Stepper(value: binding(\.clickFilterMilliseconds), in: 0...500, step: 10) { EmptyView() }
+                    .labelsHidden()
             }
-        } header: {
-            Text("Click filter", bundle: .module)
         }
 
-        Section {
+        SettingsCard(Text("Exceptions", bundle: .module)) {
+            Text("Turn Sonary's mouse changes off while one of these apps is in front.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
             ForEach(module.settings.appOverrides.keys.sorted(), id: \.self) { bundleID in
-                HStack {
+                SettingsRow(symbol: "app.dashed", title: Text(appName(for: bundleID))) {
                     Toggle(isOn: Binding(
                         get: { module.settings.appOverrides[bundleID]?.disabled ?? false },
                         set: { on in module.update { $0.appOverrides[bundleID, default: AppOverride()].disabled = on } }
-                    )) {
-                        Text(appName(for: bundleID))
-                    }
+                    )) { EmptyView() }
+                        .labelsHidden().toggleStyle(.switch).controlSize(.small)
                     Button(role: .destructive) {
                         module.update { _ = $0.appOverrides.removeValue(forKey: bundleID) }
                     } label: {
@@ -127,12 +133,8 @@ struct MouseSettingsView: View {
             Button {
                 addApp()
             } label: {
-                Text("Add app…", bundle: .module)
+                Label { Text("Add app…", bundle: .module) } icon: { Image(systemName: "plus") }
             }
-        } header: {
-            Text("Exceptions", bundle: .module)
-        } footer: {
-            Text("Turn Sonary's mouse changes off while one of these apps is in front.", bundle: .module)
         }
     }
 
