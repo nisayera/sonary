@@ -75,6 +75,15 @@ private struct GeneralSettings: View {
             if let error = model.launchAtLogin.errorMessage {
                 Text(error).foregroundStyle(.red)
             }
+            Section("Updates") {
+                Toggle("Check for updates automatically", isOn: Binding(
+                    get: { model.updates.automaticallyChecks },
+                    set: { model.updates.setAutomaticallyChecks($0) }
+                ))
+                Button("Check for Updates…") { model.updates.checkForUpdates() }
+                    .disabled(!model.updates.canCheckForUpdates)
+                LabeledContent("Version", value: UpdateModel.versionString)
+            }
             Button("Show onboarding again") {
                 model.resetOnboarding()
                 openWindow(id: "onboarding")

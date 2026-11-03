@@ -4,7 +4,7 @@ import SonaryUI
 
 @main
 struct SonaryApp: App {
-    @State private var model = AppModel()
+    @State private var model = AppModel(startUpdater: !AppModel.isRunningTests)
 
     var body: some Scene {
         MenuBarExtra {

@@ -4,6 +4,9 @@ options:
   deploymentTarget:
     macOS: "26.0"
 packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.6.4
   SonaryCore:
     path: Packages/SonaryCore
   SonaryUI:
@@ -14,6 +17,8 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
+    MARKETING_VERSION: "0.2.0"
+    CURRENT_PROJECT_VERSION: 200
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -25,12 +30,23 @@ targets:
       - package: SonaryCore
       - package: SonaryUI
       - package: Monitor
+      - package: Sparkle
+        product: Sparkle
+    entitlements:
+      path: App/Sonary.entitlements
+      properties:
+        com.apple.security.cs.disable-library-validation: true
     info:
       path: App/Info.plist
       properties:
         CFBundleName: Sonary
         CFBundleDisplayName: Sonary
         LSUIElement: true
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        SUFeedURL: https://github.com/nisayera/sonary/releases/latest/download/appcast.xml
+        SUPublicEDKey: nOzXdHJRORv/XYR8k+04/MHvpxSBO13KaP7gO4UHLVw=
+        SUEnableAutomaticChecks: true
         NSHumanReadableCopyright: "GPL-3.0-or-later"
     settings:
       base:

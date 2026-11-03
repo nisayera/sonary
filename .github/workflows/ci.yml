@@ -17,6 +17,13 @@ jobs:
           swift --version
           uname -m
 
+      - name: Test release tools
+        run: |
+          set -eo pipefail
+          python3 -m venv .venv
+          .venv/bin/pip install cryptography
+          .venv/bin/python scripts/test_release_tools.py
+
       - name: Test packages
         run: |
           set -eo pipefail

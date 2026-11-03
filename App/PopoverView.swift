@@ -29,6 +29,12 @@ struct PopoverView: View {
                 Label("Settings…", systemImage: "gearshape")
             }
             .keyboardShortcut(",")
+            Button {
+                model.updates.checkForUpdates()
+            } label: {
+                Label("Check for Updates…", systemImage: "arrow.down.circle")
+            }
+            .disabled(!model.updates.canCheckForUpdates)
             Button("Quit Sonary") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q")
         }

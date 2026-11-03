@@ -10,12 +10,12 @@ struct AppModelTests {
 
     @Test func monitorToggleEnablesAndPersists() async {
         let defaults = makeDefaults()
-        let first = AppModel(defaults: defaults)
+        let first = AppModel(defaults: defaults, startUpdater: false)
         await first.registry.setEnabled("monitor", true)
         #expect(first.registry.isEnabled("monitor"))
         #expect(first.registry.failures["monitor"] == nil)
 
-        let second = AppModel(defaults: defaults)
+        let second = AppModel(defaults: defaults, startUpdater: false)
         #expect(second.registry.isEnabled("monitor"))
 
         await first.registry.setEnabled("monitor", false)
@@ -24,9 +24,9 @@ struct AppModelTests {
 
     @Test func onboardingFlagPersists() {
         let defaults = makeDefaults()
-        let model = AppModel(defaults: defaults)
+        let model = AppModel(defaults: defaults, startUpdater: false)
         #expect(!model.onboardingCompleted)
         model.completeOnboarding()
-        #expect(AppModel(defaults: defaults).onboardingCompleted)
+        #expect(AppModel(defaults: defaults, startUpdater: false).onboardingCompleted)
     }
 }
