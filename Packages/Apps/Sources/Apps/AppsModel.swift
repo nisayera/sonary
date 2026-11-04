@@ -42,6 +42,10 @@ public final class AppsModel {
     public private(set) var isScanning = false
     public private(set) var ports: [ListeningPort] = []
     public private(set) var outdated: [OutdatedPackage] = []
+    public private(set) var appUpdates: [AppUpdate] = []
+    public private(set) var isCheckingApps = false
+    /// A mounted disk image that is offering exactly one app to install.
+    public private(set) var installer: MountedInstaller?
     public private(set) var brewAvailable = brewExecutable() != nil
     public private(set) var isBrewBusy = false
     public private(set) var uninstallPlan: UninstallPlan?
@@ -50,6 +54,8 @@ public final class AppsModel {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var scheduleTask: Task<Void, Never>?
+    @ObservationIgnored private var mountObserver: (any NSObjectProtocol)?
+    @ObservationIgnored private var unmountObserver: (any NSObjectProtocol)?
 
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -67,6 +73,7 @@ public final class AppsModel {
 
     func start() {
         guard scheduleTask == nil else { return }
+        observeMounts()
         scheduleTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.runScheduledWork()
@@ -78,11 +85,120 @@ public final class AppsModel {
     func stop() {
         scheduleTask?.cancel()
         scheduleTask = nil
+        let center = NSWorkspace.shared.notificationCenter
+        if let mountObserver { center.removeObserver(mountObserver) }
+        if let unmountObserver { center.removeObserver(unmountObserver) }
+        mountObserver = nil
+        unmountObserver = nil
+        installer = nil
+    }
+
+    // MARK: Disk images
+
+    /// Watches for a mounted disk image so the panel can offer to install the app in it.
+    private func observeMounts() {
+        guard mountObserver == nil else { return }
+        let center = NSWorkspace.shared.notificationCenter
+        mountObserver = center.addObserver(forName: NSWorkspace.didMountNotification,
+                                           object: nil, queue: .main) { [weak self] note in
+            let volume = note.userInfo?["NSDevicePath"] as? String
+            MainActor.assumeIsolated { self?.volumeMounted(volume) }
+        }
+        unmountObserver = center.addObserver(forName: NSWorkspace.didUnmountNotification,
+                                             object: nil, queue: .main) { [weak self] note in
+            let volume = note.userInfo?["NSDevicePath"] as? String
+            MainActor.assumeIsolated { self?.volumeUnmounted(volume) }
+        }
+    }
+
+    private func volumeMounted(_ path: String?) {
+        guard let path else { return }
+        let volume = URL(fileURLWithPath: path, isDirectory: true)
+        guard isInstallerVolume(volume) else { return }
+        let contents = (try? FileManager.default.contentsOfDirectory(
+            at: volume, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+        installer = installerApp(volume: volume, contents: contents)
+    }
+
+    private func volumeUnmounted(_ path: String?) {
+        guard let path, installer?.volume.path == path else { return }
+        installer = nil
+    }
+
+    public func dismissInstaller() { installer = nil }
+
+    /// Copies the app into /Applications, then ejects the image.
+    public func install(_ installer: MountedInstaller) async {
+        let destination = installDestination(for: installer)
+        let source = installer.app
+        let moved = await Task.detached { () -> Bool in
+            let manager = FileManager.default
+            if manager.fileExists(atPath: destination.path) {
+                guard (try? manager.trashItem(at: destination, resultingItemURL: nil)) != nil else { return false }
+            }
+            return (try? manager.copyItem(at: source, to: destination)) != nil
+        }.value
+        guard moved else {
+            message = String(localized: "\(installer.name) could not be copied to the Applications folder.",
+                             bundle: .module)
+            return
+        }
+        _ = try? NSWorkspace.shared.unmountAndEjectDevice(at: installer.volume)
+        self.installer = nil
+        message = String(localized: "\(installer.name) is in your Applications folder.", bundle: .module)
+        NSWorkspace.shared.activateFileViewerSelecting([destination])
     }
 
     public func update(_ change: (inout AppsSettings) -> Void) {
         change(&settings)
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "apps.settings") }
+    }
+
+    // MARK: App updates
+
+    /// Asks every app in /Applications that ships a Sparkle feed whether it is current.
+    public func checkAppUpdates() async {
+        guard !isCheckingApps else { return }
+        isCheckingApps = true
+        defer { isCheckingApps = false }
+        let apps = await Task.detached { Self.sparkleApps() }.value
+        var found: [AppUpdate] = []
+        await withTaskGroup(of: AppUpdate?.self) { group in
+            for app in apps {
+                group.addTask {
+                    var request = URLRequest(url: app.feed)
+                    request.timeoutInterval = 15
+                    guard let (data, _) = try? await URLSession.shared.data(for: request),
+                          let xml = String(data: data, encoding: .utf8) else { return nil }
+                    return appUpdate(for: app, latest: latestAppcastVersion(xml))
+                }
+            }
+            for await update in group { if let update { found.append(update) } }
+        }
+        appUpdates = found.sorted { $0.app.name.localizedStandardCompare($1.app.name) == .orderedAscending }
+    }
+
+    /// Opens the app, so its own updater takes it from here.
+    public func openApp(_ update: AppUpdate) {
+        NSWorkspace.shared.open(update.app.url)
+    }
+
+    nonisolated private static func sparkleApps() -> [InstalledApp] {
+        let folders = [URL(fileURLWithPath: "/Applications", isDirectory: true),
+                       FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications")]
+        var result: [InstalledApp] = []
+        for folder in folders {
+            let contents = (try? FileManager.default.contentsOfDirectory(
+                at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+            for bundle in contents where bundle.pathExtension == "app" {
+                let plistURL = bundle.appendingPathComponent("Contents/Info.plist")
+                guard let data = try? Data(contentsOf: plistURL),
+                      let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+                      let app = installedApp(at: bundle, plist: plist) else { continue }
+                result.append(app)
+            }
+        }
+        return result
     }
 
     /// The scheduled clean and the retention rules, checked once an hour.

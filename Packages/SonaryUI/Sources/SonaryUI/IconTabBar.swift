@@ -15,12 +15,16 @@ public struct IconTab<ID: Hashable>: Identifiable {
 /// A row of icon-only tabs in a rounded bar; the active one is tinted. VoiceOver reads each tab's title.
 public struct IconTabBar<ID: Hashable>: View {
     private let tabs: [IconTab<ID>]
+    private let minimumItemWidth: CGFloat?
     @Binding private var selection: ID
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    public init(tabs: [IconTab<ID>], selection: Binding<ID>) {
+    /// `minimumItemWidth` keeps every tab readable when there are many of them; the row is meant
+    /// to sit in a horizontal scroll view then, rather than squeezing the icons together.
+    public init(tabs: [IconTab<ID>], selection: Binding<ID>, minimumItemWidth: CGFloat? = nil) {
         self.tabs = tabs
+        self.minimumItemWidth = minimumItemWidth
         self._selection = selection
     }
 
@@ -33,7 +37,7 @@ public struct IconTabBar<ID: Hashable>: View {
                 } label: {
                     Image(systemName: tab.symbol)
                         .font(.system(size: 13.5, weight: .semibold))
-                        .frame(maxWidth: .infinity)
+                        .frame(minWidth: minimumItemWidth, maxWidth: minimumItemWidth == nil ? .infinity : nil)
                         .frame(height: 30)
                         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 }

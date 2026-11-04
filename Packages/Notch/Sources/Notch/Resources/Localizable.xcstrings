@@ -1,72 +1,32 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Notch": {
+    "%lld min": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Notch"
+            "value": "%lld Min."
           }
         }
       }
     },
-    "Sonary island": {
+    "All day": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonary-Insel"
+            "value": "Ganztägig"
           }
         }
       }
     },
-    "Turn on widgets in Sonary's settings.": {
+    "Allow access": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Schalte Widgets in den Einstellungen von Sonary ein."
-          }
-        }
-      }
-    },
-    "Music": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Musik"
-          }
-        }
-      }
-    },
-    "Calendar": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kalender"
-          }
-        }
-      }
-    },
-    "Timer": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timer"
-          }
-        }
-      }
-    },
-    "Downloads": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Downloads"
+            "value": "Zugriff erlauben"
           }
         }
       }
@@ -81,12 +41,186 @@
         }
       }
     },
-    "Previous track": {
+    "Calendar": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vorheriger Titel"
+            "value": "Kalender"
+          }
+        }
+      }
+    },
+    "Clear the shelf": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablage leeren"
+          }
+        }
+      }
+    },
+    "Display": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anzeige"
+          }
+        }
+      }
+    },
+    "Downloads": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads"
+          }
+        }
+      }
+    },
+    "Draws a small island at the top centre of the main display.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigt eine kleine Insel oben mittig auf dem Hauptdisplay."
+          }
+        }
+      }
+    },
+    "Drop files here to park them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lege Dateien hier ab, um sie zu parken."
+          }
+        }
+      }
+    },
+    "Mouse, keyboard, trackpad and headphones.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maus, Tastatur, Trackpad und Kopfhörer."
+          }
+        }
+      }
+    },
+    "Move the pointer onto the island to open it. Click it to keep it open, click anywhere else to close it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewege den Zeiger auf die Insel, um sie zu öffnen. Klicke sie an, damit sie offen bleibt, und klicke woanders hin, um sie zu schließen."
+          }
+        }
+      }
+    },
+    "Music": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musik"
+          }
+        }
+      }
+    },
+    "Music and Spotify, with play, pause and skip.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musik und Spotify, mit Abspielen, Pause und Überspringen."
+          }
+        }
+      }
+    },
+    "Next track": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächster Titel"
+          }
+        }
+      }
+    },
+    "No accessories report a battery": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Zubehör meldet einen Akkustand"
+          }
+        }
+      }
+    },
+    "No more events today": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute keine Termine mehr"
+          }
+        }
+      }
+    },
+    "No recent downloads": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine neuen Downloads"
+          }
+        }
+      }
+    },
+    "Notch": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notch"
+          }
+        }
+      }
+    },
+    "Nothing is playing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es läuft nichts"
+          }
+        }
+      }
+    },
+    "Open": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnen"
+          }
+        }
+      }
+    },
+    "Park files on the notch and drag them out again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dateien auf der Notch parken und wieder herausziehen."
           }
         }
       }
@@ -111,182 +245,12 @@
         }
       }
     },
-    "Next track": {
+    "Previous track": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nächster Titel"
-          }
-        }
-      }
-    },
-    "Nothing is playing": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Es läuft nichts"
-          }
-        }
-      }
-    },
-    "Sonary needs access to your calendars.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonary braucht Zugriff auf deine Kalender."
-          }
-        }
-      }
-    },
-    "Allow access": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zugriff erlauben"
-          }
-        }
-      }
-    },
-    "No more events today": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heute keine Termine mehr"
-          }
-        }
-      }
-    },
-    "All day": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ganztägig"
-          }
-        }
-      }
-    },
-    "Stop": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stopp"
-          }
-        }
-      }
-    },
-    "%lld min": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld Min."
-          }
-        }
-      }
-    },
-    "No recent downloads": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine neuen Downloads"
-          }
-        }
-      }
-    },
-    "No accessories report a battery": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kein Zubehör meldet einen Akkustand"
-          }
-        }
-      }
-    },
-    "Widgets": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Widgets"
-          }
-        }
-      }
-    },
-    "Display": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anzeige"
-          }
-        }
-      }
-    },
-    "Show on displays without a notch": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Auf Displays ohne Notch zeigen"
-          }
-        }
-      }
-    },
-    "Draws a small island at the top centre of the main display.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeigt eine kleine Insel oben mittig auf dem Hauptdisplay."
-          }
-        }
-      }
-    },
-    "Usage": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bedienung"
-          }
-        }
-      }
-    },
-    "Move the pointer onto the island to open it. Click it to keep it open, click anywhere else to close it.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bewege den Zeiger auf die Insel, um sie zu öffnen. Klicke sie an, damit sie offen bleibt, und klicke woanders hin, um sie zu schließen."
-          }
-        }
-      }
-    },
-    "Music and Spotify, with play, pause and skip.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Musik und Spotify, mit Abspielen, Pause und Überspringen."
-          }
-        }
-      }
-    },
-    "Today's remaining events. Asks for calendar access.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die restlichen Termine von heute. Fragt nach Kalenderzugriff."
+            "value": "Vorheriger Titel"
           }
         }
       }
@@ -301,22 +265,135 @@
         }
       }
     },
+    "Shelf": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablage"
+          }
+        }
+      }
+    },
+    "Show in Finder": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Finder zeigen"
+          }
+        }
+      }
+    },
+    "Show on displays without a notch": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf Displays ohne Notch zeigen"
+          }
+        }
+      }
+    },
+    "Sonary island": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary-Insel"
+          }
+        }
+      }
+    },
+    "Sonary needs access to your calendars.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary braucht Zugriff auf deine Kalender."
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopp"
+          }
+        }
+      }
+    },
+    "Take off the shelf": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von der Ablage nehmen"
+          }
+        }
+      }
+    },
+    "Timer": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer"
+          }
+        }
+      }
+    },
+    "Today's remaining events. Asks for calendar access.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die restlichen Termine von heute. Fragt nach Kalenderzugriff."
+          }
+        }
+      }
+    },
+    "Turn on widgets in Sonary's settings.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte Widgets in den Einstellungen von Sonary ein."
+          }
+        }
+      }
+    },
+    "Usage": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedienung"
+          }
+        }
+      }
+    },
+    "Widgets": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widgets"
+          }
+        }
+      }
+    },
     "Your newest downloads; click to open or drag them out.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Deine neuesten Downloads; klicken zum Öffnen oder herausziehen."
-          }
-        }
-      }
-    },
-    "Mouse, keyboard, trackpad and headphones.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maus, Tastatur, Trackpad und Kopfhörer."
           }
         }
       }

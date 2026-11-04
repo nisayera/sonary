@@ -1,4 +1,5 @@
 import Foundation
+import IOKit.pwr_mgt
 
 public struct AudioDevice: Equatable, Sendable, Identifiable {
     public var id: UInt32
@@ -55,4 +56,47 @@ public func isHeadphoneLike(_ name: String) -> Bool {
 /// How loud the speakers may be right after headphones were disconnected.
 public func volumeAfterUnplug(current: Double, limit: Double) -> Double {
     min(clampedVolume(current), clampedVolume(limit))
+}
+
+/// The media keys macOS sends as system-defined events: play/pause, next and previous.
+public enum MediaKey: Int, Sendable, CaseIterable {
+    case playPause = 16
+    case next = 17
+    case previous = 18
+
+    public init?(systemDefinedKeyCode code: Int) {
+        self.init(rawValue: code)
+    }
+}
+
+/// Whether Sonary should answer a media key itself instead of letting macOS wake a music app.
+/// It only steps in when a player is already running, so the keys keep working as usual otherwise.
+public func shouldHandleMediaKey(playersRunning: Bool, guardEnabled: Bool) -> Bool {
+    guardEnabled && playersRunning
+}
+
+/// What keeps the Mac awake: a countdown, an app that is running, or being plugged in.
+public enum KeepAwakeCondition: Codable, Equatable, Sendable {
+    case duration(KeepAwakeDuration)
+    case whileAppRuns(String)
+    case whilePowered
+}
+
+/// The power assertion to take. Preventing *system* sleep is the only one that
+/// also holds with the lid shut, so that mode asks for the stronger one.
+public func keepAwakeAssertionType(closedLid: Bool) -> String {
+    closedLid ? kIOPMAssertionTypePreventSystemSleep : kIOPMAssertionTypePreventUserIdleDisplaySleep
+}
+
+/// Whether a running keep-awake still has a reason to hold. A countdown is
+/// handled by its own timer, so it always says yes here.
+public func keepAwakeShouldContinue(
+    condition: KeepAwakeCondition, runningBundleIDs: [String], onPower: Bool
+) -> Bool {
+    switch condition {
+    case .duration: true
+    case .whileAppRuns(let bundleID):
+        runningBundleIDs.contains { $0.caseInsensitiveCompare(bundleID) == .orderedSame }
+    case .whilePowered: onPower
+    }
 }

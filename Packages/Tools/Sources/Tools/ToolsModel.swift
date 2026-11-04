@@ -12,6 +12,8 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var radialActions: [QuickAction] = QuickAction.allCases
     public var colorFormat: ColorFormat = .hex
     public var scratchpadTabs: [ScratchpadTab] = []
+    /// Use Sonary's own region selector, with a magnifier, instead of the system one.
+    public var ownCaptureSelector = false
     public var activeTab: UUID?
     public init() {}
 }
@@ -22,17 +24,37 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
 public final class ToolsModel {
     public private(set) var settings: ToolsSettings
     public private(set) var lastResult: String?
+    @ObservationIgnored private var resultTask: Task<Void, Never>?
 
     /// The command bar reports what it copied through this.
     var lastResultText: String? {
         get { lastResult }
-        set { lastResult = newValue }
+        set { report(newValue) }
+    }
+
+    /// Shows a short note under the tools and takes it away again, so it cannot linger
+    /// behind the next thing the panel shows.
+    func report(_ text: String?) {
+        lastResult = text
+        resultTask?.cancel()
+        guard text != nil else { return }
+        resultTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(6))
+            guard !Task.isCancelled else { return }
+            self?.lastResult = nil
+        }
     }
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private var hotKeys: [HotKey] = []
     @ObservationIgnored private var commandBar: CommandBarController?
     @ObservationIgnored private let radial = RadialMenuController()
     @ObservationIgnored private let cleaning = CleaningModeController()
+    @ObservationIgnored private let pinned = PinnedImageController()
+    @ObservationIgnored private let camera = CameraPreviewController()
+    @ObservationIgnored private let recorder = ScreenRecorder()
+    @ObservationIgnored private let selector = CaptureSelectorController()
+    public private(set) var isRecording = false
+    /// Commands other modules add to the command bar, for example the clipboard history.
+    @ObservationIgnored public var externalCommands: @MainActor () -> [ExternalCommand] = { [] }
     @ObservationIgnored private var running = false
 
     public init(defaults: UserDefaults) {
@@ -57,6 +79,10 @@ public final class ToolsModel {
         commandBar = nil
         radial.close()
         cleaning.stop()
+        pinned.closeAll()
+        camera.close()
+        if isRecording { Task { await stopRecording() } }
+        selector.close()
     }
 
     /// The notes, with the old single scratchpad carried over the first time.
@@ -113,9 +139,9 @@ public final class ToolsModel {
         do {
             try tab.text.write(to: url, atomically: true, encoding: .utf8)
             NSWorkspace.shared.activateFileViewerSelecting([url])
-            lastResult = String(localized: "Saved to \(url.lastPathComponent)", bundle: .module)
+            report(String(localized: "Saved to \(url.lastPathComponent)", bundle: .module))
         } catch {
-            lastResult = String(localized: "Could not save the note.", bundle: .module)
+            report(String(localized: "Could not save the note.", bundle: .module))
         }
     }
 
@@ -126,21 +152,42 @@ public final class ToolsModel {
         if before != settings.shortcuts { applyShortcuts() }
     }
 
+    private static let ctrlOpt = KeyModifier.control | KeyModifier.option
+
+    /// What the tools offer the central shortcut page, and what each one runs.
+    static var shortcutDefinitions: [ShortcutDefinition] { [
+        ShortcutDefinition(id: "tools.commandBar", title: String(localized: "Command bar", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 49, modifiers: KeyModifier.option)),
+        ShortcutDefinition(id: "tools.textFromScreen",
+                           title: String(localized: "Copy text from screen", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 17, modifiers: ToolsModel.ctrlOpt)),
+        ShortcutDefinition(id: "tools.colorPicker", title: String(localized: "Pick a color", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 35, modifiers: ToolsModel.ctrlOpt)),
+        ShortcutDefinition(id: "tools.screenshot", title: String(localized: "Screenshot to clipboard", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 1, modifiers: ToolsModel.ctrlOpt)),
+        ShortcutDefinition(id: "tools.radialMenu", title: String(localized: "Radial menu", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 15, modifiers: ToolsModel.ctrlOpt)),
+        ShortcutDefinition(id: "tools.screenRecording", title: String(localized: "Record the screen", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: .none),
+    ] }
+
     private func applyShortcuts() {
-        hotKeys.forEach { $0.unregister() }
-        hotKeys = []
+        let shortcuts = ShortcutStore.shared
+        shortcuts.describe(Self.shortcutDefinitions)
+        shortcuts.unbindAll(prefix: "tools.")
         guard running, settings.shortcuts else { return }
-        let ctrlOpt = 4096 | 2048
-        let bindings: [(Int, Int, () -> Void)] = [
-            (49, 2048, { [weak self] in self?.showCommandBar() }),          // ⌥Space
-            (17, ctrlOpt, { [weak self] in self?.recognizeText() }),          // ⌃⌥T
-            (35, ctrlOpt, { [weak self] in self?.pickColor() }),              // ⌃⌥P
-            (1, ctrlOpt, { [weak self] in self?.screenshotToClipboard() }),   // ⌃⌥S
-            (15, ctrlOpt, { [weak self] in self?.showRadialMenu() }),         // ⌃⌥R
-        ]
-        for (key, modifiers, action) in bindings {
-            if let hotKey = HotKey(keyCode: key, modifiers: modifiers, action: action) { hotKeys.append(hotKey) }
-        }
+        shortcuts.bind("tools.commandBar") { [weak self] in self?.showCommandBar() }
+        shortcuts.bind("tools.textFromScreen") { [weak self] in self?.recognizeText() }
+        shortcuts.bind("tools.colorPicker") { [weak self] in self?.pickColor() }
+        shortcuts.bind("tools.screenshot") { [weak self] in self?.screenshotToClipboard() }
+        shortcuts.bind("tools.radialMenu") { [weak self] in self?.showRadialMenu() }
+        shortcuts.bind("tools.screenRecording") { [weak self] in self?.toggleRecording() }
     }
 
     // MARK: Tools
@@ -159,15 +206,114 @@ public final class ToolsModel {
                 guard let self else { return }
                 let value = formatColor(red: red, green: green, blue: blue, format: self.settings.colorFormat)
                 self.copy(value)
-                self.lastResult = String(localized: "Copied \(value)", bundle: .module)
+                self.report(String(localized: "Copied \(value)", bundle: .module))
+            }
+        }
+    }
+
+    /// Takes a screenshot and keeps it floating on top until it is closed.
+    public func pinScreenshot() {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("sonary-pin-\(UUID().uuidString).png")
+        Task {
+            guard let arguments = await captureArguments(["-x", file.path]),
+                  await capture(arguments: arguments), let image = NSImage(contentsOf: file) else { return }
+            try? FileManager.default.removeItem(at: file)
+            pinned.pin(image)
+        }
+    }
+
+    public func toggleCamera() { camera.toggle() }
+
+    // MARK: Screen recording
+
+    public func toggleRecording() {
+        Task { isRecording ? await stopRecording() : await startRecording() }
+    }
+
+    private func startRecording() async {
+        guard let folder = FileManager.default.urls(for: .moviesDirectory, in: .userDomainMask).first else { return }
+        let url = folder.appendingPathComponent(recordingFileName(now: Date()))
+        do {
+            try await recorder.start(to: url)
+            isRecording = true
+            report(String(localized: "Recording the screen.", bundle: .module))
+        } catch {
+            report(String(localized: "Allow Sonary to record the screen in System Settings > Privacy & Security.",
+                          bundle: .module))
+        }
+    }
+
+    private func stopRecording() async {
+        let url = await recorder.stop()
+        isRecording = false
+        guard let url else {
+            report(String(localized: "Nothing was recorded.", bundle: .module))
+            return
+        }
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+        report(String(localized: "Saved to \(url.lastPathComponent)", bundle: .module))
+    }
+
+    // MARK: Media tools
+
+    /// Converts the images the user picked, scaling and watermarking them as asked.
+    public func convertImages(_ urls: [URL], to format: ImageFormat, longestEdge: Int, watermark: String) {
+        guard !urls.isEmpty else { return }
+        Task {
+            let written = await Task.detached { () -> Int in
+                var done = 0
+                for url in urls {
+                    if (try? convertImage(at: url, to: format, longestEdge: longestEdge, watermark: watermark)) != nil {
+                        done += 1
+                    }
+                }
+                return done
+            }.value
+            if written == 0 {
+                report(String(localized: "No image could be converted.", bundle: .module))
+            } else {
+                report(String(localized: "Converted \(written) images.", bundle: .module))
+            }
+        }
+    }
+
+    /// Turns the videos the user picked into animated GIFs.
+    public func makeGIFs(_ urls: [URL]) {
+        guard !urls.isEmpty else { return }
+        Task {
+            var written = 0
+            for url in urls {
+                if (try? await makeGIF(from: url)) != nil { written += 1 }
+            }
+            if written == 0 {
+                report(String(localized: "No GIF could be made.", bundle: .module))
+            } else {
+                report(String(localized: "Made \(written) GIFs.", bundle: .module))
+            }
+        }
+    }
+
+    /// Re-encodes a video smaller, next to the original.
+    public func compressVideos(_ urls: [URL]) {
+        guard !urls.isEmpty else { return }
+        Task {
+            var written = 0
+            for url in urls {
+                if (try? await compressVideo(at: url)) != nil { written += 1 }
+            }
+            if written == 0 {
+                report(String(localized: "No video could be compressed.", bundle: .module))
+            } else {
+                report(String(localized: "Compressed \(written) videos.", bundle: .module))
             }
         }
     }
 
     public func screenshotToClipboard() {
         Task {
-            _ = await capture(arguments: ["-i", "-c"])
-            lastResult = String(localized: "Screenshot copied to the clipboard.", bundle: .module)
+            guard let arguments = await captureArguments(["-c"]) else { return }
+            _ = await capture(arguments: arguments)
+            report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
         }
     }
 
@@ -175,7 +321,8 @@ public final class ToolsModel {
     public func recognizeText() {
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("sonary-ocr-\(UUID().uuidString).png")
         Task {
-            guard await capture(arguments: ["-i", "-x", file.path]) else { return }
+            guard let arguments = await captureArguments(["-x", file.path]),
+                  await capture(arguments: arguments) else { return }
             defer { try? FileManager.default.removeItem(at: file) }
             let text = await Task.detached { () -> String in
                 guard let image = NSImage(contentsOf: file)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return "" }
@@ -193,12 +340,30 @@ public final class ToolsModel {
                 return joinRecognizedLines(lines)
             }.value
             if text.isEmpty {
-                lastResult = String(localized: "No text found.", bundle: .module)
+                report(String(localized: "No text found.", bundle: .module))
             } else {
                 copy(text)
-                lastResult = String(localized: "Text copied to the clipboard.", bundle: .module)
+                report(String(localized: "Text copied to the clipboard.", bundle: .module))
             }
         }
+    }
+
+    /// Picks a region with whichever selector the user prefers, then runs the system
+    /// screenshot tool on it. Nil when nothing was picked.
+    private func region() async -> CGRect? {
+        guard settings.ownCaptureSelector else { return nil }
+        return await withCheckedContinuation { continuation in
+            selector.show { continuation.resume(returning: $0) }
+        }
+    }
+
+    /// The arguments that capture what the user picked: our own region, or the system
+    /// selector when that is what they want.
+    private func captureArguments(_ tail: [String]) async -> [String]? {
+        guard settings.ownCaptureSelector else { return ["-i"] + tail }
+        guard let rect = await region() else { return nil }
+        let value = "\(Int(rect.minX)),\(Int(rect.minY)),\(Int(rect.width)),\(Int(rect.height))"
+        return ["-R", value] + tail
     }
 
     /// Runs the system screenshot tool; false when it failed or was cancelled.
@@ -219,7 +384,7 @@ public final class ToolsModel {
     public func insert(_ snippet: Snippet) {
         let clipboard = NSPasteboard.general.string(forType: .string)
         copy(expandSnippet(snippet.text, now: Date(), clipboard: clipboard))
-        lastResult = String(localized: "Snippet copied. Press ⌘V to paste it.", bundle: .module)
+        report(String(localized: "Snippet copied. Press ⌘V to paste it.", bundle: .module))
     }
 
     public func addSnippet() {
@@ -238,6 +403,9 @@ public final class ToolsModel {
         case .ejectDisks: SystemActions.ejectDisks()
         case .lockScreen: SystemActions.lockScreen()
         case .cleaningMode: cleaning.start()
+        case .pinScreenshot: pinScreenshot()
+        case .cameraPreview: camera.toggle()
+        case .screenRecording: toggleRecording()
         case .commandBar: showCommandBar()
         case .textFromScreen: recognizeText()
         case .colorPicker: pickColor()

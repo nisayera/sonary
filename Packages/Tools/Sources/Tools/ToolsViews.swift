@@ -1,5 +1,7 @@
+import AppKit
 import SonaryUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 private enum ToolsSection: String, CaseIterable, Identifiable {
     case tools, toggles, scratchpad, snippets
@@ -17,6 +19,8 @@ private enum ToolsSection: String, CaseIterable, Identifiable {
 struct ToolsPopoverView: View {
     let model: ToolsModel
     @State private var section: ToolsSection = .tools
+    @State private var previewingMarkdown = false
+    @State private var convertingImages = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
@@ -44,7 +48,15 @@ struct ToolsPopoverView: View {
             tool("eyedropper", "Pick a color", "⌃⌥P") { model.pickColor() }
             tool("camera.viewfinder", "Screenshot to clipboard", "⌃⌥S") { model.screenshotToClipboard() }
             tool("circle.grid.cross", "Radial menu", "⌃⌥R") { model.showRadialMenu() }
+            tool("pin", "Pin a screenshot", "") { model.pinScreenshot() }
+            tool("web.camera", "Camera mirror", "") { model.toggleCamera() }
+            tool(model.isRecording ? "stop.circle" : "record.circle",
+                 model.isRecording ? "Stop recording" : "Record the screen", "") { model.toggleRecording() }
+            tool("photo.on.rectangle.angled", "Convert images…", "") { convertingImages = true }
+            tool("film", "Make a video smaller…", "") { pickVideos(gif: false) }
+            tool("photo.stack", "Turn a video into a GIF…", "") { pickVideos(gif: true) }
         }
+        .sheet(isPresented: $convertingImages) { ImageConversionSheet(model: model) }
     }
 
     private var togglesView: some View {
@@ -83,13 +95,28 @@ struct ToolsPopoverView: View {
                 }
             }
             .scrollIndicators(.hidden)
-            TextEditor(text: Binding(get: { current.text }, set: { model.setText($0, for: current.id) }))
-                .font(.body)
-                .frame(height: 260)
-                .scrollContentBackground(.hidden)
-                .padding(6)
-                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            Group {
+                if previewingMarkdown {
+                    ScrollView {
+                        Text(markdown: current.text)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(8)
+                    }
+                } else {
+                    TextEditor(text: Binding(get: { current.text }, set: { model.setText($0, for: current.id) }))
+                        .font(.body)
+                        .scrollContentBackground(.hidden)
+                        .padding(6)
+                }
+            }
+            .frame(height: 260)
+            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             HStack {
+                Toggle(isOn: $previewingMarkdown) {
+                    Label { Text("Preview", bundle: .module) } icon: { Image(systemName: "doc.richtext") }
+                }
+                .toggleStyle(.button)
                 Button { model.exportTab(current) } label: {
                     Label { Text("Save as Markdown", bundle: .module) } icon: { Image(systemName: "square.and.arrow.down") }
                 }
@@ -100,6 +127,15 @@ struct ToolsPopoverView: View {
             }
             .buttonStyle(.borderless)
         }
+    }
+
+    private func pickVideos(gif: Bool) {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.allowedContentTypes = [.movie, .mpeg4Movie, .quickTimeMovie]
+        guard panel.runModal() == .OK else { return }
+        if gif { model.makeGIFs(panel.urls) } else { model.compressVideos(panel.urls) }
     }
 
     private func tool(_ symbol: String, _ title: LocalizedStringKey, _ shortcut: String, action: @escaping () -> Void) -> some View {
@@ -135,6 +171,14 @@ struct ToolsSettingsView: View {
             SettingsToggleRow(symbol: "keyboard", title: Text("Keyboard shortcuts", bundle: .module),
                               caption: Text("⌥Space command bar, ⌃⌥T text from screen, ⌃⌥P color picker, ⌃⌥S screenshot.", bundle: .module),
                               isOn: Binding(get: { model.settings.shortcuts }, set: { value in model.update { $0.shortcuts = value } }))
+        }
+        SettingsCard(Text("Capture", bundle: .module)) {
+            SettingsToggleRow(symbol: "viewfinder.rectangular",
+                              title: Text("Pick regions with Sonary's own selector", bundle: .module),
+                              caption: Text("Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.ownCaptureSelector },
+                                            set: { value in model.update { $0.ownCaptureSelector = value } }))
         }
         SettingsCard(Text("Colour picker", bundle: .module)) {
             SettingsRow(symbol: "eyedropper", title: Text("Copy colours as", bundle: .module)) {
@@ -209,4 +253,67 @@ struct ToolsSettingsView: View {
 /// Shows each format with the same example colour, so the choice explains itself.
 func colorFormatExample(_ format: ColorFormat) -> String {
     formatColor(red: 1, green: 0.42, blue: 0.45, format: format)
+}
+
+extension Text {
+    /// Renders Markdown, falling back to the plain text when it cannot be parsed.
+    init(markdown: String) {
+        if let attributed = try? AttributedString(
+            markdown: markdown,
+            options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
+            self.init(attributed)
+        } else {
+            self.init(verbatim: markdown)
+        }
+    }
+}
+
+/// Picks the files, the format, a size limit and a watermark for a batch conversion.
+struct ImageConversionSheet: View {
+    let model: ToolsModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var format: ImageFormat = .jpeg
+    @State private var longestEdge = 0
+    @State private var watermark = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.m) {
+            Text("Image conversion", bundle: .module).font(.headline)
+            Picker(selection: $format) {
+                ForEach(ImageFormat.allCases) { Text(verbatim: $0.rawValue.uppercased()).tag($0) }
+            } label: { Text("Format", bundle: .module) }
+            HStack {
+                Text("Longest edge", bundle: .module)
+                Spacer()
+                TextField(value: $longestEdge, format: .number) { EmptyView() }
+                    .labelsHidden().frame(width: 80)
+                Text("px, 0 keeps the size", bundle: .module).font(.caption).foregroundStyle(.secondary)
+            }
+            HStack {
+                Text("Watermark", bundle: .module)
+                Spacer()
+                TextField(text: $watermark) { EmptyView() }.labelsHidden().frame(width: 180)
+            }
+            Text("The converted copies land next to the originals.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            HStack {
+                Spacer()
+                Button { dismiss() } label: { Text("Cancel", bundle: .module) }
+                Button { pick() } label: { Text("Choose images…", bundle: .module) }
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(Spacing.l)
+        .frame(width: 420)
+    }
+
+    private func pick() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.allowedContentTypes = [.image]
+        guard panel.runModal() == .OK else { return }
+        model.convertImages(panel.urls, to: format, longestEdge: max(0, longestEdge), watermark: watermark)
+        dismiss()
+    }
 }

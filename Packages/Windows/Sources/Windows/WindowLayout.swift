@@ -1,10 +1,11 @@
 import CoreGraphics
+import Foundation
 
 public enum LayoutAction: String, CaseIterable, Codable, Sendable {
     case leftHalf, rightHalf, topHalf, bottomHalf
     case topLeft, topRight, bottomLeft, bottomRight
     case leftThird, centerThird, rightThird
-    case maximize, center
+    case maximize, center, fillScreen
 
     /// Arrow and letter keys with ⌃⌥ (Carbon key codes).
     public var keyCode: Int {
@@ -22,6 +23,7 @@ public enum LayoutAction: String, CaseIterable, Codable, Sendable {
         case .rightThird: 5    // G
         case .maximize: 36     // Return
         case .center: 8        // C
+        case .fillScreen: 11     // B, for the whole screen including the menu bar
         }
     }
 
@@ -40,6 +42,7 @@ public enum LayoutAction: String, CaseIterable, Codable, Sendable {
         case .rightThird: "G"
         case .maximize: "↩"
         case .center: "C"
+        case .fillScreen: "B"
         }
         return "⌃⌥" + key
     }
@@ -48,6 +51,12 @@ public enum LayoutAction: String, CaseIterable, Codable, Sendable {
 /// Target frame in Cocoa coordinates (origin bottom-left) inside a screen's visible frame.
 /// `current` is only used for `.center`, which keeps the window's size.
 public func layoutFrame(_ action: LayoutAction, visible v: CGRect, current: CGRect) -> CGRect {
+    layoutFrame(action, visible: v, full: v, current: current)
+}
+
+/// The same, but told the screen's whole frame as well, which `.fillScreen` needs:
+/// it covers the menu bar strip too, without macOS making a new Space for it.
+public func layoutFrame(_ action: LayoutAction, visible v: CGRect, full: CGRect, current: CGRect) -> CGRect {
     let w = v.width, h = v.height
     let frame: CGRect = switch action {
     case .leftHalf: CGRect(x: v.minX, y: v.minY, width: w / 2, height: h)
@@ -62,6 +71,7 @@ public func layoutFrame(_ action: LayoutAction, visible v: CGRect, current: CGRe
     case .centerThird: CGRect(x: v.minX + w / 3, y: v.minY, width: w / 3, height: h)
     case .rightThird: CGRect(x: v.minX + 2 * w / 3, y: v.minY, width: w / 3, height: h)
     case .maximize: v
+    case .fillScreen: full
     case .center:
         CGRect(x: v.midX - min(current.width, w) / 2, y: v.midY - min(current.height, h) / 2,
                width: min(current.width, w), height: min(current.height, h))
@@ -142,4 +152,25 @@ public func appsWithNoWindowsLeft(previous: [Int32: Int], current: [Int32: Int])
         return pid
     }
     .sorted()
+}
+
+/// The layout's name as plain text, for places that cannot take a LocalizedStringKey,
+/// such as the central shortcut page.
+func layoutName(_ action: LayoutAction) -> String {
+    switch action {
+    case .leftHalf: String(localized: "Left half", bundle: .module)
+    case .rightHalf: String(localized: "Right half", bundle: .module)
+    case .topHalf: String(localized: "Top half", bundle: .module)
+    case .bottomHalf: String(localized: "Bottom half", bundle: .module)
+    case .topLeft: String(localized: "Top left quarter", bundle: .module)
+    case .topRight: String(localized: "Top right quarter", bundle: .module)
+    case .bottomLeft: String(localized: "Bottom left quarter", bundle: .module)
+    case .bottomRight: String(localized: "Bottom right quarter", bundle: .module)
+    case .leftThird: String(localized: "Left third", bundle: .module)
+    case .centerThird: String(localized: "Center third", bundle: .module)
+    case .rightThird: String(localized: "Right third", bundle: .module)
+    case .maximize: String(localized: "Maximize", bundle: .module)
+    case .center: String(localized: "Center", bundle: .module)
+    case .fillScreen: String(localized: "Fill the screen", bundle: .module)
+    }
 }

@@ -35,8 +35,8 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
-    MARKETING_VERSION: "0.12.0"
-    CURRENT_PROJECT_VERSION: 1200
+    MARKETING_VERSION: "0.16.0"
+    CURRENT_PROJECT_VERSION: 1600
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -78,6 +78,7 @@ targets:
         NSAppleEventsUsageDescription: "Sonary controls Music and Spotify from the notch and runs the Finder helpers you click."
         NSCalendarsFullAccessUsageDescription: "Sonary shows today's events in the notch when you turn on the calendar widget."
         NSDownloadsFolderUsageDescription: "Sonary shows your newest downloads in the notch."
+        NSCameraUsageDescription: "Sonary shows a small camera preview when you turn it on from the tools tab."
         NSHumanReadableCopyright: "GPL-3.0-or-later"
     settings:
       base:

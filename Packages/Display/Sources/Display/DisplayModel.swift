@@ -7,6 +7,8 @@ public struct DisplaySettings: Codable, Equatable, Sendable {
     public var shortcuts = true
     /// Remembered software brightness per display, so an overlay survives a restart.
     public var softwareBrightness: [String: Double] = [:]
+    /// Switch Bluetooth off when the Mac sleeps and back on when it wakes.
+    public var bluetoothOffDuringSleep = false
 
     public init() {}
 }
@@ -21,8 +23,11 @@ public final class DisplayModel {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var overlays: [CGDirectDisplayID: NSWindow] = [:]
-    @ObservationIgnored private var hotKeys: [HotKey] = []
     @ObservationIgnored private var screenObserver: (any NSObjectProtocol)?
+    @ObservationIgnored private var sleepObserver: (any NSObjectProtocol)?
+    @ObservationIgnored private var wakeObserver: (any NSObjectProtocol)?
+    /// Sonary only switches Bluetooth back on when it was the one that switched it off.
+    @ObservationIgnored private var turnedOffBluetooth = false
     @ObservationIgnored private var running = false
 
     public init(defaults: UserDefaults) {
@@ -46,13 +51,48 @@ public final class DisplayModel {
             }
         }
         applyShortcuts()
+        observeSleep()
     }
+
+    /// Bluetooth is switched off on sleep and restored on wake, and only then.
+    private func observeSleep() {
+        guard sleepObserver == nil else { return }
+        let center = NSWorkspace.shared.notificationCenter
+        sleepObserver = center.addObserver(forName: NSWorkspace.willSleepNotification,
+                                           object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.bluetoothForSleep() }
+        }
+        wakeObserver = center.addObserver(forName: NSWorkspace.didWakeNotification,
+                                          object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.bluetoothForWake() }
+        }
+    }
+
+    private func bluetoothForSleep() {
+        guard settings.bluetoothOffDuringSleep, BluetoothPower.isOn == true else { return }
+        turnedOffBluetooth = BluetoothPower.set(on: false)
+    }
+
+    private func bluetoothForWake() {
+        guard shouldRestoreBluetooth(turnedOffBySonary: turnedOffBluetooth,
+                                     settingEnabled: settings.bluetoothOffDuringSleep) else { return }
+        BluetoothPower.set(on: true)
+        turnedOffBluetooth = false
+    }
+
+    /// Whether this Mac lets Sonary switch Bluetooth at all.
+    public var canSwitchBluetooth: Bool { BluetoothPower.isAvailable }
 
     func stop() {
         running = false
         applyShortcuts()
         if let screenObserver { NotificationCenter.default.removeObserver(screenObserver) }
         screenObserver = nil
+        let workspace = NSWorkspace.shared.notificationCenter
+        if let sleepObserver { workspace.removeObserver(sleepObserver) }
+        if let wakeObserver { workspace.removeObserver(wakeObserver) }
+        sleepObserver = nil
+        wakeObserver = nil
         for window in overlays.values { window.orderOut(nil) }
         overlays.removeAll()
     }
@@ -110,17 +150,25 @@ public final class DisplayModel {
         displays[index].brightness = brightness
     }
 
+    // ⌃⌥⇧↑ and ⌃⌥⇧↓; the plain ⌃⌥ arrows already move windows.
+    private static let brightnessModifiers = KeyModifier.control | KeyModifier.option | KeyModifier.shift
+
+    static var shortcutDefinitions: [ShortcutDefinition] { [
+        ShortcutDefinition(id: "display.brighter", title: String(localized: "Brighter", bundle: .module),
+                           group: String(localized: "Display", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 126, modifiers: DisplayModel.brightnessModifiers)),
+        ShortcutDefinition(id: "display.darker", title: String(localized: "Darker", bundle: .module),
+                           group: String(localized: "Display", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 125, modifiers: DisplayModel.brightnessModifiers)),
+    ] }
+
     private func applyShortcuts() {
-        hotKeys.forEach { $0.unregister() }
-        hotKeys = []
+        let shortcuts = ShortcutStore.shared
+        shortcuts.describe(Self.shortcutDefinitions)
+        shortcuts.unbindAll(prefix: "display.")
         guard running, settings.shortcuts else { return }
-        // ⌃⌥⇧↑ and ⌃⌥⇧↓; the plain ⌃⌥ arrows already move windows.
-        let modifiers = 4096 | 2048 | 512
-        for (code, up) in [(126, true), (125, false)] {
-            if let key = HotKey(keyCode: code, modifiers: modifiers, action: { [weak self] in self?.step(up: up) }) {
-                hotKeys.append(key)
-            }
-        }
+        shortcuts.bind("display.brighter") { [weak self] in self?.step(up: true) }
+        shortcuts.bind("display.darker") { [weak self] in self?.step(up: false) }
     }
 
     /// A black window over the display, as dark as the wanted brightness; clicks go straight through it.

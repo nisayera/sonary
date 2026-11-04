@@ -1,112 +1,33 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "General": {
+    "About": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allgemein"
+            "value": "Über"
           }
         }
       }
     },
-    "Modules": {
+    "Accessibility": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Module"
+            "value": "Bedienungshilfen"
           }
         }
       }
     },
-    "Settings…": {
+    "Add ⌃, ⌥, ⇧ or ⌘ — a plain key would be caught everywhere.": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Einstellungen …"
-          }
-        }
-      }
-    },
-    "Quit Sonary": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonary beenden"
-          }
-        }
-      }
-    },
-    "No modules active": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine Module aktiv"
-          }
-        }
-      }
-    },
-    "Turn modules on in Settings.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schalte Module in den Einstellungen ein."
-          }
-        }
-      }
-    },
-    "Open at login": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beim Anmelden öffnen"
-          }
-        }
-      }
-    },
-    "Show onboarding again": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einführung erneut zeigen"
-          }
-        }
-      }
-    },
-    "Welcome to Sonary": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Willkommen bei Sonary"
-          }
-        }
-      }
-    },
-    "Sonary lives in your menu bar. Every feature is a module you can turn on or off.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonary lebt in deiner Menüleiste. Jede Funktion ist ein Modul, das du ein- oder ausschalten kannst."
-          }
-        }
-      }
-    },
-    "No permissions are needed right now. Modules ask for access only when you turn them on.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktuell sind keine Berechtigungen nötig. Module fragen erst nach Zugriff, wenn du sie einschaltest."
+            "value": "Füge ⌃, ⌥, ⇧ oder ⌘ hinzu – eine einzelne Taste würde überall abgefangen."
           }
         }
       }
@@ -121,22 +42,84 @@
         }
       }
     },
-    "Granted": {
+    "Already used by %@.": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erteilt"
+            "value": "Wird schon von %@ benutzt."
           }
         }
       }
     },
-    "Done": {
+    "An island at the notch with music, calendar, timer, downloads and accessory batteries.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fertig"
+            "value": "Eine Insel am Notch mit Musik, Kalender, Timer, Downloads und Zubehör-Akkus."
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erscheinungsbild"
+          }
+        }
+      }
+    },
+    "Asked for when you turn the module on.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird angefragt, wenn du das Modul einschaltest."
+          }
+        }
+      }
+    },
+    "Back to the shortcut Sonary ships with": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurück zum Kürzel, das Sonary mitbringt"
+          }
+        }
+      }
+    },
+    "Brightness for every display, with shortcuts and dimming for displays without hardware control.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helligkeit für jedes Display, mit Kurzbefehlen und Abdunkeln für Displays ohne Hardware-Steuerung."
+          }
+        }
+      }
+    },
+    "CPU, GPU, memory, network, disk, battery and temperatures, with history and alerts.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU, GPU, Arbeitsspeicher, Netzwerk, Festplatte, Akku und Temperaturen, mit Verlauf und Warnungen."
+          }
+        }
+      }
+    },
+    "Calendars": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalender"
           }
         }
       }
@@ -161,6 +144,450 @@
         }
       }
     },
+    "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufräumen, Deinstallieren, Beenden und Sofort-Beenden, Port-Manager und Homebrew-Updates."
+          }
+        }
+      }
+    },
+    "Click a shortcut to record a new one. Press ⌫ to switch it off, ⎋ to keep it as it is.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klicke auf ein Kürzel, um ein neues aufzunehmen. ⌫ schaltet es aus, ⎋ behält es."
+          }
+        }
+      }
+    },
+    "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwischenablage-Verlauf, saubere Links, Einsetzen als reiner Text, eine Datei-Ablage und Finder-Helfer."
+          }
+        }
+      }
+    },
+    "Command bar, text from screen, color picker, screenshots, scratchpad and snippets.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Befehlsleiste, Text vom Bildschirm, Farbaufnahme, Bildschirmfotos, Notizblock und Textbausteine."
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        }
+      }
+    },
+    "Explains Sonary and the permissions of your modules.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erklärt Sonary und die Berechtigungen deiner Module."
+          }
+        }
+      }
+    },
+    "Frosted": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchglas"
+          }
+        }
+      }
+    },
+    "Full Disk Access": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Festplattenvollzugriff"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allgemein"
+          }
+        }
+      }
+    },
+    "Glass": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glas"
+          }
+        }
+      }
+    },
+    "Granted": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erteilt"
+          }
+        }
+      }
+    },
+    "How Sonary starts and behaves.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie Sonary startet und sich verhält."
+          }
+        }
+      }
+    },
+    "How much of the desktop shows through.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie viel vom Schreibtisch durchscheint."
+          }
+        }
+      }
+    },
+    "Input Monitoring": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eingabeüberwachung"
+          }
+        }
+      }
+    },
+    "Introduction": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einführung"
+          }
+        }
+      }
+    },
+    "License": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lizenz"
+          }
+        }
+      }
+    },
+    "Linear or smooth scrolling, pointer acceleration, extra buttons, click filter and app exceptions.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lineares oder weiches Scrollen, Zeigerbeschleunigung, Zusatztasten, Klick-Filter und Ausnahmen pro App."
+          }
+        }
+      }
+    },
+    "Modules": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module"
+          }
+        }
+      }
+    },
+    "No modules active": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Module aktiv"
+          }
+        }
+      }
+    },
+    "No permissions are needed right now. Modules ask for access only when you turn them on.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuell sind keine Berechtigungen nötig. Module fragen erst nach Zugriff, wenn du sie einschaltest."
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitteilungen"
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
+          }
+        }
+      }
+    },
+    "On": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An"
+          }
+        }
+      }
+    },
+    "Open": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnen"
+          }
+        }
+      }
+    },
+    "Open at login": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beim Anmelden öffnen"
+          }
+        }
+      }
+    },
+    "Overview": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Übersicht"
+          }
+        }
+      }
+    },
+    "Panels and the island": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panels und die Insel"
+          }
+        }
+      }
+    },
+    "Permissions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berechtigungen"
+          }
+        }
+      }
+    },
+    "Press keys…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasten drücken …"
+          }
+        }
+      }
+    },
+    "Quit Sonary": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary beenden"
+          }
+        }
+      }
+    },
+    "Screen Recording": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmaufnahme"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen …"
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastaturkürzel"
+          }
+        }
+      }
+    },
+    "Show onboarding again": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einführung erneut zeigen"
+          }
+        }
+      }
+    },
+    "Solid": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deckend"
+          }
+        }
+      }
+    },
+    "Sonary lives in your menu bar. Every feature is a module you can turn on or off.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary lebt in deiner Menüleiste. Jede Funktion ist ein Modul, das du ein- oder ausschalten kannst."
+          }
+        }
+      }
+    },
+    "Sonary updates itself from its GitHub releases.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary aktualisiert sich selbst über seine GitHub-Releases."
+          }
+        }
+      }
+    },
+    "Source code": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quellcode"
+          }
+        }
+      }
+    },
+    "Startup": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        }
+      }
+    },
+    "Super Key: one key becomes ⌃⌥⇧⌘ while held and runs an action when tapped.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super-Taste: Eine Taste wird gehalten zu ⌃⌥⇧⌘ und löst beim Antippen eine Aktion aus."
+          }
+        }
+      }
+    },
+    "Switch speakers and microphones, volume, microphone mute on ⌃⌥M and keep awake.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lautsprecher und Mikrofone wechseln, Lautstärke, Mikrofon stumm per ⌃⌥M und Wachhalten."
+          }
+        }
+      }
+    },
+    "Turn a module on to see the shortcuts it offers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte ein Modul ein, um seine Kürzel zu sehen."
+          }
+        }
+      }
+    },
+    "Turn modules on in Settings.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte Module in den Einstellungen ein."
+          }
+        }
+      }
+    },
+    "Turn on a module to see it here as its own tab.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte ein Modul ein, um es hier als eigenen Tab zu sehen."
+          }
+        }
+      }
+    },
     "Updates": {
       "localizations": {
         "de": {
@@ -181,162 +608,12 @@
         }
       }
     },
-    "Overview": {
+    "Welcome to Sonary": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Übersicht"
-          }
-        }
-      }
-    },
-    "Turn on a module to see it here as its own tab.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schalte ein Modul ein, um es hier als eigenen Tab zu sehen."
-          }
-        }
-      }
-    },
-    "About": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Über"
-          }
-        }
-      }
-    },
-    "On": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "An"
-          }
-        }
-      }
-    },
-    "Off": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aus"
-          }
-        }
-      }
-    },
-    "Permissions": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Berechtigungen"
-          }
-        }
-      }
-    },
-    "Asked for when you turn the module on.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wird angefragt, wenn du das Modul einschaltest."
-          }
-        }
-      }
-    },
-    "Accessibility": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bedienungshilfen"
-          }
-        }
-      }
-    },
-    "Input Monitoring": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eingabeüberwachung"
-          }
-        }
-      }
-    },
-    "Screen Recording": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bildschirmaufnahme"
-          }
-        }
-      }
-    },
-    "Full Disk Access": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Festplattenvollzugriff"
-          }
-        }
-      }
-    },
-    "Notifications": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mitteilungen"
-          }
-        }
-      }
-    },
-    "Calendars": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kalender"
-          }
-        }
-      }
-    },
-    "How Sonary starts and behaves.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wie Sonary startet und sich verhält."
-          }
-        }
-      }
-    },
-    "Startup": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start"
-          }
-        }
-      }
-    },
-    "Introduction": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einführung"
+            "value": "Willkommen bei Sonary"
           }
         }
       }
@@ -351,116 +628,6 @@
         }
       }
     },
-    "Explains Sonary and the permissions of your modules.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erklärt Sonary und die Berechtigungen deiner Module."
-          }
-        }
-      }
-    },
-    "Sonary updates itself from its GitHub releases.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonary aktualisiert sich selbst über seine GitHub-Releases."
-          }
-        }
-      }
-    },
-    "Your Mac's menu bar toolbox. Open source, modular, native for macOS 26.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Werkzeugkasten für deine Mac-Menüleiste. Quelloffen, modular, nativ für macOS 26."
-          }
-        }
-      }
-    },
-    "Source code": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quellcode"
-          }
-        }
-      }
-    },
-    "Open": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Öffnen"
-          }
-        }
-      }
-    },
-    "License": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lizenz"
-          }
-        }
-      }
-    },
-    "CPU, GPU, memory, network, disk, battery and temperatures, with history and alerts.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CPU, GPU, Arbeitsspeicher, Netzwerk, Festplatte, Akku und Temperaturen, mit Verlauf und Warnungen."
-          }
-        }
-      }
-    },
-    "Linear or smooth scrolling, pointer acceleration, extra buttons, click filter and app exceptions.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lineares oder weiches Scrollen, Zeigerbeschleunigung, Zusatztasten, Klick-Filter und Ausnahmen pro App."
-          }
-        }
-      }
-    },
-    "An island at the notch with music, calendar, timer, downloads and accessory batteries.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eine Insel am Notch mit Musik, Kalender, Timer, Downloads und Zubehör-Akkus."
-          }
-        }
-      }
-    },
-    "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zwischenablage-Verlauf, saubere Links, Einsetzen als reiner Text, eine Datei-Ablage und Finder-Helfer."
-          }
-        }
-      }
-    },
-    "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aufräumen, Deinstallieren, Beenden und Sofort-Beenden, Port-Manager und Homebrew-Updates."
-          }
-        }
-      }
-    },
     "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident.": {
       "localizations": {
         "de": {
@@ -471,42 +638,12 @@
         }
       }
     },
-    "Switch speakers and microphones, volume, microphone mute on ⌃⌥M and keep awake.": {
+    "Your Mac's menu bar toolbox. Open source, modular, native for macOS 26.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lautsprecher und Mikrofone wechseln, Lautstärke, Mikrofon stumm per ⌃⌥M und Wachhalten."
-          }
-        }
-      }
-    },
-    "Command bar, text from screen, color picker, screenshots, scratchpad and snippets.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Befehlsleiste, Text vom Bildschirm, Farbaufnahme, Bildschirmfotos, Notizblock und Textbausteine."
-          }
-        }
-      }
-    },
-    "Super Key: one key becomes ⌃⌥⇧⌘ while held and runs an action when tapped.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Super-Taste: Eine Taste wird gehalten zu ⌃⌥⇧⌘ und löst beim Antippen eine Aktion aus."
-          }
-        }
-      }
-    },
-    "Brightness for every display, with shortcuts and dimming for displays without hardware control.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helligkeit für jedes Display, mit Kurzbefehlen und Abdunkeln für Displays ohne Hardware-Steuerung."
+            "value": "Der Werkzeugkasten für deine Mac-Menüleiste. Quelloffen, modular, nativ für macOS 26."
           }
         }
       }

@@ -234,3 +234,42 @@ struct NotchGestureTests {
         #expect(neighbourWidget(.calendar, in: widgets, forward: true) == .music)
     }
 }
+
+@Suite struct FileShelfTests {
+    @MainActor
+    @Test func keepsTheNewestFirstAndIgnoresRepeats() {
+        let shelf = FileShelf()
+        let a = URL(fileURLWithPath: "/tmp/a.txt")
+        let b = URL(fileURLWithPath: "/tmp/b.txt")
+        shelf.add([a])
+        shelf.add([b])
+        #expect(shelf.files == [b, a])
+        shelf.add([a])
+        #expect(shelf.files == [b, a], "a file already on the shelf is not added twice")
+    }
+
+    @MainActor
+    @Test func dropsTheOldestPastTheLimit() {
+        let shelf = FileShelf()
+        shelf.add((0..<(shelfLimit + 5)).map { URL(fileURLWithPath: "/tmp/\($0).txt") })
+        #expect(shelf.files.count == shelfLimit)
+        #expect(shelf.files.first?.lastPathComponent == "0.txt", "the drop order is kept")
+    }
+
+    @MainActor
+    @Test func pruningRemovesWhatIsNoLongerThere() {
+        let shelf = FileShelf()
+        shelf.add([URL(fileURLWithPath: "/tmp/definitely-not-here-\(UUID().uuidString).txt")])
+        #expect(shelf.files.count == 1)
+        shelf.prune()
+        #expect(shelf.files.isEmpty)
+    }
+
+    @Test func shortensLongNamesInTheMiddle() {
+        #expect(shelfLabel("short.txt") == "short.txt")
+        let long = shelfLabel("a-very-long-file-name-indeed.txt")
+        #expect(long.count <= 19)
+        #expect(long.contains("…"))
+        #expect(long.hasSuffix(".txt"))
+    }
+}

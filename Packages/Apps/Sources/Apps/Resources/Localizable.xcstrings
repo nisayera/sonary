@@ -1,282 +1,24 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Apps": {
+    "%@ could not be copied to the Applications folder.": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apps"
+            "value": "%@ konnte nicht in den Programme-Ordner kopiert werden."
           }
         }
       }
     },
-    "Clean": {
+    "%@ is in your Applications folder.": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aufräumen"
-          }
-        }
-      }
-    },
-    "Ports": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ports"
-          }
-        }
-      }
-    },
-    "Updates": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Updates"
-          }
-        }
-      }
-    },
-    "App caches": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App-Caches"
-          }
-        }
-      }
-    },
-    "Logs": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Protokolle"
-          }
-        }
-      }
-    },
-    "Xcode build data": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Xcode-Build-Daten"
-          }
-        }
-      }
-    },
-    "Other": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonstiges"
-          }
-        }
-      }
-    },
-    "Cleaning moves the files to the Trash. Apps rebuild their caches when needed.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aufräumen legt die Dateien in den Papierkorb. Apps bauen ihre Caches bei Bedarf neu auf."
-          }
-        }
-      }
-    },
-    "Quit": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beenden"
-          }
-        }
-      }
-    },
-    "Force Quit": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sofort beenden"
-          }
-        }
-      }
-    },
-    "No app is listening on a TCP port.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine App lauscht auf einem TCP-Port."
-          }
-        }
-      }
-    },
-    "Stop": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stoppen"
-          }
-        }
-      }
-    },
-    "Refresh": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktualisieren"
-          }
-        }
-      }
-    },
-    "Install Homebrew (brew.sh) to see and install updates for your apps and tools.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Installiere Homebrew (brew.sh), um Updates für deine Apps und Werkzeuge zu sehen und zu installieren."
-          }
-        }
-      }
-    },
-    "Everything installed with Homebrew is up to date.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alles, was mit Homebrew installiert ist, ist aktuell."
-          }
-        }
-      }
-    },
-    "Update": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktualisieren"
-          }
-        }
-      }
-    },
-    "Uninstaller": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deinstallation"
-          }
-        }
-      }
-    },
-    "Remove an app completely": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eine App vollständig entfernen"
-          }
-        }
-      }
-    },
-    "Moves the app and its settings, caches and data from your Library to the Trash.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Legt die App und ihre Einstellungen, Caches und Daten aus deiner Library in den Papierkorb."
-          }
-        }
-      }
-    },
-    "Choose app…": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App auswählen …"
-          }
-        }
-      }
-    },
-    "%@: %lld extra items, %@ in total": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@: %2$lld zusätzliche Objekte, insgesamt %3$@"
-          }
-        }
-      }
-    },
-    "Move to Trash": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In den Papierkorb legen"
-          }
-        }
-      }
-    },
-    "Cancel": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abbrechen"
-          }
-        }
-      }
-    },
-    "In the menu panel": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Im Menü"
-          }
-        }
-      }
-    },
-    "Clean caches and logs, quit or force quit apps, stop processes that block a port and update Homebrew apps from the menu panel's apps tab.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Im Apps-Tab des Menüs räumst du Caches und Protokolle auf, beendest Apps, stoppst Prozesse, die einen Port blockieren, und aktualisierst Homebrew-Apps."
-          }
-        }
-      }
-    },
-    "Some items are in use and were skipped.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einige Objekte werden gerade benutzt und wurden übersprungen."
-          }
-        }
-      }
-    },
-    "This is not an app Sonary can read.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diese App kann Sonary nicht lesen."
+            "value": "%@ liegt jetzt in deinem Programme-Ordner."
           }
         }
       }
@@ -291,132 +33,12 @@
         }
       }
     },
-    "Could not move %@ to the Trash.": {
+    "%@: %lld extra items, %@ in total": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ konnte nicht in den Papierkorb gelegt werden."
-          }
-        }
-      }
-    },
-    "Homebrew could not upgrade %@.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Homebrew konnte %@ nicht aktualisieren."
-          }
-        }
-      }
-    },
-    "Scheduled cleaning": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geplantes Aufräumen"
-          }
-        }
-      }
-    },
-    "Clean caches and logs": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caches und Protokolle aufräumen"
-          }
-        }
-      }
-    },
-    "Runs in the background and moves everything to the Trash.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Läuft im Hintergrund und legt alles in den Papierkorb."
-          }
-        }
-      }
-    },
-    "Never": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nie"
-          }
-        }
-      }
-    },
-    "Every week": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jede Woche"
-          }
-        }
-      }
-    },
-    "Every month": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jeden Monat"
-          }
-        }
-      }
-    },
-    "Last cleaned %@": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zuletzt aufgeräumt %@"
-          }
-        }
-      }
-    },
-    "Tidy up folders": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ordner aufräumen"
-          }
-        }
-      }
-    },
-    "Sonary moves files out of these folders to the Trash once they are old enough. Good for a messenger's downloads.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonary legt Dateien aus diesen Ordnern in den Papierkorb, sobald sie alt genug sind. Gut für die Downloads eines Messengers."
-          }
-        }
-      }
-    },
-    "Delete after %lld days": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nach %lld Tagen löschen"
-          }
-        }
-      }
-    },
-    "Remove folder": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ordner entfernen"
+            "value": "%1$@: %2$lld zusätzliche Objekte, insgesamt %3$@"
           }
         }
       }
@@ -431,12 +53,467 @@
         }
       }
     },
+    "App caches": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App-Caches"
+          }
+        }
+      }
+    },
+    "Apps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbrechen"
+          }
+        }
+      }
+    },
+    "Checking your apps…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Apps werden geprüft …"
+          }
+        }
+      }
+    },
+    "Choose app…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App auswählen …"
+          }
+        }
+      }
+    },
+    "Clean": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufräumen"
+          }
+        }
+      }
+    },
+    "Clean caches and logs": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caches und Protokolle aufräumen"
+          }
+        }
+      }
+    },
+    "Clean caches and logs, quit or force quit apps, stop processes that block a port and update Homebrew apps from the menu panel's apps tab.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Apps-Tab des Menüs räumst du Caches und Protokolle auf, beendest Apps, stoppst Prozesse, die einen Port blockieren, und aktualisierst Homebrew-Apps."
+          }
+        }
+      }
+    },
+    "Cleaning moves the files to the Trash. Apps rebuild their caches when needed.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufräumen legt die Dateien in den Papierkorb. Apps bauen ihre Caches bei Bedarf neu auf."
+          }
+        }
+      }
+    },
+    "Could not move %@ to the Trash.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ konnte nicht in den Papierkorb gelegt werden."
+          }
+        }
+      }
+    },
+    "Delete after %lld days": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach %lld Tagen löschen"
+          }
+        }
+      }
+    },
+    "Every month": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeden Monat"
+          }
+        }
+      }
+    },
+    "Every week": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jede Woche"
+          }
+        }
+      }
+    },
+    "Everything installed with Homebrew is up to date.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles, was mit Homebrew installiert ist, ist aktuell."
+          }
+        }
+      }
+    },
+    "Force Quit": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sofort beenden"
+          }
+        }
+      }
+    },
+    "Found on a mounted disk image": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf einem eingebundenen Image gefunden"
+          }
+        }
+      }
+    },
+    "Homebrew could not upgrade %@.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew konnte %@ nicht aktualisieren."
+          }
+        }
+      }
+    },
+    "Ignore": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignorieren"
+          }
+        }
+      }
+    },
+    "In the menu panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Menü"
+          }
+        }
+      }
+    },
+    "Install": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installieren"
+          }
+        }
+      }
+    },
+    "Install Homebrew (brew.sh) to see and install updates for your apps and tools.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installiere Homebrew (brew.sh), um Updates für deine Apps und Werkzeuge zu sehen und zu installieren."
+          }
+        }
+      }
+    },
+    "Last cleaned %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuletzt aufgeräumt %@"
+          }
+        }
+      }
+    },
+    "Logs": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protokolle"
+          }
+        }
+      }
+    },
+    "Move to Trash": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In den Papierkorb legen"
+          }
+        }
+      }
+    },
     "Moved %lld old files to the Trash.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld alte Dateien in den Papierkorb gelegt."
+          }
+        }
+      }
+    },
+    "Moves the app and its settings, caches and data from your Library to the Trash.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legt die App und ihre Einstellungen, Caches und Daten aus deiner Library in den Papierkorb."
+          }
+        }
+      }
+    },
+    "Never": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie"
+          }
+        }
+      }
+    },
+    "No app is listening on a TCP port.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine App lauscht auf einem TCP-Port."
+          }
+        }
+      }
+    },
+    "Open": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnen"
+          }
+        }
+      }
+    },
+    "Other": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonstiges"
+          }
+        }
+      }
+    },
+    "Ports": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ports"
+          }
+        }
+      }
+    },
+    "Quit": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beenden"
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisieren"
+          }
+        }
+      }
+    },
+    "Remove an app completely": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine App vollständig entfernen"
+          }
+        }
+      }
+    },
+    "Remove folder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner entfernen"
+          }
+        }
+      }
+    },
+    "Runs in the background and moves everything to the Trash.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läuft im Hintergrund und legt alles in den Papierkorb."
+          }
+        }
+      }
+    },
+    "Scheduled cleaning": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplantes Aufräumen"
+          }
+        }
+      }
+    },
+    "Some items are in use and were skipped.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einige Objekte werden gerade benutzt und wurden übersprungen."
+          }
+        }
+      }
+    },
+    "Sonary moves files out of these folders to the Trash once they are old enough. Good for a messenger's downloads.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary legt Dateien aus diesen Ordnern in den Papierkorb, sobald sie alt genug sind. Gut für die Downloads eines Messengers."
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoppen"
+          }
+        }
+      }
+    },
+    "This is not an app Sonary can read.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese App kann Sonary nicht lesen."
+          }
+        }
+      }
+    },
+    "Tidy up folders": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner aufräumen"
+          }
+        }
+      }
+    },
+    "Uninstaller": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deinstallation"
+          }
+        }
+      }
+    },
+    "Update": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisieren"
+          }
+        }
+      }
+    },
+    "Updates": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates"
+          }
+        }
+      }
+    },
+    "Xcode build data": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode-Build-Daten"
           }
         }
       }

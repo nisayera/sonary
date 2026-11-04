@@ -73,3 +73,44 @@ struct OutputSwitchingTests {
         #expect(volumeAfterUnplug(current: 2, limit: 5) == 1)
     }
 }
+
+struct MediaKeyTests {
+    @Test func recognisesTheThreeKeys() {
+        #expect(MediaKey(systemDefinedKeyCode: 16) == .playPause)
+        #expect(MediaKey(systemDefinedKeyCode: 17) == .next)
+        #expect(MediaKey(systemDefinedKeyCode: 18) == .previous)
+        #expect(MediaKey(systemDefinedKeyCode: 7) == nil)
+    }
+
+    @Test func stepsInOnlyWhenAPlayerIsRunning() {
+        #expect(shouldHandleMediaKey(playersRunning: true, guardEnabled: true))
+        #expect(!shouldHandleMediaKey(playersRunning: false, guardEnabled: true))
+        #expect(!shouldHandleMediaKey(playersRunning: true, guardEnabled: false))
+    }
+}
+
+@Suite struct KeepAwakeConditionTests {
+    @Test func closedLidNeedsTheStrongerAssertion() {
+        #expect(keepAwakeAssertionType(closedLid: true) != keepAwakeAssertionType(closedLid: false))
+        #expect(keepAwakeAssertionType(closedLid: false).contains("Display"))
+    }
+
+    @Test func durationAlwaysContinues() {
+        #expect(keepAwakeShouldContinue(condition: .duration(.oneHour), runningBundleIDs: [], onPower: false))
+    }
+
+    @Test func appConditionFollowsTheApp() {
+        let running = ["com.apple.Music"]
+        #expect(keepAwakeShouldContinue(condition: .whileAppRuns("com.apple.Music"),
+                                        runningBundleIDs: running, onPower: false))
+        #expect(keepAwakeShouldContinue(condition: .whileAppRuns("COM.APPLE.MUSIC"),
+                                        runningBundleIDs: running, onPower: false))
+        #expect(!keepAwakeShouldContinue(condition: .whileAppRuns("com.spotify.client"),
+                                         runningBundleIDs: running, onPower: false))
+    }
+
+    @Test func powerConditionFollowsThePlug() {
+        #expect(keepAwakeShouldContinue(condition: .whilePowered, runningBundleIDs: [], onPower: true))
+        #expect(!keepAwakeShouldContinue(condition: .whilePowered, runningBundleIDs: [], onPower: false))
+    }
+}

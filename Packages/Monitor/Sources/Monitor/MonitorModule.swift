@@ -21,6 +21,8 @@ public final class MonitorModule: SonaryModule {
     public private(set) var topProcesses: [ProcessUsage] = []
     public private(set) var fans: [FanReading] = []
     public private(set) var localAddress: String?
+    public private(set) var speedTest: SpeedTestResult?
+    public private(set) var isSpeedTesting = false
     /// Rough time left on battery while it is discharging.
     public private(set) var batteryTime: TimeInterval?
 
@@ -107,6 +109,15 @@ public final class MonitorModule: SonaryModule {
         sampler = nil
         latest = nil
         history = []
+    }
+
+    /// Measures the connection on demand. This is the only network call Sonary makes
+    /// besides the update check, and it only happens when the user asks for it.
+    public func runSpeedTest() async {
+        guard !isSpeedTesting else { return }
+        isSpeedTesting = true
+        defer { isSpeedTesting = false }
+        speedTest = try? await Monitor.runSpeedTest()
     }
 
     public func setReadoutMetrics(_ metrics: [ReadoutMetric]) {

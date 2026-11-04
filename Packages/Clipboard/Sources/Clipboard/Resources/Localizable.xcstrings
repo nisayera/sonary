@@ -1,192 +1,12 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Clipboard": {
+    "Allow Sonary to control Finder in System Settings > Privacy & Security > Automation.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zwischenablage"
-          }
-        }
-      }
-    },
-    "History": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verlauf"
-          }
-        }
-      }
-    },
-    "Shelf": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ablage"
-          }
-        }
-      }
-    },
-    "Finder": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finder"
-          }
-        }
-      }
-    },
-    "Search": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Suchen"
-          }
-        }
-      }
-    },
-    "Copied text appears here.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kopierter Text erscheint hier."
-          }
-        }
-      }
-    },
-    "Copy again": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erneut kopieren"
-          }
-        }
-      }
-    },
-    "Unpin": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lösen"
-          }
-        }
-      }
-    },
-    "Pin": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anheften"
-          }
-        }
-      }
-    },
-    "Remove": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Entfernen"
-          }
-        }
-      }
-    },
-    "Clear history (keeps pinned)": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verlauf leeren (Angeheftetes bleibt)"
-          }
-        }
-      }
-    },
-    "Drop files here to keep them handy": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dateien hier ablegen, um sie griffbereit zu haben"
-          }
-        }
-      }
-    },
-    "Drag files out of the shelf to move or copy them.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ziehe Dateien aus der Ablage, um sie zu verschieben oder zu kopieren."
-          }
-        }
-      }
-    },
-    "Copy path of selected items": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pfad der ausgewählten Objekte kopieren"
-          }
-        }
-      }
-    },
-    "Open Terminal in current folder": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Terminal im aktuellen Ordner öffnen"
-          }
-        }
-      }
-    },
-    "New text file in current folder": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neue Textdatei im aktuellen Ordner"
-          }
-        }
-      }
-    },
-    "Keep the last %lld copies": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die letzten %lld Kopien behalten"
-          }
-        }
-      }
-    },
-    "Pinned entries are always kept. Passwords from password managers are never recorded.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Angeheftete Einträge bleiben immer. Passwörter aus Passwort-Managern werden nie gespeichert."
-          }
-        }
-      }
-    },
-    "Copying and pasting": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kopieren und Einsetzen"
+            "value": "Erlaube Sonary unter Systemeinstellungen > Datenschutz & Sicherheit > Automation, den Finder zu steuern."
           }
         }
       }
@@ -201,162 +21,12 @@
         }
       }
     },
-    "Removes tracking parameters such as utm_source or fbclid from copied links.": {
+    "Clear history (keeps pinned)": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Entfernt Tracking-Parameter wie utm_source oder fbclid aus kopierten Links."
-          }
-        }
-      }
-    },
-    "Paste as plain text with ⌘⌥⇧V": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mit ⌘⌥⇧V als reinen Text einsetzen"
-          }
-        }
-      }
-    },
-    "Shelf and Finder": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ablage und Finder"
-          }
-        }
-      }
-    },
-    "Open the menu panel's clipboard tab to use the file shelf and the Finder helpers. The Finder helpers ask once for permission to control Finder.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Ablage und die Finder-Helfer findest du im Zwischenablage-Tab des Menüs. Die Finder-Helfer fragen einmal nach der Erlaubnis, Finder zu steuern."
-          }
-        }
-      }
-    },
-    "Select files in Finder first.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wähle zuerst Dateien im Finder aus."
-          }
-        }
-      }
-    },
-    "Path copied.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pfad kopiert."
-          }
-        }
-      }
-    },
-    "Untitled": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ohne Titel"
-          }
-        }
-      }
-    },
-    "Allow Sonary to control Finder in System Settings > Privacy & Security > Automation.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erlaube Sonary unter Systemeinstellungen > Datenschutz & Sicherheit > Automation, den Finder zu steuern."
-          }
-        }
-      }
-    },
-    "What is recorded": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Was gespeichert wird"
-          }
-        }
-      }
-    },
-    "Images": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bilder"
-          }
-        }
-      }
-    },
-    "Copied images are kept as files and opened again from the list.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kopierte Bilder werden als Dateien abgelegt und aus der Liste wieder geöffnet."
-          }
-        }
-      }
-    },
-    "Files": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dateien"
-          }
-        }
-      }
-    },
-    "Clearing": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leeren"
-          }
-        }
-      }
-    },
-    "Keep entries until I clear them": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einträge behalten, bis ich sie lösche"
-          }
-        }
-      }
-    },
-    "Forget entries after %lld minutes": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einträge nach %lld Minuten vergessen"
-          }
-        }
-      }
-    },
-    "Pinned entries always stay.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Angeheftete Einträge bleiben immer."
+            "value": "Verlauf leeren (Angeheftetes bleibt)"
           }
         }
       }
@@ -381,12 +51,397 @@
         }
       }
     },
+    "Clearing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leeren"
+          }
+        }
+      }
+    },
+    "Clipboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwischenablage"
+          }
+        }
+      }
+    },
+    "Copied images are kept as files and opened again from the list.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopierte Bilder werden als Dateien abgelegt und aus der Liste wieder geöffnet."
+          }
+        }
+      }
+    },
+    "Copied text appears here.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopierter Text erscheint hier."
+          }
+        }
+      }
+    },
+    "Copy again": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneut kopieren"
+          }
+        }
+      }
+    },
+    "Copy path of selected items": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfad der ausgewählten Objekte kopieren"
+          }
+        }
+      }
+    },
+    "Copying and pasting": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieren und Einsetzen"
+          }
+        }
+      }
+    },
+    "Could not save the image there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Bild konnte dort nicht gesichert werden."
+          }
+        }
+      }
+    },
+    "Drag files out of the shelf to move or copy them.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ziehe Dateien aus der Ablage, um sie zu verschieben oder zu kopieren."
+          }
+        }
+      }
+    },
+    "Drop files here to keep them handy": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dateien hier ablegen, um sie griffbereit zu haben"
+          }
+        }
+      }
+    },
+    "Files": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dateien"
+          }
+        }
+      }
+    },
+    "Finder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder"
+          }
+        }
+      }
+    },
+    "Forget entries after %lld minutes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einträge nach %lld Minuten vergessen"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verlauf"
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilder"
+          }
+        }
+      }
+    },
+    "Keep entries until I clear them": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einträge behalten, bis ich sie lösche"
+          }
+        }
+      }
+    },
+    "Keep the last %lld copies": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die letzten %lld Kopien behalten"
+          }
+        }
+      }
+    },
+    "New text file in current folder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Textdatei im aktuellen Ordner"
+          }
+        }
+      }
+    },
+    "Open Terminal in current folder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminal im aktuellen Ordner öffnen"
+          }
+        }
+      }
+    },
+    "Open the menu panel's clipboard tab to use the file shelf and the Finder helpers. The Finder helpers ask once for permission to control Finder.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Ablage und die Finder-Helfer findest du im Zwischenablage-Tab des Menüs. Die Finder-Helfer fragen einmal nach der Erlaubnis, Finder zu steuern."
+          }
+        }
+      }
+    },
+    "Paste as plain text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als reinen Text einsetzen"
+          }
+        }
+      }
+    },
+    "Paste as plain text with ⌘⌥⇧V": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit ⌘⌥⇧V als reinen Text einsetzen"
+          }
+        }
+      }
+    },
+    "Path copied.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfad kopiert."
+          }
+        }
+      }
+    },
+    "Pin": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anheften"
+          }
+        }
+      }
+    },
+    "Pinned entries always stay.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angeheftete Einträge bleiben immer."
+          }
+        }
+      }
+    },
+    "Pinned entries are always kept. Passwords from password managers are never recorded.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angeheftete Einträge bleiben immer. Passwörter aus Passwort-Managern werden nie gespeichert."
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen"
+          }
+        }
+      }
+    },
+    "Removes tracking parameters such as utm_source or fbclid from copied links.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernt Tracking-Parameter wie utm_source oder fbclid aus kopierten Links."
+          }
+        }
+      }
+    },
+    "Save clipboard image here as PNG": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bild aus der Zwischenablage hier als PNG sichern"
+          }
+        }
+      }
+    },
+    "Saved %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ gesichert."
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suchen"
+          }
+        }
+      }
+    },
+    "Select files in Finder first.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle zuerst Dateien im Finder aus."
+          }
+        }
+      }
+    },
+    "Shelf": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablage"
+          }
+        }
+      }
+    },
+    "Shelf and Finder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablage und Finder"
+          }
+        }
+      }
+    },
     "Strips formatting, pastes, and puts the original contents back. Needs the Accessibility permission.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Entfernt die Formatierung, setzt ein und stellt den ursprünglichen Inhalt danach wieder her. Braucht die Berechtigung Bedienungshilfen."
+          }
+        }
+      }
+    },
+    "There is no image on the clipboard.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In der Zwischenablage ist kein Bild."
+          }
+        }
+      }
+    },
+    "Unpin": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lösen"
+          }
+        }
+      }
+    },
+    "Untitled": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Titel"
+          }
+        }
+      }
+    },
+    "What is recorded": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was gespeichert wird"
           }
         }
       }

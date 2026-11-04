@@ -1,42 +1,32 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Windows": {
+    "A window comes forward when the pointer rests on it.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenster"
+            "value": "Ein Fenster kommt nach vorn, wenn der Zeiger darauf ruht."
           }
         }
       }
     },
-    "Left half": {
+    "Add app…": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Linke Hälfte"
+            "value": "App hinzufügen …"
           }
         }
       }
     },
-    "Right half": {
+    "Asks for the Screen Recording permission the first time.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rechte Hälfte"
-          }
-        }
-      }
-    },
-    "Top half": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Obere Hälfte"
+            "value": "Fragt beim ersten Mal nach der Berechtigung Bildschirmaufnahme."
           }
         }
       }
@@ -47,26 +37,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Untere Hälfte"
-          }
-        }
-      }
-    },
-    "Top left quarter": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oben links"
-          }
-        }
-      }
-    },
-    "Top right quarter": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oben rechts"
           }
         }
       }
@@ -91,12 +61,12 @@
         }
       }
     },
-    "Left third": {
+    "Center": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Linkes Drittel"
+            "value": "Zentrieren"
           }
         }
       }
@@ -111,42 +81,73 @@
         }
       }
     },
-    "Right third": {
+    "Closing": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rechtes Drittel"
+            "value": "Schließen"
           }
         }
       }
     },
-    "Maximize": {
+    "Drag a window against an edge or a corner and let go.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Maximieren"
+            "value": "Zieh ein Fenster an einen Rand oder in eine Ecke und lass los."
           }
         }
       }
     },
-    "Center": {
+    "Dragging": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zentrieren"
+            "value": "Ziehen"
           }
         }
       }
     },
-    "Window layouts": {
+    "Every app is protected. Add apps to protect only those.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fensteranordnung"
+            "value": "Alle Apps sind geschützt. Füge Apps hinzu, um nur diese zu schützen."
+          }
+        }
+      }
+    },
+    "Fill the screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirm füllen"
+          }
+        }
+      }
+    },
+    "Finder and menu bar apps are never quit.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Finder und Menüleisten-Apps werden nie beendet."
+          }
+        }
+      }
+    },
+    "Focus follows the pointer": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus folgt dem Zeiger"
           }
         }
       }
@@ -161,6 +162,56 @@
         }
       }
     },
+    "Left half": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linke Hälfte"
+          }
+        }
+      }
+    },
+    "Left third": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linkes Drittel"
+          }
+        }
+      }
+    },
+    "Lists every open window with search, and brings the one you pick to the front.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listet jedes offene Fenster mit Suche und holt das gewählte nach vorn."
+          }
+        }
+      }
+    },
+    "Maximize": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maximieren"
+          }
+        }
+      }
+    },
+    "Move to the next display": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf das nächste Display"
+          }
+        }
+      }
+    },
     "Moves and resizes the front window.": {
       "localizations": {
         "de": {
@@ -171,12 +222,22 @@
         }
       }
     },
-    "Quit protection": {
+    "Only these apps are protected.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beenden-Schutz"
+            "value": "Nur diese Apps sind geschützt."
+          }
+        }
+      }
+    },
+    "Press ⌘Q again to quit %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drücke erneut ⌘Q, um %@ zu beenden"
           }
         }
       }
@@ -191,6 +252,137 @@
         }
       }
     },
+    "Press ⌘W again to close this window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drücke erneut ⌘W, um dieses Fenster zu schließen"
+          }
+        }
+      }
+    },
+    "Press ⌘W twice to close a window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘W zweimal drücken zum Schließen"
+          }
+        }
+      }
+    },
+    "Put the last window back": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letztes Fenster zurücksetzen"
+          }
+        }
+      }
+    },
+    "Put the window back": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster zurücksetzen"
+          }
+        }
+      }
+    },
+    "Quit an app when its last window closes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App beenden, wenn ihr letztes Fenster schließt"
+          }
+        }
+      }
+    },
+    "Quit protection": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beenden-Schutz"
+          }
+        }
+      }
+    },
+    "Remove app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App entfernen"
+          }
+        }
+      }
+    },
+    "Right half": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechte Hälfte"
+          }
+        }
+      }
+    },
+    "Right third": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechtes Drittel"
+          }
+        }
+      }
+    },
+    "Search windows": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster suchen"
+          }
+        }
+      }
+    },
+    "Show a picture of each window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bild jedes Fensters zeigen"
+          }
+        }
+      }
+    },
+    "Show it now": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jetzt anzeigen"
+          }
+        }
+      }
+    },
+    "Snap windows at the screen edges": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster an den Bildschirmrändern einrasten"
+          }
+        }
+      }
+    },
     "Stops apps from closing by accident. Finder is never affected.": {
       "localizations": {
         "de": {
@@ -201,12 +393,42 @@
         }
       }
     },
-    "Press ⌘Q again to quit %@": {
+    "Top half": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Drücke erneut ⌘Q, um %@ zu beenden"
+            "value": "Obere Hälfte"
+          }
+        }
+      }
+    },
+    "Top left quarter": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oben links"
+          }
+        }
+      }
+    },
+    "Top right quarter": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oben rechts"
+          }
+        }
+      }
+    },
+    "Window layouts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fensteranordnung"
           }
         }
       }
@@ -231,142 +453,12 @@
         }
       }
     },
-    "Lists every open window with search, and brings the one you pick to the front.": {
+    "Windows": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Listet jedes offene Fenster mit Suche und holt das gewählte nach vorn."
-          }
-        }
-      }
-    },
-    "Show it now": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jetzt anzeigen"
-          }
-        }
-      }
-    },
-    "Search windows": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fenster suchen"
-          }
-        }
-      }
-    },
-    "Press ⌘W twice to close a window": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⌘W zweimal drücken zum Schließen"
-          }
-        }
-      }
-    },
-    "Press ⌘W again to close this window": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drücke erneut ⌘W, um dieses Fenster zu schließen"
-          }
-        }
-      }
-    },
-    "Every app is protected. Add apps to protect only those.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alle Apps sind geschützt. Füge Apps hinzu, um nur diese zu schützen."
-          }
-        }
-      }
-    },
-    "Only these apps are protected.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nur diese Apps sind geschützt."
-          }
-        }
-      }
-    },
-    "Remove app": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App entfernen"
-          }
-        }
-      }
-    },
-    "Add app…": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App hinzufügen …"
-          }
-        }
-      }
-    },
-    "Move to the next display": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Auf das nächste Display"
-          }
-        }
-      }
-    },
-    "Put the window back": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fenster zurücksetzen"
-          }
-        }
-      }
-    },
-    "Closing": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schließen"
-          }
-        }
-      }
-    },
-    "Quit an app when its last window closes": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App beenden, wenn ihr letztes Fenster schließt"
-          }
-        }
-      }
-    },
-    "Finder and menu bar apps are never quit.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Finder und Menüleisten-Apps werden nie beendet."
+            "value": "Fenster"
           }
         }
       }

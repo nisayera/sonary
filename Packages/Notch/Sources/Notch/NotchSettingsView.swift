@@ -38,6 +38,7 @@ struct NotchSettingsView: View {
         case .timer: Text("Quick countdowns with a sound at the end.", bundle: .module)
         case .downloads: Text("Your newest downloads; click to open or drag them out.", bundle: .module)
         case .batteries: Text("Mouse, keyboard, trackpad and headphones.", bundle: .module)
+        case .shelf: Text("Park files on the notch and drag them out again.", bundle: .module)
         }
     }
 }

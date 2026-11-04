@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import ScreenCaptureKit
 import SonaryUI
 import SwiftUI
 
@@ -11,6 +12,9 @@ final class SwitcherPanel: NSPanel {
 @MainActor
 final class WindowSwitcherController {
     private var panel: SwitcherPanel?
+    /// Live pictures of each window. Off unless the user turns it on, because it needs
+    /// the Screen Recording permission.
+    var showsPreviews = false
 
     func show() {
         let entries = Self.currentEntries()
@@ -27,6 +31,7 @@ final class WindowSwitcherController {
         guard let panel else { return }
         panel.contentView = NSHostingView(rootView: WindowSwitcherView(
             entries: entries,
+            showsPreviews: showsPreviews,
             choose: { [weak self] entry in
                 self?.close()
                 WindowSwitcherController.raise(entry)
@@ -70,6 +75,7 @@ final class WindowSwitcherController {
 
 struct WindowSwitcherView: View {
     let entries: [WindowEntry]
+    let showsPreviews: Bool
     let choose: (WindowEntry) -> Void
     let cancel: () -> Void
     @State private var query = ""
@@ -97,6 +103,9 @@ struct WindowSwitcherView: View {
                             }
                             Text(entry.label).lineLimit(1)
                             Spacer()
+                            if showsPreviews {
+                                WindowPreviewImage(id: entry.id)
+                            }
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 5)
@@ -121,5 +130,64 @@ struct WindowSwitcherView: View {
     private func pick(_ list: [WindowEntry]) {
         guard list.indices.contains(selected) else { return }
         choose(list[selected])
+    }
+}
+
+/// The rectangle shown while a window is dragged against an edge.
+struct SnapPreviewView: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .fill(Color.sonaryAccent.opacity(0.22))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Color.sonaryAccent, lineWidth: 2)
+            )
+            .padding(6)
+    }
+}
+
+/// A picture of one window, fetched once and kept for a few seconds. Nil without the
+/// Screen Recording permission, which is why previews are a setting rather than the default.
+@MainActor
+enum WindowPreviews {
+    private static var cache: [UInt32: (image: NSImage, taken: Date)] = [:]
+
+    static func image(for id: UInt32) async -> NSImage? {
+        if let hit = cache[id], Date().timeIntervalSince(hit.taken) < 5 { return hit.image }
+        guard let content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true),
+              let window = content.windows.first(where: { $0.windowID == id }),
+              window.frame.width > 1, window.frame.height > 1 else { return nil }
+        let configuration = SCStreamConfiguration()
+        configuration.width = Int(window.frame.width)
+        configuration.height = Int(window.frame.height)
+        configuration.showsCursor = false
+        guard let shot = try? await SCScreenshotManager.captureImage(
+            contentFilter: SCContentFilter(desktopIndependentWindow: window), configuration: configuration)
+        else { return nil }
+        let image = NSImage(cgImage: shot, size: NSSize(width: shot.width, height: shot.height))
+        cache[id] = (image, Date())
+        return image
+    }
+}
+
+/// The thumbnail in a switcher row. It stays empty until the picture arrives, so the
+/// list never waits on the capture.
+struct WindowPreviewImage: View {
+    let id: UInt32
+    @State private var image: NSImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(nsImage: image)
+                    .resizable().aspectRatio(contentMode: .fit)
+                    .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+            } else {
+                Color.clear
+            }
+        }
+        .frame(width: 92, height: 56)
+        .accessibilityHidden(true)
+        .task(id: id) { image = await WindowPreviews.image(for: id) }
     }
 }

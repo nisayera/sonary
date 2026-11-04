@@ -1,156 +1,6 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Tools": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Werkzeuge"
-          }
-        }
-      }
-    },
-    "Scratchpad": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notizblock"
-          }
-        }
-      }
-    },
-    "Snippets": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Textbausteine"
-          }
-        }
-      }
-    },
-    "Command bar": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Befehlsleiste"
-          }
-        }
-      }
-    },
-    "Copy text from screen": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Text vom Bildschirm kopieren"
-          }
-        }
-      }
-    },
-    "Pick a color": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Farbe aufnehmen"
-          }
-        }
-      }
-    },
-    "Screenshot to clipboard": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bildschirmfoto in die Zwischenablage"
-          }
-        }
-      }
-    },
-    "Edit snippets in Sonary's settings.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Textbausteine bearbeitest du in den Einstellungen von Sonary."
-          }
-        }
-      }
-    },
-    "Shortcuts": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kurzbefehle"
-          }
-        }
-      }
-    },
-    "Keyboard shortcuts": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tastenkürzel"
-          }
-        }
-      }
-    },
-    "⌥Space command bar, ⌃⌥T text from screen, ⌃⌥P color picker, ⌃⌥S screenshot.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⌥Leertaste Befehlsleiste, ⌃⌥T Text vom Bildschirm, ⌃⌥P Farbe, ⌃⌥S Bildschirmfoto."
-          }
-        }
-      }
-    },
-    "Placeholders: {date}, {time} and {clipboard}.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Platzhalter: {date}, {time} und {clipboard}."
-          }
-        }
-      }
-    },
-    "Title": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Titel"
-          }
-        }
-      }
-    },
-    "Text": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Text"
-          }
-        }
-      }
-    },
-    "Remove snippet": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Textbaustein entfernen"
-          }
-        }
-      }
-    },
     "Add snippet": {
       "localizations": {
         "de": {
@@ -161,262 +11,56 @@
         }
       }
     },
-    "Permissions": {
+    "Allow Sonary to record the screen in System Settings > Privacy & Security.": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Berechtigungen"
+            "value": "Erlaube Sonary die Bildschirmaufnahme in Systemeinstellungen > Datenschutz & Sicherheit."
           }
         }
       }
     },
-    "Screenshots and text from screen ask once for the Screen Recording permission.": {
+    "Camera mirror": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bildschirmfotos und Text vom Bildschirm fragen einmal nach der Berechtigung Bildschirmaufnahme."
+            "value": "Kamera-Spiegel"
           }
         }
       }
     },
-    "Copied %@": {
+    "Cancel": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ kopiert"
+            "value": "Abbrechen"
           }
         }
       }
     },
-    "Screenshot copied to the clipboard.": {
+    "Capture": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bildschirmfoto in die Zwischenablage kopiert."
+            "value": "Aufnahme"
           }
         }
       }
     },
-    "No text found.": {
+    "Choose images…": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kein Text gefunden."
-          }
-        }
-      }
-    },
-    "Text copied to the clipboard.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Text in die Zwischenablage kopiert."
-          }
-        }
-      }
-    },
-    "Snippet copied. Press ⌘V to paste it.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Textbaustein kopiert. Mit ⌘V einsetzen."
-          }
-        }
-      }
-    },
-    "New snippet": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neuer Textbaustein"
-          }
-        }
-      }
-    },
-    "Search apps, snippets and tools": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apps, Textbausteine und Werkzeuge suchen"
-          }
-        }
-      }
-    },
-    "Toggles": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schalter"
-          }
-        }
-      }
-    },
-    "Dark mode": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dunkler Modus"
-          }
-        }
-      }
-    },
-    "Desktop icons": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schreibtischsymbole"
-          }
-        }
-      }
-    },
-    "Empty Trash": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Papierkorb leeren"
-          }
-        }
-      }
-    },
-    "Eject disks": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Volumes auswerfen"
-          }
-        }
-      }
-    },
-    "Lock screen": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bildschirm sperren"
-          }
-        }
-      }
-    },
-    "Radial menu": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Radial-Menü"
-          }
-        }
-      }
-    },
-    "Dark mode and the Trash ask once for permission to control the system.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dunkler Modus und Papierkorb fragen einmal nach der Erlaubnis, das System zu steuern."
-          }
-        }
-      }
-    },
-    "⌃⌥R opens a ring of actions around the pointer. Pick which ones it holds, up to eight.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⌃⌥R öffnet einen Ring mit Aktionen um den Zeiger. Wähle aus, welche darin liegen, bis zu acht."
-          }
-        }
-      }
-    },
-    "Colour picker": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Farbaufnahme"
-          }
-        }
-      }
-    },
-    "Copy colours as": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Farben kopieren als"
-          }
-        }
-      }
-    },
-    "Note": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notiz"
-          }
-        }
-      }
-    },
-    "New note": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neue Notiz"
-          }
-        }
-      }
-    },
-    "Save as Markdown": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Als Markdown sichern"
-          }
-        }
-      }
-    },
-    "Delete note": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notiz löschen"
-          }
-        }
-      }
-    },
-    "Saved to %@": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gesichert als %@"
-          }
-        }
-      }
-    },
-    "Could not save the note.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Notiz konnte nicht gesichert werden."
+            "value": "Bilder auswählen …"
           }
         }
       }
@@ -431,6 +75,212 @@
         }
       }
     },
+    "Close": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
+          }
+        }
+      }
+    },
+    "Colour picker": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farbaufnahme"
+          }
+        }
+      }
+    },
+    "Command bar": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Befehlsleiste"
+          }
+        }
+      }
+    },
+    "Compressed %lld videos.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Videos verkleinert."
+          }
+        }
+      }
+    },
+    "Convert images…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilder umwandeln …"
+          }
+        }
+      }
+    },
+    "Converted %lld images.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Bilder umgewandelt."
+          }
+        }
+      }
+    },
+    "Copied %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kopiert"
+          }
+        }
+      }
+    },
+    "Copy colours as": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farben kopieren als"
+          }
+        }
+      }
+    },
+    "Copy text from screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text vom Bildschirm kopieren"
+          }
+        }
+      }
+    },
+    "Could not save the note.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Notiz konnte nicht gesichert werden."
+          }
+        }
+      }
+    },
+    "Dark mode": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler Modus"
+          }
+        }
+      }
+    },
+    "Dark mode and the Trash ask once for permission to control the system.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler Modus und Papierkorb fragen einmal nach der Erlaubnis, das System zu steuern."
+          }
+        }
+      }
+    },
+    "Delete note": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz löschen"
+          }
+        }
+      }
+    },
+    "Desktop icons": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schreibtischsymbole"
+          }
+        }
+      }
+    },
+    "Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkelt den Bildschirm ab und zeigt beim Ziehen eine Lupe und die Pixelgröße. Aus benutzt die Systemauswahl."
+          }
+        }
+      }
+    },
+    "Edit snippets in Sonary's settings.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbausteine bearbeitest du in den Einstellungen von Sonary."
+          }
+        }
+      }
+    },
+    "Eject disks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes auswerfen"
+          }
+        }
+      }
+    },
+    "Empty Trash": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papierkorb leeren"
+          }
+        }
+      }
+    },
+    "Format": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Format"
+          }
+        }
+      }
+    },
+    "Image conversion": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilder umwandeln"
+          }
+        }
+      }
+    },
     "Keyboard and screen are locked for cleaning": {
       "localizations": {
         "de": {
@@ -441,12 +291,477 @@
         }
       }
     },
+    "Keyboard shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastenkürzel"
+          }
+        }
+      }
+    },
+    "Lock screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirm sperren"
+          }
+        }
+      }
+    },
+    "Longest edge": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Längste Kante"
+          }
+        }
+      }
+    },
+    "Made %lld GIFs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld GIFs erstellt."
+          }
+        }
+      }
+    },
+    "Make a video smaller…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video verkleinern …"
+          }
+        }
+      }
+    },
+    "New note": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Notiz"
+          }
+        }
+      }
+    },
+    "New snippet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neuer Textbaustein"
+          }
+        }
+      }
+    },
+    "No GIF could be made.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es konnte kein GIF erstellt werden."
+          }
+        }
+      }
+    },
+    "No image could be converted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Bild konnte umgewandelt werden."
+          }
+        }
+      }
+    },
+    "No text found.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Text gefunden."
+          }
+        }
+      }
+    },
+    "No video could be compressed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Video konnte verkleinert werden."
+          }
+        }
+      }
+    },
+    "Note": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz"
+          }
+        }
+      }
+    },
+    "Nothing was recorded.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es wurde nichts aufgenommen."
+          }
+        }
+      }
+    },
+    "Permissions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berechtigungen"
+          }
+        }
+      }
+    },
+    "Pick a color": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farbe aufnehmen"
+          }
+        }
+      }
+    },
+    "Pick regions with Sonary's own selector": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereiche mit Sonarys eigener Auswahl wählen"
+          }
+        }
+      }
+    },
+    "Pin a screenshot": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto anheften"
+          }
+        }
+      }
+    },
+    "Placeholders: {date}, {time} and {clipboard}.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platzhalter: {date}, {time} und {clipboard}."
+          }
+        }
+      }
+    },
     "Press Escape or click to stop": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Escape drücken oder klicken zum Beenden"
+          }
+        }
+      }
+    },
+    "Preview": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschau"
+          }
+        }
+      }
+    },
+    "Radial menu": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radial-Menü"
+          }
+        }
+      }
+    },
+    "Record the screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirm aufnehmen"
+          }
+        }
+      }
+    },
+    "Recording the screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Bildschirm wird aufgenommen."
+          }
+        }
+      }
+    },
+    "Remove snippet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbaustein entfernen"
+          }
+        }
+      }
+    },
+    "Save as Markdown": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als Markdown sichern"
+          }
+        }
+      }
+    },
+    "Saved to %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gesichert als %@"
+          }
+        }
+      }
+    },
+    "Scratchpad": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notizblock"
+          }
+        }
+      }
+    },
+    "Screenshot copied to the clipboard.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto in die Zwischenablage kopiert."
+          }
+        }
+      }
+    },
+    "Screenshot to clipboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto in die Zwischenablage"
+          }
+        }
+      }
+    },
+    "Screenshots and text from screen ask once for the Screen Recording permission.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfotos und Text vom Bildschirm fragen einmal nach der Berechtigung Bildschirmaufnahme."
+          }
+        }
+      }
+    },
+    "Search apps, snippets and tools": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps, Textbausteine und Werkzeuge suchen"
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Snippet copied. Press ⌘V to paste it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbaustein kopiert. Mit ⌘V einsetzen."
+          }
+        }
+      }
+    },
+    "Snippets": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbausteine"
+          }
+        }
+      }
+    },
+    "Stop recording": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufnahme beenden"
+          }
+        }
+      }
+    },
+    "Text": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text"
+          }
+        }
+      }
+    },
+    "Text copied to the clipboard.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text in die Zwischenablage kopiert."
+          }
+        }
+      }
+    },
+    "The converted copies land next to the originals.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die umgewandelten Kopien landen neben den Originalen."
+          }
+        }
+      }
+    },
+    "Title": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titel"
+          }
+        }
+      }
+    },
+    "Toggles": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalter"
+          }
+        }
+      }
+    },
+    "Tools": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werkzeuge"
+          }
+        }
+      }
+    },
+    "Turn a video into a GIF…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video in ein GIF umwandeln …"
+          }
+        }
+      }
+    },
+    "Watermark": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wasserzeichen"
+          }
+        }
+      }
+    },
+    "px, 0 keeps the size": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "px, 0 behält die Größe"
+          }
+        }
+      }
+    },
+    "⌃⌥R opens a ring of actions around the pointer. Pick which ones it holds, up to eight.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃⌥R öffnet einen Ring mit Aktionen um den Zeiger. Wähle aus, welche darin liegen, bis zu acht."
+          }
+        }
+      }
+    },
+    "⌥Space command bar, ⌃⌥T text from screen, ⌃⌥P color picker, ⌃⌥S screenshot.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌥Leertaste Befehlsleiste, ⌃⌥T Text vom Bildschirm, ⌃⌥P Farbe, ⌃⌥S Bildschirmfoto."
           }
         }
       }

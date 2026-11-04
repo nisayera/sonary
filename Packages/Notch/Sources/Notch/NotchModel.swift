@@ -17,6 +17,7 @@ public final class NotchModel {
     public let music = NowPlayingCenter()
     public let calendar = CalendarSource()
     public let downloads = DownloadsWatcher()
+    public let shelf = FileShelf()
 
     /// Called when the island opens or closes, so the window can change size.
     @ObservationIgnored var presentationChanged: ((NotchPresentation) -> Void)?

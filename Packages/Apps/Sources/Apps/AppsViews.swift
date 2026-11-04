@@ -35,6 +35,21 @@ struct AppsPopoverView: View {
             } label: { EmptyView() }
                 .pickerStyle(.segmented)
                 .labelsHidden()
+            if let installer = model.installer {
+                row {
+                    Image(systemName: "externaldrive.badge.plus").foregroundStyle(Color.sonaryAccent)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(installer.name)
+                        Text("Found on a mounted disk image", bundle: .module)
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button { Task { await model.install(installer) } } label: {
+                        Text("Install", bundle: .module)
+                    }
+                    Button { model.dismissInstaller() } label: { Text("Ignore", bundle: .module) }
+                }
+            }
             if let message = model.message {
                 Text(message).font(.caption).foregroundStyle(.secondary)
             }
@@ -42,7 +57,10 @@ struct AppsPopoverView: View {
             case .clean: cleanView.task { await model.scan() }
             case .apps: appsView
             case .ports: portsView.task { await model.refreshPorts() }
-            case .updates: updatesView.task { await model.refreshOutdated() }
+            case .updates: updatesView.task {
+                await model.refreshOutdated()
+                await model.checkAppUpdates()
+            }
             }
         }
     }
@@ -118,6 +136,25 @@ struct AppsPopoverView: View {
                     Spacer()
                     Button { Task { await model.upgrade(package) } } label: { Text("Update", bundle: .module) }
                         .disabled(model.isBrewBusy)
+                }
+            }
+            if model.isCheckingApps {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text("Checking your apps…", bundle: .module).font(.caption).foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            ForEach(model.appUpdates) { update in
+                row {
+                    Image(systemName: "arrow.down.app").foregroundStyle(Color.sonaryAccent)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(update.app.name)
+                        Text(verbatim: "\(update.app.shortVersion) → \(update.latestVersion)")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button { model.openApp(update) } label: { Text("Open", bundle: .module) }
                 }
             }
         }

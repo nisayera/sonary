@@ -217,3 +217,158 @@ struct ScratchpadTests {
         #expect(movedTab(tabs, from: 1, to: 1).map(\.title) == ["a", "b", "c"])
     }
 }
+
+struct MenuCommandTests {
+    @Test func keepsRealCommands() {
+        let commands = [MenuCommand(path: ["File", "Save"]), MenuCommand(path: ["Edit", "Copy"])]
+        #expect(usefulMenuCommands(commands).map(\.title) == ["File ▸ Save", "Edit ▸ Copy"])
+    }
+
+    @Test func dropsAppleAndHelpMenus() {
+        let commands = [MenuCommand(path: ["Apple", "Sleep"]), MenuCommand(path: ["Help", "Search"]),
+                        MenuCommand(path: ["Window", "Zoom"]), MenuCommand(path: ["File", "Open"])]
+        #expect(usefulMenuCommands(commands).map(\.title) == ["File ▸ Open"])
+    }
+
+    @Test func dropsSeparatorsAndTopLevelOnly() {
+        let commands = [MenuCommand(path: ["File"]), MenuCommand(path: ["File", "-"]),
+                        MenuCommand(path: ["File", ""]), MenuCommand(path: ["File", "Close"])]
+        #expect(usefulMenuCommands(commands).map(\.title) == ["File ▸ Close"])
+    }
+
+    @Test func dropsDuplicates() {
+        let commands = [MenuCommand(path: ["File", "Save"]), MenuCommand(path: ["File", "Save"])]
+        #expect(usefulMenuCommands(commands).count == 1)
+    }
+
+    @Test func respectsTheLimit() {
+        let commands = (0..<50).map { MenuCommand(path: ["File", "Item \($0)"]) }
+        #expect(usefulMenuCommands(commands, limit: 10).count == 10)
+    }
+}
+
+@Suite struct MediaToolTests {
+    @Test func keepsImagesThatAreAlreadySmallEnough() {
+        let big = scaledSize(width: 800, height: 600, longestEdge: 1200)
+        #expect(big.width == 800)
+        #expect(big.height == 600)
+        let off = scaledSize(width: 800, height: 600, longestEdge: 0)
+        #expect(off.width == 800)
+        #expect(off.height == 600)
+        let empty = scaledSize(width: 0, height: 0, longestEdge: 100)
+        #expect(empty.width == 0)
+        #expect(empty.height == 0)
+    }
+
+    @Test func scalesTheLongestEdgeAndKeepsTheRatio() {
+        let landscape = scaledSize(width: 4000, height: 3000, longestEdge: 1000)
+        #expect(landscape.width == 1000)
+        #expect(landscape.height == 750)
+        let portrait = scaledSize(width: 3000, height: 4000, longestEdge: 1000)
+        #expect(portrait.width == 750)
+        #expect(portrait.height == 1000)
+        let thin = scaledSize(width: 10_000, height: 3, longestEdge: 100)
+        #expect(thin.height >= 1)
+    }
+
+    @Test func neverOverwritesAnExistingExport() {
+        let source = URL(fileURLWithPath: "/tmp/pictures/Shot.heic")
+        let taken = ["Shot.jpg"]
+        let url = exportURL(for: source, format: .jpeg) { taken.contains($0) }
+        #expect(url.lastPathComponent == "Shot 2.jpg")
+        #expect(url.deletingLastPathComponent().path == "/tmp/pictures")
+    }
+
+    @Test func formatsCarryTheirExtension() {
+        #expect(ImageFormat.jpeg.fileExtension == "jpg")
+        #expect(ImageFormat.allCases.allSatisfy { !$0.fileExtension.isEmpty })
+    }
+
+    @Test func recordingNamesAreStampedAndSafe() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let date = calendar.date(from: DateComponents(year: 2026, month: 7, day: 1, hour: 14, minute: 2, second: 9))!
+        let name = recordingFileName(now: date, calendar: calendar)
+        #expect(name == "Sonary 2026-07-01 at 14.02.09.mp4")
+    }
+
+    @Test func bitrateStaysInAReasonableRange() {
+        #expect(recordingBitrate(width: 320, height: 240) == 2_000_000)
+        #expect(recordingBitrate(width: 7680, height: 4320) == 40_000_000)
+        let retina = recordingBitrate(width: 2560, height: 1440)
+        #expect(retina > 2_000_000 && retina < 40_000_000)
+    }
+}
+
+@Suite struct GIFPlanTests {
+    @Test func spreadsFramesOverTheClip() {
+        let plan = gifPlan(duration: 4, fps: 10)
+        #expect(plan.frames == 40)
+        #expect(abs(plan.delay - 0.1) < 0.0001)
+    }
+
+    @Test func capsALongClipInsteadOfExploding() {
+        let plan = gifPlan(duration: 600, fps: 10, maxFrames: 240)
+        #expect(plan.frames == 240)
+        #expect(abs(plan.delay - 2.5) < 0.0001, "the same clip, just coarser")
+    }
+
+    @Test func survivesAClipWithNoLength() {
+        let plan = gifPlan(duration: 0, fps: 10)
+        #expect(plan.frames == 1)
+        #expect(plan.delay > 0)
+        #expect(gifSampleTimes(duration: 0, frames: 0) == [0])
+    }
+
+    @Test func samplesStartAtZeroAndStayInsideTheClip() {
+        let times = gifSampleTimes(duration: 4, frames: 4)
+        #expect(times.count == 4)
+        #expect(times.first == 0)
+        #expect(times.allSatisfy { $0 < 4 })
+    }
+}
+
+@Suite struct CaptureSelectionTests {
+    private let screen = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+
+    @Test func aDragInAnyDirectionGivesTheSameRectangle() {
+        let downRight = selectionRect(from: CGPoint(x: 100, y: 100), to: CGPoint(x: 300, y: 250))
+        let upLeft = selectionRect(from: CGPoint(x: 300, y: 250), to: CGPoint(x: 100, y: 100))
+        #expect(downRight == upLeft)
+        #expect(downRight == CGRect(x: 100, y: 100, width: 200, height: 150))
+    }
+
+    @Test func aSelectionStaysOnItsScreen() {
+        let over = CGRect(x: -50, y: -50, width: 200, height: 200)
+        #expect(clampSelection(over, to: screen) == CGRect(x: 0, y: 0, width: 150, height: 150))
+    }
+
+    @Test func aStraySmallDragCapturesNothing() {
+        #expect(!isSelectionUsable(CGRect(x: 0, y: 0, width: 2, height: 80)))
+        #expect(!isSelectionUsable(.zero))
+        #expect(isSelectionUsable(CGRect(x: 0, y: 0, width: 10, height: 10)))
+    }
+
+    @Test func showsThePixelSizeWhileDragging() {
+        #expect(selectionSizeLabel(CGRect(x: 0, y: 0, width: 200.4, height: 149.6)) == "200 × 150")
+    }
+
+    @Test func theMagnifierNeverLooksOffTheScreen() {
+        let corner = magnifierSource(at: CGPoint(x: 0, y: 0), in: screen, side: 24)
+        #expect(screen.contains(corner))
+        #expect(corner.width == 24 && corner.height == 24)
+        let farCorner = magnifierSource(at: CGPoint(x: 1600, y: 1000), in: screen, side: 24)
+        #expect(screen.contains(farCorner))
+        let middle = magnifierSource(at: CGPoint(x: 800, y: 500), in: screen, side: 24)
+        #expect(middle == CGRect(x: 788, y: 488, width: 24, height: 24))
+    }
+
+    @Test func theLoupeMovesOutOfItsOwnWay() {
+        let normal = magnifierPlacement(at: CGPoint(x: 100, y: 100), in: screen, size: 120, gap: 16)
+        #expect(normal == CGPoint(x: 116, y: 116))
+        let nearEdge = magnifierPlacement(at: CGPoint(x: 1590, y: 990), in: screen, size: 120, gap: 16)
+        #expect(nearEdge.x < 1590)
+        #expect(nearEdge.y < 990)
+        #expect(nearEdge.x >= 0 && nearEdge.y >= 0)
+    }
+}

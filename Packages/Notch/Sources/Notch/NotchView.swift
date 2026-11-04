@@ -55,6 +55,7 @@ struct NotchView: View {
                     case .timer: TimerWidget(model: model)
                     case .downloads: DownloadsWidget(watcher: model.downloads)
                     case .batteries: BatteriesWidget(batteries: model.batteries)
+                    case .shelf: ShelfWidget(shelf: model.shelf)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -70,6 +71,7 @@ func widgetTitle(_ widget: NotchWidget) -> LocalizedStringKey {
     case .timer: "Timer"
     case .downloads: "Downloads"
     case .batteries: "Batteries"
+    case .shelf: "Shelf"
     }
 }
 
@@ -255,5 +257,54 @@ final class ScrollCatchingView: NSView {
 
     override func scrollWheel(with event: NSEvent) {
         onScroll?(Double(event.scrollingDeltaX), Double(event.scrollingDeltaY))
+    }
+}
+
+/// The notch's parking spot for files: drop them on it, drag them off again.
+private struct ShelfWidget: View {
+    let shelf: FileShelf
+    @State private var isTargeted = false
+
+    var body: some View {
+        VStack(spacing: 8) {
+            if shelf.files.isEmpty {
+                EmptyWidget(symbol: "tray", text: "Drop files here to park them.")
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(shelf.files, id: \.self) { url in
+                            VStack(spacing: 4) {
+                                Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
+                                    .resizable().frame(width: 32, height: 32)
+                                Text(verbatim: shelfLabel(url.lastPathComponent))
+                                    .font(.caption2).lineLimit(1)
+                            }
+                            .frame(width: 64)
+                            .draggable(url)
+                            .contextMenu {
+                                Button { NSWorkspace.shared.open(url) } label: { Text("Open", bundle: .module) }
+                                Button { NSWorkspace.shared.activateFileViewerSelecting([url]) } label: {
+                                    Text("Show in Finder", bundle: .module)
+                                }
+                                Button(role: .destructive) { shelf.remove(url) } label: {
+                                    Text("Take off the shelf", bundle: .module)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 2)
+                }
+                Button { shelf.clear() } label: { Text("Clear the shelf", bundle: .module) }
+                    .buttonStyle(.borderless).controlSize(.small)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(isTargeted ? Color.sonaryAccent.opacity(0.15) : .clear,
+                    in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .dropDestination(for: URL.self) { urls, _ in
+            shelf.add(urls)
+            return true
+        } isTargeted: { isTargeted = $0 }
+        .task { shelf.prune() }
     }
 }

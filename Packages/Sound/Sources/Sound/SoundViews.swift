@@ -53,6 +53,18 @@ struct SoundPopoverView: View {
                     }
                 }
                 .controlSize(.small)
+                HStack(spacing: 6) {
+                    if !model.settings.keepAwakeApp.isEmpty {
+                        Button { model.keepAwakeWhileAppRuns(model.settings.keepAwakeApp) } label: {
+                            Text("While \(model.appName(for: model.settings.keepAwakeApp)) runs", bundle: .module)
+                                .lineLimit(1)
+                        }
+                    }
+                    Button { model.keepAwakeWhilePowered() } label: {
+                        Text("While plugged in", bundle: .module).lineLimit(1)
+                    }
+                }
+                .controlSize(.small)
             }
         }
     }
@@ -85,6 +97,29 @@ struct SoundSettingsView: View {
                               caption: Text("Keeps the speakers from suddenly blaring.", bundle: .module),
                               isOn: Binding(get: { model.settings.volumeAfterUnplug > 0 },
                                             set: { value in model.update { $0.volumeAfterUnplug = value ? 0.25 : 0 } }))
+        }
+        SettingsCard(Text("Media keys", bundle: .module)) {
+            SettingsToggleRow(symbol: "playpause", title: Text("Keep the media keys from opening Music", bundle: .module),
+                              caption: Text("While a player is running, Sonary passes the key to it instead.", bundle: .module),
+                              isOn: Binding(get: { model.settings.mediaKeyGuard },
+                                            set: { value in model.update { $0.mediaKeyGuard = value } }))
+        }
+        SettingsCard(Text("Keep awake", bundle: .module)) {
+            SettingsToggleRow(symbol: "laptopcomputer", title: Text("Stay awake with the lid closed", bundle: .module),
+                              caption: Text("Holds the stronger assertion, so an external display keeps working.", bundle: .module),
+                              isOn: Binding(get: { model.settings.keepAwakeWithClosedLid },
+                                            set: { value in model.update { $0.keepAwakeWithClosedLid = value } }))
+            HStack {
+                Text("Keep awake while this app runs", bundle: .module)
+                Spacer()
+                Picker(selection: Binding(get: { model.settings.keepAwakeApp },
+                                          set: { value in model.update { $0.keepAwakeApp = value } })) {
+                    Text("None", bundle: .module).tag("")
+                    ForEach(model.runningApps) { Text($0.name).tag($0.id) }
+                } label: { EmptyView() }
+                    .labelsHidden()
+                    .frame(maxWidth: 180)
+            }
         }
         SettingsCard(Text("In the menu panel", bundle: .module)) {
             Text("Switch speakers and microphones, change the volume, mute the microphone and keep your Mac awake from the menu panel's sound tab.",

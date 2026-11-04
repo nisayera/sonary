@@ -20,7 +20,11 @@ struct PopoverView: View {
         let current = currentTab(in: panelModules)
         VStack(spacing: 10) {
             header
-            IconTabBar(tabs: tabs(for: panelModules), selection: Binding(get: { current }, set: { tab = $0 }))
+            ScrollView(.horizontal) {
+                IconTabBar(tabs: tabs(for: panelModules), selection: Binding(get: { current }, set: { tab = $0 }),
+                           minimumItemWidth: 34)
+            }
+            .scrollIndicators(.hidden)
             ScrollView {
                 VStack(spacing: Spacing.s) {
                     content(for: current, panelModules: panelModules)
@@ -32,8 +36,9 @@ struct PopoverView: View {
             footer
         }
         .padding(12)
-        .frame(width: 340)
+        .frame(width: 420)
         .tint(Color.sonaryAccent)
+        .environment(\.sonaryAppearance, model.appearance)
     }
 
     private func currentTab(in panelModules: [any SonaryModule]) -> PanelTab {

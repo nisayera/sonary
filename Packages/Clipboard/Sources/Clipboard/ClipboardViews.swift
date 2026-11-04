@@ -148,6 +148,9 @@ struct ClipboardPopoverView: View {
             Button { model.newTextFileInFinderFolder() } label: {
                 Label { Text("New text file in current folder", bundle: .module) } icon: { Image(systemName: "doc.badge.plus") }
             }
+            Button { model.saveClipboardImageToFinderFolder() } label: {
+                Label { Text("Save clipboard image here as PNG", bundle: .module) } icon: { Image(systemName: "photo.badge.arrow.down") }
+            }
             if let message = model.lastMessage {
                 Text(message).font(.caption).foregroundStyle(.secondary)
             }

@@ -1,6 +1,137 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "A chip temperature is unusually high.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Chip-Temperatur ist ungewöhnlich hoch."
+          }
+        }
+      }
+    },
+    "Alerts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warnungen"
+          }
+        }
+      }
+    },
+    "Battery": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akku"
+          }
+        }
+      }
+    },
+    "Battery left": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akku reicht noch"
+          }
+        }
+      }
+    },
+    "Busiest apps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktivste Apps"
+          }
+        }
+      }
+    },
+    "CPU": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU"
+          }
+        }
+      }
+    },
+    "Connection speed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbindungsgeschwindigkeit"
+          }
+        }
+      }
+    },
+    "Disk": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Festplatte"
+          }
+        }
+      }
+    },
+    "Downloaded": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empfangen"
+          }
+        }
+      }
+    },
+    "Fan speed": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lüfterdrehzahl"
+          }
+        }
+      }
+    },
+    "Fans": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lüfter"
+          }
+        }
+      }
+    },
+    "Free disk space is almost used up.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der freie Speicherplatz ist fast aufgebraucht."
+          }
+        }
+      }
+    },
+    "GPU": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPU"
+          }
+        }
+      }
+    },
     "High CPU load": {
       "localizations": {
         "de": {
@@ -21,22 +152,12 @@
         }
       }
     },
-    "Memory pressure": {
+    "Local address": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Speicherdruck"
-          }
-        }
-      }
-    },
-    "Low disk space": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wenig Speicherplatz"
+            "value": "Lokale Adresse"
           }
         }
       }
@@ -51,82 +172,23 @@
         }
       }
     },
-    "The CPU has been under heavy load for a while.": {
+    "Low disk space": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die CPU ist seit einiger Zeit stark ausgelastet."
+            "value": "Wenig Speicherplatz"
           }
         }
       }
     },
-    "A chip temperature is unusually high.": {
+    "Measure": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Eine Chip-Temperatur ist ungewöhnlich hoch."
-          }
-        }
-      }
-    },
-    "The system is running low on memory.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dem System geht der Arbeitsspeicher aus."
-          }
-        }
-      }
-    },
-    "Free disk space is almost used up.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der freie Speicherplatz ist fast aufgebraucht."
-          }
-        }
-      }
-    },
-    "Plug in your Mac soon.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schließe bald dein Ladegerät an."
-          }
-        }
-      }
-    },
-    "Monitor": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Monitor"
-          }
-        }
-      }
-    },
-    "CPU": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CPU"
-          }
-        }
-      }
-    },
-    "GPU": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GPU"
+            "value": "Messen"
           }
         }
       }
@@ -141,42 +203,12 @@
         }
       }
     },
-    "Network": {
+    "Memory pressure": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Netzwerk"
-          }
-        }
-      }
-    },
-    "Disk": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Festplatte"
-          }
-        }
-      }
-    },
-    "Battery": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Akku"
-          }
-        }
-      }
-    },
-    "Temperature": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temperatur"
+            "value": "Speicherdruck"
           }
         }
       }
@@ -191,32 +223,22 @@
         }
       }
     },
-    "Alerts": {
+    "Monitor": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Warnungen"
+            "value": "Monitor"
           }
         }
       }
     },
-    "Notify me about high load, temperature, low disk space and low battery": {
+    "Network": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Benachrichtige mich bei hoher Last, hoher Temperatur, wenig Speicherplatz und leerem Akku"
-          }
-        }
-      }
-    },
-    "Show values in the menu bar": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Werte in der Menüleiste zeigen"
+            "value": "Netzwerk"
           }
         }
       }
@@ -241,12 +263,62 @@
         }
       }
     },
-    "Busiest apps": {
+    "Notify me about high load, temperature, low disk space and low battery": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aktivste Apps"
+            "value": "Benachrichtige mich bei hoher Last, hoher Temperatur, wenig Speicherplatz und leerem Akku"
+          }
+        }
+      }
+    },
+    "Plug in your Mac soon.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließe bald dein Ladegerät an."
+          }
+        }
+      }
+    },
+    "Show values in the menu bar": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werte in der Menüleiste zeigen"
+          }
+        }
+      }
+    },
+    "Temperature": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temperatur"
+          }
+        }
+      }
+    },
+    "The CPU has been under heavy load for a while.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die CPU ist seit einiger Zeit stark ausgelastet."
+          }
+        }
+      }
+    },
+    "The system is running low on memory.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dem System geht der Arbeitsspeicher aus."
           }
         }
       }
@@ -261,62 +333,12 @@
         }
       }
     },
-    "Downloaded": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Empfangen"
-          }
-        }
-      }
-    },
     "Uploaded": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Gesendet"
-          }
-        }
-      }
-    },
-    "Local address": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lokale Adresse"
-          }
-        }
-      }
-    },
-    "Battery left": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Akku reicht noch"
-          }
-        }
-      }
-    },
-    "Fan speed": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lüfterdrehzahl"
-          }
-        }
-      }
-    },
-    "Fans": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lüfter"
           }
         }
       }
