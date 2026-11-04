@@ -5,7 +5,7 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.14.0.
+Status checked against the code at version 0.15.0.
 
 ## Audio
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
@@ -46,7 +46,7 @@ Status checked against the code at version 0.14.0.
 - [x] Double-click filter for worn buttons
 - [x] Keyboard debounce
 - [x] Super Key from Caps Lock or a right modifier, with a tap action and per-app exceptions
-- [ ] Central shortcut manager
+- [x] Central shortcut manager — every Sonary shortcut on one settings page, recordable, resettable, with clashes refused
 
 ## Clipboard, files and links
 - [x] Clipboard history — text, images and files, with search, pinning and thumbnails
