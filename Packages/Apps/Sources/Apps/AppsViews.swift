@@ -35,6 +35,21 @@ struct AppsPopoverView: View {
             } label: { EmptyView() }
                 .pickerStyle(.segmented)
                 .labelsHidden()
+            if let installer = model.installer {
+                row {
+                    Image(systemName: "externaldrive.badge.plus").foregroundStyle(Color.sonaryAccent)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(installer.name)
+                        Text("Found on a mounted disk image", bundle: .module)
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button { Task { await model.install(installer) } } label: {
+                        Text("Install", bundle: .module)
+                    }
+                    Button { model.dismissInstaller() } label: { Text("Ignore", bundle: .module) }
+                }
+            }
             if let message = model.message {
                 Text(message).font(.caption).foregroundStyle(.secondary)
             }

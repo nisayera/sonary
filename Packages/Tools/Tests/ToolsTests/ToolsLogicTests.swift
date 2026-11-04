@@ -246,3 +246,56 @@ struct MenuCommandTests {
         #expect(usefulMenuCommands(commands, limit: 10).count == 10)
     }
 }
+
+@Suite struct MediaToolTests {
+    @Test func keepsImagesThatAreAlreadySmallEnough() {
+        let big = scaledSize(width: 800, height: 600, longestEdge: 1200)
+        #expect(big.width == 800)
+        #expect(big.height == 600)
+        let off = scaledSize(width: 800, height: 600, longestEdge: 0)
+        #expect(off.width == 800)
+        #expect(off.height == 600)
+        let empty = scaledSize(width: 0, height: 0, longestEdge: 100)
+        #expect(empty.width == 0)
+        #expect(empty.height == 0)
+    }
+
+    @Test func scalesTheLongestEdgeAndKeepsTheRatio() {
+        let landscape = scaledSize(width: 4000, height: 3000, longestEdge: 1000)
+        #expect(landscape.width == 1000)
+        #expect(landscape.height == 750)
+        let portrait = scaledSize(width: 3000, height: 4000, longestEdge: 1000)
+        #expect(portrait.width == 750)
+        #expect(portrait.height == 1000)
+        let thin = scaledSize(width: 10_000, height: 3, longestEdge: 100)
+        #expect(thin.height >= 1)
+    }
+
+    @Test func neverOverwritesAnExistingExport() {
+        let source = URL(fileURLWithPath: "/tmp/pictures/Shot.heic")
+        let taken = ["Shot.jpg"]
+        let url = exportURL(for: source, format: .jpeg) { taken.contains($0) }
+        #expect(url.lastPathComponent == "Shot 2.jpg")
+        #expect(url.deletingLastPathComponent().path == "/tmp/pictures")
+    }
+
+    @Test func formatsCarryTheirExtension() {
+        #expect(ImageFormat.jpeg.fileExtension == "jpg")
+        #expect(ImageFormat.allCases.allSatisfy { !$0.fileExtension.isEmpty })
+    }
+
+    @Test func recordingNamesAreStampedAndSafe() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let date = calendar.date(from: DateComponents(year: 2026, month: 7, day: 1, hour: 14, minute: 2, second: 9))!
+        let name = recordingFileName(now: date, calendar: calendar)
+        #expect(name == "Sonary 2026-07-01 at 14.02.09.mp4")
+    }
+
+    @Test func bitrateStaysInAReasonableRange() {
+        #expect(recordingBitrate(width: 320, height: 240) == 2_000_000)
+        #expect(recordingBitrate(width: 7680, height: 4320) == 40_000_000)
+        let retina = recordingBitrate(width: 2560, height: 1440)
+        #expect(retina > 2_000_000 && retina < 40_000_000)
+    }
+}

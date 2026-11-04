@@ -49,6 +49,8 @@ public final class ToolsModel {
     @ObservationIgnored private let cleaning = CleaningModeController()
     @ObservationIgnored private let pinned = PinnedImageController()
     @ObservationIgnored private let camera = CameraPreviewController()
+    @ObservationIgnored private let recorder = ScreenRecorder()
+    public private(set) var isRecording = false
     /// Commands other modules add to the command bar, for example the clipboard history.
     @ObservationIgnored public var externalCommands: @MainActor () -> [ExternalCommand] = { [] }
     @ObservationIgnored private var running = false
@@ -77,6 +79,7 @@ public final class ToolsModel {
         cleaning.stop()
         pinned.closeAll()
         camera.close()
+        if isRecording { Task { await stopRecording() } }
     }
 
     /// The notes, with the old single scratchpad carried over the first time.
@@ -196,6 +199,75 @@ public final class ToolsModel {
 
     public func toggleCamera() { camera.toggle() }
 
+    // MARK: Screen recording
+
+    public func toggleRecording() {
+        Task { isRecording ? await stopRecording() : await startRecording() }
+    }
+
+    private func startRecording() async {
+        guard let folder = FileManager.default.urls(for: .moviesDirectory, in: .userDomainMask).first else { return }
+        let url = folder.appendingPathComponent(recordingFileName(now: Date()))
+        do {
+            try await recorder.start(to: url)
+            isRecording = true
+            report(String(localized: "Recording the screen.", bundle: .module))
+        } catch {
+            report(String(localized: "Allow Sonary to record the screen in System Settings > Privacy & Security.",
+                          bundle: .module))
+        }
+    }
+
+    private func stopRecording() async {
+        let url = await recorder.stop()
+        isRecording = false
+        guard let url else {
+            report(String(localized: "Nothing was recorded.", bundle: .module))
+            return
+        }
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+        report(String(localized: "Saved to \(url.lastPathComponent)", bundle: .module))
+    }
+
+    // MARK: Media tools
+
+    /// Converts the images the user picked, scaling and watermarking them as asked.
+    public func convertImages(_ urls: [URL], to format: ImageFormat, longestEdge: Int, watermark: String) {
+        guard !urls.isEmpty else { return }
+        Task {
+            let written = await Task.detached { () -> Int in
+                var done = 0
+                for url in urls {
+                    if (try? convertImage(at: url, to: format, longestEdge: longestEdge, watermark: watermark)) != nil {
+                        done += 1
+                    }
+                }
+                return done
+            }.value
+            if written == 0 {
+                report(String(localized: "No image could be converted.", bundle: .module))
+            } else {
+                report(String(localized: "Converted \(written) images.", bundle: .module))
+            }
+        }
+    }
+
+    /// Re-encodes a video smaller, next to the original.
+    public func compressVideos(_ urls: [URL]) {
+        guard !urls.isEmpty else { return }
+        Task {
+            var written = 0
+            for url in urls {
+                if (try? await compressVideo(at: url)) != nil { written += 1 }
+            }
+            if written == 0 {
+                report(String(localized: "No video could be compressed.", bundle: .module))
+            } else {
+                report(String(localized: "Compressed \(written) videos.", bundle: .module))
+            }
+        }
+    }
+
     public func screenshotToClipboard() {
         Task {
             _ = await capture(arguments: ["-i", "-c"])
@@ -272,6 +344,7 @@ public final class ToolsModel {
         case .cleaningMode: cleaning.start()
         case .pinScreenshot: pinScreenshot()
         case .cameraPreview: camera.toggle()
+        case .screenRecording: toggleRecording()
         case .commandBar: showCommandBar()
         case .textFromScreen: recognizeText()
         case .colorPicker: pickColor()

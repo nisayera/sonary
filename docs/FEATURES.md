@@ -5,7 +5,7 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.13.0.
+Status checked against the code at version 0.14.0.
 
 ## Audio
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
@@ -18,7 +18,7 @@ Status checked against the code at version 0.13.0.
 - [x] CPU, GPU, memory, temperatures, battery, history graphs and the busiest apps
 - [~] Fan speeds are read and shown, in the panel and the menu bar; no manual speed, no curves
 - [x] Configurable menu bar readouts — CPU, memory, network, battery, temperature and fan speed
-- [~] Network — live traffic, totals for this session and the local address; no speed test
+- [x] Network — live traffic, totals for this session, the local address and a speed test on demand
 - [x] Alerts for sustained CPU load, temperature, memory pressure, low disk space and low battery
 
 ## Windows and Dock
@@ -55,7 +55,7 @@ Status checked against the code at version 0.13.0.
 - [x] Drag shelf for files
 - [~] Finder helpers — copy path, open Terminal, new text file, save the clipboard image as a PNG; no ⌘X cut-and-paste, no F2 rename
 - [x] Strip tracking parameters from copied links
-- [ ] DMG installer helper
+- [x] DMG installer helper — a mounted image with one app offers to copy it into /Applications and eject itself
 
 ## Everyday tools
 - [~] Notch island — music, calendar, timer, downloads, accessory batteries, scroll gestures, simulated on displays without a notch; no notifications, lyrics, equalizer, camera or files
@@ -70,11 +70,11 @@ Status checked against the code at version 0.13.0.
 ## Capture
 - [ ] Unified capture selector with magnifier
 - [~] Screenshots through the system tool, with pinning a shot on top of everything; no scrolling capture, annotation, redaction, backgrounds or sharing
-- [ ] Screen recording
+- [x] Screen recording to an MP4, through ScreenCaptureKit
 - [x] Camera preview mirror, a floating round window from the tools tab
 - [x] Offline text recognition, including QR codes and barcodes
 - [x] Colour picker with HEX, RGB, HSL and SwiftUI formats
-- [ ] Media tools (video compression, image conversion, watermarks, GIF)
+- [~] Media tools — image conversion (PNG, JPEG, HEIC, TIFF) with downscaling and a text watermark, and video shrinking; no GIF yet
 
 ## App management
 - [~] Update checker — Homebrew formulae and casks, plus apps in /Applications that ship a Sparkle feed; no App Store
@@ -88,7 +88,7 @@ Status checked against the code at version 0.13.0.
 - [~] Keep awake with a timer, until turned off, while an app runs, while plugged in and with the lid closed; no display condition
 - [~] Per-display brightness through the system's own control, with dimming where it offers none; no DDC for external monitors
 - [ ] XDR extra brightness
-- [ ] Bluetooth off during sleep
+- [x] Bluetooth off during sleep, switched back on at wake and only if Sonary switched it off
 
 ## The app itself
 - [x] Menu panel with icon tabs and a settings window with a sidebar, laid out the way the original is

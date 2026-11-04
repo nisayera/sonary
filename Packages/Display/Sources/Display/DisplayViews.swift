@@ -43,6 +43,16 @@ struct DisplaySettingsView: View {
                               isOn: Binding(get: { model.settings.shortcuts },
                                             set: { value in model.update { $0.shortcuts = value } }))
         }
+        if model.canSwitchBluetooth {
+            SettingsCard(Text("Energy", bundle: .module)) {
+                SettingsToggleRow(symbol: "bolt.horizontal",
+                                  title: Text("Turn Bluetooth off while the Mac sleeps", bundle: .module),
+                                  caption: Text("Switched back on when it wakes, and only if Sonary switched it off.",
+                                                bundle: .module),
+                                  isOn: Binding(get: { model.settings.bluetoothOffDuringSleep },
+                                                set: { value in model.update { $0.bluetoothOffDuringSleep = value } }))
+            }
+        }
         SettingsCard(Text("Displays", bundle: .module)) {
             ForEach(model.displays) { display in
                 SettingsRow(symbol: display.isBuiltIn ? "laptopcomputer" : "display",

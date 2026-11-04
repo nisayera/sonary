@@ -1,52 +1,12 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Display": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anzeige"
-          }
-        }
-      }
-    },
     "Brightness": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Helligkeit"
-          }
-        }
-      }
-    },
-    "No display found.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kein Display gefunden."
-          }
-        }
-      }
-    },
-    "dimmed by Sonary": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "von Sonary abgedunkelt"
-          }
-        }
-      }
-    },
-    "Shortcuts": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kurzbefehle"
           }
         }
       }
@@ -71,12 +31,33 @@
         }
       }
     },
+    "Display": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anzeige"
+          }
+        }
+      }
+    },
     "Displays": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Displays"
+          }
+        }
+      }
+    },
+    "Energy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energie"
           }
         }
       }
@@ -91,12 +72,64 @@
         }
       }
     },
+    "No display found.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Display gefunden."
+          }
+        }
+      }
+    },
     "No hardware control: Sonary dims it with an overlay instead.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Keine Hardware-Steuerung: Sonary dunkelt stattdessen mit einer Ebene ab."
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Switched back on when it wakes, and only if Sonary switched it off.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird beim Aufwachen wieder eingeschaltet, und nur wenn Sonary es ausgeschaltet hat."
+          }
+        }
+      }
+    },
+    "Turn Bluetooth off while the Mac sleeps": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth ausschalten, während der Mac schläft"
+          }
+        }
+      }
+    },
+    "dimmed by Sonary": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "von Sonary abgedunkelt"
           }
         }
       }

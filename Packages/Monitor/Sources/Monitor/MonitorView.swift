@@ -66,6 +66,21 @@ public struct MonitorView: View {
                                     Text(verbatim: address).monospacedDigit()
                                 }
                             }
+                            HStack {
+                                Text("Connection speed", bundle: .module)
+                                Spacer()
+                                if module.isSpeedTesting {
+                                    ProgressView().controlSize(.small)
+                                } else if let result = module.speedTest {
+                                    Text(verbatim: "\(formatThroughput(result.downloadBitsPerSecond)) · \(formatLatency(result.latency))")
+                                        .monospacedDigit()
+                                } else {
+                                    Button { Task { await module.runSpeedTest() } } label: {
+                                        Text("Measure", bundle: .module)
+                                    }
+                                    .controlSize(.small)
+                                }
+                            }
                             if let time = module.batteryTime {
                                 HStack {
                                     Text("Battery left", bundle: .module)

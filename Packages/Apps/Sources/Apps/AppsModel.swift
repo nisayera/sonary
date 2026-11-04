@@ -44,6 +44,8 @@ public final class AppsModel {
     public private(set) var outdated: [OutdatedPackage] = []
     public private(set) var appUpdates: [AppUpdate] = []
     public private(set) var isCheckingApps = false
+    /// A mounted disk image that is offering exactly one app to install.
+    public private(set) var installer: MountedInstaller?
     public private(set) var brewAvailable = brewExecutable() != nil
     public private(set) var isBrewBusy = false
     public private(set) var uninstallPlan: UninstallPlan?
@@ -52,6 +54,8 @@ public final class AppsModel {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var scheduleTask: Task<Void, Never>?
+    @ObservationIgnored private var mountObserver: (any NSObjectProtocol)?
+    @ObservationIgnored private var unmountObserver: (any NSObjectProtocol)?
 
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -69,6 +73,7 @@ public final class AppsModel {
 
     func start() {
         guard scheduleTask == nil else { return }
+        observeMounts()
         scheduleTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.runScheduledWork()
@@ -80,6 +85,68 @@ public final class AppsModel {
     func stop() {
         scheduleTask?.cancel()
         scheduleTask = nil
+        let center = NSWorkspace.shared.notificationCenter
+        if let mountObserver { center.removeObserver(mountObserver) }
+        if let unmountObserver { center.removeObserver(unmountObserver) }
+        mountObserver = nil
+        unmountObserver = nil
+        installer = nil
+    }
+
+    // MARK: Disk images
+
+    /// Watches for a mounted disk image so the panel can offer to install the app in it.
+    private func observeMounts() {
+        guard mountObserver == nil else { return }
+        let center = NSWorkspace.shared.notificationCenter
+        mountObserver = center.addObserver(forName: NSWorkspace.didMountNotification,
+                                           object: nil, queue: .main) { [weak self] note in
+            let volume = note.userInfo?["NSDevicePath"] as? String
+            MainActor.assumeIsolated { self?.volumeMounted(volume) }
+        }
+        unmountObserver = center.addObserver(forName: NSWorkspace.didUnmountNotification,
+                                             object: nil, queue: .main) { [weak self] note in
+            let volume = note.userInfo?["NSDevicePath"] as? String
+            MainActor.assumeIsolated { self?.volumeUnmounted(volume) }
+        }
+    }
+
+    private func volumeMounted(_ path: String?) {
+        guard let path else { return }
+        let volume = URL(fileURLWithPath: path, isDirectory: true)
+        guard isInstallerVolume(volume) else { return }
+        let contents = (try? FileManager.default.contentsOfDirectory(
+            at: volume, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+        installer = installerApp(volume: volume, contents: contents)
+    }
+
+    private func volumeUnmounted(_ path: String?) {
+        guard let path, installer?.volume.path == path else { return }
+        installer = nil
+    }
+
+    public func dismissInstaller() { installer = nil }
+
+    /// Copies the app into /Applications, then ejects the image.
+    public func install(_ installer: MountedInstaller) async {
+        let destination = installDestination(for: installer)
+        let source = installer.app
+        let moved = await Task.detached { () -> Bool in
+            let manager = FileManager.default
+            if manager.fileExists(atPath: destination.path) {
+                guard (try? manager.trashItem(at: destination, resultingItemURL: nil)) != nil else { return false }
+            }
+            return (try? manager.copyItem(at: source, to: destination)) != nil
+        }.value
+        guard moved else {
+            message = String(localized: "\(installer.name) could not be copied to the Applications folder.",
+                             bundle: .module)
+            return
+        }
+        _ = try? NSWorkspace.shared.unmountAndEjectDevice(at: installer.volume)
+        self.installer = nil
+        message = String(localized: "\(installer.name) is in your Applications folder.", bundle: .module)
+        NSWorkspace.shared.activateFileViewerSelecting([destination])
     }
 
     public func update(_ change: (inout AppsSettings) -> Void) {

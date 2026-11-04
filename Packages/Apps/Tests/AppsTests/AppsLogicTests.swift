@@ -166,3 +166,36 @@ struct HousekeepingTests {
         #expect(good?.name == "Demo")
     }
 }
+
+@Suite struct DMGInstallerTests {
+    private let volume = URL(fileURLWithPath: "/Volumes/Demo", isDirectory: true)
+
+    @Test func offersAnImageThatHoldsExactlyOneApp() {
+        let one = installerApp(volume: volume, contents: [
+            volume.appendingPathComponent("Demo.app"),
+            volume.appendingPathComponent("Readme.txt"),
+        ])
+        #expect(one?.name == "Demo")
+        #expect(one?.app.lastPathComponent == "Demo.app")
+    }
+
+    @Test func leavesAmbiguousImagesAlone() {
+        #expect(installerApp(volume: volume, contents: []) == nil)
+        #expect(installerApp(volume: volume, contents: [volume.appendingPathComponent("Readme.txt")]) == nil)
+        #expect(installerApp(volume: volume, contents: [
+            volume.appendingPathComponent("A.app"), volume.appendingPathComponent("B.app"),
+        ]) == nil)
+    }
+
+    @Test func installsIntoApplicationsUnderTheSameName() {
+        let installer = MountedInstaller(volume: volume, app: volume.appendingPathComponent("Demo.app"), name: "Demo")
+        #expect(installDestination(for: installer).path == "/Applications/Demo.app")
+    }
+
+    @Test func ignoresSystemVolumes() {
+        #expect(isInstallerVolume(volume))
+        #expect(!isInstallerVolume(URL(fileURLWithPath: "/", isDirectory: true)))
+        #expect(!isInstallerVolume(URL(fileURLWithPath: "/Volumes/Recovery", isDirectory: true)))
+        #expect(!isInstallerVolume(URL(fileURLWithPath: "/Volumes/Macintosh HD", isDirectory: true)))
+    }
+}

@@ -1,5 +1,7 @@
+import AppKit
 import SonaryUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 private enum ToolsSection: String, CaseIterable, Identifiable {
     case tools, toggles, scratchpad, snippets
@@ -18,6 +20,7 @@ struct ToolsPopoverView: View {
     let model: ToolsModel
     @State private var section: ToolsSection = .tools
     @State private var previewingMarkdown = false
+    @State private var convertingImages = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
@@ -47,7 +50,12 @@ struct ToolsPopoverView: View {
             tool("circle.grid.cross", "Radial menu", "⌃⌥R") { model.showRadialMenu() }
             tool("pin", "Pin a screenshot", "") { model.pinScreenshot() }
             tool("web.camera", "Camera mirror", "") { model.toggleCamera() }
+            tool(model.isRecording ? "stop.circle" : "record.circle",
+                 model.isRecording ? "Stop recording" : "Record the screen", "") { model.toggleRecording() }
+            tool("photo.on.rectangle.angled", "Convert images…", "") { convertingImages = true }
+            tool("film", "Make a video smaller…", "") { pickVideos() }
         }
+        .sheet(isPresented: $convertingImages) { ImageConversionSheet(model: model) }
     }
 
     private var togglesView: some View {
@@ -118,6 +126,15 @@ struct ToolsPopoverView: View {
             }
             .buttonStyle(.borderless)
         }
+    }
+
+    private func pickVideos() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.allowedContentTypes = [.movie, .mpeg4Movie, .quickTimeMovie]
+        guard panel.runModal() == .OK else { return }
+        model.compressVideos(panel.urls)
     }
 
     private func tool(_ symbol: String, _ title: LocalizedStringKey, _ shortcut: String, action: @escaping () -> Void) -> some View {
@@ -239,5 +256,55 @@ extension Text {
         } else {
             self.init(verbatim: markdown)
         }
+    }
+}
+
+/// Picks the files, the format, a size limit and a watermark for a batch conversion.
+struct ImageConversionSheet: View {
+    let model: ToolsModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var format: ImageFormat = .jpeg
+    @State private var longestEdge = 0
+    @State private var watermark = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.m) {
+            Text("Convert images", bundle: .module).font(.headline)
+            Picker(selection: $format) {
+                ForEach(ImageFormat.allCases) { Text(verbatim: $0.rawValue.uppercased()).tag($0) }
+            } label: { Text("Format", bundle: .module) }
+            HStack {
+                Text("Longest edge", bundle: .module)
+                Spacer()
+                TextField(value: $longestEdge, format: .number) { EmptyView() }
+                    .labelsHidden().frame(width: 80)
+                Text("px, 0 keeps the size", bundle: .module).font(.caption).foregroundStyle(.secondary)
+            }
+            HStack {
+                Text("Watermark", bundle: .module)
+                Spacer()
+                TextField(text: $watermark) { EmptyView() }.labelsHidden().frame(width: 180)
+            }
+            Text("The converted copies land next to the originals.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            HStack {
+                Spacer()
+                Button { dismiss() } label: { Text("Cancel", bundle: .module) }
+                Button { pick() } label: { Text("Choose images…", bundle: .module) }
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(Spacing.l)
+        .frame(width: 420)
+    }
+
+    private func pick() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.allowedContentTypes = [.image]
+        guard panel.runModal() == .OK else { return }
+        model.convertImages(panel.urls, to: format, longestEdge: max(0, longestEdge), watermark: watermark)
+        dismiss()
     }
 }

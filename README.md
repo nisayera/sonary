@@ -38,7 +38,7 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 
 - **Modular.** One app, many tools. Enable just the ones you use.
 - **Native.** Swift 6 and SwiftUI, designed for Liquid Glass on macOS 26.
-- **Private.** Everything runs locally. The only network call is the update check.
+- **Private.** Everything runs locally. Sonary only reaches the network for the update check, the app update checker and the speed test — the last two only when you ask.
 - **Free.** GPL-3.0-or-later. No subscription, no "Pro" tier.
 - **Bilingual.** English and German interface.
 
@@ -95,6 +95,7 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 - [x] **M8 — Tools**
 - [x] **0.10 — Super Key, notch gestures, window switcher, brightness, quick toggles, radial menu**
 - [x] **0.12 — clipboard images and auto-clear, busiest apps and fans, horizontal scroll, key debounce, scheduled cleaning, scratchpad tabs, cleaning mode**
+- [x] **0.14 — screen recording, image conversion and video shrinking, speed test, Bluetooth off during sleep, disk image installer**
 - [x] **0.13 — adjustable transparency, edge snapping, focus follows mouse, switcher previews, menu commands and clipboard history in the command bar, pinned screenshots, camera preview, Markdown preview, media-key guard, keep-awake conditions, app update checker, clipboard image to Finder**
 
 Every milestone ships as its own release: M2 is 0.3.0, M8 is 0.9.0, and 1.0 arrives when the plan is done.

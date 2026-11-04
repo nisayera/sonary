@@ -140,3 +140,23 @@ struct LocalAddressTests {
         #expect(preferredLocalAddress([]) == nil)
     }
 }
+
+@Suite struct SpeedTestLogicTests {
+    @Test func refusesAMeasurementThatCannotMeanAnything() {
+        #expect(throughput(bytes: 1000, seconds: 0) == nil)
+        #expect(throughput(bytes: 1000, seconds: 0.001) == nil)
+        #expect(throughput(bytes: 0, seconds: 2) == nil)
+    }
+
+    @Test func turnsBytesAndSecondsIntoBits() {
+        #expect(throughput(bytes: 1_000_000, seconds: 1) == 8_000_000)
+        #expect(throughput(bytes: 1_000_000, seconds: 2) == 4_000_000)
+    }
+
+    @Test func readsThroughputTheWayAPersonWould() {
+        #expect(formatThroughput(94_300_000).hasSuffix("Mbit/s"))
+        #expect(formatThroughput(94_300_000).hasPrefix("94.3"))
+        #expect(formatThroughput(2_400_000_000).hasSuffix("Gbit/s"))
+        #expect(formatLatency(0.0184) == "18 ms")
+    }
+}
