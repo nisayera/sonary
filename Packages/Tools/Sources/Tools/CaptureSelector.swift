@@ -122,9 +122,15 @@ private final class SelectionView: NSView {
             start = nil
             current = nil
         }
-        guard let start, let current else { return onFinish?(nil) }
+        guard let start, let current else {
+            onFinish?(nil)
+            return
+        }
         let rect = clampSelection(selectionRect(from: start, to: current), to: bounds)
-        guard isSelectionUsable(rect) else { return onFinish?(nil) }
+        guard isSelectionUsable(rect) else {
+            onFinish?(nil)
+            return
+        }
         onFinish?(CGRect(x: rect.minX + screenOrigin.x, y: rect.minY + screenOrigin.y,
                          width: rect.width, height: rect.height))
     }
