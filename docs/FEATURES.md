@@ -5,11 +5,11 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.21.0.
+Status checked against the code at version 0.22.0.
 
 ## Audio
-- [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
-- [ ] Per-app output routing
+- [~] Per-app volume mixer — the panel shows which apps are playing; setting a single app's volume needs Sonary to take over the output path through a process tap, which is not built
+- [ ] Per-app output routing (same process-tap route as the mixer above)
 - [x] Output device switching, with a ⌃⌥O shortcut and an automatic volume drop when headphones are unplugged
 - [x] Microphone — preferred input, the ⌃⌥M mute shortcut, a level meter in the panel and a dot on screen while it is live
 - [x] Stop Music.app from launching itself on the media keys — Sonary passes the key to a player that is already running
@@ -58,8 +58,8 @@ Status checked against the code at version 0.21.0.
 - [x] DMG installer helper — a mounted image with one app offers to copy it into /Applications and eject itself
 
 ## Everyday tools
-- [~] Notch island — music, calendar, timer, downloads, accessory batteries, a file shelf, the camera, scroll gestures, simulated on displays without a notch; no notifications, lyrics or equalizer
-- [ ] AI agent tracking in the island (no public way to see another app's agent activity)
+- [~] Notch island — music, calendar, timer, downloads, accessory batteries, a file shelf, the camera, scroll gestures, simulated on displays without a notch; notifications and lyrics have no public source (another app's notifications cannot be read, lyrics need a licensed service), the equalizer needs the same audio tap as the mixer
+- [ ] AI agent tracking in the island — macOS offers no public way to see another app's agent activity
 - [x] Command bar — apps, snippets, scripts, files through Spotlight, Sonary's tools, the clipboard history, the front app's menu commands, a calculator, unit conversion and emoji
 - [x] Quick toggles: dark mode, desktop icons, empty Trash, eject disks, lock screen
 - [x] Quit-apps list

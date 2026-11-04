@@ -206,12 +206,34 @@
         }
       }
     },
+    "Nothing is playing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es spielt nichts."
+          }
+        }
+      }
+    },
     "Output": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Ausgabe"
+          }
+        }
+      }
+    },
+    "Playing now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielt gerade"
           }
         }
       }
@@ -226,6 +248,17 @@
         }
       }
     },
+    "Show": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigen"
+          }
+        }
+      }
+    },
     "Show a dot while the microphone is live": {
       "extractionState": "manual",
       "localizations": {
@@ -233,6 +266,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Punkt anzeigen, während das Mikrofon aktiv ist"
+          }
+        }
+      }
+    },
+    "Sonary can see which apps are playing. Setting each one's volume needs to take over the audio path, which Sonary does not do.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary sieht, welche Apps spielen. Die Lautstärke einzeln zu setzen würde den Audio-Pfad übernehmen – das tut Sonary nicht."
           }
         }
       }

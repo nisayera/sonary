@@ -146,3 +146,46 @@ struct MediaKeyTests {
                                          onPower: true, externalDisplays: 0))
     }
 }
+
+@Suite struct MixerEntryTests {
+    private func process(_ bundleID: String, pid: pid_t = 1, playing: Bool = true, object: UInt32 = 0)
+    -> AudioProcess {
+        AudioProcess(objectID: object == 0 ? UInt32(abs(bundleID.hashValue % 10_000)) : object,
+                     pid: pid, bundleID: bundleID, isPlaying: playing)
+    }
+
+    @Test func onlyWhatIsActuallyPlaying() {
+        let found = mixerEntries([
+            process("com.apple.Music"),
+            process("com.spotify.client", playing: false),
+        ], ownBundleID: nil)
+        #expect(found.map(\.bundleID) == ["com.apple.Music"])
+    }
+
+    @Test func sonaryLeavesItselfOut() {
+        let found = mixerEntries([
+            process("app.sonary.Sonary"),
+            process("com.apple.Music"),
+        ], ownBundleID: "app.sonary.Sonary")
+        #expect(found.map(\.bundleID) == ["com.apple.Music"])
+    }
+
+    @Test func anAppWithSeveralStreamsIsListedOnce() {
+        let found = mixerEntries([
+            process("com.apple.Safari", pid: 10, object: 1),
+            process("com.apple.Safari", pid: 11, object: 2),
+        ], ownBundleID: nil)
+        #expect(found.count == 1)
+    }
+
+    @Test func aProcessWithoutABundleIsNotWorthShowing() {
+        #expect(mixerEntries([process("")], ownBundleID: nil).isEmpty)
+    }
+
+    @Test func theOrderDoesNotJumpAbout() {
+        let found = mixerEntries([
+            process("com.zed.Zed"), process("com.apple.Music"), process("com.spotify.client"),
+        ], ownBundleID: nil)
+        #expect(found.map(\.bundleID) == ["com.apple.Music", "com.spotify.client", "com.zed.Zed"])
+    }
+}

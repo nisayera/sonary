@@ -47,6 +47,32 @@ struct SoundPopoverView: View {
                               caption: model.settings.micMuteShortcut ? Text(verbatim: "⌃⌥M") : nil,
                               isOn: Binding(get: { model.micMuted }, set: { _ in model.toggleMicMute() }))
         }
+        SettingsCard(Text("Playing now", bundle: .module)) {
+            if model.playingApps.isEmpty {
+                Text("Nothing is playing.", bundle: .module).font(.callout).foregroundStyle(.secondary)
+            }
+            ForEach(model.playingApps) { process in
+                HStack(spacing: 8) {
+                    if let icon = NSRunningApplication(processIdentifier: process.pid)?.icon {
+                        Image(nsImage: icon).resizable().frame(width: 18, height: 18)
+                    }
+                    Text(verbatim: model.appName(for: process)).lineLimit(1)
+                    Spacer()
+                    Button { model.reveal(process) } label: { Text("Show", bundle: .module) }
+                        .controlSize(.small)
+                }
+            }
+            Text("Sonary can see which apps are playing. Setting each one's volume needs to take over the audio path, which Sonary does not do.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .task {
+            // Refreshed while the panel is open, and not otherwise.
+            while !Task.isCancelled {
+                model.refreshPlayingApps()
+                try? await Task.sleep(for: .seconds(2))
+            }
+        }
         SettingsCard(Text("Keep awake", bundle: .module)) {
             if model.keepAwakeActive {
                 HStack {

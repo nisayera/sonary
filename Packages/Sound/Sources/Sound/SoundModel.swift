@@ -59,6 +59,9 @@ public final class SoundModel {
     public private(set) var micMuted = false
     /// The microphone's loudness while the meter is being watched, 0 to 1.
     public private(set) var inputLevel: Double = 0
+    /// The apps playing sound right now. Read-only: Sonary cannot set their volume
+    /// without taking over the output path, which it does not do.
+    public private(set) var playingApps: [AudioProcess] = []
     public private(set) var keepAwakeEndsAt: Date?
     public private(set) var keepAwakeActive = false
     public private(set) var settings: SoundSettings
@@ -258,6 +261,23 @@ public final class SoundModel {
         if settings.outputSwitchShortcut {
             shortcuts.bind("sound.cycleOutput") { [weak self] in self?.cycleOutput() }
         }
+    }
+
+    // MARK: Which apps are playing
+
+    /// Asks Core Audio which apps are making a sound. Nothing is changed by asking,
+    /// so this cannot disturb what is playing.
+    public func refreshPlayingApps() {
+        playingApps = mixerEntries(ProcessAudioReader.processes(), ownBundleID: Bundle.main.bundleIdentifier)
+    }
+
+    /// Brings an app forward so its own volume can be set where it belongs.
+    public func reveal(_ process: AudioProcess) {
+        NSRunningApplication(processIdentifier: process.pid)?.activate()
+    }
+
+    public func appName(for process: AudioProcess) -> String {
+        NSRunningApplication(processIdentifier: process.pid)?.localizedName ?? process.bundleID
     }
 
     // MARK: Microphone level
