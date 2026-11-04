@@ -32,6 +32,17 @@
         }
       }
     },
+    "All apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Apps"
+          }
+        }
+      }
+    },
     "Asks for the Screen Recording permission the first time.": {
       "localizations": {
         "de": {
@@ -98,6 +109,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schließen"
+          }
+        }
+      }
+    },
+    "Confirm by": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestätigen durch"
           }
         }
       }
@@ -181,6 +203,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fokus folgt dem Zeiger"
+          }
+        }
+      }
+    },
+    "Hold ⌘Q to quit %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘Q halten, um %@ zu beenden"
+          }
+        }
+      }
+    },
+    "Hold ⌘W to close this window": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘W halten, um dieses Fenster zu schließen"
+          }
+        }
+      }
+    },
+    "Holding the keys": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasten halten"
           }
         }
       }
@@ -334,6 +389,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "⌘W zweimal drücken zum Schließen"
+          }
+        }
+      }
+    },
+    "Pressing twice": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zweimal drücken"
           }
         }
       }

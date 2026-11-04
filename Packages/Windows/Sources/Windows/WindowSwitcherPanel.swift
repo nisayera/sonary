@@ -79,10 +79,11 @@ struct WindowSwitcherView: View {
     let choose: (WindowEntry) -> Void
     let cancel: () -> Void
     @State private var query = ""
+    @State private var app: String?
     @State private var selected = 0
     @FocusState private var focused: Bool
 
-    private var results: [WindowEntry] { filteredEntries(entries, query: query) }
+    private var results: [WindowEntry] { filteredEntries(entries, query: query, app: app) }
 
     var body: some View {
         let list = results
@@ -93,6 +94,16 @@ struct WindowSwitcherView: View {
                 .focused($focused)
                 .onSubmit { pick(list) }
                 .onChange(of: query) { _, _ in selected = 0 }
+            let apps = appNames(in: entries)
+            if apps.count > 1 {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        filterChip(title: String(localized: "All apps", bundle: .module), value: nil)
+                        ForEach(apps, id: \.self) { name in filterChip(title: name, value: name) }
+                    }
+                }
+                .frame(height: 26)
+            }
             Divider()
             ScrollView {
                 VStack(spacing: 2) {
@@ -125,6 +136,21 @@ struct WindowSwitcherView: View {
         .onKeyPress(.upArrow) { selected = nextIndex(from: selected, count: list.count, forward: false); return .handled }
         .onKeyPress(.tab) { selected = nextIndex(from: selected, count: list.count, forward: true); return .handled }
         .onKeyPress(.escape) { cancel(); return .handled }
+    }
+
+    private func filterChip(title: String, value: String?) -> some View {
+        Button {
+            app = value
+            selected = 0
+        } label: {
+            Text(verbatim: title)
+                .font(.caption)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 3)
+                .background(app == value ? Color.sonaryAccent.opacity(0.28) : Color.secondary.opacity(0.14),
+                            in: Capsule())
+        }
+        .buttonStyle(.plain)
     }
 
     private func pick(_ list: [WindowEntry]) {

@@ -1,6 +1,28 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld files moved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Dateien verschoben."
+          }
+        }
+      }
+    },
+    "%lld files ready to move. Paste them in another folder.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Dateien bereit zum Verschieben. Füge sie in einem anderen Ordner ein."
+          }
+        }
+      }
+    },
     "Allow Sonary to control Finder in System Settings > Privacy & Security > Automation.": {
       "localizations": {
         "de": {
@@ -132,6 +154,17 @@
         }
       }
     },
+    "Cut the selected files": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgewählte Dateien ausschneiden"
+          }
+        }
+      }
+    },
     "Drag files out of the shelf to move or copy them.": {
       "localizations": {
         "de": {
@@ -222,12 +255,34 @@
         }
       }
     },
+    "Move them into this folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In diesen Ordner verschieben"
+          }
+        }
+      }
+    },
     "New text file in current folder": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Neue Textdatei im aktuellen Ordner"
+          }
+        }
+      }
+    },
+    "Nothing was cut.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es wurde nichts ausgeschnitten."
           }
         }
       }
@@ -333,6 +388,17 @@
         }
       }
     },
+    "Rename the selected file": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgewählte Datei umbenennen"
+          }
+        }
+      }
+    },
     "Save clipboard image here as PNG": {
       "extractionState": "manual",
       "localizations": {
@@ -401,6 +467,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Entfernt die Formatierung, setzt ein und stellt den ursprünglichen Inhalt danach wieder her. Braucht die Berechtigung Bedienungshilfen."
+          }
+        }
+      }
+    },
+    "The files could not be moved there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Dateien konnten dort nicht abgelegt werden."
           }
         }
       }

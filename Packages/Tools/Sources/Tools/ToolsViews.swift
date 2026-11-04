@@ -212,6 +212,14 @@ struct ToolsSettingsView: View {
             }
         }
         SettingsCard(Text("Snippets", bundle: .module)) {
+            SettingsRow(symbol: "text.cursor", title: Text("Insert a snippet by", bundle: .module)) {
+                Picker(selection: Binding(get: { model.settings.snippetDelivery },
+                                          set: { value in model.update { $0.snippetDelivery = value } })) {
+                    Text("Typing it", bundle: .module).tag(SnippetDelivery.type)
+                    Text("Putting it on the clipboard", bundle: .module).tag(SnippetDelivery.clipboard)
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 220)
+            }
             Text("Placeholders: {date}, {time} and {clipboard}.", bundle: .module).font(.caption).foregroundStyle(.secondary)
             ForEach(model.settings.snippets) { snippet in
                 HStack(alignment: .top) {

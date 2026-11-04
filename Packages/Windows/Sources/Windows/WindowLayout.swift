@@ -95,6 +95,45 @@ public enum ProtectedKey: String, Sendable, Equatable {
     case close
 }
 
+/// How a protected shortcut is confirmed: press it twice, or hold it down.
+public enum QuitConfirmation: String, CaseIterable, Codable, Sendable, Identifiable {
+    case pressTwice, hold
+
+    public var id: String { rawValue }
+}
+
+/// Holding a protected shortcut: it goes through once it has been held long enough.
+/// Letting go early cancels, so a slip of the finger never quits anything.
+public struct HoldGuard: Sendable {
+    public var duration: Double
+    private var heldSince: Double?
+    private var held: String?
+
+    public init(duration: Double = 0.6) { self.duration = duration }
+
+    /// A key-down. Returns true when it has already been held long enough.
+    public mutating func down(app: String, key: ProtectedKey, at time: Double) -> Bool {
+        let identity = "\(app)#\(key.rawValue)"
+        guard held == identity, let heldSince else {
+            held = identity
+            heldSince = time
+            return false
+        }
+        return time - heldSince >= duration
+    }
+
+    /// Progress from 0 to 1, for the hint Sonary shows while the keys are down.
+    public func progress(app: String, key: ProtectedKey, at time: Double) -> Double {
+        guard held == "\(app)#\(key.rawValue)", let heldSince, duration > 0 else { return 0 }
+        return min(max((time - heldSince) / duration, 0), 1)
+    }
+
+    public mutating func up() {
+        held = nil
+        heldSince = nil
+    }
+}
+
 /// The shortcut has to be pressed twice within `window` seconds to go through.
 public struct QuitGuard: Sendable {
     public var window: Double

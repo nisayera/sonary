@@ -281,6 +281,17 @@
         }
       }
     },
+    "Insert a snippet by": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baustein einfügen durch"
+          }
+        }
+      }
+    },
     "Keyboard and screen are locked for cleaning": {
       "localizations": {
         "de": {
@@ -499,6 +510,17 @@
         }
       }
     },
+    "Putting it on the clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In die Zwischenablage legen"
+          }
+        }
+      }
+    },
     "Radial menu": {
       "localizations": {
         "de": {
@@ -631,6 +653,17 @@
         }
       }
     },
+    "Snippet typed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baustein getippt."
+          }
+        }
+      }
+    },
     "Snippets": {
       "localizations": {
         "de": {
@@ -720,6 +753,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Video in ein GIF umwandeln …"
+          }
+        }
+      }
+    },
+    "Typing it": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippen"
           }
         }
       }

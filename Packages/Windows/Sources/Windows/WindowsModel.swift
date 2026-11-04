@@ -24,6 +24,8 @@ public struct WindowsSettings: Codable, Equatable, Sendable {
     public var dockClickAction: DockClickAction = .system
     /// Show the app's windows, across every Space, when the pointer rests on its Dock icon.
     public var dockPreviews = false
+    /// Press a protected shortcut twice, or hold it down.
+    public var quitConfirmation: QuitConfirmation = .pressTwice
 
     public init() {}
 }
@@ -52,6 +54,8 @@ public final class WindowsModel {
     @ObservationIgnored private var quitTap: CFMachPort?
     @ObservationIgnored private var quitSource: CFRunLoopSource?
     @ObservationIgnored private var quitGuard = QuitGuard()
+    @ObservationIgnored private var holdGuard = HoldGuard()
+    @ObservationIgnored private var hudProgress: Double = 0
     /// The frame a window had before the last layout, so it can be put back.
     @ObservationIgnored private var previousFrames: [pid_t: CGRect] = [:]
     @ObservationIgnored private var windowCounts: [Int32: Int] = [:]
@@ -535,29 +539,47 @@ public final class WindowsModel {
         case 13 where settings.closeProtection: .close
         default: nil
         }
-        guard type == .keyDown, plainCommand, let key, !isRepeat,
+        // Holding needs the repeats, which is how it knows the keys are still down.
+        let wantsRepeats = settings.quitConfirmation == .hold
+        guard type == .keyDown, plainCommand, let key, !isRepeat || wantsRepeats,
               let app = NSWorkspace.shared.frontmostApplication,
               let bundleID = app.bundleIdentifier, bundleID != "com.apple.finder",
               isProtected(bundleID: bundleID, onlyApps: settings.protectedApps) else {
+            if type == .keyUp, settings.quitConfirmation == .hold {
+                holdGuard.up()
+                hideHUD()
+            }
             return true
         }
-        if quitGuard.shouldQuit(app: bundleID, key: key, at: ProcessInfo.processInfo.systemUptime) {
-            return true
+        let now = ProcessInfo.processInfo.systemUptime
+        switch settings.quitConfirmation {
+        case .pressTwice:
+            if quitGuard.shouldQuit(app: bundleID, key: key, at: now) { return true }
+            showHUD(appName: app.localizedName ?? bundleID, key: key)
+        case .hold:
+            if holdGuard.down(app: bundleID, key: key, at: now) {
+                holdGuard.up()
+                hideHUD()
+                return true
+            }
+            showHUD(appName: app.localizedName ?? bundleID, key: key,
+                    progress: holdGuard.progress(app: bundleID, key: key, at: now))
         }
-        showHUD(appName: app.localizedName ?? bundleID, key: key)
         return false
     }
 
-    private func showHUD(appName: String, key: ProtectedKey) {
+    /// The hint while a protected shortcut waits. With a progress value it shows a bar
+    /// filling up, so holding has something to look at.
+    private func showHUD(appName: String, key: ProtectedKey, progress: Double? = nil) {
+        let text = hudText(appName: appName, key: key, holding: progress != nil)
+        // While holding, the panel is only rebuilt once; after that the bar is updated.
+        if let progress, let existing = hud, existing.identifier?.rawValue == text {
+            hudProgress = progress
+            return
+        }
         hud?.orderOut(nil)
-        let text = key == .quit
-            ? String(localized: "Press ⌘Q again to quit \(appName)", bundle: .module)
-            : String(localized: "Press ⌘W again to close this window", bundle: .module)
-        let view = Text(text)
-            .font(.title3.weight(.semibold))
-            .padding(.horizontal, 22)
-            .padding(.vertical, 14)
-            .glassEffect(.regular, in: Capsule())
+        hudProgress = progress ?? 0
+        let view = QuitHintView(text: text, progress: progress == nil ? nil : { [weak self] in self?.hudProgress ?? 0 })
         let host = NSHostingView(rootView: view)
         let size = host.fittingSize
         let panel = NSPanel(contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless, .nonactivatingPanel],
@@ -566,16 +588,33 @@ public final class WindowsModel {
         panel.backgroundColor = .clear
         panel.level = .statusBar
         panel.ignoresMouseEvents = true
+        panel.identifier = NSUserInterfaceItemIdentifier(text)
         panel.contentView = host
         if let screen = NSScreen.main {
-            panel.setFrameOrigin(CGPoint(x: screen.frame.midX - size.width / 2, y: screen.frame.minY + screen.frame.height * 0.2))
+            panel.setFrameOrigin(CGPoint(x: screen.frame.midX - size.width / 2,
+                                         y: screen.frame.minY + screen.frame.height * 0.2))
         }
         panel.orderFrontRegardless()
         hud = panel
+        guard progress == nil else { return }  // holding takes it away on key-up
         Task { [weak self, weak panel] in
             try? await Task.sleep(for: .seconds(1.6))
             panel?.orderOut(nil)
             if self?.hud === panel { self?.hud = nil }
+        }
+    }
+
+    private func hideHUD() {
+        hud?.orderOut(nil)
+        hud = nil
+    }
+
+    private func hudText(appName: String, key: ProtectedKey, holding: Bool) -> String {
+        switch (key, holding) {
+        case (.quit, false): String(localized: "Press ⌘Q again to quit \(appName)", bundle: .module)
+        case (.close, false): String(localized: "Press ⌘W again to close this window", bundle: .module)
+        case (.quit, true): String(localized: "Hold ⌘Q to quit \(appName)", bundle: .module)
+        case (.close, true): String(localized: "Hold ⌘W to close this window", bundle: .module)
         }
     }
 }

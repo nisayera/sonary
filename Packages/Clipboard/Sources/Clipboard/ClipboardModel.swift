@@ -10,6 +10,8 @@ public final class ClipboardModel {
     public private(set) var settings: ClipboardSettings
     public private(set) var shelf: [URL] = []
     public private(set) var lastMessage: String?
+    /// Files waiting to be moved by a paste, since Finder has no cut of its own.
+    public private(set) var cutFiles: [URL] = []
 
     @ObservationIgnored private let store: ClipboardStore
     @ObservationIgnored private var pollTask: Task<Void, Never>?
@@ -17,6 +19,7 @@ public final class ClipboardModel {
     @ObservationIgnored private var autoClearTask: Task<Void, Never>?
     @ObservationIgnored private var sleepObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var lockObserver: (any NSObjectProtocol)?
+
 
     /// Where copied images are kept, next to the rest of Sonary's data.
     private var imageFolder: URL? {
@@ -325,6 +328,63 @@ public final class ClipboardModel {
         if FileManager.default.createFile(atPath: url.path, contents: Data()) {
             NSWorkspace.shared.activateFileViewerSelecting([url])
         }
+    }
+
+    /// Remembers files for a move rather than a copy. Finder has no cut, so Sonary
+    /// keeps the list and moves them when you paste.
+    public func cutFinderSelection() {
+        guard let paths = finderSelectionPaths(), !paths.isEmpty else {
+            lastMessage = String(localized: "Select files in Finder first.", bundle: .module)
+            return
+        }
+        cutFiles = paths.map { URL(fileURLWithPath: $0) }
+        lastMessage = String(localized: "\(cutFiles.count) files ready to move. Paste them in another folder.",
+                             bundle: .module)
+    }
+
+    /// Moves what was cut into the front Finder window.
+    public func pasteCutFiles() {
+        guard !cutFiles.isEmpty else {
+            lastMessage = String(localized: "Nothing was cut.", bundle: .module)
+            return
+        }
+        guard let folder = currentFinderFolder() else { return }
+        var moved = 0
+        for file in cutFiles {
+            let destination = folder.appendingPathComponent(file.lastPathComponent)
+            guard destination.path != file.path else { continue }
+            if (try? FileManager.default.moveItem(at: file, to: destination)) != nil { moved += 1 }
+        }
+        cutFiles = []
+        lastMessage = moved == 0
+            ? String(localized: "The files could not be moved there.", bundle: .module)
+            : String(localized: "\(moved) files moved.", bundle: .module)
+        NSWorkspace.shared.activateFileViewerSelecting([folder])
+    }
+
+    /// Starts renaming the selected file, which is what F2 does on other systems.
+    public func renameFinderSelection() {
+        let script = """
+        tell application "Finder" to activate
+        tell application "System Events" to tell process "Finder" to key code 36
+        """
+        guard runFinderScript(script) != nil else { return }
+    }
+
+    /// The POSIX paths of what is selected in Finder.
+    private func finderSelectionPaths() -> [String]? {
+        let script = """
+        tell application "Finder"
+            set chosen to selection as alias list
+            set output to ""
+            repeat with item_ in chosen
+                set output to output & POSIX path of item_ & linefeed
+            end repeat
+            return output
+        end tell
+        """
+        guard let text = runFinderScript(script) else { return nil }
+        return text.split(separator: "\n").map(String.init).filter { !$0.isEmpty }
     }
 
     /// Writes the image on the clipboard into the front Finder window as a PNG.

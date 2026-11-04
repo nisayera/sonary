@@ -22,17 +22,17 @@ Status checked against the code at version 0.18.0.
 - [x] Alerts for sustained CPU load, temperature, memory pressure, low disk space and low battery
 
 ## Windows and Dock
-- [~] Window switcher — every window, with search, live previews and raise on ⌃⌥Tab; no filters
+- [x] Window switcher — every window, with word-by-word search, a filter per app, live previews and raise on ⌃⌥Tab
 - [~] Window layouts — halves, quarters, thirds, maximize, centre, move to the next display and put back, on ⌃⌥ shortcuts and by dragging a window to a screen edge; no modifier-drag
 - [x] Dock window previews across Spaces, when the pointer rests on an icon
 - [x] Dock icon click actions — cycle the app's windows, minimize them all or show them all
 - [x] A layout that fills the screen, menu bar strip included, without a new Space (⌃⌥B)
 - [x] Fixed Space order — stops macOS rearranging Spaces by most recent use, through the Dock's own preference
 - [x] Quit apps when their last window closes
-- [~] ⌘Q and ⌘W protection — press twice, with per-app rules; no hold mode
+- [x] ⌘Q and ⌘W protection — press twice or hold the keys, with per-app rules and a bar while holding
 
 ## Keyboard and mouse
-- [~] Text snippets with variables — {date}, {time}, {clipboard}, searchable in the command bar; they land in the clipboard instead of being typed
+- [x] Text snippets with variables — {date}, {time}, {clipboard}, searchable in the command bar, typed where the cursor is or put on the clipboard
 - [x] Smooth scrolling, adjustable
 - [x] Pointer acceleration off, restored when the module stops or after a crash
 - [x] Linear scrolling with a fixed number of lines per notch
@@ -53,7 +53,7 @@ Status checked against the code at version 0.18.0.
 - [x] Auto-clear after a delay, on sleep or on lock
 - [x] Paste as plain text on ⌘⌥⇧V, putting the original clipboard back afterwards
 - [x] Drag shelf for files
-- [~] Finder helpers — copy path, open Terminal, new text file, save the clipboard image as a PNG; no ⌘X cut-and-paste, no F2 rename
+- [x] Finder helpers — copy path, open Terminal, new text file, save the clipboard image as a PNG, cut and move files, rename the selection
 - [x] Strip tracking parameters from copied links
 - [x] DMG installer helper — a mounted image with one app offers to copy it into /Applications and eject itself
 

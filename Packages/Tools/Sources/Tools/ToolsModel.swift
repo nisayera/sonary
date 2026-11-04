@@ -14,6 +14,8 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var scratchpadTabs: [ScratchpadTab] = []
     /// Use Sonary's own region selector, with a magnifier, instead of the system one.
     public var ownCaptureSelector = false
+    /// Whether a snippet is typed where the cursor is or put on the clipboard.
+    public var snippetDelivery: SnippetDelivery = .type
     public var activeTab: UUID?
     public init() {}
 }
@@ -383,8 +385,19 @@ public final class ToolsModel {
 
     public func insert(_ snippet: Snippet) {
         let clipboard = NSPasteboard.general.string(forType: .string)
-        copy(expandSnippet(snippet.text, now: Date(), clipboard: clipboard))
-        report(String(localized: "Snippet copied. Press ⌘V to paste it.", bundle: .module))
+        let text = expandSnippet(snippet.text, now: Date(), clipboard: clipboard)
+        guard settings.snippetDelivery == .type else {
+            copy(text)
+            report(String(localized: "Snippet copied. Press ⌘V to paste it.", bundle: .module))
+            return
+        }
+        // The panel has the keyboard while it is open, so the text goes to whatever
+        // had it before, once Sonary is out of the way.
+        Task {
+            try? await Task.sleep(for: .milliseconds(120))
+            TypeText.type(text)
+        }
+        report(String(localized: "Snippet typed.", bundle: .module))
     }
 
     public func addSnippet() {

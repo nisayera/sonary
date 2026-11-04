@@ -45,7 +45,25 @@ public func nextIndex(from index: Int, count: Int, forward: Bool) -> Int {
 
 /// Filters the list by what the user typed; empty query keeps the order.
 public func filteredEntries(_ entries: [WindowEntry], query: String) -> [WindowEntry] {
+    filteredEntries(entries, query: query, app: nil)
+}
+
+/// The same, narrowed to one app as well. `app` is an app name from `appNames`.
+public func filteredEntries(_ entries: [WindowEntry], query: String, app: String?) -> [WindowEntry] {
+    var result = entries
+    if let app, !app.isEmpty { result = result.filter { $0.appName == app } }
     let q = query.trimmingCharacters(in: .whitespaces)
-    guard !q.isEmpty else { return entries }
-    return entries.filter { $0.label.localizedCaseInsensitiveContains(q) }
+    guard !q.isEmpty else { return result }
+    // A query with a space matches each word, so "saf dow" finds a Safari download.
+    let words = q.split(separator: " ").map(String.init)
+    return result.filter { entry in
+        words.allSatisfy { entry.label.localizedCaseInsensitiveContains($0) }
+    }
+}
+
+/// The apps that have windows open, for the filter row, in the order they appear.
+public func appNames(in entries: [WindowEntry]) -> [String] {
+    var seen: [String] = []
+    for entry in entries where !seen.contains(entry.appName) { seen.append(entry.appName) }
+    return seen.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
 }

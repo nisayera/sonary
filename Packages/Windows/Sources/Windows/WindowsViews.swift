@@ -128,6 +128,14 @@ struct WindowsSettingsView: View {
                               isOn: Binding(get: { model.settings.closeProtection },
                                             set: { value in model.update { $0.closeProtection = value } }))
             if model.settings.quitProtection || model.settings.closeProtection {
+                SettingsRow(symbol: "hand.raised", title: Text("Confirm by", bundle: .module)) {
+                    Picker(selection: Binding(get: { model.settings.quitConfirmation },
+                                              set: { value in model.update { $0.quitConfirmation = value } })) {
+                        Text("Pressing twice", bundle: .module).tag(QuitConfirmation.pressTwice)
+                        Text("Holding the keys", bundle: .module).tag(QuitConfirmation.hold)
+                    } label: { EmptyView() }
+                        .labelsHidden().frame(width: 180)
+                }
                 Divider()
                 Group {
                     if model.settings.protectedApps.isEmpty {
@@ -163,5 +171,36 @@ extension WindowsSettingsView {
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
         guard panel.runModal() == .OK, let url = panel.url, let id = Bundle(url: url)?.bundleIdentifier else { return }
         model.update { if !$0.protectedApps.contains(id) { $0.protectedApps.append(id) } }
+    }
+}
+
+/// The hint shown while a protected shortcut waits. While it is being held, a bar
+/// fills up so there is something to look at and a reason to keep holding.
+struct QuitHintView: View {
+    let text: String
+    /// Nil for the press-twice hint, which has no bar.
+    let progress: (() -> Double)?
+    @State private var filled: Double = 0
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(verbatim: text).font(.title3.weight(.semibold))
+            if progress != nil {
+                ProgressView(value: filled)
+                    .progressViewStyle(.linear)
+                    .tint(Color.sonaryAccent)
+                    .frame(width: 180)
+            }
+        }
+        .padding(.horizontal, 22)
+        .padding(.vertical, 14)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .task {
+            guard let progress else { return }
+            while !Task.isCancelled {
+                filled = progress()
+                try? await Task.sleep(for: .milliseconds(40))
+            }
+        }
     }
 }

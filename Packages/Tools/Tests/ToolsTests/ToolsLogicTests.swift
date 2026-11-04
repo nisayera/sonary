@@ -372,3 +372,26 @@ struct MenuCommandTests {
         #expect(nearEdge.x >= 0 && nearEdge.y >= 0)
     }
 }
+
+@Suite struct TypeTextTests {
+    @MainActor
+    @Test func splitsTextIntoChunksTheEventCanCarry() {
+        let chunks = TypeText.chunks(of: String(repeating: "a", count: 40), size: 16)
+        #expect(chunks.count == 3)
+        #expect(chunks.map(\.count) == [16, 16, 8])
+    }
+
+    @MainActor
+    @Test func keepsEmojiAndAccentsWhole() {
+        // Characters outside the basic plane take two UTF-16 units; nothing may be lost.
+        let text = "Grüße 🙂"
+        let units = TypeText.chunks(of: text, size: 4).flatMap { $0 }
+        #expect(String(decoding: units, as: UTF16.self) == text)
+    }
+
+    @MainActor
+    @Test func nothingToTypeIsNoChunks() {
+        #expect(TypeText.chunks(of: "").isEmpty)
+        #expect(TypeText.chunks(of: "abc", size: 0).isEmpty)
+    }
+}
