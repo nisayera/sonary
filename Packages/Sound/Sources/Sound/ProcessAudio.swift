@@ -70,9 +70,13 @@ enum ProcessAudioReader {
                                                  mScope: kAudioObjectPropertyScopeGlobal,
                                                  mElement: kAudioObjectPropertyElementMain)
         var size = UInt32(MemoryLayout<CFString?>.size)
-        var result: CFString?
-        guard AudioObjectGetPropertyData(objectID, &address, 0, nil, &size, &result) == noErr,
-              let result else { return nil }
-        return result as String
+        // Core Audio hands back a string the caller owns, so it is taken retained;
+        // a plain `&result` on an Optional<CFString> is not a safe buffer for it.
+        let pointer = UnsafeMutablePointer<Unmanaged<CFString>?>.allocate(capacity: 1)
+        pointer.initialize(to: nil)
+        defer { pointer.deallocate() }
+        guard AudioObjectGetPropertyData(objectID, &address, 0, nil, &size, pointer) == noErr,
+              let value = pointer.pointee else { return nil }
+        return value.takeRetainedValue() as String
     }
 }
