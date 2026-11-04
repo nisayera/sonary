@@ -214,6 +214,17 @@
         }
       }
     },
+    "Park files on the notch and drag them out again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dateien auf der Notch parken und wieder herausziehen."
+          }
+        }
+      }
+    },
     "Pause": {
       "localizations": {
         "de": {
