@@ -110,6 +110,35 @@ struct MouseSettingsView: View {
             }
         }
 
+        SettingsCard(Text("Sideways wheel", bundle: .module)) {
+            Text("If your mouse has a wheel that tilts or a second wheel, it can run an action instead of scrolling sideways.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            SettingsRow(symbol: "arrow.left", title: Text("Tilted left", bundle: .module)) {
+                actionPicker(sideWheelBinding(\.sideWheelLeft))
+            }
+            SettingsRow(symbol: "arrow.right", title: Text("Tilted right", bundle: .module)) {
+                actionPicker(sideWheelBinding(\.sideWheelRight))
+            }
+        }
+
+        SettingsCard(Text("Push gestures", bundle: .module)) {
+            Text("Hold an extra button and push the mouse in one direction. The button's own action still runs when you click it without pushing.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            ForEach([3, 4], id: \.self) { button in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Button \(button + 1)", bundle: .module).font(.callout.weight(.medium))
+                    ForEach(GestureDirection.allCases) { direction in
+                        SettingsRow(symbol: gestureSymbol(direction),
+                                    title: Text(gestureTitle(direction), bundle: .module)) {
+                            actionPicker(gestureBinding(button: button, direction: direction))
+                        }
+                    }
+                }
+            }
+        }
+
         SettingsCard(Text("Trackpad", bundle: .module)) {
             SettingsToggleRow(symbol: "hand.point.up.left",
                               title: Text("Three-finger press is a middle click", bundle: .module),
@@ -161,6 +190,59 @@ struct MouseSettingsView: View {
             get: { module.settings[keyPath: keyPath] },
             set: { value in module.update { $0[keyPath: keyPath] = value } }
         )
+    }
+
+    private func actionPicker(_ selection: Binding<ActionChoice>) -> some View {
+        Picker(selection: selection) {
+            ForEach(ActionChoice.allCases) { choice in
+                Text(choice.label, bundle: .module).tag(choice)
+            }
+        } label: { EmptyView() }
+            .labelsHidden()
+            .frame(width: 180)
+    }
+
+    private func sideWheelBinding(_ keyPath: WritableKeyPath<MouseSettings, ButtonAction>) -> Binding<ActionChoice> {
+        Binding(
+            get: { ActionChoice(module.settings[keyPath: keyPath]) },
+            set: { choice in
+                module.update { $0[keyPath: keyPath] = choice.action ?? ButtonAction.none }
+            }
+        )
+    }
+
+    private func gestureBinding(button: Int, direction: GestureDirection) -> Binding<ActionChoice> {
+        Binding(
+            get: { ActionChoice(action(forGesture: button, direction: direction,
+                                       in: module.settings.gestureMappings)) },
+            set: { choice in
+                module.update { settings in
+                    settings.gestureMappings.removeAll { $0.button == button && $0.direction == direction }
+                    if let action = choice.action, action != ButtonAction.none {
+                        settings.gestureMappings.append(
+                            GestureMapping(button: button, direction: direction, action: action))
+                    }
+                }
+            }
+        )
+    }
+
+    private func gestureSymbol(_ direction: GestureDirection) -> String {
+        switch direction {
+        case .up: "arrow.up"
+        case .down: "arrow.down"
+        case .left: "arrow.left"
+        case .right: "arrow.right"
+        }
+    }
+
+    private func gestureTitle(_ direction: GestureDirection) -> LocalizedStringKey {
+        switch direction {
+        case .up: "Push up"
+        case .down: "Push down"
+        case .left: "Push left"
+        case .right: "Push right"
+        }
     }
 
     private func mappingBinding(for button: Int) -> Binding<ActionChoice> {

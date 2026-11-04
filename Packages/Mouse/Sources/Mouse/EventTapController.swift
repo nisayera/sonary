@@ -30,6 +30,8 @@ final class EventTapController: @unchecked Sendable {
     private let runLoopBox = Locked<CFRunLoop?>(nil)
     private let driver = Locked<SmoothScrollDriver?>(nil)
     private let middleClickEnabled = Locked<Bool>(false)
+    /// Where each button was pressed, so a push can be measured when it comes up.
+    private let gestureOrigins = Locked<[Int: CGPoint]>([:])
 
     init(settings: MouseSettings) {
         middleClickEnabled.withValue { $0 = settings.threeFingerMiddleClick }
@@ -106,6 +108,18 @@ final class EventTapController: @unchecked Sendable {
             return handleDown(event)
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
             let button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
+            if let origin = gestureOrigins.withValue({ $0.removeValue(forKey: button) }) {
+                let direction = gestureDirection(from: origin, to: event.location)
+                let decision = processor.withValue {
+                    $0.process(.buttonUp(button: button, direction: direction), bundleID: frontmost.bundleID)
+                }
+                swallowedUps.withValue { _ = $0.remove(button) }
+                if case let .perform(action) = decision {
+                    DispatchQueue.main.async { SyntheticEvents.perform(action) }
+                }
+                if case .passThrough = decision { return Unmanaged.passUnretained(event) }
+                return nil
+            }
             let swallow = swallowedUps.withValue { $0.remove(button) != nil }
             return swallow ? nil : Unmanaged.passUnretained(event)
         default:
@@ -165,6 +179,12 @@ final class EventTapController: @unchecked Sendable {
     private func handleDown(_ event: CGEvent) -> Unmanaged<CGEvent>? {
         let button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
         let bundleID = frontmost.bundleID
+        if button > 2 {
+            let mappings = processor.withValue { $0.gestureMappings(for: bundleID) }
+            if hasGestures(button: button, in: mappings) {
+                gestureOrigins.withValue { $0[button] = event.location }
+            }
+        }
         let decision = processor.withValue {
             $0.process(.buttonDown(button: button, timestampNanoseconds: event.timestamp), bundleID: bundleID)
         }

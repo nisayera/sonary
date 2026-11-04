@@ -151,6 +151,28 @@
         }
       }
     },
+    "Hold an extra button and push the mouse in one direction. The button's own action still runs when you click it without pushing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Halte eine Zusatztaste und schiebe die Maus in eine Richtung. Ohne Schieben läuft weiter die eigene Aktion der Taste."
+          }
+        }
+      }
+    },
+    "If your mouse has a wheel that tilts or a second wheel, it can run an action instead of scrolling sideways.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn deine Maus ein kippbares oder zweites Rad hat, kann es eine Aktion auslösen statt seitwärts zu scrollen."
+          }
+        }
+      }
+    },
     "Ignore repeat clicks within %lld ms": {
       "localizations": {
         "de": {
@@ -252,6 +274,61 @@
         }
       }
     },
+    "Push down": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach unten schieben"
+          }
+        }
+      }
+    },
+    "Push gestures": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schiebe-Gesten"
+          }
+        }
+      }
+    },
+    "Push left": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach links schieben"
+          }
+        }
+      }
+    },
+    "Push right": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach rechts schieben"
+          }
+        }
+      }
+    },
+    "Push up": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach oben schieben"
+          }
+        }
+      }
+    },
     "Remove exception": {
       "localizations": {
         "de": {
@@ -312,6 +389,17 @@
         }
       }
     },
+    "Sideways wheel": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seitliches Rad"
+          }
+        }
+      }
+    },
     "Smooth scrolling": {
       "localizations": {
         "de": {
@@ -359,6 +447,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dreifinger-Druck ist ein Mittelklick"
+          }
+        }
+      }
+    },
+    "Tilted left": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach links gekippt"
+          }
+        }
+      }
+    },
+    "Tilted right": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach rechts gekippt"
           }
         }
       }

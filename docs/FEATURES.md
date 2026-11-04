@@ -40,7 +40,7 @@ Status checked against the code at version 0.19.0.
 - [x] Mouse scroll direction independent of the trackpad
 - [x] Horizontal scrolling while holding a key you choose
 - [x] Back and forward on the side buttons
-- [~] Actions for extra buttons — a fixed list of actions and any keyboard shortcut; no side wheels, no button-drag gestures
+- [x] Actions for extra buttons — a fixed list of actions and any keyboard shortcut, a sideways wheel, and push gestures while a button is held
 - [x] Three-finger trackpad press as middle click, read from the touches the click itself carries
 - [x] Per-app exclusions for the mouse features
 - [x] Double-click filter for worn buttons
