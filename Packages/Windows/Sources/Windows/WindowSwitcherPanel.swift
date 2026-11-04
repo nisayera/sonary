@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import ScreenCaptureKit
 import SonaryUI
 import SwiftUI
 
@@ -102,12 +103,8 @@ struct WindowSwitcherView: View {
                             }
                             Text(entry.label).lineLimit(1)
                             Spacer()
-                            if showsPreviews, let preview = windowPreview(entry.id) {
-                                Image(nsImage: preview)
-                                    .resizable().aspectRatio(contentMode: .fit)
-                                    .frame(width: 92, height: 56)
-                                    .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
-                                    .accessibilityHidden(true)
+                            if showsPreviews {
+                                WindowPreviewImage(id: entry.id)
                             }
                         }
                         .padding(.horizontal, 8)
@@ -149,12 +146,48 @@ struct SnapPreviewView: View {
     }
 }
 
-/// A picture of one window. Nil without the Screen Recording permission, which is why
-/// previews are a setting rather than the default.
+/// A picture of one window, fetched once and kept for a few seconds. Nil without the
+/// Screen Recording permission, which is why previews are a setting rather than the default.
 @MainActor
-func windowPreview(_ id: UInt32) -> NSImage? {
-    guard let image = CGWindowListCreateImage(.null, [.optionIncludingWindow], id,
-                                              [.boundsIgnoreFraming, .nominalResolution]),
-          image.width > 1, image.height > 1 else { return nil }
-    return NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
+enum WindowPreviews {
+    private static var cache: [UInt32: (image: NSImage, taken: Date)] = [:]
+
+    static func image(for id: UInt32) async -> NSImage? {
+        if let hit = cache[id], Date().timeIntervalSince(hit.taken) < 5 { return hit.image }
+        guard let content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true),
+              let window = content.windows.first(where: { $0.windowID == id }),
+              window.frame.width > 1, window.frame.height > 1 else { return nil }
+        let configuration = SCStreamConfiguration()
+        configuration.width = Int(window.frame.width)
+        configuration.height = Int(window.frame.height)
+        configuration.showsCursor = false
+        guard let shot = try? await SCScreenshotManager.captureImage(
+            contentFilter: SCContentFilter(desktopIndependentWindow: window), configuration: configuration)
+        else { return nil }
+        let image = NSImage(cgImage: shot, size: NSSize(width: shot.width, height: shot.height))
+        cache[id] = (image, Date())
+        return image
+    }
+}
+
+/// The thumbnail in a switcher row. It stays empty until the picture arrives, so the
+/// list never waits on the capture.
+struct WindowPreviewImage: View {
+    let id: UInt32
+    @State private var image: NSImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(nsImage: image)
+                    .resizable().aspectRatio(contentMode: .fit)
+                    .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+            } else {
+                Color.clear
+            }
+        }
+        .frame(width: 92, height: 56)
+        .accessibilityHidden(true)
+        .task(id: id) { image = await WindowPreviews.image(for: id) }
+    }
 }
