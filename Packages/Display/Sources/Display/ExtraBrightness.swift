@@ -61,7 +61,8 @@ final class ExtraBrightnessOverlay {
         window.displaysWhenScreenProfileChanges = true
         let view = NSView(frame: CGRect(origin: .zero, size: screen.frame.size))
         view.wantsLayer = true
-        view.layer?.wantsExtendedDynamicRangeContent = true
+        // macOS 26 replaced wantsExtendedDynamicRangeContent with this.
+        view.layer?.preferredDynamicRange = .high
         window.contentView = view
         return window
     }
