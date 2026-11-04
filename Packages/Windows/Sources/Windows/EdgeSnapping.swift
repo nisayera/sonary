@@ -10,8 +10,9 @@ public func edgeLayout(for point: CGPoint, in visible: CGRect, threshold: CGFloa
     let top = visible.maxY - point.y <= threshold
     let bottom = point.y - visible.minY <= threshold
     guard left || right || top || bottom else { return nil }
-    guard visible.contains(CGPoint(x: min(max(point.x, visible.minX), visible.maxX - 1),
-                                   y: min(max(point.y, visible.minY), visible.maxY - 1))) else { return nil }
+    // A drag may slip a little past the edge, but a pointer far outside this screen
+    // belongs to another one and must not snap here.
+    guard visible.insetBy(dx: -threshold, dy: -threshold).contains(point) else { return nil }
 
     let nearLeft = point.x - visible.minX <= corner
     let nearRight = visible.maxX - point.x <= corner
