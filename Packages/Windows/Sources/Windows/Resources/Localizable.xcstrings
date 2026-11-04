@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "A click on a running app's icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Klick auf das Symbol einer laufenden App"
+          }
+        }
+      }
+    },
     "A window comes forward when the pointer rests on it.": {
       "localizations": {
         "de": {
@@ -91,6 +102,28 @@
         }
       }
     },
+    "Cycle through its windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durch ihre Fenster blättern"
+          }
+        }
+      }
+    },
+    "Dock": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock"
+          }
+        }
+      }
+    },
     "Drag a window against an edge or a corner and let go.": {
       "localizations": {
         "de": {
@@ -173,6 +206,17 @@
         }
       }
     },
+    "Leave it to macOS": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS überlassen"
+          }
+        }
+      }
+    },
     "Left half": {
       "localizations": {
         "de": {
@@ -209,6 +253,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maximieren"
+          }
+        }
+      }
+    },
+    "Minimize all its windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle ihre Fenster minimieren"
           }
         }
       }
@@ -374,6 +429,17 @@
         }
       }
     },
+    "Show all its windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle ihre Fenster zeigen"
+          }
+        }
+      }
+    },
     "Show it now": {
       "localizations": {
         "de": {
@@ -384,12 +450,34 @@
         }
       }
     },
+    "Shows that app's windows from every Space, which the Dock itself will not.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigt die Fenster der App aus allen Spaces – das Dock selbst tut das nicht."
+          }
+        }
+      }
+    },
     "Snap windows at the screen edges": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Fenster an den Bildschirmrändern einrasten"
+          }
+        }
+      }
+    },
+    "Sonary adds this after the Dock has had the click, so the Dock keeps working.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary ergänzt das, nachdem das Dock den Klick hatte – das Dock funktioniert also weiter."
           }
         }
       }
@@ -451,6 +539,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fensteranordnung"
+          }
+        }
+      }
+    },
+    "Window previews when the pointer rests on an icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenstervorschauen, wenn der Zeiger auf einem Symbol ruht"
           }
         }
       }

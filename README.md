@@ -95,6 +95,7 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 - [x] **M8 — Tools**
 - [x] **0.10 — Super Key, notch gestures, window switcher, brightness, quick toggles, radial menu**
 - [x] **0.12 — clipboard images and auto-clear, busiest apps and fans, horizontal scroll, key debounce, scheduled cleaning, scratchpad tabs, cleaning mode**
+- [x] **0.18 — Dock click actions and window previews across Spaces**
 - [x] **0.17 — fixed Space order, three-finger middle click, extra brightness on XDR panels**
 - [x] **0.16 — fill the screen without a new Space, GIFs from videos, a file shelf in the notch, Sonary's own capture selector**
 - [x] **0.15 — central shortcut manager: every shortcut on one page, recordable and resettable**

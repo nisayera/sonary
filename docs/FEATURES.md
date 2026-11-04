@@ -5,7 +5,7 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.17.0.
+Status checked against the code at version 0.18.0.
 
 ## Audio
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
@@ -24,8 +24,8 @@ Status checked against the code at version 0.17.0.
 ## Windows and Dock
 - [~] Window switcher — every window, with search, live previews and raise on ⌃⌥Tab; no filters
 - [~] Window layouts — halves, quarters, thirds, maximize, centre, move to the next display and put back, on ⌃⌥ shortcuts and by dragging a window to a screen edge; no modifier-drag
-- [ ] Dock window previews across Spaces
-- [ ] Dock icon click actions
+- [x] Dock window previews across Spaces, when the pointer rests on an icon
+- [x] Dock icon click actions — cycle the app's windows, minimize them all or show them all
 - [x] A layout that fills the screen, menu bar strip included, without a new Space (⌃⌥B)
 - [x] Fixed Space order — stops macOS rearranging Spaces by most recent use, through the Dock's own preference
 - [x] Quit apps when their last window closes
@@ -59,7 +59,7 @@ Status checked against the code at version 0.17.0.
 
 ## Everyday tools
 - [~] Notch island — music, calendar, timer, downloads, accessory batteries, a file shelf, scroll gestures, simulated on displays without a notch; no notifications, lyrics, equalizer or camera
-- [ ] AI agent tracking in the island
+- [ ] AI agent tracking in the island (no public way to see another app's agent activity)
 - [~] Command bar — apps, snippets, Sonary's tools, the clipboard history, the front app's menu commands, a calculator, unit conversion and emoji; no files, no scripts
 - [x] Quick toggles: dark mode, desktop icons, empty Trash, eject disks, lock screen
 - [x] Quit-apps list

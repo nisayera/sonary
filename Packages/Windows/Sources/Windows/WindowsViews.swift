@@ -2,6 +2,15 @@ import AppKit
 import SonaryUI
 import SwiftUI
 
+func dockActionTitle(_ action: DockClickAction) -> LocalizedStringKey {
+    switch action {
+    case .system: "Leave it to macOS"
+    case .cycleWindows: "Cycle through its windows"
+    case .minimizeAll: "Minimize all its windows"
+    case .showAllWindows: "Show all its windows"
+    }
+}
+
 func layoutTitle(_ action: LayoutAction) -> LocalizedStringKey {
     switch action {
     case .leftHalf: "Left half"
@@ -25,6 +34,23 @@ struct WindowsSettingsView: View {
     let model: WindowsModel
 
     var body: some View {
+        SettingsCard(Text("Dock", bundle: .module)) {
+            SettingsRow(symbol: "dock.rectangle", title: Text("A click on a running app's icon", bundle: .module),
+                        caption: Text("Sonary adds this after the Dock has had the click, so the Dock keeps working.",
+                                      bundle: .module)) {
+                Picker(selection: Binding(get: { model.settings.dockClickAction },
+                                          set: { value in model.update { $0.dockClickAction = value } })) {
+                    ForEach(DockClickAction.allCases) { Text(dockActionTitle($0), bundle: .module).tag($0) }
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 200)
+            }
+            SettingsToggleRow(symbol: "rectangle.on.rectangle",
+                              title: Text("Window previews when the pointer rests on an icon", bundle: .module),
+                              caption: Text("Shows that app's windows from every Space, which the Dock itself will not.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.dockPreviews },
+                                            set: { value in model.update { $0.dockPreviews = value } }))
+        }
         SettingsCard(Text("Spaces", bundle: .module)) {
             SettingsToggleRow(symbol: "rectangle.3.group",
                               title: Text("Keep the Spaces in the order I put them", bundle: .module),

@@ -20,6 +20,10 @@ public struct WindowsSettings: Codable, Equatable, Sendable {
     public var focusFollowsMouse = false
     /// Live pictures of each window in the switcher; needs the Screen Recording permission.
     public var switcherPreviews = false
+    /// What a click on a running app's Dock icon does.
+    public var dockClickAction: DockClickAction = .system
+    /// Show the app's windows, across every Space, when the pointer rests on its Dock icon.
+    public var dockPreviews = false
 
     public init() {}
 }
@@ -58,6 +62,12 @@ public final class WindowsModel {
     @ObservationIgnored private var snapPreview: NSPanel?
     @ObservationIgnored private var pendingSnap: LayoutAction?
     @ObservationIgnored private var focusState = FocusFollowState()
+    @ObservationIgnored private var dockHoverMonitor: Any?
+    @ObservationIgnored private var dockClickMonitor: Any?
+    @ObservationIgnored private var dockHover = DockHoverState()
+    @ObservationIgnored private let dockPreview = DockPreviewController()
+    /// The window each app's Dock icon last raised, so a second click moves on.
+    @ObservationIgnored private var lastRaisedDockWindow: [Int32: UInt32] = [:]
     @ObservationIgnored private var hud: NSPanel?
     @ObservationIgnored private let switcher = WindowSwitcherController()
     @ObservationIgnored private var running = false
@@ -130,6 +140,8 @@ public final class WindowsModel {
         if running, settings.quitWhenLastWindowCloses { startWatchingWindows() } else { stopWatchingWindows() }
         if running, settings.edgeSnapping { startEdgeSnapping() } else { stopEdgeSnapping() }
         if running, settings.focusFollowsMouse { startFocusFollowsMouse() } else { stopFocusFollowsMouse() }
+        if running, settings.dockPreviews { startDockHover() } else { stopDockHover() }
+        if running, settings.dockClickAction != .system { startDockClicks() } else { stopDockClicks() }
         switcher.showsPreviews = settings.switcherPreviews
         if !running || !settings.windowSwitcher { switcher.close() }
     }
@@ -210,6 +222,112 @@ public final class WindowsModel {
     private func hideSnapPreview() {
         snapPreview?.orderOut(nil)
         snapPreview = nil
+    }
+
+    // MARK: The Dock
+
+    private func startDockHover() {
+        guard dockHoverMonitor == nil else { return }
+        dockHoverMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved]) { [weak self] _ in
+            MainActor.assumeIsolated { self?.pointerMovedOverDock() }
+        }
+    }
+
+    private func stopDockHover() {
+        if let dockHoverMonitor { NSEvent.removeMonitor(dockHoverMonitor) }
+        dockHoverMonitor = nil
+        dockHover = DockHoverState()
+        dockPreview.close()
+    }
+
+    private func startDockClicks() {
+        guard dockClickMonitor == nil else { return }
+        dockClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseUp]) { [weak self] _ in
+            MainActor.assumeIsolated { self?.dockClicked() }
+        }
+    }
+
+    private func stopDockClicks() {
+        if let dockClickMonitor { NSEvent.removeMonitor(dockClickMonitor) }
+        dockClickMonitor = nil
+    }
+
+    private func pointerMovedOverDock() {
+        let point = NSEvent.mouseLocation
+        let app = DockReader.app(at: point)
+        guard let pid = dockHover.pointer(over: app?.processIdentifier, at: Date().timeIntervalSinceReferenceDate) else {
+            if app == nil { dockPreview.close() }
+            return
+        }
+        guard let app, app.processIdentifier == pid else { return }
+        let windows = Self.windows(of: pid)
+        guard !windows.isEmpty else { return }
+        dockPreview.show(app: app, windows: windows, near: point) { [weak self] window in
+            self?.raise(windowID: window.id, pid: pid)
+        }
+    }
+
+    /// A click on a Dock icon, after the Dock has had it: Sonary adds what the user
+    /// asked for rather than swallowing the click, so the Dock keeps working.
+    private func dockClicked() {
+        let point = NSEvent.mouseLocation
+        guard let app = DockReader.app(at: point) else { return }
+        let pid = app.processIdentifier
+        switch settings.dockClickAction {
+        case .system: return
+        case .minimizeAll: minimizeWindows(of: pid)
+        case .showAllWindows: showAllWindows(of: pid)
+        case .cycleWindows:
+            let windows = Self.windows(of: pid)
+            guard let next = nextWindowToRaise(after: lastRaisedDockWindow[pid], in: windows) else { return }
+            lastRaisedDockWindow[pid] = next.id
+            raise(windowID: next.id, pid: pid)
+        }
+    }
+
+    /// Every window of an app, across all Spaces.
+    private static func windows(of pid: Int32) -> [DockWindow] {
+        let info = CGWindowListCopyWindowInfo([.optionAll, .excludeDesktopElements], kCGNullWindowID)
+            as? [[String: Any]] ?? []
+        return dockWindows(ofPID: pid, in: info)
+    }
+
+    /// Brings one window forward. The window server knows it by number, the
+    /// accessibility API by position, so the app is activated and its matching window
+    /// raised by its frame.
+    private func raise(windowID: UInt32, pid: Int32) {
+        NSRunningApplication(processIdentifier: pid)?.activate()
+        let element = AXUIElementCreateApplication(pid)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXWindowsAttribute as CFString, &value) == .success,
+              let list = value as? [AXUIElement] else { return }
+        guard let target = Self.windows(of: pid).first(where: { $0.id == windowID }) else { return }
+        for window in list where frame(of: window).map({ abs($0.origin.x - target.frame.minX) < 4 }) == true {
+            AXUIElementPerformAction(window, kAXRaiseAction as CFString)
+            return
+        }
+    }
+
+    private func minimizeWindows(of pid: Int32) {
+        let element = AXUIElementCreateApplication(pid)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXWindowsAttribute as CFString, &value) == .success,
+              let list = value as? [AXUIElement] else { return }
+        for window in list {
+            AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, kCFBooleanTrue)
+        }
+    }
+
+    private func showAllWindows(of pid: Int32) {
+        let element = AXUIElementCreateApplication(pid)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXWindowsAttribute as CFString, &value) == .success,
+              let list = value as? [AXUIElement] else { return }
+        NSRunningApplication(processIdentifier: pid)?.activate()
+        for window in list {
+            AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
+            AXUIElementPerformAction(window, kAXRaiseAction as CFString)
+        }
     }
 
     // MARK: Focus follows mouse

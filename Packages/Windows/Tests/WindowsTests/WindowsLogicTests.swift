@@ -304,3 +304,59 @@ struct FocusFollowsMouseTests {
         #expect(!spaceOrderIsFixed(rearrangesAutomatically: true))
     }
 }
+
+@Suite struct DockActionTests {
+    private func entry(pid: Int32, number: UInt32, layer: Int = 0,
+                       width: Double = 800, height: Double = 600, title: String = "Doc") -> [String: Any] {
+        [
+            kCGWindowOwnerPID as String: pid,
+            kCGWindowNumber as String: number,
+            kCGWindowLayer as String: layer,
+            kCGWindowName as String: title,
+            kCGWindowBounds as String: ["X": 10.0, "Y": 20.0, "Width": width, "Height": height],
+        ]
+    }
+
+    @Test func keepsOnlyTheRealWindowsOfOneApp() {
+        let info = [
+            entry(pid: 1, number: 10),
+            entry(pid: 2, number: 11),
+            entry(pid: 1, number: 12, layer: 25),          // a panel or menu, not a window
+            entry(pid: 1, number: 13, width: 20, height: 8), // too small to be a window
+            entry(pid: 1, number: 14, title: ""),
+        ]
+        let windows = dockWindows(ofPID: 1, in: info)
+        #expect(windows.map(\.id) == [10, 14])
+        #expect(windows.first?.frame == CGRect(x: 10, y: 20, width: 800, height: 600))
+        #expect(windows.last?.title.isEmpty == true, "a window with no name still counts")
+    }
+
+    @Test func cyclingWrapsAroundAndCopesWithOne() {
+        let windows = [DockWindow(id: 1, title: "a", frame: .zero),
+                       DockWindow(id: 2, title: "b", frame: .zero),
+                       DockWindow(id: 3, title: "c", frame: .zero)]
+        #expect(nextWindowToRaise(after: 1, in: windows)?.id == 2)
+        #expect(nextWindowToRaise(after: 3, in: windows)?.id == 1)
+        #expect(nextWindowToRaise(after: nil, in: windows)?.id == 1)
+        #expect(nextWindowToRaise(after: 99, in: windows)?.id == 1, "a window that has gone starts over")
+        #expect(nextWindowToRaise(after: 1, in: [windows[0]])?.id == 1)
+        #expect(nextWindowToRaise(after: nil, in: []) == nil)
+    }
+
+    @Test func previewsWaitForThePointerToSettle() {
+        var state = DockHoverState(delay: 0.4)
+        #expect(state.pointer(over: 42, at: 0) == nil)
+        #expect(state.pointer(over: 42, at: 0.2) == nil, "still too soon")
+        #expect(state.pointer(over: 42, at: 0.45) == 42)
+        #expect(state.pointer(over: 42, at: 0.5) == nil, "it has already opened")
+    }
+
+    @Test func movingToAnotherIconStartsTheWaitAgain() {
+        var state = DockHoverState(delay: 0.4)
+        #expect(state.pointer(over: 42, at: 0) == nil)
+        #expect(state.pointer(over: 7, at: 0.39) == nil)
+        #expect(state.pointer(over: 7, at: 0.5) == nil, "the clock restarted on the new icon")
+        #expect(state.pointer(over: 7, at: 0.8) == 7)
+        #expect(state.pointer(over: nil, at: 0.9) == nil)
+    }
+}
