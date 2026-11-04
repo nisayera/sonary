@@ -196,3 +196,20 @@ struct ClipboardAutoClearTests {
         #expect(settings.captureImages && settings.captureFiles)
     }
 }
+
+@Suite struct FinderHelperTests {
+    @Test func picksAFreeName() {
+        #expect(uniqueFileName(base: "Shot", extension: "png") { _ in false } == "Shot.png")
+        let taken = ["Shot.png", "Shot 2.png"]
+        #expect(uniqueFileName(base: "Shot", extension: "png") { taken.contains($0) } == "Shot 3.png")
+    }
+
+    @Test func stampsTheImageName() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let date = calendar.date(from: DateComponents(year: 2026, month: 3, day: 7, hour: 9, minute: 5, second: 4))!
+        let name = clipboardImageName(now: date, calendar: calendar)
+        #expect(name.hasPrefix("Clipboard 2026-03-07 at "))
+        #expect(!name.contains("/"))
+    }
+}

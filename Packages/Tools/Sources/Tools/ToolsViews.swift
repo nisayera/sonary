@@ -17,6 +17,7 @@ private enum ToolsSection: String, CaseIterable, Identifiable {
 struct ToolsPopoverView: View {
     let model: ToolsModel
     @State private var section: ToolsSection = .tools
+    @State private var previewingMarkdown = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
@@ -44,6 +45,8 @@ struct ToolsPopoverView: View {
             tool("eyedropper", "Pick a color", "⌃⌥P") { model.pickColor() }
             tool("camera.viewfinder", "Screenshot to clipboard", "⌃⌥S") { model.screenshotToClipboard() }
             tool("circle.grid.cross", "Radial menu", "⌃⌥R") { model.showRadialMenu() }
+            tool("pin", "Pin a screenshot", "") { model.pinScreenshot() }
+            tool("web.camera", "Camera mirror", "") { model.toggleCamera() }
         }
     }
 
@@ -83,13 +86,28 @@ struct ToolsPopoverView: View {
                 }
             }
             .scrollIndicators(.hidden)
-            TextEditor(text: Binding(get: { current.text }, set: { model.setText($0, for: current.id) }))
-                .font(.body)
-                .frame(height: 260)
-                .scrollContentBackground(.hidden)
-                .padding(6)
-                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            Group {
+                if previewingMarkdown {
+                    ScrollView {
+                        Text(markdown: current.text)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(8)
+                    }
+                } else {
+                    TextEditor(text: Binding(get: { current.text }, set: { model.setText($0, for: current.id) }))
+                        .font(.body)
+                        .scrollContentBackground(.hidden)
+                        .padding(6)
+                }
+            }
+            .frame(height: 260)
+            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             HStack {
+                Toggle(isOn: $previewingMarkdown) {
+                    Label { Text("Preview", bundle: .module) } icon: { Image(systemName: "doc.richtext") }
+                }
+                .toggleStyle(.button)
                 Button { model.exportTab(current) } label: {
                     Label { Text("Save as Markdown", bundle: .module) } icon: { Image(systemName: "square.and.arrow.down") }
                 }
@@ -209,4 +227,17 @@ struct ToolsSettingsView: View {
 /// Shows each format with the same example colour, so the choice explains itself.
 func colorFormatExample(_ format: ColorFormat) -> String {
     formatColor(red: 1, green: 0.42, blue: 0.45, format: format)
+}
+
+extension Text {
+    /// Renders Markdown, falling back to the plain text when it cannot be parsed.
+    init(markdown: String) {
+        if let attributed = try? AttributedString(
+            markdown: markdown,
+            options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)) {
+            self.init(attributed)
+        } else {
+            self.init(verbatim: markdown)
+        }
+    }
 }

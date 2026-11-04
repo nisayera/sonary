@@ -217,3 +217,32 @@ struct ScratchpadTests {
         #expect(movedTab(tabs, from: 1, to: 1).map(\.title) == ["a", "b", "c"])
     }
 }
+
+struct MenuCommandTests {
+    @Test func keepsRealCommands() {
+        let commands = [MenuCommand(path: ["File", "Save"]), MenuCommand(path: ["Edit", "Copy"])]
+        #expect(usefulMenuCommands(commands).map(\.title) == ["File ▸ Save", "Edit ▸ Copy"])
+    }
+
+    @Test func dropsAppleAndHelpMenus() {
+        let commands = [MenuCommand(path: ["Apple", "Sleep"]), MenuCommand(path: ["Help", "Search"]),
+                        MenuCommand(path: ["Window", "Zoom"]), MenuCommand(path: ["File", "Open"])]
+        #expect(usefulMenuCommands(commands).map(\.title) == ["File ▸ Open"])
+    }
+
+    @Test func dropsSeparatorsAndTopLevelOnly() {
+        let commands = [MenuCommand(path: ["File"]), MenuCommand(path: ["File", "-"]),
+                        MenuCommand(path: ["File", ""]), MenuCommand(path: ["File", "Close"])]
+        #expect(usefulMenuCommands(commands).map(\.title) == ["File ▸ Close"])
+    }
+
+    @Test func dropsDuplicates() {
+        let commands = [MenuCommand(path: ["File", "Save"]), MenuCommand(path: ["File", "Save"])]
+        #expect(usefulMenuCommands(commands).count == 1)
+    }
+
+    @Test func respectsTheLimit() {
+        let commands = (0..<50).map { MenuCommand(path: ["File", "Item \($0)"]) }
+        #expect(usefulMenuCommands(commands, limit: 10).count == 10)
+    }
+}

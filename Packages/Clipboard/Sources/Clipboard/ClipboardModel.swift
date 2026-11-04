@@ -306,14 +306,34 @@ public final class ClipboardModel {
     public func newTextFileInFinderFolder() {
         guard let folder = currentFinderFolder() else { return }
         let base = String(localized: "Untitled", bundle: .module)
-        var url = folder.appendingPathComponent("\(base).txt")
-        var n = 2
-        while FileManager.default.fileExists(atPath: url.path) {
-            url = folder.appendingPathComponent("\(base) \(n).txt")
-            n += 1
+        let name = uniqueFileName(base: base, extension: "txt") {
+            FileManager.default.fileExists(atPath: folder.appendingPathComponent($0).path)
         }
+        let url = folder.appendingPathComponent(name)
         if FileManager.default.createFile(atPath: url.path, contents: Data()) {
             NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
+    }
+
+    /// Writes the image on the clipboard into the front Finder window as a PNG.
+    public func saveClipboardImageToFinderFolder() {
+        guard let folder = currentFinderFolder() else { return }
+        guard let image = NSImage(pasteboard: .general),
+              let tiff = image.tiffRepresentation,
+              let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else {
+            lastMessage = String(localized: "There is no image on the clipboard.", bundle: .module)
+            return
+        }
+        let name = uniqueFileName(base: clipboardImageName(now: Date()), extension: "png") {
+            FileManager.default.fileExists(atPath: folder.appendingPathComponent($0).path)
+        }
+        let url = folder.appendingPathComponent(name)
+        do {
+            try png.write(to: url)
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+            lastMessage = String(localized: "Saved \(name).", bundle: .module)
+        } catch {
+            lastMessage = String(localized: "Could not save the image there.", bundle: .module)
         }
     }
 

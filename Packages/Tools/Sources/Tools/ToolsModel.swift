@@ -22,17 +22,35 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
 public final class ToolsModel {
     public private(set) var settings: ToolsSettings
     public private(set) var lastResult: String?
+    @ObservationIgnored private var resultTask: Task<Void, Never>?
 
     /// The command bar reports what it copied through this.
     var lastResultText: String? {
         get { lastResult }
-        set { lastResult = newValue }
+        set { report(newValue) }
+    }
+
+    /// Shows a short note under the tools and takes it away again, so it cannot linger
+    /// behind the next thing the panel shows.
+    func report(_ text: String?) {
+        lastResult = text
+        resultTask?.cancel()
+        guard text != nil else { return }
+        resultTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(6))
+            guard !Task.isCancelled else { return }
+            self?.lastResult = nil
+        }
     }
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var hotKeys: [HotKey] = []
     @ObservationIgnored private var commandBar: CommandBarController?
     @ObservationIgnored private let radial = RadialMenuController()
     @ObservationIgnored private let cleaning = CleaningModeController()
+    @ObservationIgnored private let pinned = PinnedImageController()
+    @ObservationIgnored private let camera = CameraPreviewController()
+    /// Commands other modules add to the command bar, for example the clipboard history.
+    @ObservationIgnored public var externalCommands: @MainActor () -> [ExternalCommand] = { [] }
     @ObservationIgnored private var running = false
 
     public init(defaults: UserDefaults) {
@@ -57,6 +75,8 @@ public final class ToolsModel {
         commandBar = nil
         radial.close()
         cleaning.stop()
+        pinned.closeAll()
+        camera.close()
     }
 
     /// The notes, with the old single scratchpad carried over the first time.
@@ -113,9 +133,9 @@ public final class ToolsModel {
         do {
             try tab.text.write(to: url, atomically: true, encoding: .utf8)
             NSWorkspace.shared.activateFileViewerSelecting([url])
-            lastResult = String(localized: "Saved to \(url.lastPathComponent)", bundle: .module)
+            report(String(localized: "Saved to \(url.lastPathComponent)", bundle: .module))
         } catch {
-            lastResult = String(localized: "Could not save the note.", bundle: .module)
+            report(String(localized: "Could not save the note.", bundle: .module))
         }
     }
 
@@ -159,15 +179,27 @@ public final class ToolsModel {
                 guard let self else { return }
                 let value = formatColor(red: red, green: green, blue: blue, format: self.settings.colorFormat)
                 self.copy(value)
-                self.lastResult = String(localized: "Copied \(value)", bundle: .module)
+                self.report(String(localized: "Copied \(value)", bundle: .module))
             }
         }
     }
 
+    /// Takes a screenshot and keeps it floating on top until it is closed.
+    public func pinScreenshot() {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("sonary-pin-\(UUID().uuidString).png")
+        Task {
+            guard await capture(arguments: ["-i", "-x", file.path]), let image = NSImage(contentsOf: file) else { return }
+            try? FileManager.default.removeItem(at: file)
+            pinned.pin(image)
+        }
+    }
+
+    public func toggleCamera() { camera.toggle() }
+
     public func screenshotToClipboard() {
         Task {
             _ = await capture(arguments: ["-i", "-c"])
-            lastResult = String(localized: "Screenshot copied to the clipboard.", bundle: .module)
+            report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
         }
     }
 
@@ -193,10 +225,10 @@ public final class ToolsModel {
                 return joinRecognizedLines(lines)
             }.value
             if text.isEmpty {
-                lastResult = String(localized: "No text found.", bundle: .module)
+                report(String(localized: "No text found.", bundle: .module))
             } else {
                 copy(text)
-                lastResult = String(localized: "Text copied to the clipboard.", bundle: .module)
+                report(String(localized: "Text copied to the clipboard.", bundle: .module))
             }
         }
     }
@@ -219,7 +251,7 @@ public final class ToolsModel {
     public func insert(_ snippet: Snippet) {
         let clipboard = NSPasteboard.general.string(forType: .string)
         copy(expandSnippet(snippet.text, now: Date(), clipboard: clipboard))
-        lastResult = String(localized: "Snippet copied. Press ⌘V to paste it.", bundle: .module)
+        report(String(localized: "Snippet copied. Press ⌘V to paste it.", bundle: .module))
     }
 
     public func addSnippet() {
@@ -238,6 +270,8 @@ public final class ToolsModel {
         case .ejectDisks: SystemActions.ejectDisks()
         case .lockScreen: SystemActions.lockScreen()
         case .cleaningMode: cleaning.start()
+        case .pinScreenshot: pinScreenshot()
+        case .cameraPreview: camera.toggle()
         case .commandBar: showCommandBar()
         case .textFromScreen: recognizeText()
         case .colorPicker: pickColor()

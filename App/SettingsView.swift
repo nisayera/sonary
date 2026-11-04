@@ -36,6 +36,7 @@ struct SettingsView: View {
         }
         .frame(minWidth: 760, minHeight: 520)
         .tint(Color.sonaryAccent)
+        .environment(\.sonaryAppearance, model.appearance)
     }
 
     private func sidebarRow(_ id: SettingsPageID, symbol: String, title: Text, isOn: Bool? = nil) -> some View {
@@ -132,6 +133,15 @@ private struct GeneralPage: View {
                                   isOn: Binding(get: { model.launchAtLogin.isEnabled },
                                                 set: { model.launchAtLogin.set($0) }))
             }
+            SettingsCard(Text("Appearance")) {
+                SettingsRow(symbol: "square.on.square.dashed", title: Text("Panels and the island"),
+                            caption: Text("How much of the desktop shows through.")) {
+                    Picker(selection: Binding(get: { model.appearance }, set: { model.setAppearance($0) })) {
+                        ForEach(SonaryAppearance.allCases, id: \.self) { Text(appearanceTitle($0)).tag($0) }
+                    } label: { EmptyView() }
+                        .labelsHidden().frame(width: 150)
+                }
+            }
             SettingsCard(Text("Introduction")) {
                 SettingsRow(symbol: "hand.wave", title: Text("Welcome window"),
                             caption: Text("Explains Sonary and the permissions of your modules.")) {
@@ -192,5 +202,13 @@ private struct AboutPage: View {
                 }
             }
         }
+    }
+}
+
+func appearanceTitle(_ appearance: SonaryAppearance) -> LocalizedStringKey {
+    switch appearance {
+    case .glass: "Glass"
+    case .frosted: "Frosted"
+    case .solid: "Solid"
     }
 }

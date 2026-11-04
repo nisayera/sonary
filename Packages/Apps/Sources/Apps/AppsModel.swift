@@ -42,6 +42,8 @@ public final class AppsModel {
     public private(set) var isScanning = false
     public private(set) var ports: [ListeningPort] = []
     public private(set) var outdated: [OutdatedPackage] = []
+    public private(set) var appUpdates: [AppUpdate] = []
+    public private(set) var isCheckingApps = false
     public private(set) var brewAvailable = brewExecutable() != nil
     public private(set) var isBrewBusy = false
     public private(set) var uninstallPlan: UninstallPlan?
@@ -83,6 +85,53 @@ public final class AppsModel {
     public func update(_ change: (inout AppsSettings) -> Void) {
         change(&settings)
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "apps.settings") }
+    }
+
+    // MARK: App updates
+
+    /// Asks every app in /Applications that ships a Sparkle feed whether it is current.
+    public func checkAppUpdates() async {
+        guard !isCheckingApps else { return }
+        isCheckingApps = true
+        defer { isCheckingApps = false }
+        let apps = await Task.detached { Self.sparkleApps() }.value
+        var found: [AppUpdate] = []
+        await withTaskGroup(of: AppUpdate?.self) { group in
+            for app in apps {
+                group.addTask {
+                    var request = URLRequest(url: app.feed)
+                    request.timeoutInterval = 15
+                    guard let (data, _) = try? await URLSession.shared.data(for: request),
+                          let xml = String(data: data, encoding: .utf8) else { return nil }
+                    return appUpdate(for: app, latest: latestAppcastVersion(xml))
+                }
+            }
+            for await update in group { if let update { found.append(update) } }
+        }
+        appUpdates = found.sorted { $0.app.name.localizedStandardCompare($1.app.name) == .orderedAscending }
+    }
+
+    /// Opens the app, so its own updater takes it from here.
+    public func openApp(_ update: AppUpdate) {
+        NSWorkspace.shared.open(update.app.url)
+    }
+
+    nonisolated private static func sparkleApps() -> [InstalledApp] {
+        let folders = [URL(fileURLWithPath: "/Applications", isDirectory: true),
+                       FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications")]
+        var result: [InstalledApp] = []
+        for folder in folders {
+            let contents = (try? FileManager.default.contentsOfDirectory(
+                at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+            for bundle in contents where bundle.pathExtension == "app" {
+                let plistURL = bundle.appendingPathComponent("Contents/Info.plist")
+                guard let data = try? Data(contentsOf: plistURL),
+                      let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+                      let app = installedApp(at: bundle, plist: plist) else { continue }
+                result.append(app)
+            }
+        }
+        return result
     }
 
     /// The scheduled clean and the retention rules, checked once an hour.

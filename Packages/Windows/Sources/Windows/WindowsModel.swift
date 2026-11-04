@@ -14,6 +14,12 @@ public struct WindowsSettings: Codable, Equatable, Sendable {
     public var quitWhenLastWindowCloses = false
     /// Apps this never applies to, by bundle ID.
     public var neverQuitApps: [String] = []
+    /// Snap a window by dragging it against an edge or a corner of the screen.
+    public var edgeSnapping = true
+    /// Hand the focus to whatever the pointer rests on.
+    public var focusFollowsMouse = false
+    /// Live pictures of each window in the switcher; needs the Screen Recording permission.
+    public var switcherPreviews = false
 
     public init() {}
 }
@@ -47,6 +53,12 @@ public final class WindowsModel {
     @ObservationIgnored private var previousFrames: [pid_t: CGRect] = [:]
     @ObservationIgnored private var windowCounts: [Int32: Int] = [:]
     @ObservationIgnored private var watchTask: Task<Void, Never>?
+    @ObservationIgnored private var dragMonitor: Any?
+    @ObservationIgnored private var upMonitor: Any?
+    @ObservationIgnored private var moveMonitor: Any?
+    @ObservationIgnored private var snapPreview: NSPanel?
+    @ObservationIgnored private var pendingSnap: LayoutAction?
+    @ObservationIgnored private var focusState = FocusFollowState()
     @ObservationIgnored private var hud: NSPanel?
     @ObservationIgnored private let switcher = WindowSwitcherController()
     @ObservationIgnored private var running = false
@@ -105,10 +117,119 @@ public final class WindowsModel {
         }
         if running, settings.quitProtection || settings.closeProtection { installQuitTap() } else { removeQuitTap() }
         if running, settings.quitWhenLastWindowCloses { startWatchingWindows() } else { stopWatchingWindows() }
+        if running, settings.edgeSnapping { startEdgeSnapping() } else { stopEdgeSnapping() }
+        if running, settings.focusFollowsMouse { startFocusFollowsMouse() } else { stopFocusFollowsMouse() }
+        switcher.showsPreviews = settings.switcherPreviews
         if !running || !settings.windowSwitcher { switcher.close() }
     }
 
     public func showSwitcher() { switcher.show() }
+
+    // MARK: Snap to the screen edges
+
+    private func startEdgeSnapping() {
+        guard dragMonitor == nil else { return }
+        dragMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged]) { [weak self] _ in
+            MainActor.assumeIsolated { self?.dragged() }
+        }
+        upMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseUp]) { [weak self] _ in
+            MainActor.assumeIsolated { self?.dropped() }
+        }
+    }
+
+    private func stopEdgeSnapping() {
+        if let dragMonitor { NSEvent.removeMonitor(dragMonitor) }
+        if let upMonitor { NSEvent.removeMonitor(upMonitor) }
+        dragMonitor = nil
+        upMonitor = nil
+        hideSnapPreview()
+        pendingSnap = nil
+    }
+
+    private func dragged() {
+        let point = NSEvent.mouseLocation
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(point) }) ?? NSScreen.main else { return }
+        guard let action = edgeLayout(for: point, in: screen.visibleFrame) else {
+            pendingSnap = nil
+            hideSnapPreview()
+            return
+        }
+        pendingSnap = action
+        showSnapPreview(layoutFrame(action, visible: screen.visibleFrame, current: .zero))
+    }
+
+    private func dropped() {
+        defer {
+            pendingSnap = nil
+            hideSnapPreview()
+        }
+        guard let action = pendingSnap else { return }
+        perform(action)
+    }
+
+    /// A translucent rectangle showing where the window will land.
+    private func showSnapPreview(_ frame: CGRect) {
+        let panel = snapPreview ?? {
+            let panel = NSPanel(contentRect: frame, styleMask: [.borderless, .nonactivatingPanel],
+                                backing: .buffered, defer: false)
+            panel.isOpaque = false
+            panel.backgroundColor = .clear
+            panel.hasShadow = false
+            panel.ignoresMouseEvents = true
+            panel.level = .floating
+            panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+            panel.contentView = NSHostingView(rootView: SnapPreviewView())
+            return panel
+        }()
+        panel.setFrame(frame, display: true)
+        panel.orderFrontRegardless()
+        snapPreview = panel
+    }
+
+    private func hideSnapPreview() {
+        snapPreview?.orderOut(nil)
+        snapPreview = nil
+    }
+
+    // MARK: Focus follows mouse
+
+    private func startFocusFollowsMouse() {
+        guard moveMonitor == nil else { return }
+        moveMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved]) { [weak self] _ in
+            MainActor.assumeIsolated { self?.pointerMoved() }
+        }
+    }
+
+    private func stopFocusFollowsMouse() {
+        if let moveMonitor { NSEvent.removeMonitor(moveMonitor) }
+        moveMonitor = nil
+        focusState = FocusFollowState()
+    }
+
+    private func pointerMoved() {
+        let point = NSEvent.mouseLocation
+        guard let primary = NSScreen.screens.first else { return }
+        let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+        let windows: [(pid: Int32, frame: CGRect)] = ((raw as? [[String: Any]]) ?? []).compactMap { window in
+            guard (window["kCGWindowLayer"] as? Int) == 0,
+                  let pid = (window["kCGWindowOwnerPID"] as? NSNumber)?.int32Value,
+                  let bounds = window["kCGWindowBounds"] as? [String: Any],
+                  let x = (bounds["X"] as? NSNumber)?.doubleValue,
+                  let y = (bounds["Y"] as? NSNumber)?.doubleValue,
+                  let width = (bounds["Width"] as? NSNumber)?.doubleValue,
+                  let height = (bounds["Height"] as? NSNumber)?.doubleValue else { return nil }
+            // The window server measures from the top of the primary screen; the pointer does not.
+            let frame = cocoaRect(fromAX: CGRect(x: x, y: y, width: width, height: height),
+                                  primaryScreenHeight: primary.frame.height)
+            return (pid: pid, frame: frame)
+        }
+        let focused = NSWorkspace.shared.frontmostApplication?.processIdentifier
+        let under = windowUnder(point, in: windows)
+        guard let pid = focusState.pointer(over: under, at: ProcessInfo.processInfo.systemUptime, focused: focused),
+              let app = NSRunningApplication(processIdentifier: pid),
+              app.bundleIdentifier != Bundle.main.bundleIdentifier else { return }
+        app.activate()
+    }
 
     // MARK: Quit when the last window closes
 

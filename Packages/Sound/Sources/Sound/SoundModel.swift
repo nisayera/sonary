@@ -1,15 +1,47 @@
 import AppKit
 import CoreAudio
+import IOKit.ps
 import IOKit.pwr_mgt
 import Observation
 import SonaryCore
 
 public struct SoundSettings: Codable, Equatable, Sendable {
     public var micMuteShortcut = true
+    /// Keep the media keys from launching a music app that is not running.
+    public var mediaKeyGuard = false
     public var outputSwitchShortcut = true
     /// Turn the volume down to this when headphones are unplugged; 0 leaves it alone.
     public var volumeAfterUnplug = 0.25
+    /// Hold the stronger assertion so the Mac also stays awake with the lid shut.
+    public var keepAwakeWithClosedLid = false
+    /// The app whose running state can hold keep awake, as a bundle identifier.
+    public var keepAwakeApp = ""
     public init() {}
+}
+
+private func mediaTapCallback(
+    proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, userInfo: UnsafeMutableRawPointer?
+) -> Unmanaged<CGEvent>? {
+    guard let userInfo else { return Unmanaged.passUnretained(event) }
+    let model = Unmanaged<SoundModel>.fromOpaque(userInfo).takeUnretainedValue()
+    if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+        MainActor.assumeIsolated { model.reenableMediaTap() }
+        return Unmanaged.passUnretained(event)
+    }
+    // Media keys arrive as system-defined events, with the key packed into the event's data.
+    guard type.rawValue == UInt32(NSEvent.EventType.systemDefined.rawValue),
+          let nsEvent = NSEvent(cgEvent: event), nsEvent.subtype.rawValue == 8
+    else { return Unmanaged.passUnretained(event) }
+    let code = Int((nsEvent.data1 & 0xFFFF_0000) >> 16)
+    let isDown = ((nsEvent.data1 & 0x0000_FF00) >> 8) == 0x0A
+    guard let key = MediaKey(systemDefinedKeyCode: code) else { return Unmanaged.passUnretained(event) }
+    let pass = MainActor.assumeIsolated { model.handleMediaKey(key, isDown: isDown) }
+    return pass ? Unmanaged.passUnretained(event) : nil
+}
+
+public struct RunningApp: Identifiable, Hashable, Sendable {
+    public var id: String
+    public var name: String
 }
 
 /// Output and input switching, volume, microphone mute and keep awake.
@@ -29,9 +61,14 @@ public final class SoundModel {
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var assertion: IOPMAssertionID = 0
     @ObservationIgnored private var keepAwakeTask: Task<Void, Never>?
+    @ObservationIgnored private var keepAwakeCondition: KeepAwakeCondition?
     @ObservationIgnored private var micKey: HotKey?
     @ObservationIgnored private var outputKey: HotKey?
     @ObservationIgnored private var lastOutputName: String?
+    @ObservationIgnored private var mediaTap: CFMachPort?
+    @ObservationIgnored private var mediaSource: CFRunLoopSource?
+    /// Bundle IDs of the players Sonary will talk to; it never launches one.
+    @ObservationIgnored private let players = ["com.apple.Music", "com.spotify.client"]
     @ObservationIgnored private var volumeBeforeMute: Double?
     @ObservationIgnored private var listening = false
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
@@ -67,9 +104,11 @@ public final class SoundModel {
             }
         }
         applyShortcut(running: true)
+        if settings.mediaKeyGuard { installMediaTap() } else { removeMediaTap() }
     }
 
     func stop() {
+        removeMediaTap()
         refreshTask?.cancel()
         refreshTask = nil
         applyShortcut(running: false)
@@ -135,6 +174,53 @@ public final class SoundModel {
         change(&settings)
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "sound.settings") }
         applyShortcut(running: refreshTask != nil)
+        if refreshTask != nil, settings.mediaKeyGuard { installMediaTap() } else { removeMediaTap() }
+    }
+
+    // MARK: Media keys
+
+    private func installMediaTap() {
+        guard mediaTap == nil else { return }
+        let mask = CGEventMask(1) << NSEvent.EventType.systemDefined.rawValue
+        guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
+                                          eventsOfInterest: mask, callback: mediaTapCallback,
+                                          userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
+            _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
+            return
+        }
+        let source = CFMachPortCreateRunLoopSource(nil, tap, 0)
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
+        mediaTap = tap
+        mediaSource = source
+    }
+
+    private func removeMediaTap() {
+        if let mediaTap { CGEvent.tapEnable(tap: mediaTap, enable: false) }
+        if let mediaSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), mediaSource, .commonModes) }
+        mediaTap = nil
+        mediaSource = nil
+    }
+
+    /// False swallows the key press, after Sonary has passed the command to a running player.
+    func handleMediaKey(_ key: MediaKey, isDown: Bool) -> Bool {
+        let running = players.contains { !NSRunningApplication.runningApplications(withBundleIdentifier: $0).isEmpty }
+        guard shouldHandleMediaKey(playersRunning: running, guardEnabled: settings.mediaKeyGuard) else { return true }
+        guard isDown else { return false }
+        let player = players.first { !NSRunningApplication.runningApplications(withBundleIdentifier: $0).isEmpty }
+        let name = player == "com.spotify.client" ? "Spotify" : "Music"
+        let command = switch key {
+        case .playPause: "playpause"
+        case .next: "next track"
+        case .previous: "previous track"
+        }
+        var error: NSDictionary?
+        NSAppleScript(source: "tell application \"\(name)\" to \(command)")?.executeAndReturnError(&error)
+        return false
+    }
+
+    func reenableMediaTap() {
+        if let mediaTap { CGEvent.tapEnable(tap: mediaTap, enable: true) }
     }
 
     private func applyShortcut(running: Bool) {
@@ -156,6 +242,12 @@ public final class SoundModel {
     // MARK: Keep awake
 
     public func setKeepAwake(_ duration: KeepAwakeDuration?, on: Bool) {
+        guard on, let duration else { return setKeepAwake(nil) }
+        setKeepAwake(.duration(duration))
+    }
+
+    /// Starts keep awake under a condition, or stops it when the condition is nil.
+    public func setKeepAwake(_ condition: KeepAwakeCondition?) {
         keepAwakeTask?.cancel()
         keepAwakeTask = nil
         if assertion != 0 {
@@ -164,21 +256,77 @@ public final class SoundModel {
         }
         keepAwakeActive = false
         keepAwakeEndsAt = nil
-        guard on, let duration else { return }
+        keepAwakeCondition = nil
+        guard let condition else { return }
         let reason = "Sonary keeps your Mac awake" as CFString
-        guard IOPMAssertionCreateWithName(kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
-                                          IOPMAssertionLevel(kIOPMAssertionLevelOn), reason, &assertion) == kIOReturnSuccess else {
+        let type = keepAwakeAssertionType(closedLid: settings.keepAwakeWithClosedLid) as CFString
+        guard IOPMAssertionCreateWithName(type, IOPMAssertionLevel(kIOPMAssertionLevelOn),
+                                          reason, &assertion) == kIOReturnSuccess else {
             assertion = 0
             return
         }
         keepAwakeActive = true
-        if let seconds = duration.seconds {
+        keepAwakeCondition = condition
+        switch condition {
+        case .duration(let duration):
+            guard let seconds = duration.seconds else { return }
             keepAwakeEndsAt = Date().addingTimeInterval(seconds)
             keepAwakeTask = Task { [weak self] in
                 try? await Task.sleep(for: .seconds(seconds))
                 guard !Task.isCancelled else { return }
-                self?.setKeepAwake(nil, on: false)
+                self?.setKeepAwake(nil)
+            }
+        case .whileAppRuns, .whilePowered:
+            keepAwakeTask = Task { [weak self] in
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(10))
+                    guard !Task.isCancelled else { return }
+                    guard let self, let condition = self.keepAwakeCondition else { return }
+                    guard keepAwakeShouldContinue(condition: condition,
+                                                  runningBundleIDs: Self.runningBundleIDs(),
+                                                  onPower: Self.onPower()) else {
+                        self.setKeepAwake(nil)
+                        return
+                    }
+                }
             }
         }
+    }
+
+    /// Keep awake for as long as the app with this bundle identifier is running.
+    public func keepAwakeWhileAppRuns(_ bundleID: String) {
+        guard !bundleID.isEmpty else { return }
+        setKeepAwake(.whileAppRuns(bundleID))
+    }
+
+    /// Keep awake for as long as the Mac is plugged in.
+    public func keepAwakeWhilePowered() { setKeepAwake(.whilePowered) }
+
+    /// The apps the user can pick from, with their bundle identifiers.
+    public var runningApps: [RunningApp] {
+        var seen = Set<String>()
+        return NSWorkspace.shared.runningApplications
+            .filter { $0.activationPolicy == .regular }
+            .compactMap { app -> RunningApp? in
+                guard let id = app.bundleIdentifier, id != Bundle.main.bundleIdentifier,
+                      let name = app.localizedName, seen.insert(id).inserted else { return nil }
+                return RunningApp(id: id, name: name)
+            }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    /// The display name for a bundle identifier, falling back to the identifier itself.
+    public func appName(for bundleID: String) -> String {
+        NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+            .compactMap(\.localizedName).first ?? bundleID
+    }
+
+    private static func runningBundleIDs() -> [String] {
+        NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier)
+    }
+
+    private static func onPower() -> Bool {
+        guard let value = IOPSGetProvidingPowerSourceType(nil)?.takeUnretainedValue() else { return true }
+        return (value as String) != kIOPMBatteryPowerKey
     }
 }

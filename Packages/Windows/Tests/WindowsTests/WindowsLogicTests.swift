@@ -203,3 +203,77 @@ struct QuitWhenLastWindowClosesTests {
         #expect(appsWithNoWindowsLeft(previous: [:], current: [5: 0]).isEmpty)
     }
 }
+
+struct EdgeSnappingTests {
+    private let visible = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+
+    @Test func sidesGiveHalves() {
+        #expect(edgeLayout(for: CGPoint(x: 2, y: 500), in: visible) == .leftHalf)
+        #expect(edgeLayout(for: CGPoint(x: 1599, y: 500), in: visible) == .rightHalf)
+    }
+
+    @Test func topMaximizesAndBottomHalves() {
+        #expect(edgeLayout(for: CGPoint(x: 800, y: 999), in: visible) == .maximize)
+        #expect(edgeLayout(for: CGPoint(x: 800, y: 1), in: visible) == .bottomHalf)
+    }
+
+    @Test func cornersWinOverSides() {
+        #expect(edgeLayout(for: CGPoint(x: 2, y: 995), in: visible) == .topLeft)
+        #expect(edgeLayout(for: CGPoint(x: 1598, y: 995), in: visible) == .topRight)
+        #expect(edgeLayout(for: CGPoint(x: 2, y: 5), in: visible) == .bottomLeft)
+        #expect(edgeLayout(for: CGPoint(x: 1598, y: 5), in: visible) == .bottomRight)
+    }
+
+    @Test func themiddleSnapsNothing() {
+        #expect(edgeLayout(for: CGPoint(x: 800, y: 500), in: visible) == nil)
+    }
+
+    @Test func offScreenSnapsNothing() {
+        #expect(edgeLayout(for: CGPoint(x: -50, y: 500), in: visible) == nil)
+        #expect(edgeLayout(for: CGPoint(x: 800, y: 2000), in: visible) == nil)
+    }
+
+    @Test func turnedOffByZeroThreshold() {
+        #expect(edgeLayout(for: CGPoint(x: 0, y: 500), in: visible, threshold: 0) == nil)
+    }
+}
+
+struct FocusFollowsMouseTests {
+    private let windows: [(pid: Int32, frame: CGRect)] = [
+        (pid: 1, frame: CGRect(x: 0, y: 0, width: 500, height: 500)),
+        (pid: 2, frame: CGRect(x: 0, y: 0, width: 1000, height: 1000)),
+    ]
+
+    @Test func frontWindowWins() {
+        #expect(windowUnder(CGPoint(x: 100, y: 100), in: windows) == 1)
+        #expect(windowUnder(CGPoint(x: 800, y: 800), in: windows) == 2)
+        #expect(windowUnder(CGPoint(x: 2000, y: 2000), in: windows) == nil)
+    }
+
+    @Test func focusWaitsForTheDelay() {
+        var state = FocusFollowState(delay: 0.3)
+        #expect(state.pointer(over: 7, at: 10, focused: 1) == nil)
+        #expect(state.pointer(over: 7, at: 10.1, focused: 1) == nil)
+        #expect(state.pointer(over: 7, at: 10.4, focused: 1) == 7)
+    }
+
+    @Test func focusFiresOnlyOnce() {
+        var state = FocusFollowState(delay: 0.3)
+        _ = state.pointer(over: 7, at: 10, focused: 1)
+        #expect(state.pointer(over: 7, at: 10.4, focused: 1) == 7)
+        #expect(state.pointer(over: 7, at: 10.5, focused: 1) == nil)
+    }
+
+    @Test func movingAwayResetsTheWait() {
+        var state = FocusFollowState(delay: 0.3)
+        _ = state.pointer(over: 7, at: 10, focused: 1)
+        _ = state.pointer(over: 8, at: 10.2, focused: 1)
+        #expect(state.pointer(over: 7, at: 10.4, focused: 1) == nil)
+    }
+
+    @Test func theAppAlreadyInFrontIsLeftAlone() {
+        var state = FocusFollowState(delay: 0)
+        #expect(state.pointer(over: 1, at: 10, focused: 1) == nil)
+        #expect(state.pointer(over: nil, at: 10, focused: 1) == nil)
+    }
+}

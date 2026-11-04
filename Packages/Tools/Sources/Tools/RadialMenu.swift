@@ -95,5 +95,7 @@ func quickActionTitle(_ action: QuickAction) -> LocalizedStringKey {
     case .textFromScreen: "Copy text from screen"
     case .colorPicker: "Pick a color"
     case .screenshot: "Screenshot to clipboard"
+    case .pinScreenshot: "Pin a screenshot"
+    case .cameraPreview: "Camera mirror"
     }
 }

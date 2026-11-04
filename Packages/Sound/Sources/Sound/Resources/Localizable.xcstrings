@@ -1,12 +1,12 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Sound": {
+    "1 h": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ton"
+            "value": "1 Std."
           }
         }
       }
@@ -21,82 +21,12 @@
         }
       }
     },
-    "1 h": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 Std."
-          }
-        }
-      }
-    },
     "2 h": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "2 Std."
-          }
-        }
-      }
-    },
-    "Until I turn it off": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bis ich es ausschalte"
-          }
-        }
-      }
-    },
-    "Output": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ausgabe"
-          }
-        }
-      }
-    },
-    "Volume": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lautstärke"
-          }
-        }
-      }
-    },
-    "Microphone": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mikrofon"
-          }
-        }
-      }
-    },
-    "Mute microphone": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mikrofon stummschalten"
-          }
-        }
-      }
-    },
-    "Keep awake": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wach halten"
           }
         }
       }
@@ -121,42 +51,23 @@
         }
       }
     },
-    "Stop": {
+    "Headphones": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stopp"
+            "value": "Kopfhörer"
           }
         }
       }
     },
-    "Shortcuts": {
+    "Holds the stronger assertion, so an external display keeps working.": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kurzbefehle"
-          }
-        }
-      }
-    },
-    "Mute the microphone with ⌃⌥M": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mikrofon mit ⌃⌥M stummschalten"
-          }
-        }
-      }
-    },
-    "Works in every app, also during calls.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Funktioniert in jeder App, auch während Anrufen."
+            "value": "Hält die stärkere Sperre, damit ein externer Bildschirm weiterläuft."
           }
         }
       }
@@ -171,32 +82,63 @@
         }
       }
     },
-    "Switch speakers and microphones, change the volume, mute the microphone and keep your Mac awake from the menu panel's sound tab.": {
+    "Keep awake": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Im Ton-Tab des Menüs wechselst du Lautsprecher und Mikrofone, änderst die Lautstärke, schaltest das Mikrofon stumm und hältst deinen Mac wach."
+            "value": "Wach halten"
           }
         }
       }
     },
-    "Headphones": {
+    "Keep awake while this app runs": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kopfhörer"
+            "value": "Wach bleiben, solange diese App läuft"
           }
         }
       }
     },
-    "Switch output with ⌃⌥O": {
+    "Keep the media keys from opening Music": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ausgabe mit ⌃⌥O wechseln"
+            "value": "Medientasten sollen Musik nicht öffnen"
+          }
+        }
+      }
+    },
+    "Keeps the speakers from suddenly blaring.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verhindert, dass die Lautsprecher plötzlich losbrüllen."
+          }
+        }
+      }
+    },
+    "Media keys": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medientasten"
+          }
+        }
+      }
+    },
+    "Microphone": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon"
           }
         }
       }
@@ -211,6 +153,108 @@
         }
       }
     },
+    "Mute microphone": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon stummschalten"
+          }
+        }
+      }
+    },
+    "Mute the microphone with ⌃⌥M": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon mit ⌃⌥M stummschalten"
+          }
+        }
+      }
+    },
+    "None": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine"
+          }
+        }
+      }
+    },
+    "Output": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgabe"
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Sound": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton"
+          }
+        }
+      }
+    },
+    "Stay awake with the lid closed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit geschlossenem Deckel wach bleiben"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopp"
+          }
+        }
+      }
+    },
+    "Switch output with ⌃⌥O": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgabe mit ⌃⌥O wechseln"
+          }
+        }
+      }
+    },
+    "Switch speakers and microphones, change the volume, mute the microphone and keep your Mac awake from the menu panel's sound tab.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Ton-Tab des Menüs wechselst du Lautsprecher und Mikrofone, änderst die Lautstärke, schaltest das Mikrofon stumm und hältst deinen Mac wach."
+          }
+        }
+      }
+    },
     "Turn the volume down when headphones are unplugged": {
       "localizations": {
         "de": {
@@ -221,12 +265,64 @@
         }
       }
     },
-    "Keeps the speakers from suddenly blaring.": {
+    "Until I turn it off": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Verhindert, dass die Lautsprecher plötzlich losbrüllen."
+            "value": "Bis ich es ausschalte"
+          }
+        }
+      }
+    },
+    "Volume": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lautstärke"
+          }
+        }
+      }
+    },
+    "While %@ runs": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solange %@ läuft"
+          }
+        }
+      }
+    },
+    "While a player is running, Sonary passes the key to it instead.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solange ein Player läuft, gibt Sonary die Taste an ihn weiter."
+          }
+        }
+      }
+    },
+    "While plugged in": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solange am Strom"
+          }
+        }
+      }
+    },
+    "Works in every app, also during calls.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funktioniert in jeder App, auch während Anrufen."
           }
         }
       }

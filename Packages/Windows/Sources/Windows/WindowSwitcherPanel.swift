@@ -11,6 +11,9 @@ final class SwitcherPanel: NSPanel {
 @MainActor
 final class WindowSwitcherController {
     private var panel: SwitcherPanel?
+    /// Live pictures of each window. Off unless the user turns it on, because it needs
+    /// the Screen Recording permission.
+    var showsPreviews = false
 
     func show() {
         let entries = Self.currentEntries()
@@ -27,6 +30,7 @@ final class WindowSwitcherController {
         guard let panel else { return }
         panel.contentView = NSHostingView(rootView: WindowSwitcherView(
             entries: entries,
+            showsPreviews: showsPreviews,
             choose: { [weak self] entry in
                 self?.close()
                 WindowSwitcherController.raise(entry)
@@ -70,6 +74,7 @@ final class WindowSwitcherController {
 
 struct WindowSwitcherView: View {
     let entries: [WindowEntry]
+    let showsPreviews: Bool
     let choose: (WindowEntry) -> Void
     let cancel: () -> Void
     @State private var query = ""
@@ -97,6 +102,13 @@ struct WindowSwitcherView: View {
                             }
                             Text(entry.label).lineLimit(1)
                             Spacer()
+                            if showsPreviews, let preview = windowPreview(entry.id) {
+                                Image(nsImage: preview)
+                                    .resizable().aspectRatio(contentMode: .fit)
+                                    .frame(width: 92, height: 56)
+                                    .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                                    .accessibilityHidden(true)
+                            }
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 5)
@@ -122,4 +134,27 @@ struct WindowSwitcherView: View {
         guard list.indices.contains(selected) else { return }
         choose(list[selected])
     }
+}
+
+/// The rectangle shown while a window is dragged against an edge.
+struct SnapPreviewView: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .fill(Color.sonaryAccent.opacity(0.22))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Color.sonaryAccent, lineWidth: 2)
+            )
+            .padding(6)
+    }
+}
+
+/// A picture of one window. Nil without the Screen Recording permission, which is why
+/// previews are a setting rather than the default.
+@MainActor
+func windowPreview(_ id: UInt32) -> NSImage? {
+    guard let image = CGWindowListCreateImage(.null, [.optionIncludingWindow], id,
+                                              [.boundsIgnoreFraming, .nominalResolution]),
+          image.width > 1, image.height > 1 else { return nil }
+    return NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
 }

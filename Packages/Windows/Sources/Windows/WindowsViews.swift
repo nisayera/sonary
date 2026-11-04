@@ -59,9 +59,24 @@ struct WindowsSettingsView: View {
                               isOn: Binding(get: { model.settings.windowSwitcher },
                                             set: { value in model.update { $0.windowSwitcher = value } }))
             if model.settings.windowSwitcher {
+                SettingsToggleRow(symbol: "photo.on.rectangle", title: Text("Show a picture of each window", bundle: .module),
+                                  caption: Text("Asks for the Screen Recording permission the first time.", bundle: .module),
+                                  isOn: Binding(get: { model.settings.switcherPreviews },
+                                                set: { value in model.update { $0.switcherPreviews = value } }))
                 Button { model.showSwitcher() } label: { Text("Show it now", bundle: .module) }
                     .buttonStyle(.borderless)
             }
+        }
+        SettingsCard(Text("Dragging", bundle: .module)) {
+            SettingsToggleRow(symbol: "rectangle.and.arrow.up.right.and.arrow.down.left",
+                              title: Text("Snap windows at the screen edges", bundle: .module),
+                              caption: Text("Drag a window against an edge or a corner and let go.", bundle: .module),
+                              isOn: Binding(get: { model.settings.edgeSnapping },
+                                            set: { value in model.update { $0.edgeSnapping = value } }))
+            SettingsToggleRow(symbol: "cursorarrow.rays", title: Text("Focus follows the pointer", bundle: .module),
+                              caption: Text("A window comes forward when the pointer rests on it.", bundle: .module),
+                              isOn: Binding(get: { model.settings.focusFollowsMouse },
+                                            set: { value in model.update { $0.focusFollowsMouse = value } }))
         }
         SettingsCard(Text("Closing", bundle: .module)) {
             SettingsToggleRow(symbol: "xmark.circle", title: Text("Quit an app when its last window closes", bundle: .module),

@@ -3,7 +3,7 @@ import SonaryUI
 import SwiftUI
 
 struct CommandItem: Identifiable {
-    enum Kind { case app(URL), snippet(Snippet), action(() -> Void), copyText(String) }
+    enum Kind { case app(URL), snippet(Snippet), action(@MainActor () -> Void), copyText(String) }
     let id: String
     let title: String
     let symbol: String?
@@ -20,12 +20,15 @@ final class CommandBarController {
     private let model: ToolsModel
     private var panel: CommandBarPanel?
     private var apps: [CommandItem] = []
+    private var frontmostApp: NSRunningApplication?
 
     init(model: ToolsModel) {
         self.model = model
     }
 
     func show() {
+        // Remember who was in front: once the bar opens, Sonary itself is.
+        frontmostApp = NSWorkspace.shared.frontmostApplication
         if apps.isEmpty { apps = Self.loadApps() }
         if panel == nil {
             let panel = CommandBarPanel(contentRect: CGRect(x: 0, y: 0, width: 620, height: 380),
@@ -55,6 +58,10 @@ final class CommandBarController {
     }
 
     private func items() -> [CommandItem] {
+        let menu = menuItems()
+        let external = model.externalCommands().map { command in
+            CommandItem(id: command.id, title: command.title, symbol: command.symbol, kind: .action(command.run))
+        }
         let tools: [CommandItem] = [
             CommandItem(id: "ocr", title: String(localized: "Copy text from screen", bundle: .module), symbol: "text.viewfinder",
                         kind: .action { [weak model] in model?.recognizeText() }),
@@ -66,7 +73,19 @@ final class CommandBarController {
         let snippets = model.settings.snippets.map {
             CommandItem(id: "snippet-\($0.id)", title: $0.title, symbol: "text.quote", kind: .snippet($0))
         }
-        return tools + snippets + apps
+        return tools + snippets + external + menu + apps
+    }
+
+    /// Every menu command of the app that was in front when the bar opened.
+    private func menuItems() -> [CommandItem] {
+        guard let app = frontmostApp else { return [] }
+        let name = app.localizedName ?? ""
+        return MenuBarReader.commands(for: app).compactMap { command, element in
+            guard usefulMenuCommands([command]).first != nil else { return nil }
+            return CommandItem(id: "menu-\(name)-\(command.title)", title: "\(name): \(command.title)",
+                               symbol: "filemenu.and.selection",
+                               kind: .action { MenuBarReader.press(element) })
+        }
     }
 
     func run(_ item: CommandItem) {
@@ -74,7 +93,9 @@ final class CommandBarController {
         switch item.kind {
         case let .app(url): NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
         case let .snippet(snippet): model.insert(snippet)
-        case let .action(action): action()
+        case let .action(action):
+            // Let the panel close before the action takes effect, so the app behind is in front again.
+            Task { @MainActor in action() }
         case let .copyText(text):
             model.copy(text)
             model.lastResultText = String(localized: "Copied \(text)", bundle: .module)

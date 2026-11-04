@@ -95,6 +95,7 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 - [x] **M8 — Tools**
 - [x] **0.10 — Super Key, notch gestures, window switcher, brightness, quick toggles, radial menu**
 - [x] **0.12 — clipboard images and auto-clear, busiest apps and fans, horizontal scroll, key debounce, scheduled cleaning, scratchpad tabs, cleaning mode**
+- [x] **0.13 — adjustable transparency, edge snapping, focus follows mouse, switcher previews, menu commands and clipboard history in the command bar, pinned screenshots, camera preview, Markdown preview, media-key guard, keep-awake conditions, app update checker, clipboard image to Finder**
 
 Every milestone ships as its own release: M2 is 0.3.0, M8 is 0.9.0, and 1.0 arrives when the plan is done.
 

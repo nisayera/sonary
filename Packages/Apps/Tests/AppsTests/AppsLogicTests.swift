@@ -119,3 +119,50 @@ struct HousekeepingTests {
         #expect(settings.watchedFolders.isEmpty)
     }
 }
+
+@Suite struct AppUpdateTests {
+    private func app(_ version: String) -> InstalledApp {
+        InstalledApp(name: "Demo", bundleID: "app.demo", shortVersion: version, build: "100",
+                     feed: URL(string: "https://example.com/appcast.xml")!,
+                     url: URL(fileURLWithPath: "/Applications/Demo.app"))
+    }
+
+    @Test func comparesVersionsPartByPart() {
+        #expect(isNewerVersion("1.10.0", than: "1.9.3"))
+        #expect(isNewerVersion("2.0", than: "1.99.99"))
+        #expect(!isNewerVersion("1.2", than: "1.2.0"))
+        #expect(!isNewerVersion("1.2", than: "1.3"))
+        #expect(!isNewerVersion("", than: "1.0"))
+        #expect(!isNewerVersion("beta", than: "1.0"))
+    }
+
+    @Test func readsTheHighestVersionFromAnAppcast() {
+        let xml = """
+        <rss><channel>
+        <item><enclosure sparkle:shortVersionString="1.2.0" sparkle:version="120"/></item>
+        <item><enclosure sparkle:shortVersionString="1.10.0" sparkle:version="1100"/></item>
+        </channel></rss>
+        """
+        #expect(latestAppcastVersion(xml) == "1.10.0")
+        #expect(latestAppcastVersion("<rss></rss>") == nil)
+    }
+
+    @Test func onlyReportsRealUpdates() {
+        #expect(appUpdate(for: app("1.0"), latest: "1.1")?.latestVersion == "1.1")
+        #expect(appUpdate(for: app("1.1"), latest: "1.1") == nil)
+        #expect(appUpdate(for: app("1.2"), latest: "1.1") == nil)
+        #expect(appUpdate(for: app("1.0"), latest: nil) == nil)
+    }
+
+    @Test func skipsAppsWithoutAnHTTPSFeed() {
+        let url = URL(fileURLWithPath: "/Applications/Demo.app")
+        #expect(installedApp(at: url, plist: ["CFBundleIdentifier": "app.demo"]) == nil)
+        #expect(installedApp(at: url, plist: ["CFBundleIdentifier": "app.demo",
+                                              "SUFeedURL": "http://example.com/a.xml"]) == nil)
+        let good = installedApp(at: url, plist: ["CFBundleIdentifier": "app.demo",
+                                                 "SUFeedURL": "https://example.com/a.xml",
+                                                 "CFBundleShortVersionString": "1.0"])
+        #expect(good?.shortVersion == "1.0")
+        #expect(good?.name == "Demo")
+    }
+}

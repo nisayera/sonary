@@ -510,6 +510,66 @@
           }
         }
       }
+    },
+    "Appearance": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erscheinungsbild"
+          }
+        }
+      }
+    },
+    "Panels and the island": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panels und die Insel"
+          }
+        }
+      }
+    },
+    "How much of the desktop shows through.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie viel vom Schreibtisch durchscheint."
+          }
+        }
+      }
+    },
+    "Glass": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glas"
+          }
+        }
+      }
+    },
+    "Frosted": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Milchglas"
+          }
+        }
+      }
+    },
+    "Solid": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deckend"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

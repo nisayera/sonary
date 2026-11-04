@@ -370,6 +370,76 @@
           }
         }
       }
+    },
+    "Dragging": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ziehen"
+          }
+        }
+      }
+    },
+    "Snap windows at the screen edges": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster an den Bildschirmrändern einrasten"
+          }
+        }
+      }
+    },
+    "Drag a window against an edge or a corner and let go.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zieh ein Fenster an einen Rand oder in eine Ecke und lass los."
+          }
+        }
+      }
+    },
+    "Focus follows the pointer": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus folgt dem Zeiger"
+          }
+        }
+      }
+    },
+    "A window comes forward when the pointer rests on it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Fenster kommt nach vorn, wenn der Zeiger darauf ruht."
+          }
+        }
+      }
+    },
+    "Show a picture of each window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bild jedes Fensters zeigen"
+          }
+        }
+      }
+    },
+    "Asks for the Screen Recording permission the first time.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fragt beim ersten Mal nach der Berechtigung Bildschirmaufnahme."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
