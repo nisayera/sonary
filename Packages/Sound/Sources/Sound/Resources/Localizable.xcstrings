@@ -31,6 +31,17 @@
         }
       }
     },
+    "Appears in the top right corner when something is picked up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erscheint oben rechts, wenn etwas aufgenommen wird."
+          }
+        }
+      }
+    },
     "Awake until %@": {
       "localizations": {
         "de": {
@@ -143,6 +154,17 @@
         }
       }
     },
+    "Microphone level": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofonpegel"
+          }
+        }
+      }
+    },
     "Moves to the next speaker or headphones.": {
       "localizations": {
         "de": {
@@ -200,6 +222,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Show a dot while the microphone is live": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Punkt anzeigen, während das Mikrofon aktiv ist"
           }
         }
       }
@@ -303,6 +336,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Solange %@ läuft"
+          }
+        }
+      }
+    },
+    "While a display is attached": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solange ein Bildschirm angeschlossen ist"
           }
         }
       }

@@ -11,12 +11,34 @@
         }
       }
     },
+    "A live picture from the front camera, for checking yourself before a call.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Livebild der Frontkamera, um vor einem Anruf nach dir selbst zu sehen."
+          }
+        }
+      }
+    },
     "All day": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Ganztägig"
+          }
+        }
+      }
+    },
+    "Allow Sonary to use the camera in System Settings > Privacy & Security.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlaube Sonary die Kamera in Systemeinstellungen > Datenschutz & Sicherheit."
           }
         }
       }
@@ -47,6 +69,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kalender"
+          }
+        }
+      }
+    },
+    "Camera": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kamera"
           }
         }
       }

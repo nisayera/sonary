@@ -395,3 +395,40 @@ struct MenuCommandTests {
         #expect(TypeText.chunks(of: "abc", size: 0).isEmpty)
     }
 }
+
+@Suite struct RadialProfileTests {
+    private let profile = RadialProfile(name: "Capture", actions: [.screenshot, .pinScreenshot])
+
+    @Test func theFirstRingHoldsActionsThenRings() {
+        let items = radialRootItems(actions: [.darkMode, .lockScreen], profiles: [profile])
+        #expect(items.count == 3)
+        #expect(items[0] == .action(.darkMode))
+        #expect(items[2] == .profile(profile), "a new ring never moves the actions already there")
+    }
+
+    @Test func anEmptyChoiceMeansEverything() {
+        let items = radialRootItems(actions: [], profiles: [])
+        #expect(items.count == min(QuickAction.allCases.count, radialRingLimit))
+    }
+
+    @Test func aRingNeverGetsTooCrowded() {
+        let many = (0..<6).map { RadialProfile(name: "r\($0)") }
+        let items = radialRootItems(actions: QuickAction.allCases, profiles: many)
+        #expect(items.count == radialRingLimit)
+    }
+
+    @Test func aProfileRingKeepsAWayBack() {
+        let items = radialProfileItems(profile)
+        #expect(items.first == .action(.screenshot))
+        #expect(items.last == .back)
+        let crowded = RadialProfile(name: "all", actions: QuickAction.allCases)
+        #expect(radialProfileItems(crowded).count == radialRingLimit)
+        #expect(radialProfileItems(crowded).last == .back, "the way back is never pushed out")
+    }
+
+    @Test func itemsAreTellableApart() {
+        #expect(RadialItem.action(.darkMode).id != RadialItem.action(.lockScreen).id)
+        #expect(RadialItem.profile(profile).id != RadialItem.back.id)
+        #expect(RadialItem.back.symbol == "chevron.backward")
+    }
+}

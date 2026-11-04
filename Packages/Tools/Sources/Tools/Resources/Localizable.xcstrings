@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add a ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ring hinzufügen"
+          }
+        }
+      }
+    },
     "Add snippet": {
       "localizations": {
         "de": {
@@ -18,6 +29,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erlaube Sonary die Bildschirmaufnahme in Systemeinstellungen > Datenschutz & Sicherheit."
+          }
+        }
+      }
+    },
+    "Back": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurück"
           }
         }
       }
@@ -229,6 +251,17 @@
         }
       }
     },
+    "Each extra ring is a wedge in the first one that opens it, so the ring can hold more than eight actions without getting crowded.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeder weitere Ring ist ein Feld im ersten, das ihn öffnet – so passen mehr als acht Aktionen hinein, ohne dass es eng wird."
+          }
+        }
+      }
+    },
     "Edit snippets in Sonary's settings.": {
       "localizations": {
         "de": {
@@ -255,6 +288,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Papierkorb leeren"
+          }
+        }
+      }
+    },
+    "Extra rings": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere Ringe"
           }
         }
       }
@@ -361,6 +405,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Neue Notiz"
+          }
+        }
+      }
+    },
+    "New ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neuer Ring"
           }
         }
       }

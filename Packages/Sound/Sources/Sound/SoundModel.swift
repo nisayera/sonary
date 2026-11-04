@@ -4,6 +4,7 @@ import IOKit.ps
 import IOKit.pwr_mgt
 import Observation
 import SonaryCore
+import SwiftUI
 
 public struct SoundSettings: Codable, Equatable, Sendable {
     public var micMuteShortcut = true
@@ -16,6 +17,8 @@ public struct SoundSettings: Codable, Equatable, Sendable {
     public var keepAwakeWithClosedLid = false
     /// The app whose running state can hold keep awake, as a bundle identifier.
     public var keepAwakeApp = ""
+    /// Show a small dot on screen while the microphone is live.
+    public var micIndicator = false
     public init() {}
 }
 
@@ -54,6 +57,8 @@ public final class SoundModel {
     public private(set) var defaultInput: UInt32?
     public private(set) var outputVolume: Double?
     public private(set) var micMuted = false
+    /// The microphone's loudness while the meter is being watched, 0 to 1.
+    public private(set) var inputLevel: Double = 0
     public private(set) var keepAwakeEndsAt: Date?
     public private(set) var keepAwakeActive = false
     public private(set) var settings: SoundSettings
@@ -62,6 +67,9 @@ public final class SoundModel {
     @ObservationIgnored private var assertion: IOPMAssertionID = 0
     @ObservationIgnored private var keepAwakeTask: Task<Void, Never>?
     @ObservationIgnored private var keepAwakeCondition: KeepAwakeCondition?
+    @ObservationIgnored private let levelReader = InputLevelReader()
+    @ObservationIgnored private var indicator: NSPanel?
+    @ObservationIgnored private var levelWatchers = 0
     @ObservationIgnored private var lastOutputName: String?
     @ObservationIgnored private var mediaTap: CFMachPort?
     @ObservationIgnored private var mediaSource: CFRunLoopSource?
@@ -200,6 +208,13 @@ public final class SoundModel {
         mediaSource = nil
     }
 
+    func stopLevelAndIndicator() {
+        levelWatchers = 0
+        levelReader.stop()
+        inputLevel = 0
+        hideIndicator()
+    }
+
     /// False swallows the key press, after Sonary has passed the command to a running player.
     func handleMediaKey(_ key: MediaKey, isDown: Bool) -> Bool {
         let running = players.contains { !NSRunningApplication.runningApplications(withBundleIdentifier: $0).isEmpty }
@@ -243,6 +258,51 @@ public final class SoundModel {
         if settings.outputSwitchShortcut {
             shortcuts.bind("sound.cycleOutput") { [weak self] in self?.cycleOutput() }
         }
+    }
+
+    // MARK: Microphone level
+
+    /// The meter runs only while a view is showing it; the last one out stops the engine.
+    public func startWatchingInputLevel() {
+        levelWatchers += 1
+        guard levelWatchers == 1 else { return }
+        levelReader.onChange = { [weak self] value in
+            self?.inputLevel = value
+            self?.updateIndicator(level: value)
+        }
+        levelReader.start()
+    }
+
+    public func stopWatchingInputLevel() {
+        levelWatchers = max(0, levelWatchers - 1)
+        guard levelWatchers == 0 else { return }
+        levelReader.stop()
+        inputLevel = 0
+        hideIndicator()
+    }
+
+    /// A dot in the corner of the screen while the microphone is picking something up,
+    /// so it is never recording unnoticed.
+    private func updateIndicator(level: Double) {
+        guard settings.micIndicator, !micMuted, level > 0.04 else { return hideIndicator() }
+        guard indicator == nil, let screen = NSScreen.main else { return }
+        let size = CGSize(width: 12, height: 12)
+        let panel = NSPanel(contentRect: CGRect(origin: .zero, size: size),
+                            styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.level = .statusBar
+        panel.ignoresMouseEvents = true
+        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+        panel.contentView = NSHostingView(rootView: MicIndicatorDot())
+        panel.setFrameOrigin(CGPoint(x: screen.frame.maxX - 26, y: screen.frame.maxY - 26))
+        panel.orderFrontRegardless()
+        indicator = panel
+    }
+
+    private func hideIndicator() {
+        indicator?.orderOut(nil)
+        indicator = nil
     }
 
     // MARK: Keep awake
@@ -290,7 +350,8 @@ public final class SoundModel {
                     guard let self, let condition = self.keepAwakeCondition else { return }
                     guard keepAwakeShouldContinue(condition: condition,
                                                   runningBundleIDs: Self.runningBundleIDs(),
-                                                  onPower: Self.onPower()) else {
+                                                  onPower: Self.onPower(),
+                                                  externalDisplays: Self.externalDisplays()) else {
                         self.setKeepAwake(nil)
                         return
                     }
@@ -307,6 +368,16 @@ public final class SoundModel {
 
     /// Keep awake for as long as the Mac is plugged in.
     public func keepAwakeWhilePowered() { setKeepAwake(.whilePowered) }
+
+    /// Keep awake for as long as an external display is attached.
+    public func keepAwakeWhileDisplayConnected() { setKeepAwake(.whileDisplayConnected) }
+
+    /// How many displays beyond the built-in one are attached.
+    static func externalDisplays() -> Int {
+        NSScreen.screens.count - 1
+    }
+
+    public var hasExternalDisplay: Bool { Self.externalDisplays() > 0 }
 
     /// The apps the user can pick from, with their bundle identifiers.
     public var runningApps: [RunningApp] {

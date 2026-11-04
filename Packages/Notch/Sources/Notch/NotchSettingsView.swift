@@ -39,6 +39,7 @@ struct NotchSettingsView: View {
         case .downloads: Text("Your newest downloads; click to open or drag them out.", bundle: .module)
         case .batteries: Text("Mouse, keyboard, trackpad and headphones.", bundle: .module)
         case .shelf: Text("Park files on the notch and drag them out again.", bundle: .module)
+        case .camera: Text("A live picture from the front camera, for checking yourself before a call.", bundle: .module)
         }
     }
 }

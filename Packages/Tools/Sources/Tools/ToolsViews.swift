@@ -211,6 +211,48 @@ struct ToolsSettingsView: View {
                                       }))
             }
         }
+        SettingsCard(Text("Extra rings", bundle: .module)) {
+            Text("Each extra ring is a wedge in the first one that opens it, so the ring can hold more than eight actions without getting crowded.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            ForEach(model.settings.radialProfiles) { profile in
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        TextField(text: Binding(get: { profile.name },
+                                                set: { model.renameRadialProfile(profile.id, to: $0) })) {
+                            EmptyView()
+                        }
+                        .labelsHidden()
+                        Spacer()
+                        Button(role: .destructive) { model.removeRadialProfile(profile.id) } label: {
+                            Image(systemName: "trash")
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(QuickAction.allCases) { action in
+                                let isOn = profile.actions.contains(action)
+                                Button {
+                                    model.setRadialProfileAction(profile.id, action: action, on: !isOn)
+                                } label: {
+                                    Image(systemName: action.symbol)
+                                        .frame(width: 26, height: 22)
+                                        .background(isOn ? Color.sonaryAccent.opacity(0.3) : Color.secondary.opacity(0.12),
+                                                    in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel(Text(quickActionTitle(action), bundle: .module))
+                            }
+                        }
+                    }
+                }
+                .padding(8)
+                .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+            Button { model.addRadialProfile() } label: { Text("Add a ring", bundle: .module) }
+                .buttonStyle(.borderless)
+        }
         SettingsCard(Text("Snippets", bundle: .module)) {
             SettingsRow(symbol: "text.cursor", title: Text("Insert a snippet by", bundle: .module)) {
                 Picker(selection: Binding(get: { model.settings.snippetDelivery },

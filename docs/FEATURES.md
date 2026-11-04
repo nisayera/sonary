@@ -11,7 +11,7 @@ Status checked against the code at version 0.18.0.
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
 - [ ] Per-app output routing
 - [x] Output device switching, with a ⌃⌥O shortcut and an automatic volume drop when headphones are unplugged
-- [~] Microphone — preferred input and the ⌃⌥M mute shortcut are there; no input level meter, no on-screen indicator
+- [x] Microphone — preferred input, the ⌃⌥M mute shortcut, a level meter in the panel and a dot on screen while it is live
 - [x] Stop Music.app from launching itself on the media keys — Sonary passes the key to a player that is already running
 
 ## System monitoring
@@ -58,12 +58,12 @@ Status checked against the code at version 0.18.0.
 - [x] DMG installer helper — a mounted image with one app offers to copy it into /Applications and eject itself
 
 ## Everyday tools
-- [~] Notch island — music, calendar, timer, downloads, accessory batteries, a file shelf, scroll gestures, simulated on displays without a notch; no notifications, lyrics, equalizer or camera
+- [~] Notch island — music, calendar, timer, downloads, accessory batteries, a file shelf, the camera, scroll gestures, simulated on displays without a notch; no notifications, lyrics or equalizer
 - [ ] AI agent tracking in the island (no public way to see another app's agent activity)
 - [~] Command bar — apps, snippets, Sonary's tools, the clipboard history, the front app's menu commands, a calculator, unit conversion and emoji; no files, no scripts
 - [x] Quick toggles: dark mode, desktop icons, empty Trash, eject disks, lock screen
 - [x] Quit-apps list
-- [~] Radial menu on ⌃⌥R with a free choice of actions; no profiles, no submenus
+- [x] Radial menu on ⌃⌥R with a free choice of actions and extra rings, each a wedge that opens its own ring
 - [x] Scratchpad with tabs, Markdown export and a preview
 - [x] Cleaning mode: every screen goes black until Escape or a click
 
@@ -85,7 +85,7 @@ Status checked against the code at version 0.18.0.
 - [x] Port manager with stop
 
 ## Energy and display
-- [~] Keep awake with a timer, until turned off, while an app runs, while plugged in and with the lid closed; no display condition
+- [x] Keep awake with a timer, until turned off, while an app runs, while plugged in, while a display is attached and with the lid closed
 - [~] Per-display brightness through the system's own control, with dimming where it offers none; no DDC for external monitors
 - [~] XDR extra brightness — asks panels with headroom above white to open it; needs trying on a real XDR display
 - [x] Bluetooth off during sleep, switched back on at wake and only if Sonary switched it off

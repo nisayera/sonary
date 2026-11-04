@@ -114,3 +114,35 @@ struct MediaKeyTests {
         #expect(!keepAwakeShouldContinue(condition: .whilePowered, runningBundleIDs: [], onPower: false))
     }
 }
+
+@Suite struct InputLevelTests {
+    @Test func silenceSitsAtTheBottom() {
+        #expect(inputBar(rms: 0) == 0)
+        #expect(inputBar(rms: -1) == 0, "a nonsense reading is not a loud one")
+    }
+
+    @Test func fullScaleIsTheTop() {
+        #expect(inputBar(rms: 1) == 1)
+        #expect(inputBar(rms: 4) == 1, "anything above the scale is clamped")
+    }
+
+    @Test func halfwayDownTheScaleIsHalfTheBar() {
+        // -30 dB on a 60 dB scale is the middle.
+        let half = inputBar(rms: Float(pow(10.0, -30.0 / 20.0)))
+        #expect(abs(half - 0.5) < 0.01)
+    }
+
+    @Test func rootMeanSquareOfKnownSamples() {
+        #expect(rootMeanSquare([]) == 0)
+        #expect(rootMeanSquare([0, 0, 0]) == 0)
+        #expect(abs(rootMeanSquare([1, -1, 1, -1]) - 1) < 0.0001)
+        #expect(abs(rootMeanSquare([0.5, -0.5]) - 0.5) < 0.0001)
+    }
+
+    @Test func theDisplayConditionFollowsTheDisplays() {
+        #expect(keepAwakeShouldContinue(condition: .whileDisplayConnected, runningBundleIDs: [],
+                                        onPower: false, externalDisplays: 1))
+        #expect(!keepAwakeShouldContinue(condition: .whileDisplayConnected, runningBundleIDs: [],
+                                         onPower: true, externalDisplays: 0))
+    }
+}

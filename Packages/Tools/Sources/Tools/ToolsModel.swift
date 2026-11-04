@@ -10,6 +10,8 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
         Snippet(title: "Date", text: "{date}"),
     ]
     public var radialActions: [QuickAction] = QuickAction.allCases
+    /// Extra rings, each a wedge in the first one.
+    public var radialProfiles: [RadialProfile] = []
     public var colorFormat: ColorFormat = .hex
     public var scratchpadTabs: [ScratchpadTab] = []
     /// Use Sonary's own region selector, with a magnifier, instead of the system one.
@@ -427,8 +429,40 @@ public final class ToolsModel {
     }
 
     public func showRadialMenu() {
-        let actions = settings.radialActions.isEmpty ? QuickAction.allCases : settings.radialActions
-        radial.show(actions: Array(actions.prefix(8))) { [weak self] action in self?.run(action) }
+        showRadialRing(radialRootItems(actions: settings.radialActions, profiles: settings.radialProfiles))
+    }
+
+    private func showRadialRing(_ items: [RadialItem]) {
+        radial.show(items: items, run: { [weak self] action in
+            self?.run(action)
+        }, open: { [weak self] profile in
+            self?.showRadialRing(radialProfileItems(profile))
+        }, back: { [weak self] in
+            self?.showRadialMenu()
+        })
+    }
+
+    public func addRadialProfile() {
+        update { $0.radialProfiles.append(RadialProfile(name: String(localized: "New ring", bundle: .module))) }
+    }
+
+    public func removeRadialProfile(_ id: UUID) {
+        update { $0.radialProfiles.removeAll { $0.id == id } }
+    }
+
+    public func renameRadialProfile(_ id: UUID, to name: String) {
+        update { settings in
+            guard let index = settings.radialProfiles.firstIndex(where: { $0.id == id }) else { return }
+            settings.radialProfiles[index].name = name
+        }
+    }
+
+    public func setRadialProfileAction(_ id: UUID, action: QuickAction, on: Bool) {
+        update { settings in
+            guard let index = settings.radialProfiles.firstIndex(where: { $0.id == id }) else { return }
+            settings.radialProfiles[index].actions.removeAll { $0 == action }
+            if on { settings.radialProfiles[index].actions.append(action) }
+        }
     }
 
     // MARK: Command bar
