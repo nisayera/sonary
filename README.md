@@ -95,6 +95,7 @@ Requires Xcode 26. The Xcode project is generated from `project.yml`. See [CONTR
 - [x] **M8 — Tools**
 - [x] **0.10 — Super Key, notch gestures, window switcher, brightness, quick toggles, radial menu**
 - [x] **0.12 — clipboard images and auto-clear, busiest apps and fans, horizontal scroll, key debounce, scheduled cleaning, scratchpad tabs, cleaning mode**
+- [x] **0.16 — fill the screen without a new Space, GIFs from videos, a file shelf in the notch**
 - [x] **0.15 — central shortcut manager: every shortcut on one page, recordable and resettable**
 - [x] **0.14 — screen recording, image conversion and video shrinking, speed test, Bluetooth off during sleep, disk image installer**
 - [x] **0.13 — adjustable transparency, edge snapping, focus follows mouse, switcher previews, menu commands and clipboard history in the command bar, pinned screenshots, camera preview, Markdown preview, media-key guard, keep-awake conditions, app update checker, clipboard image to Finder**

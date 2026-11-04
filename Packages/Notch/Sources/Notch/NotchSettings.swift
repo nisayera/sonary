@@ -1,7 +1,7 @@
 import Foundation
 
 public enum NotchWidget: String, Codable, CaseIterable, Sendable {
-    case music, calendar, timer, downloads, batteries
+    case music, calendar, timer, downloads, batteries, shelf
 
     public var symbol: String {
         switch self {
@@ -10,6 +10,7 @@ public enum NotchWidget: String, Codable, CaseIterable, Sendable {
         case .timer: "timer"
         case .downloads: "arrow.down.circle"
         case .batteries: "battery.75percent"
+        case .shelf: "tray.full"
         }
     }
 }

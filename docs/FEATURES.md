@@ -5,7 +5,7 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.15.0.
+Status checked against the code at version 0.16.0.
 
 ## Audio
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
@@ -26,7 +26,7 @@ Status checked against the code at version 0.15.0.
 - [~] Window layouts — halves, quarters, thirds, maximize, centre, move to the next display and put back, on ⌃⌥ shortcuts and by dragging a window to a screen edge; no modifier-drag
 - [ ] Dock window previews across Spaces
 - [ ] Dock icon click actions
-- [ ] Green button fills the screen without a new Space
+- [x] A layout that fills the screen, menu bar strip included, without a new Space (⌃⌥B)
 - [ ] Fixed Space order
 - [x] Quit apps when their last window closes
 - [~] ⌘Q and ⌘W protection — press twice, with per-app rules; no hold mode
@@ -58,7 +58,7 @@ Status checked against the code at version 0.15.0.
 - [x] DMG installer helper — a mounted image with one app offers to copy it into /Applications and eject itself
 
 ## Everyday tools
-- [~] Notch island — music, calendar, timer, downloads, accessory batteries, scroll gestures, simulated on displays without a notch; no notifications, lyrics, equalizer, camera or files
+- [~] Notch island — music, calendar, timer, downloads, accessory batteries, a file shelf, scroll gestures, simulated on displays without a notch; no notifications, lyrics, equalizer or camera
 - [ ] AI agent tracking in the island
 - [~] Command bar — apps, snippets, Sonary's tools, the clipboard history, the front app's menu commands, a calculator, unit conversion and emoji; no files, no scripts
 - [x] Quick toggles: dark mode, desktop icons, empty Trash, eject disks, lock screen
@@ -74,7 +74,7 @@ Status checked against the code at version 0.15.0.
 - [x] Camera preview mirror, a floating round window from the tools tab
 - [x] Offline text recognition, including QR codes and barcodes
 - [x] Colour picker with HEX, RGB, HSL and SwiftUI formats
-- [~] Media tools — image conversion (PNG, JPEG, HEIC, TIFF) with downscaling and a text watermark, and video shrinking; no GIF yet
+- [x] Media tools — image conversion (PNG, JPEG, HEIC, TIFF) with downscaling and a text watermark, video shrinking and animated GIFs
 
 ## App management
 - [~] Update checker — Homebrew formulae and casks, plus apps in /Applications that ship a Sparkle feed; no App Store
