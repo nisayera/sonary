@@ -272,6 +272,22 @@ public final class ToolsModel {
         }
     }
 
+    /// Turns the videos the user picked into animated GIFs.
+    public func makeGIFs(_ urls: [URL]) {
+        guard !urls.isEmpty else { return }
+        Task {
+            var written = 0
+            for url in urls {
+                if (try? await makeGIF(from: url)) != nil { written += 1 }
+            }
+            if written == 0 {
+                report(String(localized: "No GIF could be made.", bundle: .module))
+            } else {
+                report(String(localized: "Made \(written) GIFs.", bundle: .module))
+            }
+        }
+    }
+
     /// Re-encodes a video smaller, next to the original.
     public func compressVideos(_ urls: [URL]) {
         guard !urls.isEmpty else { return }

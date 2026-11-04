@@ -121,6 +121,17 @@
         }
       }
     },
+    "Fill the screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirm füllen"
+          }
+        }
+      }
+    },
     "Finder and menu bar apps are never quit.": {
       "localizations": {
         "de": {

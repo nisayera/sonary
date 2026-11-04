@@ -137,3 +137,60 @@ public func compressVideo(at source: URL, preset: String = AVAssetExportPreset12
 }
 
 public enum MediaError: Error { case unreadable, cannotEncode }
+
+/// How many frames a GIF of this length gets, and the delay between them. Capped so a
+/// long clip cannot turn into a file nobody can open.
+public func gifPlan(duration: Double, fps: Double = 10, maxFrames: Int = 240)
+-> (frames: Int, delay: Double) {
+    guard duration > 0, fps > 0 else { return (1, 0.1) }
+    let wanted = max(1, Int((duration * fps).rounded()))
+    let frames = min(wanted, maxFrames)
+    return (frames, duration / Double(frames))
+}
+
+/// The times to grab, spread evenly over the clip.
+public func gifSampleTimes(duration: Double, frames: Int) -> [Double] {
+    guard frames > 0, duration > 0 else { return [0] }
+    let step = duration / Double(frames)
+    return (0..<frames).map { Double($0) * step }
+}
+
+/// Turns a video into an animated GIF next to it, scaled down so the file stays sane.
+public func makeGIF(from source: URL, longestEdge: Int = 640, fps: Double = 10) async throws -> URL {
+    let asset = AVURLAsset(url: source)
+    let duration = try await CMTimeGetSeconds(asset.load(.duration))
+    let plan = gifPlan(duration: duration, fps: fps)
+
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+    generator.requestedTimeToleranceBefore = .zero
+    generator.requestedTimeToleranceAfter = .zero
+    if longestEdge > 0 { generator.maximumSize = CGSize(width: longestEdge, height: longestEdge) }
+
+    let name = uniqueMediaName(base: source.deletingPathExtension().lastPathComponent, extension: "gif") {
+        FileManager.default.fileExists(atPath: source.deletingLastPathComponent().appendingPathComponent($0).path)
+    }
+    let url = source.deletingLastPathComponent().appendingPathComponent(name)
+    guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString,
+                                                            plan.frames, nil) else {
+        throw MediaError.cannotEncode
+    }
+    CGImageDestinationSetProperties(destination, [
+        kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0],
+    ] as CFDictionary)
+
+    var written = 0
+    for seconds in gifSampleTimes(duration: duration, frames: plan.frames) {
+        let time = CMTime(seconds: seconds, preferredTimescale: 600)
+        guard let (image, _) = try? await generator.image(at: time) else { continue }
+        CGImageDestinationAddImage(destination, image, [
+            kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFUnclampedDelayTime: plan.delay],
+        ] as CFDictionary)
+        written += 1
+    }
+    guard written > 0, CGImageDestinationFinalize(destination) else {
+        try? FileManager.default.removeItem(at: url)
+        throw MediaError.cannotEncode
+    }
+    return url
+}

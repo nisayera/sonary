@@ -53,7 +53,8 @@ struct ToolsPopoverView: View {
             tool(model.isRecording ? "stop.circle" : "record.circle",
                  model.isRecording ? "Stop recording" : "Record the screen", "") { model.toggleRecording() }
             tool("photo.on.rectangle.angled", "Convert images…", "") { convertingImages = true }
-            tool("film", "Make a video smaller…", "") { pickVideos() }
+            tool("film", "Make a video smaller…", "") { pickVideos(gif: false) }
+            tool("photo.stack", "Turn a video into a GIF…", "") { pickVideos(gif: true) }
         }
         .sheet(isPresented: $convertingImages) { ImageConversionSheet(model: model) }
     }
@@ -128,13 +129,13 @@ struct ToolsPopoverView: View {
         }
     }
 
-    private func pickVideos() {
+    private func pickVideos(gif: Bool) {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = false
         panel.allowedContentTypes = [.movie, .mpeg4Movie, .quickTimeMovie]
         guard panel.runModal() == .OK else { return }
-        model.compressVideos(panel.urls)
+        if gif { model.makeGIFs(panel.urls) } else { model.compressVideos(panel.urls) }
     }
 
     private func tool(_ symbol: String, _ title: LocalizedStringKey, _ shortcut: String, action: @escaping () -> Void) -> some View {

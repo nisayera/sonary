@@ -277,3 +277,23 @@ struct FocusFollowsMouseTests {
         #expect(state.pointer(over: nil, at: 10, focused: 1) == nil)
     }
 }
+
+@Suite struct FillScreenTests {
+    private let visible = CGRect(x: 0, y: 0, width: 1600, height: 960)
+    private let full = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+
+    @Test func fillingTakesTheWholeScreenAndMaximizeDoesNot() {
+        #expect(layoutFrame(.fillScreen, visible: visible, full: full, current: .zero) == full)
+        #expect(layoutFrame(.maximize, visible: visible, full: full, current: .zero) == visible)
+    }
+
+    @Test func theThreeArgumentFormStillOnlyKnowsTheVisibleFrame() {
+        #expect(layoutFrame(.fillScreen, visible: visible, current: .zero) == visible)
+    }
+
+    @Test func everyLayoutHasAKeyOfItsOwn() {
+        let codes = LayoutAction.allCases.map(\.keyCode)
+        #expect(Set(codes).count == codes.count, "two layouts would fight over one shortcut")
+        #expect(LayoutAction.fillScreen.shortcutLabel == "⌃⌥B")
+    }
+}

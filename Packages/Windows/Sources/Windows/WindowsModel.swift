@@ -318,7 +318,8 @@ public final class WindowsModel {
             let center = CGPoint(x: current.midX, y: current.midY)
             let screen = NSScreen.screens.first { $0.frame.contains(center) } ?? NSScreen.main
             guard let screen else { return nil }
-            return axRect(fromCocoa: layoutFrame(action, visible: screen.visibleFrame, current: current),
+            return axRect(fromCocoa: layoutFrame(action, visible: screen.visibleFrame, full: screen.frame,
+                                                 current: current),
                           primaryScreenHeight: height)
         }
     }

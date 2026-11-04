@@ -17,6 +17,7 @@ func layoutTitle(_ action: LayoutAction) -> LocalizedStringKey {
     case .rightThird: "Right third"
     case .maximize: "Maximize"
     case .center: "Center"
+    case .fillScreen: "Fill the screen"
     }
 }
 

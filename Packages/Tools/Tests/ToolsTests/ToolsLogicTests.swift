@@ -299,3 +299,31 @@ struct MenuCommandTests {
         #expect(retina > 2_000_000 && retina < 40_000_000)
     }
 }
+
+@Suite struct GIFPlanTests {
+    @Test func spreadsFramesOverTheClip() {
+        let plan = gifPlan(duration: 4, fps: 10)
+        #expect(plan.frames == 40)
+        #expect(abs(plan.delay - 0.1) < 0.0001)
+    }
+
+    @Test func capsALongClipInsteadOfExploding() {
+        let plan = gifPlan(duration: 600, fps: 10, maxFrames: 240)
+        #expect(plan.frames == 240)
+        #expect(abs(plan.delay - 2.5) < 0.0001, "the same clip, just coarser")
+    }
+
+    @Test func survivesAClipWithNoLength() {
+        let plan = gifPlan(duration: 0, fps: 10)
+        #expect(plan.frames == 1)
+        #expect(plan.delay > 0)
+        #expect(gifSampleTimes(duration: 0, frames: 0) == [0])
+    }
+
+    @Test func samplesStartAtZeroAndStayInsideTheClip() {
+        let times = gifSampleTimes(duration: 4, frames: 4)
+        #expect(times.count == 4)
+        #expect(times.first == 0)
+        #expect(times.allSatisfy { $0 < 4 })
+    }
+}

@@ -300,6 +300,17 @@
         }
       }
     },
+    "Made %lld GIFs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld GIFs erstellt."
+          }
+        }
+      }
+    },
     "Make a video smaller…": {
       "extractionState": "manual",
       "localizations": {
@@ -327,6 +338,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Neuer Textbaustein"
+          }
+        }
+      }
+    },
+    "No GIF could be made.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es konnte kein GIF erstellt werden."
           }
         }
       }
@@ -654,6 +676,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Werkzeuge"
+          }
+        }
+      }
+    },
+    "Turn a video into a GIF…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video in ein GIF umwandeln …"
           }
         }
       }
