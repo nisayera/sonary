@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sonary: ten Mac utilities, one menu bar icon. Free and open source.</title>
+<meta name="description" content="Sonary bundles a system monitor, window snapping, clipboard history, mouse fixes, screenshots and more into one free, open-source menu bar app for macOS 26. Switch on only what you need.">
+<meta property="og:title" content="Sonary: your Mac's menu bar toolbox">
+<meta property="og:description" content="Ten utilities behind one menu bar icon. Free, open source, no account.">
+<meta property="og:image" content="img/og.png">
+<meta name="theme-color" content="#0c0b10">
+<link rel="icon" href="img/icon-256.png">
+<link rel="preload" as="image" href="img/p_modules.webp">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add('js');if(matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('rm')</script>
+</head>
+<body>
+<div class="intro" aria-hidden="true"><img src="img/icon-256.png" alt="" width="88" height="88"><span class="ping"></span></div>
+<div class="cursor" aria-hidden="true"><span class="c-dot"></span><span class="c-ring"></span></div>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <a class="brand" href="#top" aria-label="Sonary, back to top"><img src="img/icon-256.png" alt="" width="26" height="26"><span>Sonary</span></a>
+  <nav aria-label="Sections"><a href="#story">Tour</a><a href="#modules">Modules</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a></nav>
+  <a class="nav-cta magnetic" href="https://github.com/nisayera/sonary/releases/download/v0.22.0/Sonary-0.22.0.dmg">Download</a>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <canvas class="sonar" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <p class="kicker"><span class="live" aria-hidden="true"></span>Version 0.22.0 is out</p>
+    <h1 class="split"><span class="ln"><span>Ten Mac utilities.</span></span><span class="ln"><span>One menu bar icon.</span></span></h1>
+    <p class="lede">Sonary replaces the little apps you keep installing: system monitor, window snapping, clipboard history, mouse fixes, screenshots and more. Free, open source, and every tool switches off completely when you don't need it.</p>
+    <div class="ctas">
+      <a class="btn primary magnetic" href="https://github.com/nisayera/sonary/releases/download/v0.22.0/Sonary-0.22.0.dmg"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.8-1-2.8-4.2ZM14 5.4c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4Z"/></svg>Download free for Mac</a>
+      <a class="btn ghost magnetic" href="https://github.com/nisayera/sonary">Read the source</a>
+    </div>
+    <p class="fine">DMG · Apple Silicon · macOS 26 Tahoe or newer · GPL-3.0</p>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"><span></span></div>
+</section>
+
+<section class="story" id="story" aria-labelledby="story-h">
+  <h2 id="story-h" class="vh">A tour of Sonary</h2>
+  <div class="story-pin">
+    <div class="captions">
+      <div class="cap is-on" data-i="0"><span class="step">01</span><h3>Turn on only what you use.</h3><p>Ten modules, one switch each. A module that's off doesn't load, doesn't run in the background and never asks for permissions.</p></div>
+      <div class="cap" data-i="1"><span class="step">02</span><h3>See what your Mac is doing.</h3><p>CPU, GPU, memory, network, disk, battery and temperatures, with history graphs, the busiest apps and alerts for sustained load.</p></div>
+      <div class="cap" data-i="2"><span class="step">03</span><h3>Never lose a copy again.</h3><p>Clipboard history for text, images and files, with search and pinning. Plain-text paste on ⌘⌥⇧V, tracking junk stripped from links.</p></div>
+    </div>
+    <div class="mac" aria-hidden="true">
+      <div class="screen">
+        <div class="mbar">
+          <svg class="apple" viewBox="0 0 24 24" width="13" height="13"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.8-1-2.8-4.2ZM14 5.4c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4Z"/></svg>
+          <b>Finder</b><span>File</span><span>Edit</span><span>View</span><span class="hide-s">Go</span><span class="hide-s">Window</span><span class="hide-s">Help</span>
+          <span class="mb-r">
+            <span class="sicon"><img src="img/icon-256.png" alt="" width="15" height="15"></span>
+            <svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M12 18.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm-4.6-3.3a6.5 6.5 0 0 1 9.2 0l-1.4 1.4a4.5 4.5 0 0 0-6.4 0Zm-3-3a10.7 10.7 0 0 1 15.2 0l-1.4 1.4a8.7 8.7 0 0 0-12.4 0Zm-3-3a15 15 0 0 1 21.2 0l-1.4 1.4a13 13 0 0 0-18.4 0Z"/></svg>
+            <svg viewBox="0 0 28 14" width="24" height="12"><rect x=".5" y=".5" width="23" height="13" rx="3.5" fill="none" stroke="currentColor" opacity=".6"/><rect x="2.5" y="2.5" width="15" height="9" rx="2" fill="currentColor"/><rect x="25" y="5" width="2" height="4" rx="1" fill="currentColor" opacity=".6"/></svg>
+            <span class="clock">Wed 21:10</span>
+          </span>
+        </div>
+        <div class="dd">
+          <img class="pane p0" src="img/p_modules.webp" alt="" width="338" height="577">
+          <img class="pane p1" src="img/p_monitor.webp" alt="" width="336" height="577" loading="lazy">
+          <img class="pane p2" src="img/p_clip.webp" alt="" width="334" height="571" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="modules" id="modules" aria-labelledby="m-h">
+  <div class="wrap">
+    <h2 id="m-h" class="reveal">Everything that used to need its own app.</h2>
+    <p class="sub reveal">All ten modules ship in the current release.</p>
+    <div class="bento">
+      <article class="tile t-win reveal">
+        <div class="art win-art" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <h3>Windows</h3><p>Halves, quarters, thirds, maximize and center on ⌃⌥ shortcuts. A switcher with live previews, and Dock previews across Spaces.</p>
+      </article>
+      <article class="tile t-key reveal">
+        <div class="art keys" aria-hidden="true"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>⇧</kbd><kbd>⌘</kbd></div>
+        <h3>Keyboard</h3><p>Super Key: hold Caps Lock for all four modifiers, tap it for an action. Snippets with variables, every shortcut on one page.</p>
+      </article>
+      <article class="tile t-notch reveal">
+        <div class="art notch" aria-hidden="true"><span class="pill"><span class="eq"><i></i><i></i><i></i><i></i></span></span></div>
+        <h3>Notch</h3><p>Music, calendar, timers, downloads and accessory batteries around the notch, simulated on displays without one.</p>
+      </article>
+      <article class="tile t-tools reveal">
+        <div class="art cmd" aria-hidden="true"><span class="cmd-in">Text from screen<span class="caret"></span></span><span class="cmd-row">Color picker</span><span class="cmd-row">Scrolling screenshot</span></div>
+        <h3>Tools</h3><p>Command bar, offline text recognition, color picker, screenshots with an editor and scrolling capture, screen recording, scratchpad.</p>
+      </article>
+      <article class="tile t-mouse reveal"><h3>Mouse</h3><p>Linear or smooth scrolling, acceleration off, scroll direction independent of the trackpad, button mapping, double-click filter.</p></article>
+      <article class="tile t-apps reveal"><h3>App Management</h3><p>Uninstaller that finds leftovers, cleaner, force quit, port manager and Homebrew updates.</p></article>
+      <article class="tile t-sound reveal"><h3>Sound</h3><p>Switch output and input, mute the mic on ⌃⌥M, see which apps are playing, keep the Mac awake.</p></article>
+      <article class="tile t-disp reveal"><h3>Display</h3><p>Brightness per display with shortcuts, and software dimming where macOS offers no control.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="privacy" id="privacy" aria-labelledby="p-h">
+  <div class="wrap">
+    <h2 id="p-h" class="scrub">No account. No telemetry. No Pro tier. Just the source code.</h2>
+    <div class="pcols">
+      <p class="reveal">Sonary works offline. It goes online only to check for its own updates, and for the app update checker and speed test when you ask.</p>
+      <p class="reveal">Accessibility or Screen Recording access is requested only when you enable a module that needs it.</p>
+      <p class="reveal">GPL-3.0-or-later on GitHub. Read every line, build it yourself, or send a pull request.</p>
+    </div>
+  </div>
+</section>
+
+<section class="video-sec" aria-labelledby="v-h">
+  <div class="wrap vgrid">
+    <div class="reveal"><h2 id="v-h">Fifteen seconds, start to finish.</h2><p class="sub">The short version, straight from the app.</p></div>
+    <video class="reveal" src="img/promo.mp4" poster="img/promo.jpg" controls muted playsinline preload="none" width="270" height="480" aria-label="15-second Sonary promo video"></video>
+  </div>
+</section>
+
+<section class="install" id="install" aria-labelledby="i-h">
+  <div class="wrap">
+    <h2 id="i-h" class="reveal">Running in under a minute.</h2>
+    <ol class="steps">
+      <li class="reveal"><span>1</span><div><h3>Download</h3><p>Get <a href="https://github.com/nisayera/sonary/releases/download/v0.22.0/Sonary-0.22.0.dmg">Sonary-0.22.0.dmg</a> and drag Sonary into Applications.</p></div></li>
+      <li class="reveal"><span>2</span><div><h3>Open it once</h3><p>Sonary isn't notarized yet, so right-click it, choose Open, then Open again. Or run:</p><div class="copy"><code id="xattr">xattr -dr com.apple.quarantine /Applications/Sonary.app</code><button type="button" class="copy-btn" data-copy="xattr">Copy</button></div></div></li>
+      <li class="reveal"><span>3</span><div><h3>Done</h3><p>Sonary checks for new versions itself and updates in one click.</p></div></li>
+    </ol>
+    <details class="build reveal"><summary>Build from source</summary>
+<pre><code>git clone https://github.com/nisayera/sonary.git
+cd sonary
+brew install xcodegen
+xcodegen generate
+open Sonary.xcodeproj</code></pre><p>Requires Xcode 26.</p></details>
+  </div>
+</section>
+
+<section class="faq" id="faq" aria-labelledby="f-h">
+  <div class="wrap fgrid">
+    <h2 id="f-h" class="reveal">Questions, answered.</h2>
+    <div>
+      <details class="reveal"><summary>Is it really free?</summary><p>Yes. Sonary is GPL-3.0-or-later open source, with no subscription and no paid tier.</p></details>
+      <details class="reveal"><summary>Which Macs does it run on?</summary><p>Macs with Apple Silicon on macOS 26 Tahoe or newer. Intel Macs and older macOS versions aren't supported.</p></details>
+      <details class="reveal"><summary>Why does macOS warn me when I open it?</summary><p>Sonary isn't notarized by Apple yet. Right-click the app and choose Open once; after that it launches normally.</p></details>
+      <details class="reveal"><summary>Will ten modules slow my Mac down?</summary><p>A disabled module doesn't load and doesn't run in the background. Turn on only what you use.</p></details>
+      <details class="reveal"><summary>Is it finished?</summary><p>Sonary is in early development. All ten modules ship today, and every milestone is its own release until 1.0. The <a href="https://github.com/nisayera/sonary/blob/main/docs/FEATURES.md">feature checklist</a> shows what's done and what's open.</p></details>
+      <details class="reveal"><summary>What languages does it speak?</summary><p>English and German.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="closer">
+  <canvas class="sonar sonar-2" aria-hidden="true"></canvas>
+  <div class="closer-in">
+    <img class="reveal" src="img/icon-256.png" width="112" height="112" alt="" loading="lazy">
+    <h2 class="reveal">Clear out your menu bar.</h2>
+    <a class="btn primary magnetic reveal" href="https://github.com/nisayera/sonary/releases/download/v0.22.0/Sonary-0.22.0.dmg">Download free for Mac</a>
+    <a class="star reveal" href="https://github.com/nisayera/sonary">or star it on GitHub to follow along</a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <p>Sonary is open source under GPL-3.0-or-later. Made for the Mac.</p>
+    <nav aria-label="Footer"><a href="https://github.com/nisayera/sonary">GitHub</a><a href="https://github.com/nisayera/sonary/releases">Releases</a><a href="https://github.com/nisayera/sonary/blob/main/CONTRIBUTING.md">Contributing</a><a href="https://github.com/nisayera/sonary/blob/main/LICENSE">License</a></nav>
+  </div>
+</footer>
+<script src="vendor/gsap.min.js" defer></script>
+<script src="vendor/ScrollTrigger.min.js" defer></script>
+<script src="vendor/lenis.min.js" defer></script>
+<script src="main.js" defer></script>
+</body>
+</html>
