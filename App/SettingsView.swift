@@ -4,6 +4,7 @@ import SwiftUI
 
 private enum SettingsPageID: Hashable {
     case general
+    case shortcuts
     case updates
     case about
     case module(String)
@@ -19,6 +20,7 @@ struct SettingsView: View {
             List(selection: $selection) {
                 Section("Sonary") {
                     sidebarRow(.general, symbol: "gearshape", title: Text("General"))
+                    sidebarRow(.shortcuts, symbol: "keyboard", title: Text("Shortcuts"))
                     sidebarRow(.updates, symbol: "arrow.down.circle", title: Text("Updates"))
                     sidebarRow(.about, symbol: "info.circle", title: Text("About"))
                 }
@@ -60,6 +62,7 @@ struct SettingsView: View {
     private var detail: some View {
         switch selection ?? .general {
         case .general: GeneralPage(model: model)
+        case .shortcuts: ShortcutsPage()
         case .updates: UpdatesPage(model: model)
         case .about: AboutPage()
         case let .module(id):

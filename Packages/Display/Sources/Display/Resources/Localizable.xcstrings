@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Brighter": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heller"
+          }
+        }
+      }
+    },
     "Brightness": {
       "localizations": {
         "de": {
@@ -27,6 +38,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ändert das Display, auf dem der Zeiger steht."
+          }
+        }
+      }
+    },
+    "Darker": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler"
           }
         }
       }

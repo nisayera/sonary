@@ -23,7 +23,6 @@ public final class DisplayModel {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var overlays: [CGDirectDisplayID: NSWindow] = [:]
-    @ObservationIgnored private var hotKeys: [HotKey] = []
     @ObservationIgnored private var screenObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var sleepObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var wakeObserver: (any NSObjectProtocol)?
@@ -151,17 +150,25 @@ public final class DisplayModel {
         displays[index].brightness = brightness
     }
 
+    // ⌃⌥⇧↑ and ⌃⌥⇧↓; the plain ⌃⌥ arrows already move windows.
+    private static let brightnessModifiers = KeyModifier.control | KeyModifier.option | KeyModifier.shift
+
+    static let shortcutDefinitions: [ShortcutDefinition] = [
+        ShortcutDefinition(id: "display.brighter", title: String(localized: "Brighter", bundle: .module),
+                           group: "Display",
+                           defaultCombo: KeyCombo(keyCode: 126, modifiers: Self.brightnessModifiers)),
+        ShortcutDefinition(id: "display.darker", title: String(localized: "Darker", bundle: .module),
+                           group: "Display",
+                           defaultCombo: KeyCombo(keyCode: 125, modifiers: Self.brightnessModifiers)),
+    ]
+
     private func applyShortcuts() {
-        hotKeys.forEach { $0.unregister() }
-        hotKeys = []
+        let shortcuts = ShortcutStore.shared
+        shortcuts.describe(Self.shortcutDefinitions)
+        shortcuts.unbindAll(prefix: "display.")
         guard running, settings.shortcuts else { return }
-        // ⌃⌥⇧↑ and ⌃⌥⇧↓; the plain ⌃⌥ arrows already move windows.
-        let modifiers = 4096 | 2048 | 512
-        for (code, up) in [(126, true), (125, false)] {
-            if let key = HotKey(keyCode: code, modifiers: modifiers, action: { [weak self] in self?.step(up: up) }) {
-                hotKeys.append(key)
-            }
-        }
+        shortcuts.bind("display.brighter") { [weak self] in self?.step(up: true) }
+        shortcuts.bind("display.darker") { [weak self] in self?.step(up: false) }
     }
 
     /// A black window over the display, as dark as the wanted brightness; clicks go straight through it.

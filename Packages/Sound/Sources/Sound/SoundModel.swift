@@ -62,8 +62,6 @@ public final class SoundModel {
     @ObservationIgnored private var assertion: IOPMAssertionID = 0
     @ObservationIgnored private var keepAwakeTask: Task<Void, Never>?
     @ObservationIgnored private var keepAwakeCondition: KeepAwakeCondition?
-    @ObservationIgnored private var micKey: HotKey?
-    @ObservationIgnored private var outputKey: HotKey?
     @ObservationIgnored private var lastOutputName: String?
     @ObservationIgnored private var mediaTap: CFMachPort?
     @ObservationIgnored private var mediaSource: CFRunLoopSource?
@@ -223,19 +221,25 @@ public final class SoundModel {
         if let mediaTap { CGEvent.tapEnable(tap: mediaTap, enable: true) }
     }
 
+    private static let ctrlOpt = KeyModifier.control | KeyModifier.option
+
+    static let shortcutDefinitions: [ShortcutDefinition] = [
+        ShortcutDefinition(id: "sound.micMute", title: String(localized: "Mute microphone", bundle: .module),
+                           group: "Sound", defaultCombo: KeyCombo(keyCode: 46, modifiers: Self.ctrlOpt)),
+        ShortcutDefinition(id: "sound.cycleOutput", title: String(localized: "Switch output", bundle: .module),
+                           group: "Sound", defaultCombo: KeyCombo(keyCode: 31, modifiers: Self.ctrlOpt)),
+    ]
+
     private func applyShortcut(running: Bool) {
-        micKey?.unregister()
-        micKey = nil
-        outputKey?.unregister()
-        outputKey = nil
+        let shortcuts = ShortcutStore.shared
+        shortcuts.describe(Self.shortcutDefinitions)
+        shortcuts.unbindAll(prefix: "sound.")
         guard running else { return }
         if settings.micMuteShortcut {
-            // ⌃⌥M (key code 46).
-            micKey = HotKey(keyCode: 46, modifiers: 4096 | 2048) { [weak self] in self?.toggleMicMute() }
+            shortcuts.bind("sound.micMute") { [weak self] in self?.toggleMicMute() }
         }
         if settings.outputSwitchShortcut {
-            // ⌃⌥O (key code 31).
-            outputKey = HotKey(keyCode: 31, modifiers: 4096 | 2048) { [weak self] in self?.cycleOutput() }
+            shortcuts.bind("sound.cycleOutput") { [weak self] in self?.cycleOutput() }
         }
     }
 

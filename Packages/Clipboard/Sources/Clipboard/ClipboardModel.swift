@@ -14,7 +14,6 @@ public final class ClipboardModel {
     @ObservationIgnored private let store: ClipboardStore
     @ObservationIgnored private var pollTask: Task<Void, Never>?
     @ObservationIgnored private var lastChangeCount = NSPasteboard.general.changeCount
-    @ObservationIgnored private var plainPasteKey: HotKey?
     @ObservationIgnored private var autoClearTask: Task<Void, Never>?
     @ObservationIgnored private var sleepObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var lockObserver: (any NSObjectProtocol)?
@@ -51,8 +50,7 @@ public final class ClipboardModel {
     func stop() {
         pollTask?.cancel()
         pollTask = nil
-        plainPasteKey?.unregister()
-        plainPasteKey = nil
+        ShortcutStore.shared.unbindAll(prefix: "clipboard.")
         autoClearTask?.cancel()
         autoClearTask = nil
         if let sleepObserver { NSWorkspace.shared.notificationCenter.removeObserver(sleepObserver) }
@@ -215,12 +213,26 @@ public final class ClipboardModel {
         }
     }
 
+    static let shortcutDefinitions: [ShortcutDefinition] = [
+        ShortcutDefinition(id: "clipboard.plainPaste",
+                           title: String(localized: "Paste as plain text", bundle: .module),
+                           group: "Clipboard",
+                           defaultCombo: KeyCombo(keyCode: 9, modifiers: KeyModifier.command | KeyModifier.option
+                               | KeyModifier.shift)),
+        ShortcutDefinition(id: "clipboard.imageToFinder",
+                           title: String(localized: "Save clipboard image here as PNG", bundle: .module),
+                           group: "Clipboard", defaultCombo: .none),
+    ]
+
     private func applyShortcut() {
-        plainPasteKey?.unregister()
-        plainPasteKey = nil
-        guard settings.plainTextPasteShortcut, pollTask != nil else { return }
-        // ⌘⌥⇧V (key code 9 is V).
-        plainPasteKey = HotKey(keyCode: 9, modifiers: 256 | 2048 | 512) { [weak self] in self?.pastePlainText() }
+        let shortcuts = ShortcutStore.shared
+        shortcuts.describe(Self.shortcutDefinitions)
+        shortcuts.unbindAll(prefix: "clipboard.")
+        guard pollTask != nil else { return }
+        if settings.plainTextPasteShortcut {
+            shortcuts.bind("clipboard.plainPaste") { [weak self] in self?.pastePlainText() }
+        }
+        shortcuts.bind("clipboard.imageToFinder") { [weak self] in self?.saveClipboardImageToFinderFolder() }
     }
 
     /// Pastes the clipboard without its formatting and puts the original contents back afterwards.

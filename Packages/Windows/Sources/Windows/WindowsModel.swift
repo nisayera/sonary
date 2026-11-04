@@ -45,7 +45,6 @@ private func quitTapCallback(
 public final class WindowsModel {
     public private(set) var settings: WindowsSettings
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private var hotKeys: [HotKey] = []
     @ObservationIgnored private var quitTap: CFMachPort?
     @ObservationIgnored private var quitSource: CFRunLoopSource?
     @ObservationIgnored private var quitGuard = QuitGuard()
@@ -89,31 +88,43 @@ public final class WindowsModel {
         apply()
     }
 
+    private static let ctrlOpt = KeyModifier.control | KeyModifier.option
+
+    /// Every window shortcut, for the central shortcut page.
+    static var shortcutDefinitions: [ShortcutDefinition] {
+        let group = String(localized: "Windows", bundle: .module)
+        var list = LayoutAction.allCases.map {
+            ShortcutDefinition(id: "windows.layout.\($0.rawValue)", title: layoutName($0), group: group,
+                               defaultCombo: KeyCombo(keyCode: $0.keyCode, modifiers: ctrlOpt))
+        }
+        list += [
+            ShortcutDefinition(id: "windows.switcher", title: String(localized: "Window switcher", bundle: .module),
+                               group: group, defaultCombo: KeyCombo(keyCode: 48, modifiers: ctrlOpt)),
+            ShortcutDefinition(id: "windows.restore",
+                               title: String(localized: "Put the last window back", bundle: .module),
+                               group: group, defaultCombo: KeyCombo(keyCode: 51, modifiers: ctrlOpt)),
+            ShortcutDefinition(id: "windows.nextScreen",
+                               title: String(localized: "Move to the next display", bundle: .module),
+                               group: group, defaultCombo: KeyCombo(keyCode: 42, modifiers: ctrlOpt)),
+        ]
+        return list
+    }
+
     private func apply() {
-        hotKeys.forEach { $0.unregister() }
-        hotKeys = []
+        let shortcuts = ShortcutStore.shared
+        shortcuts.describe(Self.shortcutDefinitions)
+        shortcuts.unbindAll(prefix: "windows.")
         if running, settings.layoutShortcuts {
             for action in LayoutAction.allCases {
-                // ⌃⌥ = controlKey 4096 + optionKey 2048
-                if let key = HotKey(keyCode: action.keyCode, modifiers: 4096 | 2048, action: { [weak self] in self?.perform(action) }) {
-                    hotKeys.append(key)
-                }
+                shortcuts.bind("windows.layout.\(action.rawValue)") { [weak self] in self?.perform(action) }
             }
         }
-        if running, settings.windowSwitcher,
-           // ⌃⌥Tab (key code 48)
-           let key = HotKey(keyCode: 48, modifiers: 4096 | 2048, action: { [weak self] in self?.showSwitcher() }) {
-            hotKeys.append(key)
+        if running, settings.windowSwitcher {
+            shortcuts.bind("windows.switcher") { [weak self] in self?.showSwitcher() }
         }
-        if running,
-           // ⌃⌥⌫ puts the last moved window back (key code 51)
-           let key = HotKey(keyCode: 51, modifiers: 4096 | 2048, action: { [weak self] in self?.restorePrevious() }) {
-            hotKeys.append(key)
-        }
-        if running,
-           // ⌃⌥→| moves the window to the next display (key code 42, the backslash key)
-           let key = HotKey(keyCode: 42, modifiers: 4096 | 2048, action: { [weak self] in self?.moveToNextScreen() }) {
-            hotKeys.append(key)
+        if running {
+            shortcuts.bind("windows.restore") { [weak self] in self?.restorePrevious() }
+            shortcuts.bind("windows.nextScreen") { [weak self] in self?.moveToNextScreen() }
         }
         if running, settings.quitProtection || settings.closeProtection { installQuitTap() } else { removeQuitTap() }
         if running, settings.quitWhenLastWindowCloses { startWatchingWindows() } else { stopWatchingWindows() }

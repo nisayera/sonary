@@ -252,6 +252,17 @@
         }
       }
     },
+    "Paste as plain text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als reinen Text einsetzen"
+          }
+        }
+      }
+    },
     "Paste as plain text with ⌘⌥⇧V": {
       "localizations": {
         "de": {

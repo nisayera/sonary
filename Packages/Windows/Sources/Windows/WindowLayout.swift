@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 
 public enum LayoutAction: String, CaseIterable, Codable, Sendable {
     case leftHalf, rightHalf, topHalf, bottomHalf
@@ -142,4 +143,24 @@ public func appsWithNoWindowsLeft(previous: [Int32: Int], current: [Int32: Int])
         return pid
     }
     .sorted()
+}
+
+/// The layout's name as plain text, for places that cannot take a LocalizedStringKey,
+/// such as the central shortcut page.
+func layoutName(_ action: LayoutAction) -> String {
+    switch action {
+    case .leftHalf: String(localized: "Left half", bundle: .module)
+    case .rightHalf: String(localized: "Right half", bundle: .module)
+    case .topHalf: String(localized: "Top half", bundle: .module)
+    case .bottomHalf: String(localized: "Bottom half", bundle: .module)
+    case .topLeft: String(localized: "Top left quarter", bundle: .module)
+    case .topRight: String(localized: "Top right quarter", bundle: .module)
+    case .bottomLeft: String(localized: "Bottom left quarter", bundle: .module)
+    case .bottomRight: String(localized: "Bottom right quarter", bundle: .module)
+    case .leftThird: String(localized: "Left third", bundle: .module)
+    case .centerThird: String(localized: "Center third", bundle: .module)
+    case .rightThird: String(localized: "Right third", bundle: .module)
+    case .maximize: String(localized: "Maximize", bundle: .module)
+    case .center: String(localized: "Center", bundle: .module)
+    }
 }

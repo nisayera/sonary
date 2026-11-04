@@ -235,6 +235,17 @@
         }
       }
     },
+    "Switch output": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgabe wechseln"
+          }
+        }
+      }
+    },
     "Switch output with ⌃⌥O": {
       "localizations": {
         "de": {

@@ -43,7 +43,6 @@ public final class ToolsModel {
         }
     }
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private var hotKeys: [HotKey] = []
     @ObservationIgnored private var commandBar: CommandBarController?
     @ObservationIgnored private let radial = RadialMenuController()
     @ObservationIgnored private let cleaning = CleaningModeController()
@@ -149,21 +148,36 @@ public final class ToolsModel {
         if before != settings.shortcuts { applyShortcuts() }
     }
 
+    private static let ctrlOpt = KeyModifier.control | KeyModifier.option
+
+    /// What the tools offer the central shortcut page, and what each one runs.
+    static let shortcutDefinitions: [ShortcutDefinition] = [
+        ShortcutDefinition(id: "tools.commandBar", title: String(localized: "Command bar", bundle: .module),
+                           group: "Tools", defaultCombo: KeyCombo(keyCode: 49, modifiers: KeyModifier.option)),
+        ShortcutDefinition(id: "tools.textFromScreen",
+                           title: String(localized: "Copy text from screen", bundle: .module),
+                           group: "Tools", defaultCombo: KeyCombo(keyCode: 17, modifiers: Self.ctrlOpt)),
+        ShortcutDefinition(id: "tools.colorPicker", title: String(localized: "Pick a color", bundle: .module),
+                           group: "Tools", defaultCombo: KeyCombo(keyCode: 35, modifiers: Self.ctrlOpt)),
+        ShortcutDefinition(id: "tools.screenshot", title: String(localized: "Screenshot to clipboard", bundle: .module),
+                           group: "Tools", defaultCombo: KeyCombo(keyCode: 1, modifiers: Self.ctrlOpt)),
+        ShortcutDefinition(id: "tools.radialMenu", title: String(localized: "Radial menu", bundle: .module),
+                           group: "Tools", defaultCombo: KeyCombo(keyCode: 15, modifiers: Self.ctrlOpt)),
+        ShortcutDefinition(id: "tools.screenRecording", title: String(localized: "Record the screen", bundle: .module),
+                           group: "Tools", defaultCombo: .none),
+    ]
+
     private func applyShortcuts() {
-        hotKeys.forEach { $0.unregister() }
-        hotKeys = []
+        let shortcuts = ShortcutStore.shared
+        shortcuts.describe(Self.shortcutDefinitions)
+        shortcuts.unbindAll(prefix: "tools.")
         guard running, settings.shortcuts else { return }
-        let ctrlOpt = 4096 | 2048
-        let bindings: [(Int, Int, () -> Void)] = [
-            (49, 2048, { [weak self] in self?.showCommandBar() }),          // ⌥Space
-            (17, ctrlOpt, { [weak self] in self?.recognizeText() }),          // ⌃⌥T
-            (35, ctrlOpt, { [weak self] in self?.pickColor() }),              // ⌃⌥P
-            (1, ctrlOpt, { [weak self] in self?.screenshotToClipboard() }),   // ⌃⌥S
-            (15, ctrlOpt, { [weak self] in self?.showRadialMenu() }),         // ⌃⌥R
-        ]
-        for (key, modifiers, action) in bindings {
-            if let hotKey = HotKey(keyCode: key, modifiers: modifiers, action: action) { hotKeys.append(hotKey) }
-        }
+        shortcuts.bind("tools.commandBar") { [weak self] in self?.showCommandBar() }
+        shortcuts.bind("tools.textFromScreen") { [weak self] in self?.recognizeText() }
+        shortcuts.bind("tools.colorPicker") { [weak self] in self?.pickColor() }
+        shortcuts.bind("tools.screenshot") { [weak self] in self?.screenshotToClipboard() }
+        shortcuts.bind("tools.radialMenu") { [weak self] in self?.showRadialMenu() }
+        shortcuts.bind("tools.screenRecording") { [weak self] in self?.toggleRecording() }
     }
 
     // MARK: Tools

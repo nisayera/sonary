@@ -47,6 +47,7 @@ final class AppModel {
         self.mouse = mouse
         let notch = NotchModule(defaults: defaults)
         self.notch = notch
+        ShortcutStore.shared.configure(defaults: defaults)
         let clipboard = ClipboardModule(defaults: defaults)
         self.clipboard = clipboard
         let apps = AppsModule(defaults: defaults)
