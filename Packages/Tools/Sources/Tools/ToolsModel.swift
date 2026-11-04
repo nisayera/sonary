@@ -18,6 +18,8 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var ownCaptureSelector = false
     /// Whether a snippet is typed where the cursor is or put on the clipboard.
     public var snippetDelivery: SnippetDelivery = .type
+    /// Open the editor on a fresh screenshot instead of only copying it.
+    public var annotateAfterCapture = false
     public var activeTab: UUID?
     public init() {}
 }
@@ -56,6 +58,7 @@ public final class ToolsModel {
     @ObservationIgnored private let camera = CameraPreviewController()
     @ObservationIgnored private let recorder = ScreenRecorder()
     @ObservationIgnored private let selector = CaptureSelectorController()
+    @ObservationIgnored private let editor = AnnotationEditorController()
     public private(set) var isRecording = false
     /// Commands other modules add to the command bar, for example the clipboard history.
     @ObservationIgnored public var externalCommands: @MainActor () -> [ExternalCommand] = { [] }
@@ -87,6 +90,7 @@ public final class ToolsModel {
         camera.close()
         if isRecording { Task { await stopRecording() } }
         selector.close()
+        editor.close()
     }
 
     /// The notes, with the old single scratchpad carried over the first time.
@@ -314,10 +318,22 @@ public final class ToolsModel {
     }
 
     public func screenshotToClipboard() {
+        guard settings.annotateAfterCapture else {
+            Task {
+                guard let arguments = await captureArguments(["-c"]) else { return }
+                _ = await capture(arguments: arguments)
+                report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
+            }
+            return
+        }
+        // The shot goes to a file first, so the editor has something to work on.
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sonary-shot-\(UUID().uuidString).png")
         Task {
-            guard let arguments = await captureArguments(["-c"]) else { return }
-            _ = await capture(arguments: arguments)
-            report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
+            guard let arguments = await captureArguments(["-x", file.path]),
+                  await capture(arguments: arguments), let image = NSImage(contentsOf: file) else { return }
+            try? FileManager.default.removeItem(at: file)
+            editor.open(image) { [weak self] message in self?.report(message) }
         }
     }
 

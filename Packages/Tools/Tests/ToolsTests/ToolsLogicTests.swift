@@ -474,3 +474,59 @@ struct MenuCommandTests {
         #expect(folder.path == "/Users/someone/Library/Application Support/app.sonary.Sonary/Scripts")
     }
 }
+
+@Suite struct AnnotationTests {
+    private func mark(_ kind: AnnotationKind, from start: CGPoint, to end: CGPoint, text: String = "")
+    -> Annotation {
+        Annotation(kind: kind, start: start, end: end, text: text)
+    }
+
+    @Test func aMarkCoversTheSameAreaWhicheverWayItWasDrawn() {
+        let down = mark(.rectangle, from: CGPoint(x: 10, y: 10), to: CGPoint(x: 60, y: 90))
+        let up = mark(.rectangle, from: CGPoint(x: 60, y: 90), to: CGPoint(x: 10, y: 10))
+        #expect(down.frame == up.frame)
+        #expect(down.frame == CGRect(x: 10, y: 10, width: 50, height: 80))
+    }
+
+    @Test func straySmallMarksAreDropped() {
+        #expect(!isAnnotationWorthKeeping(mark(.rectangle, from: .zero, to: CGPoint(x: 3, y: 3))))
+        #expect(isAnnotationWorthKeeping(mark(.rectangle, from: .zero, to: CGPoint(x: 20, y: 20))))
+        #expect(isAnnotationWorthKeeping(mark(.arrow, from: .zero, to: CGPoint(x: 10, y: 2))),
+                "a short arrow still points somewhere")
+        #expect(!isAnnotationWorthKeeping(mark(.arrow, from: .zero, to: CGPoint(x: 4, y: 2))))
+    }
+
+    @Test func textWithoutTextIsNotAMark() {
+        #expect(!isAnnotationWorthKeeping(mark(.text, from: .zero, to: CGPoint(x: 100, y: 40))))
+        #expect(isAnnotationWorthKeeping(mark(.text, from: .zero, to: .zero, text: "look here")))
+    }
+
+    @Test func redactionBlocksAreCoarseEnoughToDestroyTheContent() {
+        #expect(redactionBlockSize(for: CGRect(x: 0, y: 0, width: 800, height: 80)) == 10)
+        #expect(redactionBlockSize(for: CGRect(x: 0, y: 0, width: 20, height: 20)) == 6,
+                "never finer than six pixels, however small the area")
+        #expect(redactionBlockSize(for: .zero) == 1)
+    }
+
+    @Test func aBackgroundDecidesWhetherThereIsAMargin() {
+        #expect(ExportBackground.none.margin(48) == 0, "a plain export is pixel for pixel the shot")
+        #expect(ExportBackground.white.margin(48) == 48)
+        let size = exportSize(image: CGSize(width: 800, height: 600), margin: 48)
+        #expect(size == CGSize(width: 896, height: 696))
+        #expect(exportImageOrigin(margin: 48) == CGPoint(x: 48, y: 48))
+    }
+
+    @Test func undoingTakesTheLastOneAndCopesWithNone() {
+        let marks = [mark(.arrow, from: .zero, to: CGPoint(x: 20, y: 20)),
+                     mark(.rectangle, from: .zero, to: CGPoint(x: 30, y: 30))]
+        #expect(undoing(marks).count == 1)
+        #expect(undoing(marks).first?.kind == .arrow)
+        #expect(undoing([]).isEmpty)
+    }
+
+    @Test func whatIsFilledAndWhatIsOutlined() {
+        #expect(AnnotationKind.redact.isFilled)
+        #expect(AnnotationKind.highlight.isFilled)
+        #expect(!AnnotationKind.rectangle.isFilled)
+    }
+}

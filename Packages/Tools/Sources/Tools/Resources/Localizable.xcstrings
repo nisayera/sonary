@@ -33,6 +33,17 @@
         }
       }
     },
+    "Arrow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfeil"
+          }
+        }
+      }
+    },
     "Back": {
       "extractionState": "manual",
       "localizations": {
@@ -170,6 +181,17 @@
         }
       }
     },
+    "Copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieren"
+          }
+        }
+      }
+    },
     "Copy colours as": {
       "localizations": {
         "de": {
@@ -196,6 +218,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die Notiz konnte nicht gesichert werden."
+          }
+        }
+      }
+    },
+    "Dark": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkel"
           }
         }
       }
@@ -251,6 +284,17 @@
         }
       }
     },
+    "Draw arrows and boxes, hide what should not be seen, put it on a background, then copy or save.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfeile und Rahmen zeichnen, verbergen was nicht zu sehen sein soll, auf einen Hintergrund legen, dann kopieren oder sichern."
+          }
+        }
+      }
+    },
     "Each extra ring is a wedge in the first one that opens it, so the ring can hold more than eight actions without getting crowded.": {
       "extractionState": "manual",
       "localizations": {
@@ -278,6 +322,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Volumes auswerfen"
+          }
+        }
+      }
+    },
+    "Ellipse": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ellipse"
           }
         }
       }
@@ -321,6 +376,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Format"
+          }
+        }
+      }
+    },
+    "Hide": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbergen"
+          }
+        }
+      }
+    },
+    "Highlight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hervorheben"
           }
         }
       }
@@ -452,6 +529,17 @@
         }
       }
     },
+    "No background": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Hintergrund"
+          }
+        }
+      }
+    },
     "No image could be converted.": {
       "extractionState": "manual",
       "localizations": {
@@ -501,6 +589,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es wurde nichts aufgenommen."
+          }
+        }
+      }
+    },
+    "Open the editor after a screenshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach einem Bildschirmfoto den Editor öffnen"
           }
         }
       }
@@ -641,12 +740,34 @@
         }
       }
     },
+    "Rectangle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechteck"
+          }
+        }
+      }
+    },
     "Remove snippet": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Textbaustein entfernen"
+          }
+        }
+      }
+    },
+    "Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sichern"
           }
         }
       }
@@ -677,6 +798,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Notizblock"
+          }
+        }
+      }
+    },
+    "Screenshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto"
           }
         }
       }
@@ -784,6 +916,17 @@
         }
       }
     },
+    "Sonary pink": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary-Pink"
+          }
+        }
+      }
+    },
     "Stop recording": {
       "extractionState": "manual",
       "localizations": {
@@ -878,6 +1021,17 @@
         }
       }
     },
+    "Undo the last mark": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Markierung zurücknehmen"
+          }
+        }
+      }
+    },
     "Watermark": {
       "extractionState": "manual",
       "localizations": {
@@ -885,6 +1039,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wasserzeichen"
+          }
+        }
+      }
+    },
+    "White": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiß"
           }
         }
       }

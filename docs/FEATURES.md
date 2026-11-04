@@ -5,7 +5,7 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.19.0.
+Status checked against the code at version 0.20.0.
 
 ## Audio
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
@@ -69,7 +69,7 @@ Status checked against the code at version 0.19.0.
 
 ## Capture
 - [x] Sonary's own capture selector: dimmed screen, magnifier, live pixel size, feeding every capture tool
-- [~] Screenshots through the system tool or Sonary's selector, with pinning a shot on top of everything; no scrolling capture, annotation, redaction, backgrounds or sharing
+- [~] Screenshots through the system tool or Sonary's selector, with pinning, an editor for arrows, boxes, highlights, text and redaction that really destroys the pixels, and export on a background; no scrolling capture
 - [x] Screen recording to an MP4, through ScreenCaptureKit
 - [x] Camera preview mirror, a floating round window from the tools tab
 - [x] Offline text recognition, including QR codes and barcodes

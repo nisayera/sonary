@@ -173,6 +173,12 @@ struct ToolsSettingsView: View {
                               isOn: Binding(get: { model.settings.shortcuts }, set: { value in model.update { $0.shortcuts = value } }))
         }
         SettingsCard(Text("Capture", bundle: .module)) {
+            SettingsToggleRow(symbol: "pencil.tip.crop.circle",
+                              title: Text("Open the editor after a screenshot", bundle: .module),
+                              caption: Text("Draw arrows and boxes, hide what should not be seen, put it on a background, then copy or save.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.annotateAfterCapture },
+                                            set: { value in model.update { $0.annotateAfterCapture = value } }))
             SettingsToggleRow(symbol: "viewfinder.rectangular",
                               title: Text("Pick regions with Sonary's own selector", bundle: .module),
                               caption: Text("Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.",
