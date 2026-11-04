@@ -54,7 +54,10 @@ jobs:
   release:
     needs: check
     if: needs.check.outputs.publish == 'true'
-    runs-on: macos-26
+    # The x64 pool, because the arm64 one has no capacity today. This job compiles,
+    # signs and packages but never runs the app, and ARCHS stays arm64, so the host
+    # architecture does not change what comes out.
+    runs-on: macos-26-intel
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
