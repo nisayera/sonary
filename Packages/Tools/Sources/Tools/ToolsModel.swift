@@ -10,10 +10,16 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
         Snippet(title: "Date", text: "{date}"),
     ]
     public var radialActions: [QuickAction] = QuickAction.allCases
+    /// Extra rings, each a wedge in the first one.
+    public var radialProfiles: [RadialProfile] = []
     public var colorFormat: ColorFormat = .hex
     public var scratchpadTabs: [ScratchpadTab] = []
     /// Use Sonary's own region selector, with a magnifier, instead of the system one.
     public var ownCaptureSelector = false
+    /// Whether a snippet is typed where the cursor is or put on the clipboard.
+    public var snippetDelivery: SnippetDelivery = .type
+    /// Open the editor on a fresh screenshot instead of only copying it.
+    public var annotateAfterCapture = false
     public var activeTab: UUID?
     public init() {}
 }
@@ -52,6 +58,7 @@ public final class ToolsModel {
     @ObservationIgnored private let camera = CameraPreviewController()
     @ObservationIgnored private let recorder = ScreenRecorder()
     @ObservationIgnored private let selector = CaptureSelectorController()
+    @ObservationIgnored private let editor = AnnotationEditorController()
     public private(set) var isRecording = false
     /// Commands other modules add to the command bar, for example the clipboard history.
     @ObservationIgnored public var externalCommands: @MainActor () -> [ExternalCommand] = { [] }
@@ -83,6 +90,7 @@ public final class ToolsModel {
         camera.close()
         if isRecording { Task { await stopRecording() } }
         selector.close()
+        editor.close()
     }
 
     /// The notes, with the old single scratchpad carried over the first time.
@@ -224,6 +232,35 @@ public final class ToolsModel {
 
     public func toggleCamera() { camera.toggle() }
 
+    /// Captures a region, scrolls it and captures again, then hands the tall picture
+    /// to the editor. Needs a region, so it always uses Sonary's own selector.
+    public func scrollingScreenshot() {
+        Task {
+            guard let region = await withCheckedContinuation({ continuation in
+                selector.show { continuation.resume(returning: $0) }
+            }) else { return }
+            report(String(localized: "Scrolling and capturing…", bundle: .module))
+            let image = await captureScrolling(region: region) { [weak self] rect in
+                await self?.captureImage(of: rect)
+            }
+            guard let image else {
+                report(String(localized: "Nothing could be captured there.", bundle: .module))
+                return
+            }
+            editor.open(image) { [weak self] message in self?.report(message) }
+        }
+    }
+
+    /// One shot of a region, as a picture.
+    private func captureImage(of rect: CGRect) async -> NSImage? {
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sonary-scroll-\(UUID().uuidString).png")
+        let value = "\(Int(rect.minX)),\(Int(rect.minY)),\(Int(rect.width)),\(Int(rect.height))"
+        guard await capture(arguments: ["-R", value, "-x", file.path]) else { return nil }
+        defer { try? FileManager.default.removeItem(at: file) }
+        return NSImage(contentsOf: file)
+    }
+
     // MARK: Screen recording
 
     public func toggleRecording() {
@@ -310,10 +347,22 @@ public final class ToolsModel {
     }
 
     public func screenshotToClipboard() {
+        guard settings.annotateAfterCapture else {
+            Task {
+                guard let arguments = await captureArguments(["-c"]) else { return }
+                _ = await capture(arguments: arguments)
+                report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
+            }
+            return
+        }
+        // The shot goes to a file first, so the editor has something to work on.
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sonary-shot-\(UUID().uuidString).png")
         Task {
-            guard let arguments = await captureArguments(["-c"]) else { return }
-            _ = await capture(arguments: arguments)
-            report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
+            guard let arguments = await captureArguments(["-x", file.path]),
+                  await capture(arguments: arguments), let image = NSImage(contentsOf: file) else { return }
+            try? FileManager.default.removeItem(at: file)
+            editor.open(image) { [weak self] message in self?.report(message) }
         }
     }
 
@@ -383,8 +432,19 @@ public final class ToolsModel {
 
     public func insert(_ snippet: Snippet) {
         let clipboard = NSPasteboard.general.string(forType: .string)
-        copy(expandSnippet(snippet.text, now: Date(), clipboard: clipboard))
-        report(String(localized: "Snippet copied. Press ⌘V to paste it.", bundle: .module))
+        let text = expandSnippet(snippet.text, now: Date(), clipboard: clipboard)
+        guard settings.snippetDelivery == .type else {
+            copy(text)
+            report(String(localized: "Snippet copied. Press ⌘V to paste it.", bundle: .module))
+            return
+        }
+        // The panel has the keyboard while it is open, so the text goes to whatever
+        // had it before, once Sonary is out of the way.
+        Task {
+            try? await Task.sleep(for: .milliseconds(120))
+            TypeText.type(text)
+        }
+        report(String(localized: "Snippet typed.", bundle: .module))
     }
 
     public func addSnippet() {
@@ -406,6 +466,7 @@ public final class ToolsModel {
         case .pinScreenshot: pinScreenshot()
         case .cameraPreview: camera.toggle()
         case .screenRecording: toggleRecording()
+        case .scrollingShot: scrollingScreenshot()
         case .commandBar: showCommandBar()
         case .textFromScreen: recognizeText()
         case .colorPicker: pickColor()
@@ -414,8 +475,40 @@ public final class ToolsModel {
     }
 
     public func showRadialMenu() {
-        let actions = settings.radialActions.isEmpty ? QuickAction.allCases : settings.radialActions
-        radial.show(actions: Array(actions.prefix(8))) { [weak self] action in self?.run(action) }
+        showRadialRing(radialRootItems(actions: settings.radialActions, profiles: settings.radialProfiles))
+    }
+
+    private func showRadialRing(_ items: [RadialItem]) {
+        radial.show(items: items, run: { [weak self] action in
+            self?.run(action)
+        }, open: { [weak self] profile in
+            self?.showRadialRing(radialProfileItems(profile))
+        }, back: { [weak self] in
+            self?.showRadialMenu()
+        })
+    }
+
+    public func addRadialProfile() {
+        update { $0.radialProfiles.append(RadialProfile(name: String(localized: "New ring", bundle: .module))) }
+    }
+
+    public func removeRadialProfile(_ id: UUID) {
+        update { $0.radialProfiles.removeAll { $0.id == id } }
+    }
+
+    public func renameRadialProfile(_ id: UUID, to name: String) {
+        update { settings in
+            guard let index = settings.radialProfiles.firstIndex(where: { $0.id == id }) else { return }
+            settings.radialProfiles[index].name = name
+        }
+    }
+
+    public func setRadialProfileAction(_ id: UUID, action: QuickAction, on: Bool) {
+        update { settings in
+            guard let index = settings.radialProfiles.firstIndex(where: { $0.id == id }) else { return }
+            settings.radialProfiles[index].actions.removeAll { $0 == action }
+            if on { settings.radialProfiles[index].actions.append(action) }
+        }
     }
 
     // MARK: Command bar

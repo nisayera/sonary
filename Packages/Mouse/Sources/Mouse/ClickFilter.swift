@@ -21,3 +21,10 @@ public struct ClickFilter: Sendable {
         return false
     }
 }
+
+/// Whether a left click that landed with this many fingers on the trackpad should
+/// become a middle click. Three fingers is the gesture; one or two are an ordinary
+/// click or a two-finger right click, and a mouse carries no touches at all.
+public func shouldBecomeMiddleClick(touchCount: Int, enabled: Bool) -> Bool {
+    enabled && touchCount == 3
+}

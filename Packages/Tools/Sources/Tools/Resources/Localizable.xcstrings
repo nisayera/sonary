@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add a ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ring hinzufügen"
+          }
+        }
+      }
+    },
     "Add snippet": {
       "localizations": {
         "de": {
@@ -18,6 +29,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erlaube Sonary die Bildschirmaufnahme in Systemeinstellungen > Datenschutz & Sicherheit."
+          }
+        }
+      }
+    },
+    "Arrow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfeil"
+          }
+        }
+      }
+    },
+    "Back": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurück"
           }
         }
       }
@@ -148,6 +181,17 @@
         }
       }
     },
+    "Copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieren"
+          }
+        }
+      }
+    },
     "Copy colours as": {
       "localizations": {
         "de": {
@@ -174,6 +218,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die Notiz konnte nicht gesichert werden."
+          }
+        }
+      }
+    },
+    "Dark": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkel"
           }
         }
       }
@@ -229,6 +284,28 @@
         }
       }
     },
+    "Draw arrows and boxes, hide what should not be seen, put it on a background, then copy or save.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pfeile und Rahmen zeichnen, verbergen was nicht zu sehen sein soll, auf einen Hintergrund legen, dann kopieren oder sichern."
+          }
+        }
+      }
+    },
+    "Each extra ring is a wedge in the first one that opens it, so the ring can hold more than eight actions without getting crowded.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeder weitere Ring ist ein Feld im ersten, das ihn öffnet – so passen mehr als acht Aktionen hinein, ohne dass es eng wird."
+          }
+        }
+      }
+    },
     "Edit snippets in Sonary's settings.": {
       "localizations": {
         "de": {
@@ -249,12 +326,45 @@
         }
       }
     },
+    "Ellipse": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ellipse"
+          }
+        }
+      }
+    },
     "Empty Trash": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Papierkorb leeren"
+          }
+        }
+      }
+    },
+    "Executable files in Sonary's scripts folder show up in the command bar. Only files you have marked executable are offered.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausführbare Dateien im Skripte-Ordner von Sonary erscheinen in der Befehlsleiste. Angeboten werden nur Dateien, die du als ausführbar markiert hast."
+          }
+        }
+      }
+    },
+    "Extra rings": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere Ringe"
           }
         }
       }
@@ -270,6 +380,28 @@
         }
       }
     },
+    "Hide": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbergen"
+          }
+        }
+      }
+    },
+    "Highlight": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hervorheben"
+          }
+        }
+      }
+    },
     "Image conversion": {
       "extractionState": "manual",
       "localizations": {
@@ -277,6 +409,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bilder umwandeln"
+          }
+        }
+      }
+    },
+    "Insert a snippet by": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baustein einfügen durch"
           }
         }
       }
@@ -354,6 +497,17 @@
         }
       }
     },
+    "New ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neuer Ring"
+          }
+        }
+      }
+    },
     "New snippet": {
       "localizations": {
         "de": {
@@ -371,6 +525,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es konnte kein GIF erstellt werden."
+          }
+        }
+      }
+    },
+    "No background": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Hintergrund"
           }
         }
       }
@@ -417,6 +582,17 @@
         }
       }
     },
+    "Nothing could be captured there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dort konnte nichts aufgenommen werden."
+          }
+        }
+      }
+    },
     "Nothing was recorded.": {
       "extractionState": "manual",
       "localizations": {
@@ -424,6 +600,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es wurde nichts aufgenommen."
+          }
+        }
+      }
+    },
+    "Open the editor after a screenshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach einem Bildschirmfoto den Editor öffnen"
+          }
+        }
+      }
+    },
+    "Open the scripts folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skripte-Ordner öffnen"
           }
         }
       }
@@ -499,12 +697,34 @@
         }
       }
     },
+    "Putting it on the clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In die Zwischenablage legen"
+          }
+        }
+      }
+    },
     "Radial menu": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Radial-Menü"
+          }
+        }
+      }
+    },
+    "Ran %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ausgeführt"
           }
         }
       }
@@ -531,12 +751,34 @@
         }
       }
     },
+    "Rectangle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechteck"
+          }
+        }
+      }
+    },
     "Remove snippet": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Textbaustein entfernen"
+          }
+        }
+      }
+    },
+    "Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sichern"
           }
         }
       }
@@ -571,6 +813,17 @@
         }
       }
     },
+    "Screenshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto"
+          }
+        }
+      }
+    },
     "Screenshot copied to the clipboard.": {
       "localizations": {
         "de": {
@@ -601,12 +854,56 @@
         }
       }
     },
+    "Scripts": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skripte"
+          }
+        }
+      }
+    },
+    "Scrolling and capturing…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gescrollt und aufgenommen …"
+          }
+        }
+      }
+    },
+    "Scrolling screenshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scrollendes Bildschirmfoto"
+          }
+        }
+      }
+    },
     "Search apps, snippets and tools": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Apps, Textbausteine und Werkzeuge suchen"
+          }
+        }
+      }
+    },
+    "Search apps, snippets, files and tools": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps, Bausteine, Dateien und Werkzeuge suchen"
           }
         }
       }
@@ -631,12 +928,34 @@
         }
       }
     },
+    "Snippet typed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baustein getippt."
+          }
+        }
+      }
+    },
     "Snippets": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Textbausteine"
+          }
+        }
+      }
+    },
+    "Sonary pink": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary-Pink"
           }
         }
       }
@@ -724,6 +1043,28 @@
         }
       }
     },
+    "Typing it": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippen"
+          }
+        }
+      }
+    },
+    "Undo the last mark": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Markierung zurücknehmen"
+          }
+        }
+      }
+    },
     "Watermark": {
       "extractionState": "manual",
       "localizations": {
@@ -731,6 +1072,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wasserzeichen"
+          }
+        }
+      }
+    },
+    "White": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiß"
           }
         }
       }

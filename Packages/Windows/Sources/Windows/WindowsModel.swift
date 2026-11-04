@@ -20,6 +20,16 @@ public struct WindowsSettings: Codable, Equatable, Sendable {
     public var focusFollowsMouse = false
     /// Live pictures of each window in the switcher; needs the Screen Recording permission.
     public var switcherPreviews = false
+    /// What a click on a running app's Dock icon does.
+    public var dockClickAction: DockClickAction = .system
+    /// Show the app's windows, across every Space, when the pointer rests on its Dock icon.
+    public var dockPreviews = false
+    /// Press a protected shortcut twice, or hold it down.
+    public var quitConfirmation: QuitConfirmation = .pressTwice
+    /// Move or resize the window under the pointer while holding a chosen combination.
+    public var modifierDrag: ModifierDragMode = .off
+    /// The combination that starts a modifier-drag, as Carbon flags. ⌃⌘ by default.
+    public var modifierDragKeys = KeyModifier.control | KeyModifier.command
 
     public init() {}
 }
@@ -48,6 +58,8 @@ public final class WindowsModel {
     @ObservationIgnored private var quitTap: CFMachPort?
     @ObservationIgnored private var quitSource: CFRunLoopSource?
     @ObservationIgnored private var quitGuard = QuitGuard()
+    @ObservationIgnored private var holdGuard = HoldGuard()
+    @ObservationIgnored private var hudProgress: Double = 0
     /// The frame a window had before the last layout, so it can be put back.
     @ObservationIgnored private var previousFrames: [pid_t: CGRect] = [:]
     @ObservationIgnored private var windowCounts: [Int32: Int] = [:]
@@ -58,6 +70,15 @@ public final class WindowsModel {
     @ObservationIgnored private var snapPreview: NSPanel?
     @ObservationIgnored private var pendingSnap: LayoutAction?
     @ObservationIgnored private var focusState = FocusFollowState()
+    @ObservationIgnored private var dockHoverMonitor: Any?
+    @ObservationIgnored private var dockClickMonitor: Any?
+    @ObservationIgnored private var dockHover = DockHoverState()
+    @ObservationIgnored private let dockPreview = DockPreviewController()
+    /// The window each app's Dock icon last raised, so a second click moves on.
+    @ObservationIgnored private var lastRaisedDockWindow: [Int32: UInt32] = [:]
+    @ObservationIgnored private var modifierDragMonitor: Any?
+    /// The window a modifier-drag grabbed, where it was, and where the pointer began.
+    @ObservationIgnored private var modifierDragStart: (window: AXUIElement, frame: CGRect, pointer: CGPoint)?
     @ObservationIgnored private var hud: NSPanel?
     @ObservationIgnored private let switcher = WindowSwitcherController()
     @ObservationIgnored private var running = false
@@ -130,11 +151,78 @@ public final class WindowsModel {
         if running, settings.quitWhenLastWindowCloses { startWatchingWindows() } else { stopWatchingWindows() }
         if running, settings.edgeSnapping { startEdgeSnapping() } else { stopEdgeSnapping() }
         if running, settings.focusFollowsMouse { startFocusFollowsMouse() } else { stopFocusFollowsMouse() }
+        if running, settings.dockPreviews { startDockHover() } else { stopDockHover() }
+        if running, settings.dockClickAction != .system { startDockClicks() } else { stopDockClicks() }
+        if running, settings.modifierDrag != .off { startModifierDrag() } else { stopModifierDrag() }
         switcher.showsPreviews = settings.switcherPreviews
         if !running || !settings.windowSwitcher { switcher.close() }
     }
 
     public func showSwitcher() { switcher.show() }
+
+    // MARK: Moving a window by holding keys
+
+    private func startModifierDrag() {
+        guard modifierDragMonitor == nil else { return }
+        modifierDragMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .flagsChanged]
+        ) { [weak self] event in
+            MainActor.assumeIsolated { self?.modifierDragged(event) }
+        }
+    }
+
+    private func stopModifierDrag() {
+        if let modifierDragMonitor { NSEvent.removeMonitor(modifierDragMonitor) }
+        modifierDragMonitor = nil
+        modifierDragStart = nil
+    }
+
+    /// While the chosen keys are held, the pointer moves or resizes the window it is
+    /// over. Letting the keys go ends it, so an ordinary drag is never disturbed.
+    private func modifierDragged(_ event: NSEvent) {
+        let point = NSEvent.mouseLocation
+        let flags = carbonFlags(event.modifierFlags)
+        guard isModifierDrag(flags: flags, wanted: settings.modifierDragKeys) else {
+            modifierDragStart = nil
+            return
+        }
+        let resizing = event.type == .rightMouseDragged && settings.modifierDrag.resizesOnRight
+        guard resizing || settings.modifierDrag.movesOnLeft else { return }
+
+        guard let primary = NSScreen.screens.first else { return }
+        guard let start = modifierDragStart else {
+            guard let pid = windowUnder(point, in: visibleWindows()),
+                  let window = frontWindow(of: pid), let frame = frame(of: window) else { return }
+            modifierDragStart = (window: window, frame: cocoaRect(fromAX: frame,
+                                                                  primaryScreenHeight: primary.frame.height),
+                                 pointer: point)
+            return
+        }
+        let wanted = resizing
+            ? resizedFrame(start: start.frame, from: start.pointer, to: point)
+            : draggedFrame(start: start.frame, from: start.pointer, to: point)
+        setFrame(axRect(fromCocoa: wanted, primaryScreenHeight: primary.frame.height), of: start.window)
+    }
+
+    /// AppKit's modifier flags as the Carbon flags the settings store.
+    private func carbonFlags(_ flags: NSEvent.ModifierFlags) -> Int {
+        var value = 0
+        if flags.contains(.command) { value |= KeyModifier.command }
+        if flags.contains(.shift) { value |= KeyModifier.shift }
+        if flags.contains(.option) { value |= KeyModifier.option }
+        if flags.contains(.control) { value |= KeyModifier.control }
+        return value
+    }
+
+    // MARK: Spaces
+
+    /// Whether the Spaces keep the order you put them in.
+    public var spacesKeepTheirOrder: Bool { spaceOrderIsFixed(rearrangesAutomatically: SpaceOrder.rearrangesAutomatically) }
+
+    /// Fixes or releases the Spaces order. The Dock is restarted, which blinks it once.
+    public func setSpacesKeepTheirOrder(_ fixed: Bool) {
+        SpaceOrder.setRearrangesAutomatically(!fixed)
+    }
 
     // MARK: Snap to the screen edges
 
@@ -202,6 +290,112 @@ public final class WindowsModel {
         snapPreview = nil
     }
 
+    // MARK: The Dock
+
+    private func startDockHover() {
+        guard dockHoverMonitor == nil else { return }
+        dockHoverMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved]) { [weak self] _ in
+            MainActor.assumeIsolated { self?.pointerMovedOverDock() }
+        }
+    }
+
+    private func stopDockHover() {
+        if let dockHoverMonitor { NSEvent.removeMonitor(dockHoverMonitor) }
+        dockHoverMonitor = nil
+        dockHover = DockHoverState()
+        dockPreview.close()
+    }
+
+    private func startDockClicks() {
+        guard dockClickMonitor == nil else { return }
+        dockClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseUp]) { [weak self] _ in
+            MainActor.assumeIsolated { self?.dockClicked() }
+        }
+    }
+
+    private func stopDockClicks() {
+        if let dockClickMonitor { NSEvent.removeMonitor(dockClickMonitor) }
+        dockClickMonitor = nil
+    }
+
+    private func pointerMovedOverDock() {
+        let point = NSEvent.mouseLocation
+        let app = DockReader.app(at: point)
+        guard let pid = dockHover.pointer(over: app?.processIdentifier, at: Date().timeIntervalSinceReferenceDate) else {
+            if app == nil { dockPreview.close() }
+            return
+        }
+        guard let app, app.processIdentifier == pid else { return }
+        let windows = Self.windows(of: pid)
+        guard !windows.isEmpty else { return }
+        dockPreview.show(app: app, windows: windows, near: point) { [weak self] window in
+            self?.raise(windowID: window.id, pid: pid)
+        }
+    }
+
+    /// A click on a Dock icon, after the Dock has had it: Sonary adds what the user
+    /// asked for rather than swallowing the click, so the Dock keeps working.
+    private func dockClicked() {
+        let point = NSEvent.mouseLocation
+        guard let app = DockReader.app(at: point) else { return }
+        let pid = app.processIdentifier
+        switch settings.dockClickAction {
+        case .system: return
+        case .minimizeAll: minimizeWindows(of: pid)
+        case .showAllWindows: showAllWindows(of: pid)
+        case .cycleWindows:
+            let windows = Self.windows(of: pid)
+            guard let next = nextWindowToRaise(after: lastRaisedDockWindow[pid], in: windows) else { return }
+            lastRaisedDockWindow[pid] = next.id
+            raise(windowID: next.id, pid: pid)
+        }
+    }
+
+    /// Every window of an app, across all Spaces.
+    private static func windows(of pid: Int32) -> [DockWindow] {
+        let info = CGWindowListCopyWindowInfo([.optionAll, .excludeDesktopElements], kCGNullWindowID)
+            as? [[String: Any]] ?? []
+        return dockWindows(ofPID: pid, in: info)
+    }
+
+    /// Brings one window forward. The window server knows it by number, the
+    /// accessibility API by position, so the app is activated and its matching window
+    /// raised by its frame.
+    private func raise(windowID: UInt32, pid: Int32) {
+        NSRunningApplication(processIdentifier: pid)?.activate()
+        let element = AXUIElementCreateApplication(pid)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXWindowsAttribute as CFString, &value) == .success,
+              let list = value as? [AXUIElement] else { return }
+        guard let target = Self.windows(of: pid).first(where: { $0.id == windowID }) else { return }
+        for window in list where frame(of: window).map({ abs($0.origin.x - target.frame.minX) < 4 }) == true {
+            AXUIElementPerformAction(window, kAXRaiseAction as CFString)
+            return
+        }
+    }
+
+    private func minimizeWindows(of pid: Int32) {
+        let element = AXUIElementCreateApplication(pid)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXWindowsAttribute as CFString, &value) == .success,
+              let list = value as? [AXUIElement] else { return }
+        for window in list {
+            AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, kCFBooleanTrue)
+        }
+    }
+
+    private func showAllWindows(of pid: Int32) {
+        let element = AXUIElementCreateApplication(pid)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXWindowsAttribute as CFString, &value) == .success,
+              let list = value as? [AXUIElement] else { return }
+        NSRunningApplication(processIdentifier: pid)?.activate()
+        for window in list {
+            AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
+            AXUIElementPerformAction(window, kAXRaiseAction as CFString)
+        }
+    }
+
     // MARK: Focus follows mouse
 
     private func startFocusFollowsMouse() {
@@ -219,21 +413,7 @@ public final class WindowsModel {
 
     private func pointerMoved() {
         let point = NSEvent.mouseLocation
-        guard let primary = NSScreen.screens.first else { return }
-        let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
-        let windows: [(pid: Int32, frame: CGRect)] = ((raw as? [[String: Any]]) ?? []).compactMap { window in
-            guard (window["kCGWindowLayer"] as? Int) == 0,
-                  let pid = (window["kCGWindowOwnerPID"] as? NSNumber)?.int32Value,
-                  let bounds = window["kCGWindowBounds"] as? [String: Any],
-                  let x = (bounds["X"] as? NSNumber)?.doubleValue,
-                  let y = (bounds["Y"] as? NSNumber)?.doubleValue,
-                  let width = (bounds["Width"] as? NSNumber)?.doubleValue,
-                  let height = (bounds["Height"] as? NSNumber)?.doubleValue else { return nil }
-            // The window server measures from the top of the primary screen; the pointer does not.
-            let frame = cocoaRect(fromAX: CGRect(x: x, y: y, width: width, height: height),
-                                  primaryScreenHeight: primary.frame.height)
-            return (pid: pid, frame: frame)
-        }
+        let windows = visibleWindows()
         let focused = NSWorkspace.shared.frontmostApplication?.processIdentifier
         let under = windowUnder(point, in: windows)
         guard let pid = focusState.pointer(over: under, at: ProcessInfo.processInfo.systemUptime, focused: focused),
@@ -345,6 +525,34 @@ public final class WindowsModel {
         setFrame(target, of: window)
     }
 
+    /// Every ordinary window on screen, with its frame in pointer coordinates.
+    private func visibleWindows() -> [(pid: Int32, frame: CGRect)] {
+        guard let primary = NSScreen.screens.first else { return [] }
+        let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+        return ((raw as? [[String: Any]]) ?? []).compactMap { window in
+            guard (window["kCGWindowLayer"] as? Int) == 0,
+                  let pid = (window["kCGWindowOwnerPID"] as? NSNumber)?.int32Value,
+                  let bounds = window["kCGWindowBounds"] as? [String: Any],
+                  let x = (bounds["X"] as? NSNumber)?.doubleValue,
+                  let y = (bounds["Y"] as? NSNumber)?.doubleValue,
+                  let width = (bounds["Width"] as? NSNumber)?.doubleValue,
+                  let height = (bounds["Height"] as? NSNumber)?.doubleValue else { return nil }
+            // The window server measures from the top of the primary screen; the pointer does not.
+            let frame = cocoaRect(fromAX: CGRect(x: x, y: y, width: width, height: height),
+                                  primaryScreenHeight: primary.frame.height)
+            return (pid: pid, frame: frame)
+        }
+    }
+
+    /// The window an app has in front, for grabbing with a modifier-drag.
+    private func frontWindow(of pid: Int32) -> AXUIElement? {
+        let axApp = AXUIElementCreateApplication(pid)
+        var focused: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(axApp, kAXFocusedWindowAttribute as CFString, &focused) == .success,
+              let focused, CFGetTypeID(focused) == AXUIElementGetTypeID() else { return nil }
+        return unsafeDowncast(focused, to: AXUIElement.self)
+    }
+
     private func frame(of window: AXUIElement) -> CGRect? {
         var positionRef: CFTypeRef?
         var sizeRef: CFTypeRef?
@@ -407,29 +615,47 @@ public final class WindowsModel {
         case 13 where settings.closeProtection: .close
         default: nil
         }
-        guard type == .keyDown, plainCommand, let key, !isRepeat,
+        // Holding needs the repeats, which is how it knows the keys are still down.
+        let wantsRepeats = settings.quitConfirmation == .hold
+        guard type == .keyDown, plainCommand, let key, !isRepeat || wantsRepeats,
               let app = NSWorkspace.shared.frontmostApplication,
               let bundleID = app.bundleIdentifier, bundleID != "com.apple.finder",
               isProtected(bundleID: bundleID, onlyApps: settings.protectedApps) else {
+            if type == .keyUp, settings.quitConfirmation == .hold {
+                holdGuard.up()
+                hideHUD()
+            }
             return true
         }
-        if quitGuard.shouldQuit(app: bundleID, key: key, at: ProcessInfo.processInfo.systemUptime) {
-            return true
+        let now = ProcessInfo.processInfo.systemUptime
+        switch settings.quitConfirmation {
+        case .pressTwice:
+            if quitGuard.shouldQuit(app: bundleID, key: key, at: now) { return true }
+            showHUD(appName: app.localizedName ?? bundleID, key: key)
+        case .hold:
+            if holdGuard.down(app: bundleID, key: key, at: now) {
+                holdGuard.up()
+                hideHUD()
+                return true
+            }
+            showHUD(appName: app.localizedName ?? bundleID, key: key,
+                    progress: holdGuard.progress(app: bundleID, key: key, at: now))
         }
-        showHUD(appName: app.localizedName ?? bundleID, key: key)
         return false
     }
 
-    private func showHUD(appName: String, key: ProtectedKey) {
+    /// The hint while a protected shortcut waits. With a progress value it shows a bar
+    /// filling up, so holding has something to look at.
+    private func showHUD(appName: String, key: ProtectedKey, progress: Double? = nil) {
+        let text = hudText(appName: appName, key: key, holding: progress != nil)
+        // While holding, the panel is only rebuilt once; after that the bar is updated.
+        if let progress, let existing = hud, existing.identifier?.rawValue == text {
+            hudProgress = progress
+            return
+        }
         hud?.orderOut(nil)
-        let text = key == .quit
-            ? String(localized: "Press ⌘Q again to quit \(appName)", bundle: .module)
-            : String(localized: "Press ⌘W again to close this window", bundle: .module)
-        let view = Text(text)
-            .font(.title3.weight(.semibold))
-            .padding(.horizontal, 22)
-            .padding(.vertical, 14)
-            .glassEffect(.regular, in: Capsule())
+        hudProgress = progress ?? 0
+        let view = QuitHintView(text: text, progress: progress == nil ? nil : { [weak self] in self?.hudProgress ?? 0 })
         let host = NSHostingView(rootView: view)
         let size = host.fittingSize
         let panel = NSPanel(contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless, .nonactivatingPanel],
@@ -438,16 +664,33 @@ public final class WindowsModel {
         panel.backgroundColor = .clear
         panel.level = .statusBar
         panel.ignoresMouseEvents = true
+        panel.identifier = NSUserInterfaceItemIdentifier(text)
         panel.contentView = host
         if let screen = NSScreen.main {
-            panel.setFrameOrigin(CGPoint(x: screen.frame.midX - size.width / 2, y: screen.frame.minY + screen.frame.height * 0.2))
+            panel.setFrameOrigin(CGPoint(x: screen.frame.midX - size.width / 2,
+                                         y: screen.frame.minY + screen.frame.height * 0.2))
         }
         panel.orderFrontRegardless()
         hud = panel
+        guard progress == nil else { return }  // holding takes it away on key-up
         Task { [weak self, weak panel] in
             try? await Task.sleep(for: .seconds(1.6))
             panel?.orderOut(nil)
             if self?.hud === panel { self?.hud = nil }
+        }
+    }
+
+    private func hideHUD() {
+        hud?.orderOut(nil)
+        hud = nil
+    }
+
+    private func hudText(appName: String, key: ProtectedKey, holding: Bool) -> String {
+        switch (key, holding) {
+        case (.quit, false): String(localized: "Press ⌘Q again to quit \(appName)", bundle: .module)
+        case (.close, false): String(localized: "Press ⌘W again to close this window", bundle: .module)
+        case (.quit, true): String(localized: "Hold ⌘Q to quit \(appName)", bundle: .module)
+        case (.close, true): String(localized: "Hold ⌘W to close this window", bundle: .module)
         }
     }
 }

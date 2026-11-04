@@ -372,3 +372,203 @@ struct MenuCommandTests {
         #expect(nearEdge.x >= 0 && nearEdge.y >= 0)
     }
 }
+
+@Suite struct TypeTextTests {
+    @MainActor
+    @Test func splitsTextIntoChunksTheEventCanCarry() {
+        let chunks = TypeText.chunks(of: String(repeating: "a", count: 40), size: 16)
+        #expect(chunks.count == 3)
+        #expect(chunks.map(\.count) == [16, 16, 8])
+    }
+
+    @MainActor
+    @Test func keepsEmojiAndAccentsWhole() {
+        // Characters outside the basic plane take two UTF-16 units; nothing may be lost.
+        let text = "Grüße 🙂"
+        let units = TypeText.chunks(of: text, size: 4).flatMap { $0 }
+        #expect(String(decoding: units, as: UTF16.self) == text)
+    }
+
+    @MainActor
+    @Test func nothingToTypeIsNoChunks() {
+        #expect(TypeText.chunks(of: "").isEmpty)
+        #expect(TypeText.chunks(of: "abc", size: 0).isEmpty)
+    }
+}
+
+@Suite struct RadialProfileTests {
+    private let profile = RadialProfile(name: "Capture", actions: [.screenshot, .pinScreenshot])
+
+    @Test func theFirstRingHoldsActionsThenRings() {
+        let items = radialRootItems(actions: [.darkMode, .lockScreen], profiles: [profile])
+        #expect(items.count == 3)
+        #expect(items[0] == .action(.darkMode))
+        #expect(items[2] == .profile(profile), "a new ring never moves the actions already there")
+    }
+
+    @Test func anEmptyChoiceMeansEverything() {
+        let items = radialRootItems(actions: [], profiles: [])
+        #expect(items.count == min(QuickAction.allCases.count, radialRingLimit))
+    }
+
+    @Test func aRingNeverGetsTooCrowded() {
+        let many = (0..<6).map { RadialProfile(name: "r\($0)") }
+        let items = radialRootItems(actions: QuickAction.allCases, profiles: many)
+        #expect(items.count == radialRingLimit)
+    }
+
+    @Test func aProfileRingKeepsAWayBack() {
+        let items = radialProfileItems(profile)
+        #expect(items.first == .action(.screenshot))
+        #expect(items.last == .back)
+        let crowded = RadialProfile(name: "all", actions: QuickAction.allCases)
+        #expect(radialProfileItems(crowded).count == radialRingLimit)
+        #expect(radialProfileItems(crowded).last == .back, "the way back is never pushed out")
+    }
+
+    @Test func itemsAreTellableApart() {
+        #expect(RadialItem.action(.darkMode).id != RadialItem.action(.lockScreen).id)
+        #expect(RadialItem.profile(profile).id != RadialItem.back.id)
+        #expect(RadialItem.back.symbol == "chevron.backward")
+    }
+}
+
+@Suite struct FileSearchTests {
+    @Test func tooShortToBeWorthAsking() {
+        #expect(!isWorthSearching(""))
+        #expect(!isWorthSearching("ab"))
+        #expect(!isWorthSearching("  a  "))
+        #expect(isWorthSearching("abc"))
+    }
+
+    @Test func aStrayQuoteCannotChangeTheQuestion() {
+        let predicate = fileSearchPredicate("my \"file\" \\ name")
+        #expect(predicate == "kMDItemDisplayName CONTAINS[cd] \"my file  name\"")
+        #expect(predicate.filter { $0 == "\"" }.count == 2, "only the two quotes we put there")
+    }
+}
+
+@Suite struct ScriptTests {
+    private func file(_ name: String, executable: Bool = true, directory: Bool = false)
+    -> (url: URL, isExecutable: Bool, isDirectory: Bool) {
+        (URL(fileURLWithPath: "/tmp/scripts/\(name)"), executable, directory)
+    }
+
+    @Test func onlyExecutableFilesAreOffered() {
+        let found = usableScripts([
+            file("backup.sh"),
+            file("notes.txt", executable: false),
+            file("tools", directory: true),
+            file(".hidden"),
+        ])
+        #expect(found.map(\.name) == ["backup"])
+    }
+
+    @Test func scriptsAreListedByName() {
+        let found = usableScripts([file("zip-it.sh"), file("archive.sh"), file("Backup.command")])
+        #expect(found.map(\.name) == ["archive", "Backup", "zip-it"])
+    }
+
+    @Test func theFolderSitsInSonarysOwnSupportFolder() {
+        let folder = scriptsFolder(home: URL(fileURLWithPath: "/Users/someone"))
+        #expect(folder.path == "/Users/someone/Library/Application Support/app.sonary.Sonary/Scripts")
+    }
+}
+
+@Suite struct AnnotationTests {
+    private func mark(_ kind: AnnotationKind, from start: CGPoint, to end: CGPoint, text: String = "")
+    -> Annotation {
+        Annotation(kind: kind, start: start, end: end, text: text)
+    }
+
+    @Test func aMarkCoversTheSameAreaWhicheverWayItWasDrawn() {
+        let down = mark(.rectangle, from: CGPoint(x: 10, y: 10), to: CGPoint(x: 60, y: 90))
+        let up = mark(.rectangle, from: CGPoint(x: 60, y: 90), to: CGPoint(x: 10, y: 10))
+        #expect(down.frame == up.frame)
+        #expect(down.frame == CGRect(x: 10, y: 10, width: 50, height: 80))
+    }
+
+    @Test func straySmallMarksAreDropped() {
+        #expect(!isAnnotationWorthKeeping(mark(.rectangle, from: .zero, to: CGPoint(x: 3, y: 3))))
+        #expect(isAnnotationWorthKeeping(mark(.rectangle, from: .zero, to: CGPoint(x: 20, y: 20))))
+        #expect(isAnnotationWorthKeeping(mark(.arrow, from: .zero, to: CGPoint(x: 10, y: 2))),
+                "a short arrow still points somewhere")
+        #expect(!isAnnotationWorthKeeping(mark(.arrow, from: .zero, to: CGPoint(x: 4, y: 2))))
+    }
+
+    @Test func textWithoutTextIsNotAMark() {
+        #expect(!isAnnotationWorthKeeping(mark(.text, from: .zero, to: CGPoint(x: 100, y: 40))))
+        #expect(isAnnotationWorthKeeping(mark(.text, from: .zero, to: .zero, text: "look here")))
+    }
+
+    @Test func redactionBlocksAreCoarseEnoughToDestroyTheContent() {
+        #expect(redactionBlockSize(for: CGRect(x: 0, y: 0, width: 800, height: 80)) == 10)
+        #expect(redactionBlockSize(for: CGRect(x: 0, y: 0, width: 20, height: 20)) == 6,
+                "never finer than six pixels, however small the area")
+        #expect(redactionBlockSize(for: .zero) == 1)
+    }
+
+    @Test func aBackgroundDecidesWhetherThereIsAMargin() {
+        #expect(ExportBackground.none.margin(48) == 0, "a plain export is pixel for pixel the shot")
+        #expect(ExportBackground.white.margin(48) == 48)
+        let size = exportSize(image: CGSize(width: 800, height: 600), margin: 48)
+        #expect(size == CGSize(width: 896, height: 696))
+        #expect(exportImageOrigin(margin: 48) == CGPoint(x: 48, y: 48))
+    }
+
+    @Test func undoingTakesTheLastOneAndCopesWithNone() {
+        let marks = [mark(.arrow, from: .zero, to: CGPoint(x: 20, y: 20)),
+                     mark(.rectangle, from: .zero, to: CGPoint(x: 30, y: 30))]
+        #expect(undoing(marks).count == 1)
+        #expect(undoing(marks).first?.kind == .arrow)
+        #expect(undoing([]).isEmpty)
+    }
+
+    @Test func whatIsFilledAndWhatIsOutlined() {
+        #expect(AnnotationKind.redact.isFilled)
+        #expect(AnnotationKind.highlight.isFilled)
+        #expect(!AnnotationKind.rectangle.isFilled)
+    }
+}
+
+@Suite struct ScrollingCaptureTests {
+    @Test func findsWhereTheNextShotCarriesOn() {
+        // The last four rows of the first shot are the first four of the second.
+        let previous: [UInt64] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        let next: [UInt64] = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        #expect(overlapRows(previous: previous, next: next, minimumOverlap: 4) == 4)
+    }
+
+    @Test func twoShotsThatShareNothingAreJustJoined() {
+        let previous: [UInt64] = [1, 2, 3, 4, 5, 6, 7, 8]
+        let next: [UInt64] = [20, 21, 22, 23, 24, 25, 26, 27]
+        #expect(overlapRows(previous: previous, next: next, minimumOverlap: 4) == nil)
+    }
+
+    @Test func tooFewRowsToJudge() {
+        #expect(overlapRows(previous: [1, 2], next: [1, 2], minimumOverlap: 8) == nil)
+        #expect(overlapRows(previous: [], next: [], minimumOverlap: 8) == nil)
+    }
+
+    @Test func theLargestOverlapWinsOnARepeatingPage() {
+        // Every row looks the same, as on a page of identical list items.
+        let rows = [UInt64](repeating: 7, count: 10)
+        #expect(overlapRows(previous: rows, next: rows, minimumOverlap: 4) == 10,
+                "the whole shot is the same, so nothing new was captured")
+    }
+
+    @Test func aShotThatAddsNothingMeansThePageStopped() {
+        let rows: [UInt64] = [1, 2, 3]
+        #expect(hasStoppedScrolling(previous: rows, next: rows))
+        #expect(!hasStoppedScrolling(previous: rows, next: [1, 2, 4]))
+        #expect(!hasStoppedScrolling(previous: [], next: []), "nothing captured yet is not a stop")
+    }
+
+    @Test func theFinishedHeightCountsEachShotOnce() {
+        #expect(stitchedHeight(shots: [100, 100, 100], overlaps: [20, 20]) == 260)
+        #expect(stitchedHeight(shots: [100], overlaps: []) == 100)
+        #expect(stitchedHeight(shots: [], overlaps: []) == 0)
+        #expect(stitchedHeight(shots: [100, 100], overlaps: [nil]) == 200, "no overlap means both in full")
+        #expect(stitchedHeight(shots: [100, 100], overlaps: [100]) == 100, "a shot that adds nothing adds nothing")
+    }
+}

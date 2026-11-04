@@ -56,6 +56,7 @@ struct NotchView: View {
                     case .downloads: DownloadsWidget(watcher: model.downloads)
                     case .batteries: BatteriesWidget(batteries: model.batteries)
                     case .shelf: ShelfWidget(shelf: model.shelf)
+                    case .camera: NotchCameraView(camera: model.camera)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -72,10 +73,11 @@ func widgetTitle(_ widget: NotchWidget) -> LocalizedStringKey {
     case .downloads: "Downloads"
     case .batteries: "Batteries"
     case .shelf: "Shelf"
+    case .camera: "Camera"
     }
 }
 
-private struct EmptyWidget: View {
+struct EmptyWidget: View {
     let symbol: String
     let text: LocalizedStringKey
 

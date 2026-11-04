@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "A click on a running app's icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Klick auf das Symbol einer laufenden App"
+          }
+        }
+      }
+    },
     "A window comes forward when the pointer rests on it.": {
       "localizations": {
         "de": {
@@ -17,6 +28,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "App hinzufügen …"
+          }
+        }
+      }
+    },
+    "All apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Apps"
           }
         }
       }
@@ -91,6 +113,39 @@
         }
       }
     },
+    "Confirm by": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestätigen durch"
+          }
+        }
+      }
+    },
+    "Cycle through its windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durch ihre Fenster blättern"
+          }
+        }
+      }
+    },
+    "Dock": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock"
+          }
+        }
+      }
+    },
     "Drag a window against an edge or a corner and let go.": {
       "localizations": {
         "de": {
@@ -152,12 +207,78 @@
         }
       }
     },
+    "Hold ⌃⌘ and drag": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃⌘ halten und ziehen"
+          }
+        }
+      }
+    },
+    "Hold ⌘Q to quit %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘Q halten, um %@ zu beenden"
+          }
+        }
+      }
+    },
+    "Hold ⌘W to close this window": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘W halten, um dieses Fenster zu schließen"
+          }
+        }
+      }
+    },
+    "Holding the keys": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasten halten"
+          }
+        }
+      }
+    },
+    "Keep the Spaces in the order I put them": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaces in meiner Reihenfolge behalten"
+          }
+        }
+      }
+    },
     "Keyboard shortcuts for window layouts": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Tastenkürzel für die Fensteranordnung"
+          }
+        }
+      }
+    },
+    "Leave it to macOS": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS überlassen"
           }
         }
       }
@@ -202,6 +323,39 @@
         }
       }
     },
+    "Minimize all its windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle ihre Fenster minimieren"
+          }
+        }
+      }
+    },
+    "Move": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewegen"
+          }
+        }
+      }
+    },
+    "Move and resize": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewegen und Größe ändern"
+          }
+        }
+      }
+    },
     "Move to the next display": {
       "localizations": {
         "de": {
@@ -212,12 +366,45 @@
         }
       }
     },
+    "Move with the keyboard held": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit gehaltener Tastatur bewegen"
+          }
+        }
+      }
+    },
     "Moves and resizes the front window.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Verschiebt das vorderste Fenster und ändert seine Größe."
+          }
+        }
+      }
+    },
+    "Moves the window under the pointer from anywhere in it, instead of hunting for the title bar. Dragging with the right button resizes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewegt das Fenster unter dem Zeiger von jeder Stelle aus, statt die Titelleiste zu suchen. Ziehen mit der rechten Taste ändert die Größe."
+          }
+        }
+      }
+    },
+    "Off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
           }
         }
       }
@@ -268,6 +455,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "⌘W zweimal drücken zum Schließen"
+          }
+        }
+      }
+    },
+    "Pressing twice": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zweimal drücken"
           }
         }
       }
@@ -323,6 +521,17 @@
         }
       }
     },
+    "Resize": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Größe ändern"
+          }
+        }
+      }
+    },
     "Right half": {
       "localizations": {
         "de": {
@@ -363,6 +572,17 @@
         }
       }
     },
+    "Show all its windows": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle ihre Fenster zeigen"
+          }
+        }
+      }
+    },
     "Show it now": {
       "localizations": {
         "de": {
@@ -373,12 +593,45 @@
         }
       }
     },
+    "Shows that app's windows from every Space, which the Dock itself will not.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigt die Fenster der App aus allen Spaces – das Dock selbst tut das nicht."
+          }
+        }
+      }
+    },
     "Snap windows at the screen edges": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Fenster an den Bildschirmrändern einrasten"
+          }
+        }
+      }
+    },
+    "Sonary adds this after the Dock has had the click, so the Dock keeps working.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary ergänzt das, nachdem das Dock den Klick hatte – das Dock funktioniert also weiter."
+          }
+        }
+      }
+    },
+    "Spaces": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaces"
           }
         }
       }
@@ -433,6 +686,17 @@
         }
       }
     },
+    "Window previews when the pointer rests on an icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenstervorschauen, wenn der Zeiger auf einem Symbol ruht"
+          }
+        }
+      }
+    },
     "Window switcher": {
       "localizations": {
         "de": {
@@ -459,6 +723,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenster"
+          }
+        }
+      }
+    },
+    "macOS otherwise rearranges them by most recent use. Changing this restarts the Dock, which blinks once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS sortiert sie sonst nach letzter Nutzung. Die Änderung startet das Dock neu, es blinkt einmal."
           }
         }
       }

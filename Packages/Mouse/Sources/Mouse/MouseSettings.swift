@@ -25,6 +25,13 @@ public struct MouseSettings: Codable, Equatable, Sendable {
     public var clickFilterMilliseconds = 0
     /// While this key is held, the wheel scrolls sideways.
     public var horizontalScrollModifier: ScrollModifier = .none
+    /// A three-finger press on the trackpad posts a middle click instead.
+    public var threeFingerMiddleClick = false
+    /// Holding an extra button and pushing the mouse runs an action.
+    public var gestureMappings: [GestureMapping] = []
+    /// What a sideways wheel does, if the mouse has one.
+    public var sideWheelLeft: ButtonAction = .none
+    public var sideWheelRight: ButtonAction = .none
     public var appOverrides: [String: AppOverride] = [:]
 
     public init() {}

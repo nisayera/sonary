@@ -8,8 +8,9 @@ final class RadialMenuController {
     private var panel: NSPanel?
     private let size = 320.0
 
-    func show(actions: [QuickAction], run: @escaping (QuickAction) -> Void) {
-        guard !actions.isEmpty else { return }
+    func show(items: [RadialItem], run: @escaping (QuickAction) -> Void,
+              open: @escaping (RadialProfile) -> Void, back: @escaping () -> Void) {
+        guard !items.isEmpty else { return }
         close()
         let panel = NSPanel(contentRect: CGRect(x: 0, y: 0, width: size, height: size),
                             styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
@@ -21,10 +22,19 @@ final class RadialMenuController {
         let point = NSEvent.mouseLocation
         panel.setFrameOrigin(CGPoint(x: point.x - size / 2, y: point.y - size / 2))
         panel.contentView = NSHostingView(rootView: RadialMenuView(
-            actions: actions,
-            pick: { [weak self] action in
-                self?.close()
-                if let action { run(action) }
+            items: items,
+            pick: { [weak self] item in
+                switch item {
+                case .action(let action):
+                    self?.close()
+                    run(action)
+                case .profile(let profile):
+                    open(profile)
+                case .back:
+                    back()
+                case nil:
+                    self?.close()
+                }
             }
         ))
         self.panel = panel
@@ -38,8 +48,8 @@ final class RadialMenuController {
 }
 
 struct RadialMenuView: View {
-    let actions: [QuickAction]
-    let pick: (QuickAction?) -> Void
+    let items: [RadialItem]
+    let pick: (RadialItem?) -> Void
     @State private var hovered: Int?
     private let size = 320.0
 
@@ -52,17 +62,17 @@ struct RadialMenuView: View {
                 .frame(width: size, height: size)
             Circle().fill(.black.opacity(0.35)).frame(width: 52, height: 52)
             Image(systemName: "xmark").font(.system(size: 15, weight: .semibold)).foregroundStyle(.white.opacity(0.7))
-            ForEach(Array(actions.enumerated()), id: \.element.id) { index, action in
-                let offset = radialItemOffset(index: index, count: actions.count, radius: 108)
+            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                let offset = radialItemOffset(index: index, count: items.count, radius: 108)
                 let isHovered = hovered == index
-                Image(systemName: action.symbol)
+                Image(systemName: item.symbol)
                     .font(.system(size: 19, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 52, height: 52)
                     .background(isHovered ? Color.sonaryAccent : Color.black.opacity(0.45), in: Circle())
                     .scaleEffect(isHovered ? 1.12 : 1)
                     .offset(x: offset.x, y: -offset.y)
-                    .accessibilityLabel(Text(quickActionTitle(action), bundle: .module))
+                    .accessibilityLabel(radialLabel(item))
             }
         }
         .frame(width: size, height: size)
@@ -70,16 +80,24 @@ struct RadialMenuView: View {
         .onContinuousHover { phase in
             switch phase {
             case let .active(point):
-                hovered = radialSelection(center: center, point: point, count: actions.count)
+                hovered = radialSelection(center: center, point: point, count: items.count)
             case .ended:
                 hovered = nil
             }
         }
         .onTapGesture {
-            if let hovered, actions.indices.contains(hovered) { pick(actions[hovered]) } else { pick(nil) }
+            if let hovered, items.indices.contains(hovered) { pick(items[hovered]) } else { pick(nil) }
         }
         .onExitCommand { pick(nil) }
         .animation(.easeOut(duration: 0.12), value: hovered)
+    }
+}
+
+func radialLabel(_ item: RadialItem) -> Text {
+    switch item {
+    case .action(let action): Text(quickActionTitle(action), bundle: .module)
+    case .profile(let profile): Text(verbatim: profile.name)
+    case .back: Text("Back", bundle: .module)
     }
 }
 
@@ -98,5 +116,6 @@ func quickActionTitle(_ action: QuickAction) -> LocalizedStringKey {
     case .pinScreenshot: "Pin a screenshot"
     case .cameraPreview: "Camera mirror"
     case .screenRecording: "Record the screen"
+    case .scrollingShot: "Scrolling screenshot"
     }
 }

@@ -31,6 +31,17 @@
         }
       }
     },
+    "Appears in the top right corner when something is picked up.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erscheint oben rechts, wenn etwas aufgenommen wird."
+          }
+        }
+      }
+    },
     "Awake until %@": {
       "localizations": {
         "de": {
@@ -143,6 +154,17 @@
         }
       }
     },
+    "Microphone level": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofonpegel"
+          }
+        }
+      }
+    },
     "Moves to the next speaker or headphones.": {
       "localizations": {
         "de": {
@@ -184,6 +206,17 @@
         }
       }
     },
+    "Nothing is playing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es spielt nichts."
+          }
+        }
+      }
+    },
     "Output": {
       "localizations": {
         "de": {
@@ -194,12 +227,56 @@
         }
       }
     },
+    "Playing now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielt gerade"
+          }
+        }
+      }
+    },
     "Shortcuts": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Show": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigen"
+          }
+        }
+      }
+    },
+    "Show a dot while the microphone is live": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Punkt anzeigen, während das Mikrofon aktiv ist"
+          }
+        }
+      }
+    },
+    "Sonary can see which apps are playing. Setting each one's volume needs to take over the audio path, which Sonary does not do.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary sieht, welche Apps spielen. Die Lautstärke einzeln zu setzen würde den Audio-Pfad übernehmen – das tut Sonary nicht."
           }
         }
       }
@@ -303,6 +380,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Solange %@ läuft"
+          }
+        }
+      }
+    },
+    "While a display is attached": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solange ein Bildschirm angeschlossen ist"
           }
         }
       }

@@ -114,3 +114,78 @@ struct MediaKeyTests {
         #expect(!keepAwakeShouldContinue(condition: .whilePowered, runningBundleIDs: [], onPower: false))
     }
 }
+
+@Suite struct InputLevelTests {
+    @Test func silenceSitsAtTheBottom() {
+        #expect(inputBar(rms: 0) == 0)
+        #expect(inputBar(rms: -1) == 0, "a nonsense reading is not a loud one")
+    }
+
+    @Test func fullScaleIsTheTop() {
+        #expect(inputBar(rms: 1) == 1)
+        #expect(inputBar(rms: 4) == 1, "anything above the scale is clamped")
+    }
+
+    @Test func halfwayDownTheScaleIsHalfTheBar() {
+        // -30 dB on a 60 dB scale is the middle.
+        let half = inputBar(rms: Float(pow(10.0, -30.0 / 20.0)))
+        #expect(abs(half - 0.5) < 0.01)
+    }
+
+    @Test func rootMeanSquareOfKnownSamples() {
+        #expect(rootMeanSquare([]) == 0)
+        #expect(rootMeanSquare([0, 0, 0]) == 0)
+        #expect(abs(rootMeanSquare([1, -1, 1, -1]) - 1) < 0.0001)
+        #expect(abs(rootMeanSquare([0.5, -0.5]) - 0.5) < 0.0001)
+    }
+
+    @Test func theDisplayConditionFollowsTheDisplays() {
+        #expect(keepAwakeShouldContinue(condition: .whileDisplayConnected, runningBundleIDs: [],
+                                        onPower: false, externalDisplays: 1))
+        #expect(!keepAwakeShouldContinue(condition: .whileDisplayConnected, runningBundleIDs: [],
+                                         onPower: true, externalDisplays: 0))
+    }
+}
+
+@Suite struct MixerEntryTests {
+    private func process(_ bundleID: String, pid: pid_t = 1, playing: Bool = true, object: UInt32 = 0)
+    -> AudioProcess {
+        AudioProcess(objectID: object == 0 ? UInt32(abs(bundleID.hashValue % 10_000)) : object,
+                     pid: pid, bundleID: bundleID, isPlaying: playing)
+    }
+
+    @Test func onlyWhatIsActuallyPlaying() {
+        let found = mixerEntries([
+            process("com.apple.Music"),
+            process("com.spotify.client", playing: false),
+        ], ownBundleID: nil)
+        #expect(found.map(\.bundleID) == ["com.apple.Music"])
+    }
+
+    @Test func sonaryLeavesItselfOut() {
+        let found = mixerEntries([
+            process("app.sonary.Sonary"),
+            process("com.apple.Music"),
+        ], ownBundleID: "app.sonary.Sonary")
+        #expect(found.map(\.bundleID) == ["com.apple.Music"])
+    }
+
+    @Test func anAppWithSeveralStreamsIsListedOnce() {
+        let found = mixerEntries([
+            process("com.apple.Safari", pid: 10, object: 1),
+            process("com.apple.Safari", pid: 11, object: 2),
+        ], ownBundleID: nil)
+        #expect(found.count == 1)
+    }
+
+    @Test func aProcessWithoutABundleIsNotWorthShowing() {
+        #expect(mixerEntries([process("")], ownBundleID: nil).isEmpty)
+    }
+
+    @Test func theOrderDoesNotJumpAbout() {
+        let found = mixerEntries([
+            process("com.zed.Zed"), process("com.apple.Music"), process("com.spotify.client"),
+        ], ownBundleID: nil)
+        #expect(found.map(\.bundleID) == ["com.apple.Music", "com.spotify.client", "com.zed.Zed"])
+    }
+}

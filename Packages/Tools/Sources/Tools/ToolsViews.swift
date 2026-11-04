@@ -52,6 +52,7 @@ struct ToolsPopoverView: View {
             tool("web.camera", "Camera mirror", "") { model.toggleCamera() }
             tool(model.isRecording ? "stop.circle" : "record.circle",
                  model.isRecording ? "Stop recording" : "Record the screen", "") { model.toggleRecording() }
+            tool("arrow.down.doc", "Scrolling screenshot", "") { model.scrollingScreenshot() }
             tool("photo.on.rectangle.angled", "Convert images…", "") { convertingImages = true }
             tool("film", "Make a video smaller…", "") { pickVideos(gif: false) }
             tool("photo.stack", "Turn a video into a GIF…", "") { pickVideos(gif: true) }
@@ -173,6 +174,12 @@ struct ToolsSettingsView: View {
                               isOn: Binding(get: { model.settings.shortcuts }, set: { value in model.update { $0.shortcuts = value } }))
         }
         SettingsCard(Text("Capture", bundle: .module)) {
+            SettingsToggleRow(symbol: "pencil.tip.crop.circle",
+                              title: Text("Open the editor after a screenshot", bundle: .module),
+                              caption: Text("Draw arrows and boxes, hide what should not be seen, put it on a background, then copy or save.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.annotateAfterCapture },
+                                            set: { value in model.update { $0.annotateAfterCapture = value } }))
             SettingsToggleRow(symbol: "viewfinder.rectangular",
                               title: Text("Pick regions with Sonary's own selector", bundle: .module),
                               caption: Text("Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.",
@@ -211,7 +218,66 @@ struct ToolsSettingsView: View {
                                       }))
             }
         }
+        SettingsCard(Text("Scripts", bundle: .module)) {
+            Text("Executable files in Sonary's scripts folder show up in the command bar. Only files you have marked executable are offered.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            Button { NSWorkspace.shared.open(scriptsFolder()) } label: {
+                Text("Open the scripts folder", bundle: .module)
+            }
+            .buttonStyle(.borderless)
+        }
+        SettingsCard(Text("Extra rings", bundle: .module)) {
+            Text("Each extra ring is a wedge in the first one that opens it, so the ring can hold more than eight actions without getting crowded.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            ForEach(model.settings.radialProfiles) { profile in
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        TextField(text: Binding(get: { profile.name },
+                                                set: { model.renameRadialProfile(profile.id, to: $0) })) {
+                            EmptyView()
+                        }
+                        .labelsHidden()
+                        Spacer()
+                        Button(role: .destructive) { model.removeRadialProfile(profile.id) } label: {
+                            Image(systemName: "trash")
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(QuickAction.allCases) { action in
+                                let isOn = profile.actions.contains(action)
+                                Button {
+                                    model.setRadialProfileAction(profile.id, action: action, on: !isOn)
+                                } label: {
+                                    Image(systemName: action.symbol)
+                                        .frame(width: 26, height: 22)
+                                        .background(isOn ? Color.sonaryAccent.opacity(0.3) : Color.secondary.opacity(0.12),
+                                                    in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel(Text(quickActionTitle(action), bundle: .module))
+                            }
+                        }
+                    }
+                }
+                .padding(8)
+                .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+            Button { model.addRadialProfile() } label: { Text("Add a ring", bundle: .module) }
+                .buttonStyle(.borderless)
+        }
         SettingsCard(Text("Snippets", bundle: .module)) {
+            SettingsRow(symbol: "text.cursor", title: Text("Insert a snippet by", bundle: .module)) {
+                Picker(selection: Binding(get: { model.settings.snippetDelivery },
+                                          set: { value in model.update { $0.snippetDelivery = value } })) {
+                    Text("Typing it", bundle: .module).tag(SnippetDelivery.type)
+                    Text("Putting it on the clipboard", bundle: .module).tag(SnippetDelivery.clipboard)
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 220)
+            }
             Text("Placeholders: {date}, {time} and {clipboard}.", bundle: .module).font(.caption).foregroundStyle(.secondary)
             ForEach(model.settings.snippets) { snippet in
                 HStack(alignment: .top) {

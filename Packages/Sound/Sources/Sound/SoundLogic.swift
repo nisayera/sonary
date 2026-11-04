@@ -80,6 +80,7 @@ public enum KeepAwakeCondition: Codable, Equatable, Sendable {
     case duration(KeepAwakeDuration)
     case whileAppRuns(String)
     case whilePowered
+    case whileDisplayConnected
 }
 
 /// The power assertion to take. Preventing *system* sleep is the only one that
@@ -91,12 +92,14 @@ public func keepAwakeAssertionType(closedLid: Bool) -> String {
 /// Whether a running keep-awake still has a reason to hold. A countdown is
 /// handled by its own timer, so it always says yes here.
 public func keepAwakeShouldContinue(
-    condition: KeepAwakeCondition, runningBundleIDs: [String], onPower: Bool
+    condition: KeepAwakeCondition, runningBundleIDs: [String], onPower: Bool,
+    externalDisplays: Int = 0
 ) -> Bool {
     switch condition {
     case .duration: true
     case .whileAppRuns(let bundleID):
         runningBundleIDs.contains { $0.caseInsensitiveCompare(bundleID) == .orderedSame }
     case .whilePowered: onPower
+    case .whileDisplayConnected: externalDisplays > 0
     }
 }

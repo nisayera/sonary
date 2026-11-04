@@ -43,6 +43,21 @@ struct DisplaySettingsView: View {
                               isOn: Binding(get: { model.settings.shortcuts },
                                             set: { value in model.update { $0.shortcuts = value } }))
         }
+        if !model.extraBrightnessCapable.isEmpty {
+            SettingsCard(Text("Extra brightness", bundle: .module)) {
+                Text("These displays can go brighter than ordinary white. Sonary asks them to open that headroom, which is how XDR panels reach their peak.",
+                     bundle: .module)
+                    .font(.caption).foregroundStyle(.secondary)
+                ForEach(model.displays.filter { model.extraBrightnessCapable.contains($0.id) }) { display in
+                    SettingsRow(symbol: "sun.max.trianglebadge.exclamationmark", title: Text(display.name),
+                                caption: Text("Brighter than white, which uses more power.", bundle: .module)) {
+                        Slider(value: Binding(get: { model.extraBrightness(for: display.id) },
+                                              set: { model.setExtraBrightness($0, for: display.id) }), in: 0...1)
+                            .frame(width: 160)
+                    }
+                }
+            }
+        }
         if model.canSwitchBluetooth {
             SettingsCard(Text("Energy", bundle: .module)) {
                 SettingsToggleRow(symbol: "bolt.horizontal",

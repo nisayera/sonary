@@ -148,6 +148,16 @@ struct ClipboardPopoverView: View {
             Button { model.newTextFileInFinderFolder() } label: {
                 Label { Text("New text file in current folder", bundle: .module) } icon: { Image(systemName: "doc.badge.plus") }
             }
+            Button { model.cutFinderSelection() } label: {
+                Label { Text("Cut the selected files", bundle: .module) } icon: { Image(systemName: "scissors") }
+            }
+            Button { model.pasteCutFiles() } label: {
+                Label { Text("Move them into this folder", bundle: .module) } icon: { Image(systemName: "arrow.right.doc.on.clipboard") }
+            }
+            .disabled(model.cutFiles.isEmpty)
+            Button { model.renameFinderSelection() } label: {
+                Label { Text("Rename the selected file", bundle: .module) } icon: { Image(systemName: "pencil") }
+            }
             Button { model.saveClipboardImageToFinderFolder() } label: {
                 Label { Text("Save clipboard image here as PNG", bundle: .module) } icon: { Image(systemName: "photo.badge.arrow.down") }
             }

@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import SonaryCore
 import Testing
 @testable import Windows
 
@@ -295,5 +296,145 @@ struct FocusFollowsMouseTests {
         let codes = LayoutAction.allCases.map(\.keyCode)
         #expect(Set(codes).count == codes.count, "two layouts would fight over one shortcut")
         #expect(LayoutAction.fillScreen.shortcutLabel == "⌃⌥B")
+    }
+}
+
+@Suite struct SpaceOrderTests {
+    @Test func fixedIsTheOppositeOfRearranging() {
+        #expect(spaceOrderIsFixed(rearrangesAutomatically: false))
+        #expect(!spaceOrderIsFixed(rearrangesAutomatically: true))
+    }
+}
+
+@Suite struct DockActionTests {
+    private func entry(pid: Int32, number: UInt32, layer: Int = 0,
+                       width: Double = 800, height: Double = 600, title: String = "Doc") -> [String: Any] {
+        [
+            kCGWindowOwnerPID as String: pid,
+            kCGWindowNumber as String: number,
+            kCGWindowLayer as String: layer,
+            kCGWindowName as String: title,
+            kCGWindowBounds as String: ["X": 10.0, "Y": 20.0, "Width": width, "Height": height],
+        ]
+    }
+
+    @Test func keepsOnlyTheRealWindowsOfOneApp() {
+        let info = [
+            entry(pid: 1, number: 10),
+            entry(pid: 2, number: 11),
+            entry(pid: 1, number: 12, layer: 25),          // a panel or menu, not a window
+            entry(pid: 1, number: 13, width: 20, height: 8), // too small to be a window
+            entry(pid: 1, number: 14, title: ""),
+        ]
+        let windows = dockWindows(ofPID: 1, in: info)
+        #expect(windows.map(\.id) == [10, 14])
+        #expect(windows.first?.frame == CGRect(x: 10, y: 20, width: 800, height: 600))
+        #expect(windows.last?.title.isEmpty == true, "a window with no name still counts")
+    }
+
+    @Test func cyclingWrapsAroundAndCopesWithOne() {
+        let windows = [DockWindow(id: 1, title: "a", frame: .zero),
+                       DockWindow(id: 2, title: "b", frame: .zero),
+                       DockWindow(id: 3, title: "c", frame: .zero)]
+        #expect(nextWindowToRaise(after: 1, in: windows)?.id == 2)
+        #expect(nextWindowToRaise(after: 3, in: windows)?.id == 1)
+        #expect(nextWindowToRaise(after: nil, in: windows)?.id == 1)
+        #expect(nextWindowToRaise(after: 99, in: windows)?.id == 1, "a window that has gone starts over")
+        #expect(nextWindowToRaise(after: 1, in: [windows[0]])?.id == 1)
+        #expect(nextWindowToRaise(after: nil, in: []) == nil)
+    }
+
+    @Test func previewsWaitForThePointerToSettle() {
+        var state = DockHoverState(delay: 0.4)
+        #expect(state.pointer(over: 42, at: 0) == nil)
+        #expect(state.pointer(over: 42, at: 0.2) == nil, "still too soon")
+        #expect(state.pointer(over: 42, at: 0.45) == 42)
+        #expect(state.pointer(over: 42, at: 0.5) == nil, "it has already opened")
+    }
+
+    @Test func movingToAnotherIconStartsTheWaitAgain() {
+        var state = DockHoverState(delay: 0.4)
+        #expect(state.pointer(over: 42, at: 0) == nil)
+        #expect(state.pointer(over: 7, at: 0.39) == nil)
+        #expect(state.pointer(over: 7, at: 0.5) == nil, "the clock restarted on the new icon")
+        #expect(state.pointer(over: 7, at: 0.8) == 7)
+        #expect(state.pointer(over: nil, at: 0.9) == nil)
+    }
+}
+
+@Suite struct HoldGuardTests {
+    @Test func holdingLongEnoughLetsItThrough() {
+        var guardState = HoldGuard(duration: 0.6)
+        let first = guardState.down(app: "a", key: .quit, at: 0)
+        #expect(!first, "the first press only starts the clock")
+        let early = guardState.down(app: "a", key: .quit, at: 0.3)
+        #expect(!early)
+        let late = guardState.down(app: "a", key: .quit, at: 0.7)
+        #expect(late)
+    }
+
+    @Test func lettingGoCancels() {
+        var guardState = HoldGuard(duration: 0.6)
+        let first = guardState.down(app: "a", key: .quit, at: 0)
+        #expect(!first)
+        guardState.up()
+        let afterRelease = guardState.down(app: "a", key: .quit, at: 0.7)
+        #expect(!afterRelease, "the clock starts again after letting go")
+        let held = guardState.down(app: "a", key: .quit, at: 1.4)
+        #expect(held)
+    }
+
+    @Test func anotherAppOrKeyStartsOver() {
+        var guardState = HoldGuard(duration: 0.6)
+        let first = guardState.down(app: "a", key: .quit, at: 0)
+        #expect(!first)
+        let otherApp = guardState.down(app: "b", key: .quit, at: 0.7)
+        #expect(!otherApp, "a different app is a different hold")
+        let otherKey = guardState.down(app: "b", key: .close, at: 1.0)
+        #expect(!otherKey, "and so is a different key")
+    }
+
+    @Test func progressGrowsAndStopsAtOne() {
+        var guardState = HoldGuard(duration: 0.5)
+        _ = guardState.down(app: "a", key: .quit, at: 0)
+        #expect(guardState.progress(app: "a", key: .quit, at: 0) == 0)
+        #expect(abs(guardState.progress(app: "a", key: .quit, at: 0.25) - 0.5) < 0.0001)
+        #expect(guardState.progress(app: "a", key: .quit, at: 2) == 1)
+        #expect(guardState.progress(app: "other", key: .quit, at: 0.25) == 0)
+    }
+}
+
+@Suite struct ModifierDragTests {
+    private let start = CGRect(x: 100, y: 200, width: 600, height: 400)
+
+    @Test func movingFollowsThePointerAndKeepsTheSize() {
+        let moved = draggedFrame(start: start, from: CGPoint(x: 150, y: 250), to: CGPoint(x: 200, y: 230))
+        #expect(moved == CGRect(x: 150, y: 180, width: 600, height: 400))
+    }
+
+    @Test func resizingKeepsTheCornerAndNeverGetsTooSmall() {
+        let bigger = resizedFrame(start: start, from: CGPoint(x: 0, y: 0), to: CGPoint(x: 100, y: 50))
+        #expect(bigger == CGRect(x: 100, y: 200, width: 700, height: 450))
+        let tiny = resizedFrame(start: start, from: CGPoint(x: 0, y: 0), to: CGPoint(x: -5000, y: -5000))
+        #expect(tiny.width == 180)
+        #expect(tiny.height == 120)
+        #expect(tiny.origin == start.origin, "resizing never moves the window")
+    }
+
+    @Test func onlyTheExactCombinationCounts() {
+        let wanted = KeyModifier.control | KeyModifier.command
+        #expect(isModifierDrag(flags: wanted, wanted: wanted))
+        #expect(!isModifierDrag(flags: wanted | KeyModifier.shift, wanted: wanted), "an extra key is not it")
+        #expect(!isModifierDrag(flags: KeyModifier.control, wanted: wanted))
+        #expect(!isModifierDrag(flags: 0, wanted: 0), "nothing chosen means never")
+    }
+
+    @Test func whatEachModeReactsTo() {
+        #expect(ModifierDragMode.move.movesOnLeft)
+        #expect(!ModifierDragMode.move.resizesOnRight)
+        #expect(ModifierDragMode.resize.resizesOnRight)
+        #expect(!ModifierDragMode.resize.movesOnLeft)
+        #expect(ModifierDragMode.moveAndResize.movesOnLeft && ModifierDragMode.moveAndResize.resizesOnRight)
+        #expect(!ModifierDragMode.off.movesOnLeft && !ModifierDragMode.off.resizesOnRight)
     }
 }

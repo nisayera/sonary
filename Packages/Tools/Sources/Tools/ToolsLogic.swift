@@ -51,3 +51,11 @@ public func expandSnippet(_ text: String, now: Date, clipboard: String?, locale:
 public func joinRecognizedLines(_ lines: [String]) -> String {
     lines.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }.joined(separator: "\n")
 }
+
+/// How a snippet reaches the app: typed where the cursor is, or put on the clipboard
+/// for the user to paste.
+public enum SnippetDelivery: String, CaseIterable, Codable, Sendable, Identifiable {
+    case type, clipboard
+
+    public var id: String { rawValue }
+}

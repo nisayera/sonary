@@ -12,6 +12,17 @@
         }
       }
     },
+    "Brighter than white, which uses more power.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heller als Weiß, braucht mehr Strom."
+          }
+        }
+      }
+    },
     "Brightness": {
       "localizations": {
         "de": {
@@ -84,6 +95,17 @@
         }
       }
     },
+    "Extra brightness": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra Helligkeit"
+          }
+        }
+      }
+    },
     "Hardware brightness": {
       "localizations": {
         "de": {
@@ -131,6 +153,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wird beim Aufwachen wieder eingeschaltet, und nur wenn Sonary es ausgeschaltet hat."
+          }
+        }
+      }
+    },
+    "These displays can go brighter than ordinary white. Sonary asks them to open that headroom, which is how XDR panels reach their peak.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Bildschirme können heller als normales Weiß. Sonary fordert diesen Spielraum an – so erreichen XDR-Panels ihre Spitzenhelligkeit."
           }
         }
       }
