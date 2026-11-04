@@ -68,8 +68,8 @@ Status checked against the code at version 0.16.0.
 - [x] Cleaning mode: every screen goes black until Escape or a click
 
 ## Capture
-- [ ] Unified capture selector with magnifier
-- [~] Screenshots through the system tool, with pinning a shot on top of everything; no scrolling capture, annotation, redaction, backgrounds or sharing
+- [x] Sonary's own capture selector: dimmed screen, magnifier, live pixel size, feeding every capture tool
+- [~] Screenshots through the system tool or Sonary's selector, with pinning a shot on top of everything; no scrolling capture, annotation, redaction, backgrounds or sharing
 - [x] Screen recording to an MP4, through ScreenCaptureKit
 - [x] Camera preview mirror, a floating round window from the tools tab
 - [x] Offline text recognition, including QR codes and barcodes

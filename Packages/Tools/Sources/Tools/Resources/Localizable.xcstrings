@@ -43,6 +43,17 @@
         }
       }
     },
+    "Capture": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufnahme"
+          }
+        }
+      }
+    },
     "Choose images…": {
       "extractionState": "manual",
       "localizations": {
@@ -203,6 +214,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schreibtischsymbole"
+          }
+        }
+      }
+    },
+    "Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkelt den Bildschirm ab und zeigt beim Ziehen eine Lupe und die Pixelgröße. Aus benutzt die Systemauswahl."
           }
         }
       }
@@ -422,6 +444,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Farbe aufnehmen"
+          }
+        }
+      }
+    },
+    "Pick regions with Sonary's own selector": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereiche mit Sonarys eigener Auswahl wählen"
           }
         }
       }

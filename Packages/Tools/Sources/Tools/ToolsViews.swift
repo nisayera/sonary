@@ -172,6 +172,14 @@ struct ToolsSettingsView: View {
                               caption: Text("⌥Space command bar, ⌃⌥T text from screen, ⌃⌥P color picker, ⌃⌥S screenshot.", bundle: .module),
                               isOn: Binding(get: { model.settings.shortcuts }, set: { value in model.update { $0.shortcuts = value } }))
         }
+        SettingsCard(Text("Capture", bundle: .module)) {
+            SettingsToggleRow(symbol: "viewfinder.rectangular",
+                              title: Text("Pick regions with Sonary's own selector", bundle: .module),
+                              caption: Text("Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.ownCaptureSelector },
+                                            set: { value in model.update { $0.ownCaptureSelector = value } }))
+        }
         SettingsCard(Text("Colour picker", bundle: .module)) {
             SettingsRow(symbol: "eyedropper", title: Text("Copy colours as", bundle: .module)) {
                 Picker(selection: Binding(get: { model.settings.colorFormat },

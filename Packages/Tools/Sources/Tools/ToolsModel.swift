@@ -12,6 +12,8 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var radialActions: [QuickAction] = QuickAction.allCases
     public var colorFormat: ColorFormat = .hex
     public var scratchpadTabs: [ScratchpadTab] = []
+    /// Use Sonary's own region selector, with a magnifier, instead of the system one.
+    public var ownCaptureSelector = false
     public var activeTab: UUID?
     public init() {}
 }
@@ -49,6 +51,7 @@ public final class ToolsModel {
     @ObservationIgnored private let pinned = PinnedImageController()
     @ObservationIgnored private let camera = CameraPreviewController()
     @ObservationIgnored private let recorder = ScreenRecorder()
+    @ObservationIgnored private let selector = CaptureSelectorController()
     public private(set) var isRecording = false
     /// Commands other modules add to the command bar, for example the clipboard history.
     @ObservationIgnored public var externalCommands: @MainActor () -> [ExternalCommand] = { [] }
@@ -79,6 +82,7 @@ public final class ToolsModel {
         pinned.closeAll()
         camera.close()
         if isRecording { Task { await stopRecording() } }
+        selector.close()
     }
 
     /// The notes, with the old single scratchpad carried over the first time.
@@ -211,7 +215,8 @@ public final class ToolsModel {
     public func pinScreenshot() {
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("sonary-pin-\(UUID().uuidString).png")
         Task {
-            guard await capture(arguments: ["-i", "-x", file.path]), let image = NSImage(contentsOf: file) else { return }
+            guard let arguments = await captureArguments(["-x", file.path]),
+                  await capture(arguments: arguments), let image = NSImage(contentsOf: file) else { return }
             try? FileManager.default.removeItem(at: file)
             pinned.pin(image)
         }
@@ -306,7 +311,8 @@ public final class ToolsModel {
 
     public func screenshotToClipboard() {
         Task {
-            _ = await capture(arguments: ["-i", "-c"])
+            guard let arguments = await captureArguments(["-c"]) else { return }
+            _ = await capture(arguments: arguments)
             report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
         }
     }
@@ -315,7 +321,8 @@ public final class ToolsModel {
     public func recognizeText() {
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("sonary-ocr-\(UUID().uuidString).png")
         Task {
-            guard await capture(arguments: ["-i", "-x", file.path]) else { return }
+            guard let arguments = await captureArguments(["-x", file.path]),
+                  await capture(arguments: arguments) else { return }
             defer { try? FileManager.default.removeItem(at: file) }
             let text = await Task.detached { () -> String in
                 guard let image = NSImage(contentsOf: file)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return "" }
@@ -339,6 +346,24 @@ public final class ToolsModel {
                 report(String(localized: "Text copied to the clipboard.", bundle: .module))
             }
         }
+    }
+
+    /// Picks a region with whichever selector the user prefers, then runs the system
+    /// screenshot tool on it. Nil when nothing was picked.
+    private func region() async -> CGRect? {
+        guard settings.ownCaptureSelector else { return nil }
+        return await withCheckedContinuation { continuation in
+            selector.show { continuation.resume(returning: $0) }
+        }
+    }
+
+    /// The arguments that capture what the user picked: our own region, or the system
+    /// selector when that is what they want.
+    private func captureArguments(_ tail: [String]) async -> [String]? {
+        guard settings.ownCaptureSelector else { return ["-i"] + tail }
+        guard let rect = await region() else { return nil }
+        let value = "\(Int(rect.minX)),\(Int(rect.minY)),\(Int(rect.width)),\(Int(rect.height))"
+        return ["-R", value] + tail
     }
 
     /// Runs the system screenshot tool; false when it failed or was cancelled.

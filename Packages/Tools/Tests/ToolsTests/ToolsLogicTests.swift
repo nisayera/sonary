@@ -327,3 +327,48 @@ struct MenuCommandTests {
         #expect(times.allSatisfy { $0 < 4 })
     }
 }
+
+@Suite struct CaptureSelectionTests {
+    private let screen = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+
+    @Test func aDragInAnyDirectionGivesTheSameRectangle() {
+        let downRight = selectionRect(from: CGPoint(x: 100, y: 100), to: CGPoint(x: 300, y: 250))
+        let upLeft = selectionRect(from: CGPoint(x: 300, y: 250), to: CGPoint(x: 100, y: 100))
+        #expect(downRight == upLeft)
+        #expect(downRight == CGRect(x: 100, y: 100, width: 200, height: 150))
+    }
+
+    @Test func aSelectionStaysOnItsScreen() {
+        let over = CGRect(x: -50, y: -50, width: 200, height: 200)
+        #expect(clampSelection(over, to: screen) == CGRect(x: 0, y: 0, width: 150, height: 150))
+    }
+
+    @Test func aStraySmallDragCapturesNothing() {
+        #expect(!isSelectionUsable(CGRect(x: 0, y: 0, width: 2, height: 80)))
+        #expect(!isSelectionUsable(.zero))
+        #expect(isSelectionUsable(CGRect(x: 0, y: 0, width: 10, height: 10)))
+    }
+
+    @Test func showsThePixelSizeWhileDragging() {
+        #expect(selectionSizeLabel(CGRect(x: 0, y: 0, width: 200.4, height: 149.6)) == "200 × 150")
+    }
+
+    @Test func theMagnifierNeverLooksOffTheScreen() {
+        let corner = magnifierSource(at: CGPoint(x: 0, y: 0), in: screen, side: 24)
+        #expect(screen.contains(corner))
+        #expect(corner.width == 24 && corner.height == 24)
+        let farCorner = magnifierSource(at: CGPoint(x: 1600, y: 1000), in: screen, side: 24)
+        #expect(screen.contains(farCorner))
+        let middle = magnifierSource(at: CGPoint(x: 800, y: 500), in: screen, side: 24)
+        #expect(middle == CGRect(x: 788, y: 488, width: 24, height: 24))
+    }
+
+    @Test func theLoupeMovesOutOfItsOwnWay() {
+        let normal = magnifierPlacement(at: CGPoint(x: 100, y: 100), in: screen, size: 120, gap: 16)
+        #expect(normal == CGPoint(x: 116, y: 116))
+        let nearEdge = magnifierPlacement(at: CGPoint(x: 1590, y: 990), in: screen, size: 120, gap: 16)
+        #expect(nearEdge.x < 1590)
+        #expect(nearEdge.y < 990)
+        #expect(nearEdge.x >= 0 && nearEdge.y >= 0)
+    }
+}
