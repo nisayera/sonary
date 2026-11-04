@@ -56,8 +56,8 @@ struct ShortcutLogicTests {
         store.set(mine, for: "x")
         #expect(store.combo(for: "x") == mine)
         #expect(store.isCustom("x"))
-        #expect(ShortcutStore(defaults: defaults).combo(for: "x") == .none,
-                "an unknown id has no default to fall back to")
+        #expect(ShortcutStore(defaults: defaults).combo(for: "x") == mine,
+                "a changed shortcut survives a restart, before any module describes it again")
 
         store.set(nil, for: "x")
         #expect(store.combo(for: "x") == shipped)

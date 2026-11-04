@@ -153,14 +153,14 @@ public final class DisplayModel {
     // ⌃⌥⇧↑ and ⌃⌥⇧↓; the plain ⌃⌥ arrows already move windows.
     private static let brightnessModifiers = KeyModifier.control | KeyModifier.option | KeyModifier.shift
 
-    static let shortcutDefinitions: [ShortcutDefinition] = [
+    static var shortcutDefinitions: [ShortcutDefinition] { [
         ShortcutDefinition(id: "display.brighter", title: String(localized: "Brighter", bundle: .module),
-                           group: "Display",
-                           defaultCombo: KeyCombo(keyCode: 126, modifiers: Self.brightnessModifiers)),
+                           group: String(localized: "Display", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 126, modifiers: DisplayModel.brightnessModifiers)),
         ShortcutDefinition(id: "display.darker", title: String(localized: "Darker", bundle: .module),
-                           group: "Display",
-                           defaultCombo: KeyCombo(keyCode: 125, modifiers: Self.brightnessModifiers)),
-    ]
+                           group: String(localized: "Display", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 125, modifiers: DisplayModel.brightnessModifiers)),
+    ] }
 
     private func applyShortcuts() {
         let shortcuts = ShortcutStore.shared

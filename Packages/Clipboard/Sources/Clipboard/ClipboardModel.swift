@@ -213,16 +213,16 @@ public final class ClipboardModel {
         }
     }
 
-    static let shortcutDefinitions: [ShortcutDefinition] = [
+    static var shortcutDefinitions: [ShortcutDefinition] { [
         ShortcutDefinition(id: "clipboard.plainPaste",
                            title: String(localized: "Paste as plain text", bundle: .module),
-                           group: "Clipboard",
+                           group: String(localized: "Clipboard", bundle: .module),
                            defaultCombo: KeyCombo(keyCode: 9, modifiers: KeyModifier.command | KeyModifier.option
                                | KeyModifier.shift)),
         ShortcutDefinition(id: "clipboard.imageToFinder",
                            title: String(localized: "Save clipboard image here as PNG", bundle: .module),
-                           group: "Clipboard", defaultCombo: .none),
-    ]
+                           group: String(localized: "Clipboard", bundle: .module), defaultCombo: .none),
+    ] }
 
     private func applyShortcut() {
         let shortcuts = ShortcutStore.shared

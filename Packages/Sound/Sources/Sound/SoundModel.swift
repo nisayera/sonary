@@ -223,12 +223,14 @@ public final class SoundModel {
 
     private static let ctrlOpt = KeyModifier.control | KeyModifier.option
 
-    static let shortcutDefinitions: [ShortcutDefinition] = [
+    static var shortcutDefinitions: [ShortcutDefinition] { [
         ShortcutDefinition(id: "sound.micMute", title: String(localized: "Mute microphone", bundle: .module),
-                           group: "Sound", defaultCombo: KeyCombo(keyCode: 46, modifiers: Self.ctrlOpt)),
+                           group: String(localized: "Sound", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 46, modifiers: SoundModel.ctrlOpt)),
         ShortcutDefinition(id: "sound.cycleOutput", title: String(localized: "Switch output", bundle: .module),
-                           group: "Sound", defaultCombo: KeyCombo(keyCode: 31, modifiers: Self.ctrlOpt)),
-    ]
+                           group: String(localized: "Sound", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 31, modifiers: SoundModel.ctrlOpt)),
+    ] }
 
     private func applyShortcut(running: Bool) {
         let shortcuts = ShortcutStore.shared

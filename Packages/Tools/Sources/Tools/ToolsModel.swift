@@ -151,21 +151,27 @@ public final class ToolsModel {
     private static let ctrlOpt = KeyModifier.control | KeyModifier.option
 
     /// What the tools offer the central shortcut page, and what each one runs.
-    static let shortcutDefinitions: [ShortcutDefinition] = [
+    static var shortcutDefinitions: [ShortcutDefinition] { [
         ShortcutDefinition(id: "tools.commandBar", title: String(localized: "Command bar", bundle: .module),
-                           group: "Tools", defaultCombo: KeyCombo(keyCode: 49, modifiers: KeyModifier.option)),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 49, modifiers: KeyModifier.option)),
         ShortcutDefinition(id: "tools.textFromScreen",
                            title: String(localized: "Copy text from screen", bundle: .module),
-                           group: "Tools", defaultCombo: KeyCombo(keyCode: 17, modifiers: Self.ctrlOpt)),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 17, modifiers: ToolsModel.ctrlOpt)),
         ShortcutDefinition(id: "tools.colorPicker", title: String(localized: "Pick a color", bundle: .module),
-                           group: "Tools", defaultCombo: KeyCombo(keyCode: 35, modifiers: Self.ctrlOpt)),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 35, modifiers: ToolsModel.ctrlOpt)),
         ShortcutDefinition(id: "tools.screenshot", title: String(localized: "Screenshot to clipboard", bundle: .module),
-                           group: "Tools", defaultCombo: KeyCombo(keyCode: 1, modifiers: Self.ctrlOpt)),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 1, modifiers: ToolsModel.ctrlOpt)),
         ShortcutDefinition(id: "tools.radialMenu", title: String(localized: "Radial menu", bundle: .module),
-                           group: "Tools", defaultCombo: KeyCombo(keyCode: 15, modifiers: Self.ctrlOpt)),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 15, modifiers: ToolsModel.ctrlOpt)),
         ShortcutDefinition(id: "tools.screenRecording", title: String(localized: "Record the screen", bundle: .module),
-                           group: "Tools", defaultCombo: .none),
-    ]
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: .none),
+    ] }
 
     private func applyShortcuts() {
         let shortcuts = ShortcutStore.shared
