@@ -5,7 +5,7 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.16.0.
+Status checked against the code at version 0.17.0.
 
 ## Audio
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
@@ -27,7 +27,7 @@ Status checked against the code at version 0.16.0.
 - [ ] Dock window previews across Spaces
 - [ ] Dock icon click actions
 - [x] A layout that fills the screen, menu bar strip included, without a new Space (⌃⌥B)
-- [ ] Fixed Space order
+- [x] Fixed Space order — stops macOS rearranging Spaces by most recent use, through the Dock's own preference
 - [x] Quit apps when their last window closes
 - [~] ⌘Q and ⌘W protection — press twice, with per-app rules; no hold mode
 
@@ -41,7 +41,7 @@ Status checked against the code at version 0.16.0.
 - [x] Horizontal scrolling while holding a key you choose
 - [x] Back and forward on the side buttons
 - [~] Actions for extra buttons — a fixed list of actions and any keyboard shortcut; no side wheels, no button-drag gestures
-- [ ] Three-finger trackpad press as middle click
+- [x] Three-finger trackpad press as middle click, read from the touches the click itself carries
 - [x] Per-app exclusions for the mouse features
 - [x] Double-click filter for worn buttons
 - [x] Keyboard debounce
@@ -87,7 +87,7 @@ Status checked against the code at version 0.16.0.
 ## Energy and display
 - [~] Keep awake with a timer, until turned off, while an app runs, while plugged in and with the lid closed; no display condition
 - [~] Per-display brightness through the system's own control, with dimming where it offers none; no DDC for external monitors
-- [ ] XDR extra brightness
+- [~] XDR extra brightness — asks panels with headroom above white to open it; needs trying on a real XDR display
 - [x] Bluetooth off during sleep, switched back on at wake and only if Sonary switched it off
 
 ## The app itself

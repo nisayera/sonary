@@ -25,6 +25,14 @@ struct WindowsSettingsView: View {
     let model: WindowsModel
 
     var body: some View {
+        SettingsCard(Text("Spaces", bundle: .module)) {
+            SettingsToggleRow(symbol: "rectangle.3.group",
+                              title: Text("Keep the Spaces in the order I put them", bundle: .module),
+                              caption: Text("macOS otherwise rearranges them by most recent use. Changing this restarts the Dock, which blinks once.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.spacesKeepTheirOrder },
+                                            set: { model.setSpacesKeepTheirOrder($0) }))
+        }
         SettingsCard(Text("Window layouts", bundle: .module)) {
             SettingsToggleRow(symbol: "rectangle.split.2x1", title: Text("Keyboard shortcuts for window layouts", bundle: .module),
                               caption: Text("Moves and resizes the front window.", bundle: .module),

@@ -1,182 +1,12 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Mouse": {
+    "Add app…": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Maus"
-          }
-        }
-      }
-    },
-    "Scrolling": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scrollen"
-          }
-        }
-      }
-    },
-    "Linear scrolling": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lineares Scrollen"
-          }
-        }
-      }
-    },
-    "Lines per wheel step: %lld": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeilen pro Rasterschritt: %lld"
-          }
-        }
-      }
-    },
-    "Smooth scrolling": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weiches Scrollen"
-          }
-        }
-      }
-    },
-    "Smoothness": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Glättung"
-          }
-        }
-      }
-    },
-    "Reverse mouse wheel direction": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scrollrichtung des Mausrads umkehren"
-          }
-        }
-      }
-    },
-    "Trackpads and Magic Mouse are not changed.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trackpads und Magic Mouse bleiben unverändert."
-          }
-        }
-      }
-    },
-    "Pointer": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeiger"
-          }
-        }
-      }
-    },
-    "Turn off pointer acceleration": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeigerbeschleunigung ausschalten"
-          }
-        }
-      }
-    },
-    "The original setting is restored when the module is turned off or Sonary quits.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die ursprüngliche Einstellung wird wiederhergestellt, wenn das Modul ausgeschaltet oder Sonary beendet wird."
-          }
-        }
-      }
-    },
-    "Extra buttons": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zusatztasten"
-          }
-        }
-      }
-    },
-    "Button %lld": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Taste %lld"
-          }
-        }
-      }
-    },
-    "Default": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Standard"
-          }
-        }
-      }
-    },
-    "Do nothing": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nichts tun"
-          }
-        }
-      }
-    },
-    "Back": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zurück"
-          }
-        }
-      }
-    },
-    "Forward": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vor"
-          }
-        }
-      }
-    },
-    "Mission Control": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mission Control"
+            "value": "App hinzufügen …"
           }
         }
       }
@@ -191,22 +21,22 @@
         }
       }
     },
-    "Show Desktop": {
+    "Back": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Schreibtisch zeigen"
+            "value": "Zurück"
           }
         }
       }
     },
-    "Launchpad": {
+    "Button %lld": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Launchpad"
+            "value": "Taste %lld"
           }
         }
       }
@@ -231,112 +61,12 @@
         }
       }
     },
-    "Ignore repeat clicks within %lld ms": {
+    "Command": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wiederholte Klicks innerhalb von %lld ms ignorieren"
-          }
-        }
-      }
-    },
-    "Exceptions": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ausnahmen"
-          }
-        }
-      }
-    },
-    "Remove exception": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ausnahme entfernen"
-          }
-        }
-      }
-    },
-    "Add app…": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App hinzufügen …"
-          }
-        }
-      }
-    },
-    "Turn Sonary's mouse changes off while one of these apps is in front.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mausänderungen von Sonary ausschalten, solange eine dieser Apps vorne ist."
-          }
-        }
-      }
-    },
-    "Sonary could not watch mouse events. Allow Sonary under Privacy & Security > Accessibility.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonary kann Mausereignisse nicht überwachen. Erlaube Sonary unter Datenschutz & Sicherheit > Bedienungshilfen."
-          }
-        }
-      }
-    },
-    "Every wheel step scrolls the same distance.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jeder Rasterschritt scrollt gleich weit."
-          }
-        }
-      }
-    },
-    "Helps with worn mouse buttons that double-click by themselves.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hilft bei abgenutzten Maustasten, die von selbst doppelt klicken."
-          }
-        }
-      }
-    },
-    "Scroll sideways while holding": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seitwärts scrollen beim Halten von"
-          }
-        }
-      }
-    },
-    "Off": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aus"
-          }
-        }
-      }
-    },
-    "Shift": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Umschalt"
+            "value": "Befehl"
           }
         }
       }
@@ -351,6 +81,146 @@
         }
       }
     },
+    "Default": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standard"
+          }
+        }
+      }
+    },
+    "Do nothing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts tun"
+          }
+        }
+      }
+    },
+    "Every wheel step scrolls the same distance.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeder Rasterschritt scrollt gleich weit."
+          }
+        }
+      }
+    },
+    "Exceptions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausnahmen"
+          }
+        }
+      }
+    },
+    "Extra buttons": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zusatztasten"
+          }
+        }
+      }
+    },
+    "Forward": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vor"
+          }
+        }
+      }
+    },
+    "Helps with worn mouse buttons that double-click by themselves.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hilft bei abgenutzten Maustasten, die von selbst doppelt klicken."
+          }
+        }
+      }
+    },
+    "Ignore repeat clicks within %lld ms": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederholte Klicks innerhalb von %lld ms ignorieren"
+          }
+        }
+      }
+    },
+    "Launchpad": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launchpad"
+          }
+        }
+      }
+    },
+    "Linear scrolling": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lineares Scrollen"
+          }
+        }
+      }
+    },
+    "Lines per wheel step: %lld": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeilen pro Rasterschritt: %lld"
+          }
+        }
+      }
+    },
+    "Mission Control": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mission Control"
+          }
+        }
+      }
+    },
+    "Mouse": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maus"
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
+          }
+        }
+      }
+    },
     "Option": {
       "localizations": {
         "de": {
@@ -361,12 +231,175 @@
         }
       }
     },
-    "Command": {
+    "Pointer": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Befehl"
+            "value": "Zeiger"
+          }
+        }
+      }
+    },
+    "Press the trackpad with three fingers down to middle-click, for opening links in a new tab.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drücke das Trackpad mit drei Fingern, um mittlere Maustaste auszulösen – etwa um Links in einem neuen Tab zu öffnen."
+          }
+        }
+      }
+    },
+    "Remove exception": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausnahme entfernen"
+          }
+        }
+      }
+    },
+    "Reverse mouse wheel direction": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scrollrichtung des Mausrads umkehren"
+          }
+        }
+      }
+    },
+    "Scroll sideways while holding": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seitwärts scrollen beim Halten von"
+          }
+        }
+      }
+    },
+    "Scrolling": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scrollen"
+          }
+        }
+      }
+    },
+    "Shift": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umschalt"
+          }
+        }
+      }
+    },
+    "Show Desktop": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schreibtisch zeigen"
+          }
+        }
+      }
+    },
+    "Smooth scrolling": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiches Scrollen"
+          }
+        }
+      }
+    },
+    "Smoothness": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glättung"
+          }
+        }
+      }
+    },
+    "Sonary could not watch mouse events. Allow Sonary under Privacy & Security > Accessibility.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary kann Mausereignisse nicht überwachen. Erlaube Sonary unter Datenschutz & Sicherheit > Bedienungshilfen."
+          }
+        }
+      }
+    },
+    "The original setting is restored when the module is turned off or Sonary quits.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die ursprüngliche Einstellung wird wiederhergestellt, wenn das Modul ausgeschaltet oder Sonary beendet wird."
+          }
+        }
+      }
+    },
+    "Three-finger press is a middle click": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dreifinger-Druck ist ein Mittelklick"
+          }
+        }
+      }
+    },
+    "Trackpad": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trackpad"
+          }
+        }
+      }
+    },
+    "Trackpads and Magic Mouse are not changed.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trackpads und Magic Mouse bleiben unverändert."
+          }
+        }
+      }
+    },
+    "Turn Sonary's mouse changes off while one of these apps is in front.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mausänderungen von Sonary ausschalten, solange eine dieser Apps vorne ist."
+          }
+        }
+      }
+    },
+    "Turn off pointer acceleration": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeigerbeschleunigung ausschalten"
           }
         }
       }

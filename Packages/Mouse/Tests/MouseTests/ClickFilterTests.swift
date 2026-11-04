@@ -44,3 +44,16 @@ struct ClickFilterTests {
         #expect(!backwards)
     }
 }
+
+@Suite struct ThreeFingerMiddleClickTests {
+    @Test func onlyThreeFingersCount() {
+        #expect(shouldBecomeMiddleClick(touchCount: 3, enabled: true))
+        #expect(!shouldBecomeMiddleClick(touchCount: 2, enabled: true))
+        #expect(!shouldBecomeMiddleClick(touchCount: 4, enabled: true))
+        #expect(!shouldBecomeMiddleClick(touchCount: 0, enabled: true), "a mouse carries no touches")
+    }
+
+    @Test func offMeansOff() {
+        #expect(!shouldBecomeMiddleClick(touchCount: 3, enabled: false))
+    }
+}

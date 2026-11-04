@@ -297,3 +297,10 @@ struct FocusFollowsMouseTests {
         #expect(LayoutAction.fillScreen.shortcutLabel == "⌃⌥B")
     }
 }
+
+@Suite struct SpaceOrderTests {
+    @Test func fixedIsTheOppositeOfRearranging() {
+        #expect(spaceOrderIsFixed(rearrangesAutomatically: false))
+        #expect(!spaceOrderIsFixed(rearrangesAutomatically: true))
+    }
+}

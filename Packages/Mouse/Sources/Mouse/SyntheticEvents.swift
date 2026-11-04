@@ -25,6 +25,17 @@ enum SyntheticEvents {
         }
     }
 
+    /// Posts a middle click where the pointer is, for the three-finger press.
+    static func middleClick(at point: CGPoint) {
+        for down in [true, false] {
+            guard let event = CGEvent(mouseEventSource: nil,
+                                      mouseType: down ? .otherMouseDown : .otherMouseUp,
+                                      mouseCursorPosition: point, mouseButton: .center) else { continue }
+            event.setIntegerValueField(.mouseEventButtonNumber, value: 2)
+            event.post(tap: .cghidEventTap)
+        }
+    }
+
     /// Posts a pixel-based scroll event. Such events are "continuous", so our own tap lets them pass.
     static func scroll(pixelsY: Int32, pixelsX: Int32) {
         guard let event = CGEvent(

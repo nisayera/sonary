@@ -110,6 +110,14 @@ struct MouseSettingsView: View {
             }
         }
 
+        SettingsCard(Text("Trackpad", bundle: .module)) {
+            SettingsToggleRow(symbol: "hand.point.up.left",
+                              title: Text("Three-finger press is a middle click", bundle: .module),
+                              caption: Text("Press the trackpad with three fingers down to middle-click, for opening links in a new tab.",
+                                            bundle: .module),
+                              isOn: binding(\.threeFingerMiddleClick))
+        }
+
         SettingsCard(Text("Click filter", bundle: .module)) {
             SettingsRow(symbol: "hand.tap",
                         title: module.settings.clickFilterMilliseconds == 0

@@ -152,6 +152,17 @@
         }
       }
     },
+    "Keep the Spaces in the order I put them": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaces in meiner Reihenfolge behalten"
+          }
+        }
+      }
+    },
     "Keyboard shortcuts for window layouts": {
       "localizations": {
         "de": {
@@ -383,6 +394,17 @@
         }
       }
     },
+    "Spaces": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spaces"
+          }
+        }
+      }
+    },
     "Stops apps from closing by accident. Finder is never affected.": {
       "localizations": {
         "de": {
@@ -459,6 +481,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenster"
+          }
+        }
+      }
+    },
+    "macOS otherwise rearranges them by most recent use. Changing this restarts the Dock, which blinks once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS sortiert sie sonst nach letzter Nutzung. Die Änderung startet das Dock neu, es blinkt einmal."
           }
         }
       }

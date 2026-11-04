@@ -9,6 +9,8 @@ public struct DisplaySettings: Codable, Equatable, Sendable {
     public var softwareBrightness: [String: Double] = [:]
     /// Switch Bluetooth off when the Mac sleeps and back on when it wakes.
     public var bluetoothOffDuringSleep = false
+    /// Extra brightness per display, 0…1, on panels that have headroom above white.
+    public var extraBrightness: [String: Double] = [:]
 
     public init() {}
 }
@@ -23,6 +25,7 @@ public final class DisplayModel {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var overlays: [CGDirectDisplayID: NSWindow] = [:]
+    @ObservationIgnored private let extraLight = ExtraBrightnessOverlay()
     @ObservationIgnored private var screenObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var sleepObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var wakeObserver: (any NSObjectProtocol)?
@@ -95,6 +98,7 @@ public final class DisplayModel {
         wakeObserver = nil
         for window in overlays.values { window.orderOut(nil) }
         overlays.removeAll()
+        extraLight.removeAll()
     }
 
     public func refresh() {
@@ -108,6 +112,42 @@ public final class DisplayModel {
         }
         for display in displays where !display.hasHardwareControl {
             applyOverlay(to: display.id, brightness: display.brightness)
+        }
+        applyExtraBrightness()
+    }
+
+    // MARK: Extra brightness
+
+    /// How much headroom above white each display has, by its identifier. Empty for
+    /// panels that have none, which is most of them.
+    public var extraBrightnessCapable: Set<CGDirectDisplayID> {
+        var result: Set<CGDirectDisplayID> = []
+        for screen in NSScreen.screens {
+            guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber,
+                  extraBrightnessHeadroom(
+                    maxPotentialEDR: screen.maximumPotentialExtendedDynamicRangeColorComponentValue) > 0
+            else { continue }
+            result.insert(CGDirectDisplayID(number.uint32Value))
+        }
+        return result
+    }
+
+    public func extraBrightness(for id: CGDirectDisplayID) -> Double {
+        settings.extraBrightness[String(id)] ?? 0
+    }
+
+    public func setExtraBrightness(_ amount: Double, for id: CGDirectDisplayID) {
+        update { $0.extraBrightness[String(id)] = min(max(amount, 0), 1) }
+        applyExtraBrightness()
+    }
+
+    private func applyExtraBrightness() {
+        guard running else { return extraLight.removeAll() }
+        for screen in NSScreen.screens {
+            guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+            else { continue }
+            let id = CGDirectDisplayID(number.uint32Value)
+            extraLight.apply(amount: extraBrightness(for: id), to: screen, id: id)
         }
     }
 

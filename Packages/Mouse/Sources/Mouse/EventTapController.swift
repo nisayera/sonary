@@ -29,8 +29,10 @@ final class EventTapController: @unchecked Sendable {
     private let tapBox = Locked<CFMachPort?>(nil)
     private let runLoopBox = Locked<CFRunLoop?>(nil)
     private let driver = Locked<SmoothScrollDriver?>(nil)
+    private let middleClickEnabled = Locked<Bool>(false)
 
     init(settings: MouseSettings) {
+        middleClickEnabled.withValue { $0 = settings.threeFingerMiddleClick }
         processor = Locked(EventProcessor(settings: settings))
         scroller = Locked(SmoothScroller(smoothness: settings.smoothness))
     }
@@ -80,6 +82,7 @@ final class EventTapController: @unchecked Sendable {
     }
 
     func update(settings: MouseSettings) {
+        middleClickEnabled.withValue { $0 = settings.threeFingerMiddleClick }
         processor.withValue { $0.update(settings: settings) }
         scroller.withValue { $0 = SmoothScroller(smoothness: settings.smoothness) }
     }
@@ -94,6 +97,12 @@ final class EventTapController: @unchecked Sendable {
         case .scrollWheel:
             return handleScroll(event)
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            if type == .leftMouseDown, isThreeFingerPress(event) {
+                let point = event.location
+                swallowedUps.withValue { _ = $0.insert(0) }
+                DispatchQueue.main.async { SyntheticEvents.middleClick(at: point) }
+                return nil
+            }
             return handleDown(event)
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
             let button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
@@ -143,6 +152,14 @@ final class EventTapController: @unchecked Sendable {
         if flags.contains(.maskAlternate) { set.insert(.option) }
         if flags.contains(.maskCommand) { set.insert(.command) }
         return set
+    }
+
+    /// A trackpad click carries its touches with it, so the fingers that were down
+    /// when it landed can be counted. A mouse carries none and is never converted.
+    private func isThreeFingerPress(_ event: CGEvent) -> Bool {
+        guard middleClickEnabled.withValue({ $0 }), let nsEvent = NSEvent(cgEvent: event) else { return false }
+        let touches = nsEvent.touches(matching: .touching, in: nil).count
+        return shouldBecomeMiddleClick(touchCount: touches, enabled: true)
     }
 
     private func handleDown(_ event: CGEvent) -> Unmanaged<CGEvent>? {

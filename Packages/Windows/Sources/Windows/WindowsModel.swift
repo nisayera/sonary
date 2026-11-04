@@ -136,6 +136,16 @@ public final class WindowsModel {
 
     public func showSwitcher() { switcher.show() }
 
+    // MARK: Spaces
+
+    /// Whether the Spaces keep the order you put them in.
+    public var spacesKeepTheirOrder: Bool { spaceOrderIsFixed(rearrangesAutomatically: SpaceOrder.rearrangesAutomatically) }
+
+    /// Fixes or releases the Spaces order. The Dock is restarted, which blinks it once.
+    public func setSpacesKeepTheirOrder(_ fixed: Bool) {
+        SpaceOrder.setRearrangesAutomatically(!fixed)
+    }
+
     // MARK: Snap to the screen edges
 
     private func startEdgeSnapping() {
