@@ -342,7 +342,7 @@ public final class SoundModel {
                 guard !Task.isCancelled else { return }
                 self?.setKeepAwake(nil)
             }
-        case .whileAppRuns, .whilePowered:
+        case .whileAppRuns, .whilePowered, .whileDisplayConnected:
             keepAwakeTask = Task { [weak self] in
                 while !Task.isCancelled {
                     try? await Task.sleep(for: .seconds(10))

@@ -5,9 +5,11 @@ import SwiftUI
 /// before a call without opening another app.
 @MainActor
 @Observable
-final class NotchCamera {
+public final class NotchCamera {
     @ObservationIgnored private(set) var session: AVCaptureSession?
     private(set) var isDenied = false
+
+    public init() {}
 
     func start() {
         guard session == nil else { return }

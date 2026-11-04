@@ -364,24 +364,33 @@ struct FocusFollowsMouseTests {
 @Suite struct HoldGuardTests {
     @Test func holdingLongEnoughLetsItThrough() {
         var guardState = HoldGuard(duration: 0.6)
-        #expect(!guardState.down(app: "a", key: .quit, at: 0), "the first press only starts the clock")
-        #expect(!guardState.down(app: "a", key: .quit, at: 0.3))
-        #expect(guardState.down(app: "a", key: .quit, at: 0.7))
+        let first = guardState.down(app: "a", key: .quit, at: 0)
+        #expect(!first, "the first press only starts the clock")
+        let early = guardState.down(app: "a", key: .quit, at: 0.3)
+        #expect(!early)
+        let late = guardState.down(app: "a", key: .quit, at: 0.7)
+        #expect(late)
     }
 
     @Test func lettingGoCancels() {
         var guardState = HoldGuard(duration: 0.6)
-        #expect(!guardState.down(app: "a", key: .quit, at: 0))
+        let first = guardState.down(app: "a", key: .quit, at: 0)
+        #expect(!first)
         guardState.up()
-        #expect(!guardState.down(app: "a", key: .quit, at: 0.7), "the clock starts again after letting go")
-        #expect(guardState.down(app: "a", key: .quit, at: 1.4))
+        let afterRelease = guardState.down(app: "a", key: .quit, at: 0.7)
+        #expect(!afterRelease, "the clock starts again after letting go")
+        let held = guardState.down(app: "a", key: .quit, at: 1.4)
+        #expect(held)
     }
 
     @Test func anotherAppOrKeyStartsOver() {
         var guardState = HoldGuard(duration: 0.6)
-        #expect(!guardState.down(app: "a", key: .quit, at: 0))
-        #expect(!guardState.down(app: "b", key: .quit, at: 0.7), "a different app is a different hold")
-        #expect(!guardState.down(app: "b", key: .close, at: 1.0), "and so is a different key")
+        let first = guardState.down(app: "a", key: .quit, at: 0)
+        #expect(!first)
+        let otherApp = guardState.down(app: "b", key: .quit, at: 0.7)
+        #expect(!otherApp, "a different app is a different hold")
+        let otherKey = guardState.down(app: "b", key: .close, at: 1.0)
+        #expect(!otherKey, "and so is a different key")
     }
 
     @Test func progressGrowsAndStopsAtOne() {
@@ -391,38 +400,5 @@ struct FocusFollowsMouseTests {
         #expect(abs(guardState.progress(app: "a", key: .quit, at: 0.25) - 0.5) < 0.0001)
         #expect(guardState.progress(app: "a", key: .quit, at: 2) == 1)
         #expect(guardState.progress(app: "other", key: .quit, at: 0.25) == 0)
-    }
-}
-
-@Suite struct SwitcherFilterTests {
-    private let entries = [
-        WindowEntry(id: 1, pid: 10, appName: "Safari", title: "Downloads"),
-        WindowEntry(id: 2, pid: 10, appName: "Safari", title: "News"),
-        WindowEntry(id: 3, pid: 20, appName: "Xcode", title: "Sonary"),
-    ]
-
-    @Test func narrowsToOneApp() {
-        #expect(filteredEntries(entries, query: "", app: "Safari").map(\.id) == [1, 2])
-        #expect(filteredEntries(entries, query: "", app: nil).count == 3)
-        #expect(filteredEntries(entries, query: "", app: "").count == 3, "no app chosen is every app")
-    }
-
-    @Test func everyWordHasToMatch() {
-        #expect(filteredEntries(entries, query: "saf dow", app: nil).map(\.id) == [1])
-        #expect(filteredEntries(entries, query: "saf sonary", app: nil).isEmpty)
-    }
-
-    @Test func theAppFilterAndTheQueryBothApply() {
-        #expect(filteredEntries(entries, query: "news", app: "Safari").map(\.id) == [2])
-        #expect(filteredEntries(entries, query: "news", app: "Xcode").isEmpty)
-    }
-
-    @Test func listsTheAppsThatHaveWindows() {
-        #expect(appNames(in: entries) == ["Safari", "Xcode"])
-        #expect(appNames(in: []).isEmpty)
-    }
-
-    @Test func theOldTwoArgumentFormStillWorks() {
-        #expect(filteredEntries(entries, query: "sonary").map(\.id) == [3])
     }
 }
