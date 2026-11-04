@@ -105,17 +105,6 @@
         }
       }
     },
-    "Convert images": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bilder umwandeln"
-          }
-        }
-      }
-    },
     "Convert images…": {
       "extractionState": "manual",
       "localizations": {
@@ -255,6 +244,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Format"
+          }
+        }
+      }
+    },
+    "Image conversion": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilder umwandeln"
           }
         }
       }

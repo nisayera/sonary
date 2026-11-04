@@ -269,7 +269,7 @@ struct ImageConversionSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.m) {
-            Text("Convert images", bundle: .module).font(.headline)
+            Text("Image conversion", bundle: .module).font(.headline)
             Picker(selection: $format) {
                 ForEach(ImageFormat.allCases) { Text(verbatim: $0.rawValue.uppercased()).tag($0) }
             } label: { Text("Format", bundle: .module) }
