@@ -13,6 +13,8 @@ let package = Package(
             .product(name: "SonaryUI", package: "SonaryUI"),
         ],
         resources: [.process("Resources")]),
-        .testTarget(name: "WindowsTests", dependencies: ["Windows"]),
+        .testTarget(name: "WindowsTests", dependencies: [
+            "Windows", .product(name: "SonaryCore", package: "SonaryCore"),
+        ]),
     ]
 )

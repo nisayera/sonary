@@ -31,10 +31,16 @@ public func fileSearchPredicate(_ query: String) -> String {
 final class FileSearcher {
     private var query: NSMetadataQuery?
     private var observer: (any NSObjectProtocol)?
+    /// Held here rather than captured, so the notification closure only has to carry
+    /// a reference to this object, which the main actor already protects.
+    private var completion: (([FoundFile]) -> Void)?
+    private var limit = 5
 
     func search(_ text: String, limit: Int = 5, completion: @escaping ([FoundFile]) -> Void) {
         cancel()
         guard isWorthSearching(text) else { return completion([]) }
+        self.completion = completion
+        self.limit = limit
         let query = NSMetadataQuery()
         query.predicate = NSPredicate(fromMetadataQueryString: fileSearchPredicate(text))
         query.searchScopes = [NSMetadataQueryUserHomeScope]
@@ -42,24 +48,31 @@ final class FileSearcher {
         observer = NotificationCenter.default.addObserver(
             forName: .NSMetadataQueryDidFinishGathering, object: query, queue: .main
         ) { [weak self] _ in
-            query.disableUpdates()
-            let results = (0..<min(query.resultCount, limit)).compactMap { index -> FoundFile? in
-                guard let item = query.result(at: index) as? NSMetadataItem,
-                      let path = item.value(forAttribute: NSMetadataItemPathKey) as? String else { return nil }
-                let name = item.value(forAttribute: NSMetadataItemDisplayNameKey) as? String
-                    ?? URL(fileURLWithPath: path).lastPathComponent
-                return FoundFile(url: URL(fileURLWithPath: path), name: name)
-            }
-            completion(results)
-            self?.cancel()
+            MainActor.assumeIsolated { self?.finish() }
         }
         self.query = query
         query.start()
     }
 
+    private func finish() {
+        guard let query else { return }
+        query.disableUpdates()
+        let results = (0..<min(query.resultCount, limit)).compactMap { index -> FoundFile? in
+            guard let item = query.result(at: index) as? NSMetadataItem,
+                  let path = item.value(forAttribute: NSMetadataItemPathKey) as? String else { return nil }
+            let name = item.value(forAttribute: NSMetadataItemDisplayNameKey) as? String
+                ?? URL(fileURLWithPath: path).lastPathComponent
+            return FoundFile(url: URL(fileURLWithPath: path), name: name)
+        }
+        let completion = self.completion
+        cancel()
+        completion?(results)
+    }
+
     func cancel() {
         query?.stop()
         query = nil
+        completion = nil
         if let observer { NotificationCenter.default.removeObserver(observer) }
         observer = nil
     }

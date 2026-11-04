@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import SonaryCore
 import Testing
 @testable import Windows
 
