@@ -11,9 +11,11 @@ struct ShortcutsPage: View {
 
     var body: some View {
         SettingsPage {
-            Text("Shortcuts").font(.largeTitle.bold())
-            Text("Click a shortcut to record a new one. Press ⌫ to switch it off, ⎋ to keep it as it is.")
-                .foregroundStyle(.secondary)
+            SettingsPageHeader(
+                symbol: "keyboard", title: Text("Shortcuts"),
+                subtitle: Text("Click a shortcut to record a new one. Press ⌫ to switch it off, ⎋ to keep it as it is.")
+            )
+        } content: {
             ForEach(groups, id: \.self) { group in
                 SettingsCard(Text(verbatim: group)) {
                     ForEach(store.definitions.filter { $0.group == group }) { definition in
@@ -95,7 +97,7 @@ private struct ShortcutRow: View {
 
     private func record(_ combo: KeyCombo?) {
         guard let combo else {
-            store.set(.none, for: definition.id)
+            store.set(KeyCombo.none, for: definition.id)
             problem = nil
             finished()
             return
