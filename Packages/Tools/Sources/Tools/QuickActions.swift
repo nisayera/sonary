@@ -3,7 +3,7 @@ import Foundation
 
 public enum QuickAction: String, CaseIterable, Codable, Sendable, Identifiable {
     case darkMode, desktopIcons, emptyTrash, ejectDisks, lockScreen, cleaningMode
-    case commandBar, textFromScreen, colorPicker, screenshot, pinScreenshot, cameraPreview, screenRecording
+    case commandBar, textFromScreen, colorPicker, screenshot, pinScreenshot, cameraPreview, screenRecording, scrollingShot
 
     public var id: String { rawValue }
 
@@ -22,6 +22,7 @@ public enum QuickAction: String, CaseIterable, Codable, Sendable, Identifiable {
         case .pinScreenshot: "pin"
         case .cameraPreview: "web.camera"
         case .screenRecording: "record.circle"
+        case .scrollingShot: "arrow.down.doc"
         }
     }
 }

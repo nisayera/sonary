@@ -232,6 +232,35 @@ public final class ToolsModel {
 
     public func toggleCamera() { camera.toggle() }
 
+    /// Captures a region, scrolls it and captures again, then hands the tall picture
+    /// to the editor. Needs a region, so it always uses Sonary's own selector.
+    public func scrollingScreenshot() {
+        Task {
+            guard let region = await withCheckedContinuation({ continuation in
+                selector.show { continuation.resume(returning: $0) }
+            }) else { return }
+            report(String(localized: "Scrolling and capturing…", bundle: .module))
+            let image = await captureScrolling(region: region) { [weak self] rect in
+                await self?.captureImage(of: rect)
+            }
+            guard let image else {
+                report(String(localized: "Nothing could be captured there.", bundle: .module))
+                return
+            }
+            editor.open(image) { [weak self] message in self?.report(message) }
+        }
+    }
+
+    /// One shot of a region, as a picture.
+    private func captureImage(of rect: CGRect) async -> NSImage? {
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sonary-scroll-\(UUID().uuidString).png")
+        let value = "\(Int(rect.minX)),\(Int(rect.minY)),\(Int(rect.width)),\(Int(rect.height))"
+        guard await capture(arguments: ["-R", value, "-x", file.path]) else { return nil }
+        defer { try? FileManager.default.removeItem(at: file) }
+        return NSImage(contentsOf: file)
+    }
+
     // MARK: Screen recording
 
     public func toggleRecording() {
@@ -437,6 +466,7 @@ public final class ToolsModel {
         case .pinScreenshot: pinScreenshot()
         case .cameraPreview: camera.toggle()
         case .screenRecording: toggleRecording()
+        case .scrollingShot: scrollingScreenshot()
         case .commandBar: showCommandBar()
         case .textFromScreen: recognizeText()
         case .colorPicker: pickColor()

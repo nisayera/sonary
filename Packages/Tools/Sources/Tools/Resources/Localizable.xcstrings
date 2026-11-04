@@ -582,6 +582,17 @@
         }
       }
     },
+    "Nothing could be captured there.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dort konnte nichts aufgenommen werden."
+          }
+        }
+      }
+    },
     "Nothing was recorded.": {
       "extractionState": "manual",
       "localizations": {
@@ -850,6 +861,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Skripte"
+          }
+        }
+      }
+    },
+    "Scrolling and capturing…": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gescrollt und aufgenommen …"
+          }
+        }
+      }
+    },
+    "Scrolling screenshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scrollendes Bildschirmfoto"
           }
         }
       }

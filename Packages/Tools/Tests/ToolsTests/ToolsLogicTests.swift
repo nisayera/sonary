@@ -530,3 +530,45 @@ struct MenuCommandTests {
         #expect(!AnnotationKind.rectangle.isFilled)
     }
 }
+
+@Suite struct ScrollingCaptureTests {
+    @Test func findsWhereTheNextShotCarriesOn() {
+        // The last four rows of the first shot are the first four of the second.
+        let previous: [UInt64] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        let next: [UInt64] = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        #expect(overlapRows(previous: previous, next: next, minimumOverlap: 4) == 4)
+    }
+
+    @Test func twoShotsThatShareNothingAreJustJoined() {
+        let previous: [UInt64] = [1, 2, 3, 4, 5, 6, 7, 8]
+        let next: [UInt64] = [20, 21, 22, 23, 24, 25, 26, 27]
+        #expect(overlapRows(previous: previous, next: next, minimumOverlap: 4) == nil)
+    }
+
+    @Test func tooFewRowsToJudge() {
+        #expect(overlapRows(previous: [1, 2], next: [1, 2], minimumOverlap: 8) == nil)
+        #expect(overlapRows(previous: [], next: [], minimumOverlap: 8) == nil)
+    }
+
+    @Test func theLargestOverlapWinsOnARepeatingPage() {
+        // Every row looks the same, as on a page of identical list items.
+        let rows = [UInt64](repeating: 7, count: 10)
+        #expect(overlapRows(previous: rows, next: rows, minimumOverlap: 4) == 10,
+                "the whole shot is the same, so nothing new was captured")
+    }
+
+    @Test func aShotThatAddsNothingMeansThePageStopped() {
+        let rows: [UInt64] = [1, 2, 3]
+        #expect(hasStoppedScrolling(previous: rows, next: rows))
+        #expect(!hasStoppedScrolling(previous: rows, next: [1, 2, 4]))
+        #expect(!hasStoppedScrolling(previous: [], next: []), "nothing captured yet is not a stop")
+    }
+
+    @Test func theFinishedHeightCountsEachShotOnce() {
+        #expect(stitchedHeight(shots: [100, 100, 100], overlaps: [20, 20]) == 260)
+        #expect(stitchedHeight(shots: [100], overlaps: []) == 100)
+        #expect(stitchedHeight(shots: [], overlaps: []) == 0)
+        #expect(stitchedHeight(shots: [100, 100], overlaps: [nil]) == 200, "no overlap means both in full")
+        #expect(stitchedHeight(shots: [100, 100], overlaps: [100]) == 100, "a shot that adds nothing adds nothing")
+    }
+}

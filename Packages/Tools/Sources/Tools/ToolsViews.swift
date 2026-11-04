@@ -52,6 +52,7 @@ struct ToolsPopoverView: View {
             tool("web.camera", "Camera mirror", "") { model.toggleCamera() }
             tool(model.isRecording ? "stop.circle" : "record.circle",
                  model.isRecording ? "Stop recording" : "Record the screen", "") { model.toggleRecording() }
+            tool("arrow.down.doc", "Scrolling screenshot", "") { model.scrollingScreenshot() }
             tool("photo.on.rectangle.angled", "Convert images…", "") { convertingImages = true }
             tool("film", "Make a video smaller…", "") { pickVideos(gif: false) }
             tool("photo.stack", "Turn a video into a GIF…", "") { pickVideos(gif: true) }

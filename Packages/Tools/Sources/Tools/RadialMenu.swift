@@ -116,5 +116,6 @@ func quickActionTitle(_ action: QuickAction) -> LocalizedStringKey {
     case .pinScreenshot: "Pin a screenshot"
     case .cameraPreview: "Camera mirror"
     case .screenRecording: "Record the screen"
+    case .scrollingShot: "Scrolling screenshot"
     }
 }
