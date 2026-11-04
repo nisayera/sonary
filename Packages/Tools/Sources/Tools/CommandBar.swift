@@ -3,7 +3,10 @@ import SonaryUI
 import SwiftUI
 
 struct CommandItem: Identifiable {
-    enum Kind { case app(URL), snippet(Snippet), action(@MainActor () -> Void), copyText(String) }
+    enum Kind {
+        case app(URL), snippet(Snippet), action(@MainActor () -> Void), copyText(String)
+        case file(URL), script(UserScript)
+    }
     let id: String
     let title: String
     let symbol: String?
@@ -70,10 +73,13 @@ final class CommandBarController {
             CommandItem(id: "shot", title: String(localized: "Screenshot to clipboard", bundle: .module), symbol: "camera.viewfinder",
                         kind: .action { [weak model] in model?.screenshotToClipboard() }),
         ]
+        let scripts = loadScripts().map {
+            CommandItem(id: "script-\($0.id)", title: $0.name, symbol: "terminal", kind: .script($0))
+        }
         let snippets = model.settings.snippets.map {
             CommandItem(id: "snippet-\($0.id)", title: $0.title, symbol: "text.quote", kind: .snippet($0))
         }
-        return tools + snippets + external + menu + apps
+        return tools + snippets + scripts + external + menu + apps
     }
 
     /// Every menu command of the app that was in front when the bar opened.
@@ -99,6 +105,11 @@ final class CommandBarController {
         case let .copyText(text):
             model.copy(text)
             model.lastResultText = String(localized: "Copied \(text)", bundle: .module)
+        case let .file(url):
+            NSWorkspace.shared.open(url)
+        case let .script(script):
+            runScript(script)
+            model.lastResultText = String(localized: "Ran \(script.name)", bundle: .module)
         }
     }
 
@@ -125,7 +136,9 @@ struct CommandBarView: View {
     let run: (CommandItem) -> Void
     @State private var query = ""
     @State private var selected = 0
+    @State private var files: [FoundFile] = []
     @FocusState private var focused: Bool
+    @State private var searcher = FileSearcher()
 
     /// Maths, unit conversions and emoji come first; they only appear when the query really is one.
     private var instantResults: [CommandItem] {
@@ -153,18 +166,25 @@ struct CommandBarView: View {
             .sorted { $0.1 > $1.1 }
             .map(\.0)
         let instant = instantResults
-        return Array((instant + matches).prefix(8))
+        let found = files.map {
+            CommandItem(id: "file-\($0.id)", title: $0.name, symbol: "doc", kind: .file($0.url))
+        }
+        return Array((instant + matches + found).prefix(8))
     }
 
     var body: some View {
         let list = results
         VStack(alignment: .leading, spacing: 8) {
-            TextField(text: $query) { Text("Search apps, snippets and tools", bundle: .module) }
+            TextField(text: $query) { Text("Search apps, snippets, files and tools", bundle: .module) }
                 .textFieldStyle(.plain)
                 .font(.system(size: 22))
                 .focused($focused)
                 .onSubmit { if list.indices.contains(selected) { run(list[selected]) } }
-                .onChange(of: query) { _, _ in selected = 0 }
+                .onChange(of: query) { _, text in
+                    selected = 0
+                    // Spotlight is asked only once the query is long enough to mean something.
+                    searcher.search(text) { files = $0 }
+                }
             Divider()
             ForEach(Array(list.enumerated()), id: \.element.id) { index, item in
                 HStack(spacing: 10) {
@@ -193,6 +213,8 @@ struct CommandBarView: View {
     @ViewBuilder
     private func icon(for item: CommandItem) -> some View {
         if case let .app(url) = item.kind {
+            Image(nsImage: NSWorkspace.shared.icon(forFile: url.path)).resizable()
+        } else if case let .file(url) = item.kind {
             Image(nsImage: NSWorkspace.shared.icon(forFile: url.path)).resizable()
         } else if item.symbol == nil {
             Text(String(item.title.prefix(2))).font(.system(size: 18))

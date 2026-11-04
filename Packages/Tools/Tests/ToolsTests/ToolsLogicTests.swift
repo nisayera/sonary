@@ -432,3 +432,45 @@ struct MenuCommandTests {
         #expect(RadialItem.back.symbol == "chevron.backward")
     }
 }
+
+@Suite struct FileSearchTests {
+    @Test func tooShortToBeWorthAsking() {
+        #expect(!isWorthSearching(""))
+        #expect(!isWorthSearching("ab"))
+        #expect(!isWorthSearching("  a  "))
+        #expect(isWorthSearching("abc"))
+    }
+
+    @Test func aStrayQuoteCannotChangeTheQuestion() {
+        let predicate = fileSearchPredicate("my \"file\" \\ name")
+        #expect(predicate == "kMDItemDisplayName CONTAINS[cd] \"my file  name\"")
+        #expect(predicate.filter { $0 == "\"" }.count == 2, "only the two quotes we put there")
+    }
+}
+
+@Suite struct ScriptTests {
+    private func file(_ name: String, executable: Bool = true, directory: Bool = false)
+    -> (url: URL, isExecutable: Bool, isDirectory: Bool) {
+        (URL(fileURLWithPath: "/tmp/scripts/\(name)"), executable, directory)
+    }
+
+    @Test func onlyExecutableFilesAreOffered() {
+        let found = usableScripts([
+            file("backup.sh"),
+            file("notes.txt", executable: false),
+            file("tools", directory: true),
+            file(".hidden"),
+        ])
+        #expect(found.map(\.name) == ["backup"])
+    }
+
+    @Test func scriptsAreListedByName() {
+        let found = usableScripts([file("zip-it.sh"), file("archive.sh"), file("Backup.command")])
+        #expect(found.map(\.name) == ["archive", "Backup", "zip-it"])
+    }
+
+    @Test func theFolderSitsInSonarysOwnSupportFolder() {
+        let folder = scriptsFolder(home: URL(fileURLWithPath: "/Users/someone"))
+        #expect(folder.path == "/Users/someone/Library/Application Support/app.sonary.Sonary/Scripts")
+    }
+}

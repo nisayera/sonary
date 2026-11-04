@@ -211,6 +211,15 @@ struct ToolsSettingsView: View {
                                       }))
             }
         }
+        SettingsCard(Text("Scripts", bundle: .module)) {
+            Text("Executable files in Sonary's scripts folder show up in the command bar. Only files you have marked executable are offered.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            Button { NSWorkspace.shared.open(scriptsFolder()) } label: {
+                Text("Open the scripts folder", bundle: .module)
+            }
+            .buttonStyle(.borderless)
+        }
         SettingsCard(Text("Extra rings", bundle: .module)) {
             Text("Each extra ring is a wedge in the first one that opens it, so the ring can hold more than eight actions without getting crowded.",
                  bundle: .module)

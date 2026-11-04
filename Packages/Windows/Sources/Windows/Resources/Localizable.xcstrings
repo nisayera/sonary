@@ -207,6 +207,17 @@
         }
       }
     },
+    "Hold ⌃⌘ and drag": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃⌘ halten und ziehen"
+          }
+        }
+      }
+    },
     "Hold ⌘Q to quit %@": {
       "extractionState": "manual",
       "localizations": {
@@ -323,6 +334,28 @@
         }
       }
     },
+    "Move": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewegen"
+          }
+        }
+      }
+    },
+    "Move and resize": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewegen und Größe ändern"
+          }
+        }
+      }
+    },
     "Move to the next display": {
       "localizations": {
         "de": {
@@ -333,12 +366,45 @@
         }
       }
     },
+    "Move with the keyboard held": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit gehaltener Tastatur bewegen"
+          }
+        }
+      }
+    },
     "Moves and resizes the front window.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Verschiebt das vorderste Fenster und ändert seine Größe."
+          }
+        }
+      }
+    },
+    "Moves the window under the pointer from anywhere in it, instead of hunting for the title bar. Dragging with the right button resizes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewegt das Fenster unter dem Zeiger von jeder Stelle aus, statt die Titelleiste zu suchen. Ziehen mit der rechten Taste ändert die Größe."
+          }
+        }
+      }
+    },
+    "Off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
           }
         }
       }
@@ -451,6 +517,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "App entfernen"
+          }
+        }
+      }
+    },
+    "Resize": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Größe ändern"
           }
         }
       }

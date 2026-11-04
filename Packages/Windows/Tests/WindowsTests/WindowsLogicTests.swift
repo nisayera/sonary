@@ -402,3 +402,38 @@ struct FocusFollowsMouseTests {
         #expect(guardState.progress(app: "other", key: .quit, at: 0.25) == 0)
     }
 }
+
+@Suite struct ModifierDragTests {
+    private let start = CGRect(x: 100, y: 200, width: 600, height: 400)
+
+    @Test func movingFollowsThePointerAndKeepsTheSize() {
+        let moved = draggedFrame(start: start, from: CGPoint(x: 150, y: 250), to: CGPoint(x: 200, y: 230))
+        #expect(moved == CGRect(x: 150, y: 180, width: 600, height: 400))
+    }
+
+    @Test func resizingKeepsTheCornerAndNeverGetsTooSmall() {
+        let bigger = resizedFrame(start: start, from: CGPoint(x: 0, y: 0), to: CGPoint(x: 100, y: 50))
+        #expect(bigger == CGRect(x: 100, y: 200, width: 700, height: 450))
+        let tiny = resizedFrame(start: start, from: CGPoint(x: 0, y: 0), to: CGPoint(x: -5000, y: -5000))
+        #expect(tiny.width == 180)
+        #expect(tiny.height == 120)
+        #expect(tiny.origin == start.origin, "resizing never moves the window")
+    }
+
+    @Test func onlyTheExactCombinationCounts() {
+        let wanted = KeyModifier.control | KeyModifier.command
+        #expect(isModifierDrag(flags: wanted, wanted: wanted))
+        #expect(!isModifierDrag(flags: wanted | KeyModifier.shift, wanted: wanted), "an extra key is not it")
+        #expect(!isModifierDrag(flags: KeyModifier.control, wanted: wanted))
+        #expect(!isModifierDrag(flags: 0, wanted: 0), "nothing chosen means never")
+    }
+
+    @Test func whatEachModeReactsTo() {
+        #expect(ModifierDragMode.move.movesOnLeft)
+        #expect(!ModifierDragMode.move.resizesOnRight)
+        #expect(ModifierDragMode.resize.resizesOnRight)
+        #expect(!ModifierDragMode.resize.movesOnLeft)
+        #expect(ModifierDragMode.moveAndResize.movesOnLeft && ModifierDragMode.moveAndResize.resizesOnRight)
+        #expect(!ModifierDragMode.off.movesOnLeft && !ModifierDragMode.off.resizesOnRight)
+    }
+}

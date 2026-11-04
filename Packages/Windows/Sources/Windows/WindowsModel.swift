@@ -26,6 +26,10 @@ public struct WindowsSettings: Codable, Equatable, Sendable {
     public var dockPreviews = false
     /// Press a protected shortcut twice, or hold it down.
     public var quitConfirmation: QuitConfirmation = .pressTwice
+    /// Move or resize the window under the pointer while holding a chosen combination.
+    public var modifierDrag: ModifierDragMode = .off
+    /// The combination that starts a modifier-drag, as Carbon flags. ⌃⌘ by default.
+    public var modifierDragKeys = KeyModifier.control | KeyModifier.command
 
     public init() {}
 }
@@ -72,6 +76,9 @@ public final class WindowsModel {
     @ObservationIgnored private let dockPreview = DockPreviewController()
     /// The window each app's Dock icon last raised, so a second click moves on.
     @ObservationIgnored private var lastRaisedDockWindow: [Int32: UInt32] = [:]
+    @ObservationIgnored private var modifierDragMonitor: Any?
+    /// The window a modifier-drag grabbed, where it was, and where the pointer began.
+    @ObservationIgnored private var modifierDragStart: (window: AXUIElement, frame: CGRect, pointer: CGPoint)?
     @ObservationIgnored private var hud: NSPanel?
     @ObservationIgnored private let switcher = WindowSwitcherController()
     @ObservationIgnored private var running = false
@@ -146,11 +153,66 @@ public final class WindowsModel {
         if running, settings.focusFollowsMouse { startFocusFollowsMouse() } else { stopFocusFollowsMouse() }
         if running, settings.dockPreviews { startDockHover() } else { stopDockHover() }
         if running, settings.dockClickAction != .system { startDockClicks() } else { stopDockClicks() }
+        if running, settings.modifierDrag != .off { startModifierDrag() } else { stopModifierDrag() }
         switcher.showsPreviews = settings.switcherPreviews
         if !running || !settings.windowSwitcher { switcher.close() }
     }
 
     public func showSwitcher() { switcher.show() }
+
+    // MARK: Moving a window by holding keys
+
+    private func startModifierDrag() {
+        guard modifierDragMonitor == nil else { return }
+        modifierDragMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .flagsChanged]
+        ) { [weak self] event in
+            MainActor.assumeIsolated { self?.modifierDragged(event) }
+        }
+    }
+
+    private func stopModifierDrag() {
+        if let modifierDragMonitor { NSEvent.removeMonitor(modifierDragMonitor) }
+        modifierDragMonitor = nil
+        modifierDragStart = nil
+    }
+
+    /// While the chosen keys are held, the pointer moves or resizes the window it is
+    /// over. Letting the keys go ends it, so an ordinary drag is never disturbed.
+    private func modifierDragged(_ event: NSEvent) {
+        let point = NSEvent.mouseLocation
+        let flags = carbonFlags(event.modifierFlags)
+        guard isModifierDrag(flags: flags, wanted: settings.modifierDragKeys) else {
+            modifierDragStart = nil
+            return
+        }
+        let resizing = event.type == .rightMouseDragged && settings.modifierDrag.resizesOnRight
+        guard resizing || settings.modifierDrag.movesOnLeft else { return }
+
+        guard let primary = NSScreen.screens.first else { return }
+        guard let start = modifierDragStart else {
+            guard let pid = windowUnder(point, in: visibleWindows()),
+                  let window = frontWindow(of: pid), let frame = frame(of: window) else { return }
+            modifierDragStart = (window: window, frame: cocoaRect(fromAX: frame,
+                                                                  primaryScreenHeight: primary.frame.height),
+                                 pointer: point)
+            return
+        }
+        let wanted = resizing
+            ? resizedFrame(start: start.frame, from: start.pointer, to: point)
+            : draggedFrame(start: start.frame, from: start.pointer, to: point)
+        setFrame(axRect(fromCocoa: wanted, primaryScreenHeight: primary.frame.height), of: start.window)
+    }
+
+    /// AppKit's modifier flags as the Carbon flags the settings store.
+    private func carbonFlags(_ flags: NSEvent.ModifierFlags) -> Int {
+        var value = 0
+        if flags.contains(.command) { value |= KeyModifier.command }
+        if flags.contains(.shift) { value |= KeyModifier.shift }
+        if flags.contains(.option) { value |= KeyModifier.option }
+        if flags.contains(.control) { value |= KeyModifier.control }
+        return value
+    }
 
     // MARK: Spaces
 
@@ -351,21 +413,7 @@ public final class WindowsModel {
 
     private func pointerMoved() {
         let point = NSEvent.mouseLocation
-        guard let primary = NSScreen.screens.first else { return }
-        let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
-        let windows: [(pid: Int32, frame: CGRect)] = ((raw as? [[String: Any]]) ?? []).compactMap { window in
-            guard (window["kCGWindowLayer"] as? Int) == 0,
-                  let pid = (window["kCGWindowOwnerPID"] as? NSNumber)?.int32Value,
-                  let bounds = window["kCGWindowBounds"] as? [String: Any],
-                  let x = (bounds["X"] as? NSNumber)?.doubleValue,
-                  let y = (bounds["Y"] as? NSNumber)?.doubleValue,
-                  let width = (bounds["Width"] as? NSNumber)?.doubleValue,
-                  let height = (bounds["Height"] as? NSNumber)?.doubleValue else { return nil }
-            // The window server measures from the top of the primary screen; the pointer does not.
-            let frame = cocoaRect(fromAX: CGRect(x: x, y: y, width: width, height: height),
-                                  primaryScreenHeight: primary.frame.height)
-            return (pid: pid, frame: frame)
-        }
+        let windows = visibleWindows()
         let focused = NSWorkspace.shared.frontmostApplication?.processIdentifier
         let under = windowUnder(point, in: windows)
         guard let pid = focusState.pointer(over: under, at: ProcessInfo.processInfo.systemUptime, focused: focused),
@@ -475,6 +523,34 @@ public final class WindowsModel {
         guard let target = newFrame(window, currentAX, height), target != currentAX else { return }
         previousFrames[app.processIdentifier] = currentAX
         setFrame(target, of: window)
+    }
+
+    /// Every ordinary window on screen, with its frame in pointer coordinates.
+    private func visibleWindows() -> [(pid: Int32, frame: CGRect)] {
+        guard let primary = NSScreen.screens.first else { return [] }
+        let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+        return ((raw as? [[String: Any]]) ?? []).compactMap { window in
+            guard (window["kCGWindowLayer"] as? Int) == 0,
+                  let pid = (window["kCGWindowOwnerPID"] as? NSNumber)?.int32Value,
+                  let bounds = window["kCGWindowBounds"] as? [String: Any],
+                  let x = (bounds["X"] as? NSNumber)?.doubleValue,
+                  let y = (bounds["Y"] as? NSNumber)?.doubleValue,
+                  let width = (bounds["Width"] as? NSNumber)?.doubleValue,
+                  let height = (bounds["Height"] as? NSNumber)?.doubleValue else { return nil }
+            // The window server measures from the top of the primary screen; the pointer does not.
+            let frame = cocoaRect(fromAX: CGRect(x: x, y: y, width: width, height: height),
+                                  primaryScreenHeight: primary.frame.height)
+            return (pid: pid, frame: frame)
+        }
+    }
+
+    /// The window an app has in front, for grabbing with a modifier-drag.
+    private func frontWindow(of pid: Int32) -> AXUIElement? {
+        let axApp = AXUIElementCreateApplication(pid)
+        var focused: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(axApp, kAXFocusedWindowAttribute as CFString, &focused) == .success,
+              let focused, CFGetTypeID(focused) == AXUIElementGetTypeID() else { return nil }
+        return unsafeDowncast(focused, to: AXUIElement.self)
     }
 
     private func frame(of window: AXUIElement) -> CGRect? {

@@ -34,6 +34,20 @@ struct WindowsSettingsView: View {
     let model: WindowsModel
 
     var body: some View {
+        SettingsCard(Text("Move with the keyboard held", bundle: .module)) {
+            SettingsRow(symbol: "hand.draw", title: Text("Hold ⌃⌘ and drag", bundle: .module),
+                        caption: Text("Moves the window under the pointer from anywhere in it, instead of hunting for the title bar. Dragging with the right button resizes.",
+                                      bundle: .module)) {
+                Picker(selection: Binding(get: { model.settings.modifierDrag },
+                                          set: { value in model.update { $0.modifierDrag = value } })) {
+                    Text("Off", bundle: .module).tag(ModifierDragMode.off)
+                    Text("Move", bundle: .module).tag(ModifierDragMode.move)
+                    Text("Resize", bundle: .module).tag(ModifierDragMode.resize)
+                    Text("Move and resize", bundle: .module).tag(ModifierDragMode.moveAndResize)
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 180)
+            }
+        }
         SettingsCard(Text("Dock", bundle: .module)) {
             SettingsRow(symbol: "dock.rectangle", title: Text("A click on a running app's icon", bundle: .module),
                         caption: Text("Sonary adds this after the Dock has had the click, so the Dock keeps working.",

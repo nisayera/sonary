@@ -292,6 +292,17 @@
         }
       }
     },
+    "Executable files in Sonary's scripts folder show up in the command bar. Only files you have marked executable are offered.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausführbare Dateien im Skripte-Ordner von Sonary erscheinen in der Befehlsleiste. Angeboten werden nur Dateien, die du als ausführbar markiert hast."
+          }
+        }
+      }
+    },
     "Extra rings": {
       "extractionState": "manual",
       "localizations": {
@@ -494,6 +505,17 @@
         }
       }
     },
+    "Open the scripts folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skripte-Ordner öffnen"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "de": {
@@ -582,6 +604,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Radial-Menü"
+          }
+        }
+      }
+    },
+    "Ran %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ausgeführt"
           }
         }
       }
@@ -678,12 +711,34 @@
         }
       }
     },
+    "Scripts": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skripte"
+          }
+        }
+      }
+    },
     "Search apps, snippets and tools": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Apps, Textbausteine und Werkzeuge suchen"
+          }
+        }
+      }
+    },
+    "Search apps, snippets, files and tools": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps, Bausteine, Dateien und Werkzeuge suchen"
           }
         }
       }

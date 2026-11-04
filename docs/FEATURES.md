@@ -5,7 +5,7 @@ and branding stay out of it (see its `TRADEMARKS.md`), reused GPL code keeps its
 listed in `NOTICE`.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open.
-Status checked against the code at version 0.18.0.
+Status checked against the code at version 0.19.0.
 
 ## Audio
 - [ ] Per-app volume mixer (boost above 100 %, favourites, no audio driver)
@@ -23,7 +23,7 @@ Status checked against the code at version 0.18.0.
 
 ## Windows and Dock
 - [x] Window switcher — every window, with word-by-word search, a filter per app, live previews and raise on ⌃⌥Tab
-- [~] Window layouts — halves, quarters, thirds, maximize, centre, move to the next display and put back, on ⌃⌥ shortcuts and by dragging a window to a screen edge; no modifier-drag
+- [x] Window layouts — halves, quarters, thirds, maximize, centre, fill the screen, move to the next display and put back, on ⌃⌥ shortcuts, by dragging to a screen edge, and by holding ⌃⌘ to move or resize from anywhere in the window
 - [x] Dock window previews across Spaces, when the pointer rests on an icon
 - [x] Dock icon click actions — cycle the app's windows, minimize them all or show them all
 - [x] A layout that fills the screen, menu bar strip included, without a new Space (⌃⌥B)
@@ -60,7 +60,7 @@ Status checked against the code at version 0.18.0.
 ## Everyday tools
 - [~] Notch island — music, calendar, timer, downloads, accessory batteries, a file shelf, the camera, scroll gestures, simulated on displays without a notch; no notifications, lyrics or equalizer
 - [ ] AI agent tracking in the island (no public way to see another app's agent activity)
-- [~] Command bar — apps, snippets, Sonary's tools, the clipboard history, the front app's menu commands, a calculator, unit conversion and emoji; no files, no scripts
+- [x] Command bar — apps, snippets, scripts, files through Spotlight, Sonary's tools, the clipboard history, the front app's menu commands, a calculator, unit conversion and emoji
 - [x] Quick toggles: dark mode, desktop icons, empty Trash, eject disks, lock screen
 - [x] Quit-apps list
 - [x] Radial menu on ⌃⌥R with a free choice of actions and extra rings, each a wedge that opens its own ring
@@ -77,7 +77,7 @@ Status checked against the code at version 0.18.0.
 - [x] Media tools — image conversion (PNG, JPEG, HEIC, TIFF) with downscaling and a text watermark, video shrinking and animated GIFs
 
 ## App management
-- [~] Update checker — Homebrew formulae and casks, plus apps in /Applications that ship a Sparkle feed; no App Store
+- [~] Update checker — Homebrew formulae and casks, plus apps in /Applications that ship a Sparkle feed; the App Store has no public interface for this
 - [x] Cleaner for caches, logs and Xcode build data, weekly or monthly on a schedule
 - [x] Folder tidying with a retention rule per folder, for a messenger's downloads
 - [x] Uninstaller with a review of what is left behind
