@@ -89,7 +89,36 @@ struct HousekeepingTests {
     }
 
     @Test func neverCleanedIsDueAtOnce() {
+        // Still the rule, and safe: switching the schedule on writes a last-cleaned
+        // date, so a freshly enabled schedule never reaches this case.
         #expect(shouldClean(schedule: .weekly, lastCleaned: nil, now: now))
+    }
+
+    @Test func switchingTheScheduleOnStartsTheIntervalNow() {
+        let stamped = lastCleanedAfterScheduleChange(from: .off, to: .weekly, lastCleaned: nil, now: now)
+        #expect(stamped == now)
+        // Which is exactly what keeps the first check from cleaning straight away.
+        #expect(!shouldClean(schedule: .weekly, lastCleaned: stamped, now: now.addingTimeInterval(60)))
+        #expect(shouldClean(schedule: .weekly, lastCleaned: stamped, now: now.addingTimeInterval(8 * 86_400)))
+    }
+
+    @Test func switchingOffLeavesTheDateAlone() {
+        let earlier = now.addingTimeInterval(-3 * 86_400)
+        #expect(lastCleanedAfterScheduleChange(from: .weekly, to: .off, lastCleaned: earlier, now: now) == earlier)
+        #expect(lastCleanedAfterScheduleChange(from: .weekly, to: .off, lastCleaned: nil, now: now) == nil)
+    }
+
+    @Test func changingBetweenWeeklyAndMonthlyKeepsTheDate() {
+        let earlier = now.addingTimeInterval(-3 * 86_400)
+        #expect(lastCleanedAfterScheduleChange(from: .weekly, to: .monthly, lastCleaned: earlier, now: now) == earlier,
+                "the three days already served still count")
+        #expect(lastCleanedAfterScheduleChange(from: .monthly, to: .weekly, lastCleaned: earlier, now: now) == earlier)
+    }
+
+    @Test func switchingOnAgainRestartsTheInterval() {
+        let longAgo = now.addingTimeInterval(-90 * 86_400)
+        let stamped = lastCleanedAfterScheduleChange(from: .off, to: .monthly, lastCleaned: longAgo, now: now)
+        #expect(stamped == now, "an old date must not make a just-enabled schedule overdue")
     }
 
     @Test func weeklyWaitsSevenDays() {

@@ -62,7 +62,7 @@ public final class WindowsModel {
     @ObservationIgnored private var hudProgress: Double = 0
     /// The frame a window had before the last layout, so it can be put back.
     @ObservationIgnored private var previousFrames: [pid_t: CGRect] = [:]
-    @ObservationIgnored private var windowCounts: [Int32: Int] = [:]
+    @ObservationIgnored private var quitWatch = QuitWatchState()
     @ObservationIgnored private var watchTask: Task<Void, Never>?
     @ObservationIgnored private var dragMonitor: Any?
     @ObservationIgnored private var upMonitor: Any?
@@ -426,7 +426,8 @@ public final class WindowsModel {
 
     private func startWatchingWindows() {
         guard watchTask == nil else { return }
-        windowCounts = currentWindowCounts()
+        quitWatch = QuitWatchState()
+        if let counts = currentWindowCounts() { quitWatch.prime(counts) }
         watchTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(2))
@@ -438,12 +439,15 @@ public final class WindowsModel {
     private func stopWatchingWindows() {
         watchTask?.cancel()
         watchTask = nil
-        windowCounts = [:]
+        quitWatch = QuitWatchState()
     }
 
     private func checkWindows() {
-        let current = currentWindowCounts()
-        for pid in appsWithNoWindowsLeft(previous: windowCounts, current: current) {
+        // Without the Accessibility permission the windows cannot be counted, and a
+        // count that is wrong in this direction quits apps that still have windows.
+        // So nothing is quit at all until the permission is there.
+        guard let current = currentWindowCounts() else { return }
+        for pid in quitWatch.update(current) {
             guard let app = NSRunningApplication(processIdentifier: pid),
                   let bundleID = app.bundleIdentifier,
                   bundleID != Bundle.main.bundleIdentifier,
@@ -451,21 +455,26 @@ public final class WindowsModel {
                   !settings.neverQuitApps.contains(bundleID) else { continue }
             app.terminate()
         }
-        windowCounts = current
     }
 
-    /// How many normal windows each running app has on screen.
-    private func currentWindowCounts() -> [Int32: Int] {
+    /// How many windows each running app has, counted through the accessibility API so
+    /// that minimized windows and windows on other Spaces count too. The window server's
+    /// on-screen list has neither, which used to make Sonary quit apps whose windows were
+    /// merely out of sight.
+    ///
+    /// Nil when Accessibility is not granted. An app that does not answer is left out
+    /// rather than recorded as empty, so an unresponsive app is never quit for it.
+    private func currentWindowCounts() -> [Int32: Int]? {
+        guard AXIsProcessTrusted() else { return nil }
         var counts: [Int32: Int] = [:]
         for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .regular {
-            counts[app.processIdentifier] = 0
-        }
-        let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
-        for window in (raw as? [[String: Any]]) ?? [] {
-            guard (window["kCGWindowLayer"] as? Int) == 0,
-                  let pid = (window["kCGWindowOwnerPID"] as? NSNumber)?.int32Value,
-                  counts[pid] != nil else { continue }
-            counts[pid, default: 0] += 1
+            let element = AXUIElementCreateApplication(app.processIdentifier)
+            var value: CFTypeRef?
+            guard AXUIElementCopyAttributeValue(element, kAXWindowsAttribute as CFString, &value) == .success,
+                  let windows = value as? [AXUIElement] else { continue }
+            // Every window counts, panels and dialogs included: counting one too many
+            // only delays a quit, counting one too few ends an app that was still in use.
+            counts[app.processIdentifier] = windows.count
         }
         return counts
     }

@@ -193,6 +193,47 @@ public func appsWithNoWindowsLeft(previous: [Int32: Int], current: [Int32: Int])
     .sorted()
 }
 
+/// Waits for an app's last window to be gone twice in a row before it is quit.
+///
+/// One look is not enough: a window can be absent from a single count for reasons that
+/// have nothing to do with being closed, and quitting an app that still has work in it
+/// cannot be undone. Two counts in a row cost two seconds and remove that class of
+/// mistake.
+public struct QuitWatchState: Sendable {
+    /// What each app had at the last count, by process id.
+    private var counts: [Int32: Int] = [:]
+    /// How many counts in a row an app has had nothing, for the ones being watched.
+    private var emptyChecks: [Int32: Int] = [:]
+
+    public init() {}
+
+    /// Feeds a fresh count and returns the apps whose last window has now been gone
+    /// twice in a row. An app that never had a window is never returned, and an app
+    /// missing from `current` — one whose count could not be read, or that has gone
+    /// away — is left alone rather than treated as empty.
+    public mutating func update(_ current: [Int32: Int]) -> [Int32] {
+        for pid in emptyChecks.keys where current[pid] == 0 {
+            emptyChecks[pid, default: 0] += 1
+        }
+        for pid in appsWithNoWindowsLeft(previous: counts, current: current) where emptyChecks[pid] == nil {
+            emptyChecks[pid] = 1
+        }
+        // An app with a window again, or one that is gone, is no longer waiting.
+        emptyChecks = emptyChecks.filter { pid, _ in current[pid] == 0 }
+        let quit = emptyChecks.filter { $0.value >= 2 }.keys.sorted()
+        // Asked once; if the app refuses or puts up a save dialog, it is not asked again.
+        for pid in quit { emptyChecks.removeValue(forKey: pid) }
+        counts = current
+        return quit
+    }
+
+    /// Takes a first count without starting any waiting, for when the watcher begins.
+    public mutating func prime(_ current: [Int32: Int]) {
+        counts = current
+        emptyChecks = [:]
+    }
+}
+
 /// The layout's name as plain text, for places that cannot take a LocalizedStringKey,
 /// such as the central shortcut page.
 func layoutName(_ action: LayoutAction) -> String {

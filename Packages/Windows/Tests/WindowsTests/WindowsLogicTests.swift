@@ -438,3 +438,82 @@ struct FocusFollowsMouseTests {
         #expect(!ModifierDragMode.off.movesOnLeft && !ModifierDragMode.off.resizesOnRight)
     }
 }
+
+@Suite struct QuitWatchStateTests {
+    @Test func oneEmptyCountIsNotEnough() {
+        var state = QuitWatchState()
+        state.prime([7: 2])
+        let first = state.update([7: 0])
+        #expect(first.isEmpty, "the first empty count only starts the wait")
+        let second = state.update([7: 0])
+        #expect(second == [7], "gone twice in a row, now it may be quit")
+    }
+
+    @Test func aWindowComingBackEndsTheWait() {
+        var state = QuitWatchState()
+        state.prime([7: 1])
+        let emptied = state.update([7: 0])
+        #expect(emptied.isEmpty)
+        // A minimized window that is restored, or one brought back from another Space.
+        let restored = state.update([7: 1])
+        #expect(restored.isEmpty)
+        let emptiedAgain = state.update([7: 0])
+        #expect(emptiedAgain.isEmpty, "the wait starts over")
+        let twice = state.update([7: 0])
+        #expect(twice == [7])
+    }
+
+    @Test func anAppThatNeverHadAWindowIsLeftAlone() {
+        var state = QuitWatchState()
+        state.prime([7: 0])
+        let first = state.update([7: 0])
+        #expect(first.isEmpty)
+        let second = state.update([7: 0])
+        #expect(second.isEmpty, "a menu bar app or helper is not quit")
+    }
+
+    @Test func anAppWhoseCountCouldNotBeReadIsLeftAlone() {
+        var state = QuitWatchState()
+        state.prime([7: 3])
+        let emptied = state.update([7: 0])
+        #expect(emptied.isEmpty)
+        // The app did not answer, so it is missing from the count rather than zero.
+        let silent = state.update([:])
+        #expect(silent.isEmpty)
+        let stillSilent = state.update([:])
+        #expect(stillSilent.isEmpty, "silence is not the same as having no windows")
+    }
+
+    @Test func anAppThatHasGoneAwayIsNotQuitAgain() {
+        var state = QuitWatchState()
+        state.prime([7: 1])
+        let emptied = state.update([7: 0])
+        #expect(emptied.isEmpty)
+        let gone = state.update([:])
+        #expect(gone.isEmpty, "it quit by itself; nothing left to ask")
+    }
+
+    @Test func anAppIsOnlyAskedOnce() {
+        var state = QuitWatchState()
+        state.prime([7: 1])
+        _ = state.update([7: 0])
+        let asked = state.update([7: 0])
+        #expect(asked == [7])
+        let again = state.update([7: 0])
+        #expect(again.isEmpty, "a save dialog must not be nagged every two seconds")
+    }
+
+    @Test func severalAppsAreWatchedApart() {
+        var state = QuitWatchState()
+        state.prime([7: 1, 9: 1, 11: 1])
+        let first = state.update([7: 0, 9: 1, 11: 0])
+        #expect(first.isEmpty)
+        let second = state.update([7: 0, 9: 0, 11: 1])
+        #expect(second == [7], "only the one that was empty both times")
+    }
+
+    @Test func theOldHelperStillAnswersTheTransition() {
+        #expect(appsWithNoWindowsLeft(previous: [7: 2], current: [7: 0]) == [7])
+        #expect(appsWithNoWindowsLeft(previous: [7: 0], current: [7: 0]).isEmpty)
+    }
+}
