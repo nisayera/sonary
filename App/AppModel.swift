@@ -74,7 +74,9 @@ final class AppModel {
         }
         let display = DisplayModule(defaults: defaults)
         self.display = display
-        self.registry = ModuleRegistry(modules: [monitor, mouse, keyboard, notch, clipboard, apps, windows, display, sound, tools], defaults: defaults, permissions: broker)
+        self.registry = ModuleRegistry(modules: [monitor, mouse, keyboard, notch, clipboard, apps, windows, display, sound, tools],
+                                       defaults: defaults, permissions: broker,
+                                       missingPermissionText: { missingPermissionText($0) })
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
         self.appearance = SonaryAppearance.stored(in: defaults)
     }

@@ -146,3 +146,24 @@ public struct SettingsPage<Header: View, Content: View>: View {
         }
     }
 }
+
+/// A line inside a settings card for something that cannot work right now, such as a missing
+/// permission.
+public struct SettingsWarning: View {
+    private let text: Text
+
+    public init(_ text: Text) {
+        self.text = text
+    }
+
+    public var body: some View {
+        Label {
+            text.font(.callout).fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: "exclamationmark.triangle.fill")
+        }
+        .foregroundStyle(.orange)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+}

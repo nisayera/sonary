@@ -1,4 +1,5 @@
 import Foundation
+import SonaryCore
 
 public struct AppOverride: Codable, Equatable, Sendable {
     public var disabled: Bool
@@ -44,11 +45,7 @@ public struct MouseSettingsStore {
     public init(defaults: UserDefaults) { self.defaults = defaults }
 
     public func load() -> MouseSettings {
-        guard let data = defaults.data(forKey: key),
-              let settings = try? JSONDecoder().decode(MouseSettings.self, from: data) else {
-            return MouseSettings()
-        }
-        return settings
+        StoredSettings.load(MouseSettings.self, key: key, from: defaults, fallback: MouseSettings())
     }
 
     public func save(_ settings: MouseSettings) {

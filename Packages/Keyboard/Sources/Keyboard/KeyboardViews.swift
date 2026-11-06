@@ -23,6 +23,12 @@ struct KeyboardSettingsView: View {
     let model: KeyboardModel
 
     var body: some View {
+        if model.needsAccessibility {
+            SettingsCard {
+                SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.",
+                                     bundle: .module))
+            }
+        }
         SettingsCard(Text("Super Key", bundle: .module)) {
             SettingsToggleRow(symbol: "command", title: Text("Turn one key into ⌃⌥⇧⌘", bundle: .module),
                               caption: Text("Held down it adds all four modifiers, so you get shortcuts no app uses.",

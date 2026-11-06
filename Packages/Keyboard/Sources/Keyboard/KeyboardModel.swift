@@ -30,6 +30,8 @@ public final class KeyboardModel {
     public private(set) var settings: KeyboardSettings
     /// Set while the Super Key is held, so the settings screen can show it working.
     public private(set) var isHolding = false
+    /// Set when the event tap could not be created, which means Accessibility is missing.
+    public private(set) var needsAccessibility = false
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var engine = SuperKeyEngine()
@@ -42,12 +44,8 @@ public final class KeyboardModel {
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
-        if let data = defaults.data(forKey: "keyboard.settings"),
-           let settings = try? JSONDecoder().decode(KeyboardSettings.self, from: data) {
-            self.settings = settings
-        } else {
-            settings = KeyboardSettings()
-        }
+        settings = StoredSettings.load(KeyboardSettings.self, key: "keyboard.settings", from: defaults,
+                                       fallback: KeyboardSettings())
     }
 
     func start() {
@@ -81,6 +79,7 @@ public final class KeyboardModel {
         guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
                                           eventsOfInterest: mask, callback: keyboardTapCallback,
                                           userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
+            needsAccessibility = true
             _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
             return
         }
@@ -89,6 +88,7 @@ public final class KeyboardModel {
         CGEvent.tapEnable(tap: tap, enable: true)
         self.tap = tap
         self.source = source
+        needsAccessibility = false
     }
 
     private func removeTap() {
@@ -96,6 +96,7 @@ public final class KeyboardModel {
         if let source { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes) }
         tap = nil
         source = nil
+        needsAccessibility = false
     }
 
     func decide(type: CGEventType, keyCode: Int64, flags: CGEventFlags) -> SuperKeyOutcome {

@@ -35,12 +35,8 @@ public final class DisplayModel {
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
-        if let data = defaults.data(forKey: "display.settings"),
-           let settings = try? JSONDecoder().decode(DisplaySettings.self, from: data) {
-            self.settings = settings
-        } else {
-            settings = DisplaySettings()
-        }
+        settings = StoredSettings.load(DisplaySettings.self, key: "display.settings", from: defaults,
+                                       fallback: DisplaySettings())
     }
 
     func start() {

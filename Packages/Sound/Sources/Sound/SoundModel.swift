@@ -75,6 +75,8 @@ public final class SoundModel {
     @ObservationIgnored private var levelWatchers = 0
     @ObservationIgnored private var lastOutputName: String?
     @ObservationIgnored private var mediaTap: CFMachPort?
+    /// Set when the media-key tap could not be created, which means Accessibility is missing.
+    public private(set) var mediaKeysNeedAccessibility = false
     @ObservationIgnored private var mediaSource: CFRunLoopSource?
     /// Bundle IDs of the players Sonary will talk to; it never launches one.
     @ObservationIgnored private let players = ["com.apple.Music", "com.spotify.client"]
@@ -84,12 +86,8 @@ public final class SoundModel {
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
-        if let data = defaults.data(forKey: "sound.settings"),
-           let settings = try? JSONDecoder().decode(SoundSettings.self, from: data) {
-            self.settings = settings
-        } else {
-            settings = SoundSettings()
-        }
+        settings = StoredSettings.load(SoundSettings.self, key: "sound.settings", from: defaults,
+                                       fallback: SoundSettings())
     }
 
     func start() {
@@ -194,6 +192,7 @@ public final class SoundModel {
         guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
                                           eventsOfInterest: mask, callback: mediaTapCallback,
                                           userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
+            mediaKeysNeedAccessibility = true
             _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
             return
         }
@@ -202,6 +201,7 @@ public final class SoundModel {
         CGEvent.tapEnable(tap: tap, enable: true)
         mediaTap = tap
         mediaSource = source
+        mediaKeysNeedAccessibility = false
     }
 
     private func removeMediaTap() {
@@ -209,6 +209,7 @@ public final class SoundModel {
         if let mediaSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), mediaSource, .commonModes) }
         mediaTap = nil
         mediaSource = nil
+        mediaKeysNeedAccessibility = false
     }
 
     func stopLevelAndIndicator() {
@@ -230,8 +231,12 @@ public final class SoundModel {
         case .next: "next track"
         case .previous: "previous track"
         }
-        var error: NSDictionary?
-        NSAppleScript(source: "tell application \"\(name)\" to \(command)")?.executeAndReturnError(&error)
+        // This runs inside the event tap. The command goes to the player after the tap has
+        // answered, so a player that is slow to respond cannot hold up every key press.
+        Task { @MainActor in
+            var error: NSDictionary?
+            NSAppleScript(source: "tell application \"\(name)\" to \(command)")?.executeAndReturnError(&error)
+        }
         return false
     }
 

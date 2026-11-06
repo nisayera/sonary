@@ -24,7 +24,11 @@ struct OnboardingView: View {
                         ForEach(steps, id: \.permission) { step in
                             GlassCard {
                                 HStack {
-                                    Text(step.permission.rawValue).font(.headline)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(permissionTitle(step.permission)).font(.headline)
+                                        Text("Used by \(moduleNames(step.moduleIDs))")
+                                            .font(.caption).foregroundStyle(.secondary)
+                                    }
                                     Spacer()
                                     if granted.contains(step.permission) {
                                         Image(systemName: "checkmark.circle.fill")
@@ -62,5 +66,11 @@ struct OnboardingView: View {
         }
         .padding(Spacing.l)
         .frame(width: 460)
+    }
+
+    private func moduleNames(_ ids: [String]) -> String {
+        let titles = ids.compactMap { id in model.registry.modules.first { $0.id == id } }
+            .map { String(localized: $0.title) }
+        return ListFormatter.localizedString(byJoining: titles)
     }
 }

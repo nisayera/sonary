@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import SonaryCore
 
 public struct CleanTarget: Identifiable, Equatable, Sendable {
     public var id: String
@@ -59,10 +60,8 @@ public final class AppsModel {
 
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        if let data = defaults.data(forKey: "apps.settings"),
-           let stored = try? JSONDecoder().decode(AppsSettings.self, from: data) {
-            settings = stored
-        }
+        settings = StoredSettings.load(AppsSettings.self, key: "apps.settings", from: defaults,
+                                       fallback: AppsSettings())
         let library = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library")
         cleanTargets = [
             CleanTarget(id: "caches", folder: library.appendingPathComponent("Caches")),

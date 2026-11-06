@@ -117,10 +117,7 @@ public final class ShortcutStore {
 
     public func configure(defaults: UserDefaults) {
         self.defaults = defaults
-        if let data = defaults.data(forKey: Self.storageKey),
-           let stored = try? JSONDecoder().decode([String: KeyCombo].self, from: data) {
-            custom = stored
-        }
+        custom = StoredSettings.load([String: KeyCombo].self, key: Self.storageKey, from: defaults, fallback: [:])
     }
 
     /// Modules announce their shortcuts once, so the settings page can list them even

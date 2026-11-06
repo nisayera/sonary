@@ -155,6 +155,9 @@ struct SoundSettingsView: View {
                               caption: Text("While a player is running, Sonary passes the key to it instead.", bundle: .module),
                               isOn: Binding(get: { model.settings.mediaKeyGuard },
                                             set: { value in model.update { $0.mediaKeyGuard = value } }))
+            if model.mediaKeysNeedAccessibility {
+                SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.", bundle: .module))
+            }
         }
         SettingsCard(Text("Keep awake", bundle: .module)) {
             SettingsToggleRow(symbol: "laptopcomputer", title: Text("Stay awake with the lid closed", bundle: .module),

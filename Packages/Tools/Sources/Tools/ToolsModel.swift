@@ -66,12 +66,8 @@ public final class ToolsModel {
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
-        if let data = defaults.data(forKey: "tools.settings"),
-           let settings = try? JSONDecoder().decode(ToolsSettings.self, from: data) {
-            self.settings = settings
-        } else {
-            settings = ToolsSettings()
-        }
+        settings = StoredSettings.load(ToolsSettings.self, key: "tools.settings", from: defaults,
+                                       fallback: ToolsSettings())
     }
 
     func start() {

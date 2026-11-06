@@ -1,4 +1,5 @@
 import Foundation
+import SonaryCore
 
 public enum NotchWidget: String, Codable, CaseIterable, Sendable {
     case music, calendar, timer, downloads, batteries, shelf, camera
@@ -38,9 +39,7 @@ public struct NotchSettingsStore {
     public init(defaults: UserDefaults) { self.defaults = defaults }
 
     public func load() -> NotchSettings {
-        guard let data = defaults.data(forKey: key),
-              let settings = try? JSONDecoder().decode(NotchSettings.self, from: data) else { return NotchSettings() }
-        return settings
+        StoredSettings.load(NotchSettings.self, key: key, from: defaults, fallback: NotchSettings())
     }
 
     public func save(_ settings: NotchSettings) {

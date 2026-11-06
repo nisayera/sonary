@@ -625,6 +625,16 @@
         }
       }
     },
+    "Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dafür braucht Sonary die Bedienungshilfen. Erlaube sie unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen und schalte das hier dann aus und wieder ein."
+          }
+        }
+      }
+    },
     "Spaces": {
       "extractionState": "manual",
       "localizations": {
