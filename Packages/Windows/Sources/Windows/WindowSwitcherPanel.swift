@@ -32,6 +32,7 @@ final class WindowSwitcherController {
         panel.contentView = NSHostingView(rootView: WindowSwitcherView(
             entries: entries,
             showsPreviews: showsPreviews,
+            display: Self.pointerDisplayBounds(),
             choose: { [weak self] entry in
                 self?.close()
                 WindowSwitcherController.raise(entry)
@@ -46,6 +47,17 @@ final class WindowSwitcherController {
     }
 
     func close() { panel?.orderOut(nil) }
+
+    /// The display the pointer is on, in window-server coordinates, for the "this display"
+    /// filter. Nil with a single display, where the filter would change nothing.
+    static func pointerDisplayBounds() -> CGRect? {
+        guard NSScreen.screens.count > 1 else { return nil }
+        let pointer = NSEvent.mouseLocation
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(pointer) }) ?? NSScreen.main,
+              let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+        else { return nil }
+        return CGDisplayBounds(number.uint32Value)
+    }
 
     static func currentEntries() -> [WindowEntry] {
         let raw = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
@@ -76,14 +88,19 @@ final class WindowSwitcherController {
 struct WindowSwitcherView: View {
     let entries: [WindowEntry]
     let showsPreviews: Bool
+    /// The pointer's display, when there is more than one.
+    let display: CGRect?
     let choose: (WindowEntry) -> Void
     let cancel: () -> Void
     @State private var query = ""
     @State private var app: String?
+    @State private var onThisDisplay = false
     @State private var selected = 0
     @FocusState private var focused: Bool
 
-    private var results: [WindowEntry] { filteredEntries(entries, query: query, app: app) }
+    private var results: [WindowEntry] {
+        filteredEntries(entries, query: query, app: app, display: onThisDisplay ? display : nil)
+    }
 
     var body: some View {
         let list = results
@@ -95,9 +112,23 @@ struct WindowSwitcherView: View {
                 .onSubmit { pick(list) }
                 .onChange(of: query) { _, _ in selected = 0 }
             let apps = appNames(in: entries)
-            if apps.count > 1 {
+            if apps.count > 1 || display != nil {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
+                        if display != nil {
+                            Button {
+                                onThisDisplay.toggle()
+                                selected = 0
+                            } label: {
+                                Label { Text("This display", bundle: .module) } icon: { Image(systemName: "display") }
+                                    .font(.caption)
+                                    .padding(.horizontal, 9)
+                                    .padding(.vertical, 3)
+                                    .background(onThisDisplay ? Color.sonaryAccent.opacity(0.28) : Color.secondary.opacity(0.14),
+                                                in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
                         filterChip(title: String(localized: "All apps", bundle: .module), value: nil)
                         ForEach(apps, id: \.self) { name in filterChip(title: name, value: name) }
                     }

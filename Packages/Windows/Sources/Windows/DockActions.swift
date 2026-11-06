@@ -4,9 +4,15 @@ import ApplicationServices
 /// What a click on a running app's Dock icon should do instead of the system's own
 /// behaviour. `.system` leaves the click alone.
 public enum DockClickAction: String, CaseIterable, Codable, Sendable, Identifiable {
-    case system, cycleWindows, minimizeAll, showAllWindows
+    case system, cycleWindows, minimizeAll, showAllWindows, hide
 
     public var id: String { rawValue }
+}
+
+/// A Dock click only gets the extra action when its app was already in front as the click
+/// began. A click on an app in the background is the Dock's own business: bringing it forward.
+public func dockClickApplies(clickedPID: Int32, frontmostAtMouseDown: Int32?) -> Bool {
+    clickedPID == frontmostAtMouseDown
 }
 
 /// One window of an app, as the window server lists it.

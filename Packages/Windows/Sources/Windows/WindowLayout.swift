@@ -6,9 +6,12 @@ public enum LayoutAction: String, CaseIterable, Codable, Sendable {
     case topLeft, topRight, bottomLeft, bottomRight
     case leftThird, centerThird, rightThird
     case maximize, center, fillScreen
+    case topLeftSixth, topCenterSixth, topRightSixth
+    case bottomLeftSixth, bottomCenterSixth, bottomRightSixth
 
-    /// Arrow and letter keys with ⌃⌥ (Carbon key codes).
-    public var keyCode: Int {
+    /// Arrow and letter keys with ⌃⌥ (Carbon key codes). Sixths ship without a shortcut;
+    /// they can be given one on the Shortcuts page.
+    public var keyCode: Int? {
         switch self {
         case .leftHalf: 123
         case .rightHalf: 124
@@ -24,9 +27,12 @@ public enum LayoutAction: String, CaseIterable, Codable, Sendable {
         case .maximize: 36     // Return
         case .center: 8        // C
         case .fillScreen: 11     // B, for the whole screen including the menu bar
+        case .topLeftSixth, .topCenterSixth, .topRightSixth,
+             .bottomLeftSixth, .bottomCenterSixth, .bottomRightSixth: nil
         }
     }
 
+    /// The shortcut a layout ships with, or an empty string for one that has none.
     public var shortcutLabel: String {
         let key: String = switch self {
         case .leftHalf: "←"
@@ -43,8 +49,10 @@ public enum LayoutAction: String, CaseIterable, Codable, Sendable {
         case .maximize: "↩"
         case .center: "C"
         case .fillScreen: "B"
+        case .topLeftSixth, .topCenterSixth, .topRightSixth,
+             .bottomLeftSixth, .bottomCenterSixth, .bottomRightSixth: ""
         }
-        return "⌃⌥" + key
+        return key.isEmpty ? "" : "⌃⌥" + key
     }
 }
 
@@ -70,6 +78,12 @@ public func layoutFrame(_ action: LayoutAction, visible v: CGRect, full: CGRect,
     case .leftThird: CGRect(x: v.minX, y: v.minY, width: w / 3, height: h)
     case .centerThird: CGRect(x: v.minX + w / 3, y: v.minY, width: w / 3, height: h)
     case .rightThird: CGRect(x: v.minX + 2 * w / 3, y: v.minY, width: w / 3, height: h)
+    case .topLeftSixth: CGRect(x: v.minX, y: v.midY, width: w / 3, height: h / 2)
+    case .topCenterSixth: CGRect(x: v.minX + w / 3, y: v.midY, width: w / 3, height: h / 2)
+    case .topRightSixth: CGRect(x: v.minX + 2 * w / 3, y: v.midY, width: w / 3, height: h / 2)
+    case .bottomLeftSixth: CGRect(x: v.minX, y: v.minY, width: w / 3, height: h / 2)
+    case .bottomCenterSixth: CGRect(x: v.minX + w / 3, y: v.minY, width: w / 3, height: h / 2)
+    case .bottomRightSixth: CGRect(x: v.minX + 2 * w / 3, y: v.minY, width: w / 3, height: h / 2)
     case .maximize: v
     case .fillScreen: full
     case .center:
@@ -88,6 +102,19 @@ public func cocoaRect(fromAX rect: CGRect, primaryScreenHeight: CGFloat) -> CGRe
     CGRect(x: rect.minX, y: primaryScreenHeight - rect.maxY, width: rect.width, height: rect.height)
 }
 
+/// Whether a window already has the frame a layout would give it. Apps round sizes to their
+/// own steps (a terminal to whole characters), so a few points either way still count.
+public func framesMatch(_ a: CGRect, _ b: CGRect, tolerance: CGFloat = 12) -> Bool {
+    abs(a.minX - b.minX) <= tolerance && abs(a.minY - b.minY) <= tolerance
+        && abs(a.width - b.width) <= tolerance && abs(a.height - b.height) <= tolerance
+}
+
+/// Whether the front app has asked to be left alone by a feature.
+public func isExcluded(bundleID: String?, in list: [String]) -> Bool {
+    guard let bundleID else { return false }
+    return list.contains(bundleID)
+}
+
 // MARK: - Quit protection
 
 public enum ProtectedKey: String, Sendable, Equatable {
@@ -95,11 +122,27 @@ public enum ProtectedKey: String, Sendable, Equatable {
     case close
 }
 
-/// How a protected shortcut is confirmed: press it twice, or hold it down.
+/// How a protected shortcut is confirmed: press it twice, hold it down, or press it with ⌥.
 public enum QuitConfirmation: String, CaseIterable, Codable, Sendable, Identifiable {
-    case pressTwice, hold
+    case pressTwice, hold, extraModifier
 
     public var id: String { rawValue }
+}
+
+/// What the tap does with ⌘Q or ⌘W when ⌥ is the confirmation.
+public enum ModifierConfirmation: Equatable, Sendable {
+    /// Not the protected combination at all.
+    case pass
+    /// ⌘Q alone: held back, with a hint to add ⌥.
+    case holdBack
+    /// ⌥⌘Q: held back, and a plain ⌘Q sent in its place, because many apps read ⌥⌘W
+    /// as "close all windows" and ⌥⌘Q as something of their own.
+    case sendPlain
+}
+
+public func modifierConfirmation(command: Bool, option: Bool, shift: Bool, control: Bool) -> ModifierConfirmation {
+    guard command, !shift, !control else { return .pass }
+    return option ? .sendPlain : .holdBack
 }
 
 /// Holding a protected shortcut: it goes through once it has been held long enough.
@@ -255,5 +298,11 @@ func layoutName(_ action: LayoutAction) -> String {
     case .maximize: String(localized: "Maximize", bundle: .module)
     case .center: String(localized: "Center", bundle: .module)
     case .fillScreen: String(localized: "Fill the screen", bundle: .module)
+    case .topLeftSixth: String(localized: "Top left sixth", bundle: .module)
+    case .topCenterSixth: String(localized: "Top center sixth", bundle: .module)
+    case .topRightSixth: String(localized: "Top right sixth", bundle: .module)
+    case .bottomLeftSixth: String(localized: "Bottom left sixth", bundle: .module)
+    case .bottomCenterSixth: String(localized: "Bottom center sixth", bundle: .module)
+    case .bottomRightSixth: String(localized: "Bottom right sixth", bundle: .module)
     }
 }
