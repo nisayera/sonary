@@ -30,6 +30,7 @@ struct PopoverView: View {
                 VStack(alignment: .leading, spacing: PanelMetrics.spacing) {
                     content(for: current, panelModules: panelModules)
                 }
+                .controlSize(.small)
                 .frame(width: PanelMetrics.contentWidth, alignment: .leading)
                 .onGeometryChange(for: CGFloat.self) { proxy in
                     proxy.size.height

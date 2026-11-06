@@ -41,10 +41,17 @@ struct SnapshotTests {
             (.shortcuts, "shortcuts"), (.module("mouse"), "mouse"), (.module("windows"), "windows"),
             (.module("monitor"), "monitor"),
         ]
+        // The settings window's materials are not drawn off screen, so the page gets the window's
+        // own colour behind it, or its text would stand on nothing.
         for (page, name) in pages {
             model.settingsPage = page
-            await render(SettingsView(model: model).frame(width: 900, height: 620), name: "settings-\(name)",
-                         scheme: .dark, in: folder)
+            for scheme in [ColorScheme.light, .dark] {
+                let suffix = scheme == .dark ? "dark" : "light"
+                await render(SettingsView(model: model)
+                                .frame(width: 900, height: 620)
+                                .background(Color(nsColor: .windowBackgroundColor)),
+                             name: "settings-\(name)-\(suffix)", scheme: scheme, in: folder)
+            }
         }
 
         for id in running {
