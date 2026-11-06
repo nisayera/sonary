@@ -581,3 +581,113 @@ struct SpaceOrderRestoreTests {
         #expect(decodeSpaceOrderPreference(nil) == true)
     }
 }
+
+struct CommandTabTests {
+    @Test func holdingCommandMovesAndLettingGoChooses() {
+        var tracker = CommandTabTracker()
+        #expect(tracker.keyDown(keyCode: 48, command: true, shift: false, option: false, control: false)
+                == .open(forward: true))
+        #expect(tracker.keyUp(keyCode: 48) == .swallow)
+        #expect(tracker.keyDown(keyCode: 48, command: true, shift: false, option: false, control: false)
+                == .move(forward: true))
+        #expect(tracker.keyDown(keyCode: 48, command: true, shift: true, option: false, control: false)
+                == .move(forward: false))
+        #expect(tracker.flagsChanged(command: true) == .pass)
+        #expect(tracker.flagsChanged(command: false) == .choose)
+        #expect(!tracker.isOpen)
+        #expect(tracker.keyUp(keyCode: 48) == .pass)
+    }
+
+    @Test func otherKeysPassUntilTheSwitcherIsOpen() {
+        var tracker = CommandTabTracker()
+        #expect(tracker.keyDown(keyCode: 48, command: false, shift: false, option: false, control: false) == .pass)
+        #expect(tracker.keyDown(keyCode: 48, command: true, shift: false, option: true, control: false) == .pass)
+        #expect(tracker.keyDown(keyCode: 12, command: true, shift: false, option: false, control: false) == .pass)
+        _ = tracker.keyDown(keyCode: 48, command: true, shift: true, option: false, control: false)
+        // ⌘Q while the switcher is open never reaches the app in front.
+        #expect(tracker.keyDown(keyCode: 12, command: true, shift: false, option: false, control: false) == .swallow)
+        #expect(tracker.keyDown(keyCode: 53, command: true, shift: false, option: false, control: false) == .cancel)
+        #expect(tracker.flagsChanged(command: false) == .pass)
+    }
+
+    @Test func closingFromOutsideForgetsTheOpenSwitcher() {
+        var tracker = CommandTabTracker()
+        _ = tracker.keyDown(keyCode: 48, command: true, shift: false, option: false, control: false)
+        tracker.closed()
+        #expect(tracker.flagsChanged(command: false) == .pass)
+    }
+
+    @Test func selectionStartsBehindTheFrontWindow() {
+        #expect(heldSelection(count: 4, forward: true) == 1)
+        #expect(heldSelection(count: 4, forward: false) == 3)
+        #expect(heldSelection(count: 1, forward: true) == 0)
+        #expect(heldSelection(count: 0, forward: false) == 0)
+    }
+
+    @Test func iconsKeepEachAppsFrontWindow() {
+        let entries = [
+            WindowEntry(id: 1, pid: 10, appName: "Safari", title: "One"),
+            WindowEntry(id: 2, pid: 20, appName: "Mail", title: "Inbox"),
+            WindowEntry(id: 3, pid: 10, appName: "Safari", title: "Two"),
+        ]
+        #expect(oneWindowPerApp(entries).map(\.id) == [1, 2])
+    }
+}
+
+private final class FakeHotKeys: SystemHotKeyControlling, @unchecked Sendable {
+    var table: [Int32: Bool] = [1: true, 2: true]
+    var available = true
+    var writesFail = false
+
+    func isEnabled(_ id: Int32) -> Bool? { available ? table[id] ?? true : nil }
+    func setEnabled(_ id: Int32, _ enabled: Bool) -> Bool {
+        guard available, !writesFail else { return false }
+        table[id] = enabled
+        return true
+    }
+}
+
+struct NativeSwitcherGuardTests {
+    private func makeDefaults() -> UserDefaults {
+        let name = "sonary.tests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name)!
+        defaults.removePersistentDomain(forName: name)
+        return defaults
+    }
+
+    @Test func takingOverSwitchesTheSystemOffAndRestorePutsItBack() {
+        let keys = FakeHotKeys()
+        let guardian = NativeSwitcherGuard(control: keys, defaults: makeDefaults())
+        #expect(guardian.takeOver())
+        #expect(keys.table == [1: false, 2: false])
+        guardian.restore()
+        #expect(keys.table == [1: true, 2: true])
+    }
+
+    @Test func aCrashIsRepairedOnTheNextStart() {
+        let keys = FakeHotKeys()
+        let defaults = makeDefaults()
+        NativeSwitcherGuard(control: keys, defaults: defaults).takeOver()
+        // A new run, as after a crash, finds the note and puts the switcher back.
+        NativeSwitcherGuard(control: keys, defaults: defaults).recoverIfNeeded()
+        #expect(keys.table == [1: true, 2: true])
+    }
+
+    @Test func aSwitcherTheUserHadOffStaysOff() {
+        let keys = FakeHotKeys()
+        keys.table[2] = false
+        let guardian = NativeSwitcherGuard(control: keys, defaults: makeDefaults())
+        guardian.takeOver()
+        guardian.takeOver()
+        guardian.restore()
+        #expect(keys.table == [1: true, 2: false])
+    }
+
+    @Test func withoutTheSystemCallsNothingChanges() {
+        let keys = FakeHotKeys()
+        keys.available = false
+        let guardian = NativeSwitcherGuard(control: keys, defaults: makeDefaults())
+        #expect(!guardian.takeOver())
+        #expect(keys.table == [1: true, 2: true])
+    }
+}

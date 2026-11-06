@@ -73,6 +73,16 @@
         }
       }
     },
+    "App icons": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App-Symbole"
+          }
+        }
+      }
+    },
     "Asks for the Screen Recording permission the first time.": {
       "localizations": {
         "de": {
@@ -423,6 +433,16 @@
         }
       }
     },
+    "Look": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darstellung"
+          }
+        }
+      }
+    },
     "Maximize": {
       "localizations": {
         "de": {
@@ -545,6 +565,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nur diese Apps sind geschützt."
+          }
+        }
+      }
+    },
+    "Open it with ⌘Tab": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit ⌘Tab öffnen"
           }
         }
       }
@@ -826,12 +856,32 @@
         }
       }
     },
+    "Takes ⌘Tab over from macOS: hold ⌘, press Tab to move on, ⇧Tab to go back, and let go to switch. The macOS switcher comes back when this is off or Sonary quits.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Übernimmt ⌘Tab von macOS: ⌘ halten, mit Tab weiter, mit ⇧Tab zurück, loslassen zum Wechseln. Der macOS-Umschalter kommt zurück, sobald das aus ist oder Sonary beendet wird."
+          }
+        }
+      }
+    },
     "The green button fills the screen": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Die grüne Taste füllt den Bildschirm"
+          }
+        }
+      }
+    },
+    "The list finds a window by its title; the icons show one app each, like the macOS switcher.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Liste findet ein Fenster über seinen Titel, die Symbole zeigen je eine App wie der macOS-Umschalter."
           }
         }
       }
@@ -936,6 +986,16 @@
         }
       }
     },
+    "Window list": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fensterliste"
+          }
+        }
+      }
+    },
     "Window previews when the pointer rests on an icon": {
       "extractionState": "manual",
       "localizations": {
@@ -973,6 +1033,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenster"
+          }
+        }
+      }
+    },
+    "macOS kept its own switcher on, so ⌘Tab may open both.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS hat den eigenen Umschalter angelassen, ⌘Tab öffnet deshalb vielleicht beide."
           }
         }
       }

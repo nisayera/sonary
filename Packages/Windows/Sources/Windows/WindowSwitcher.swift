@@ -81,3 +81,86 @@ public func appNames(in entries: [WindowEntry]) -> [String] {
     for entry in entries where !seen.contains(entry.appName) { seen.append(entry.appName) }
     return seen.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
 }
+
+/// How the switcher looks.
+public enum SwitcherStyle: String, Codable, CaseIterable, Sendable {
+    /// Every window in a list with search, filters and pictures.
+    case list
+    /// One large icon per app in a row, the way the macOS switcher looks.
+    case icons
+}
+
+/// One entry per app, its frontmost window, in the order the apps come up.
+public func oneWindowPerApp(_ entries: [WindowEntry]) -> [WindowEntry] {
+    var seen = Set<Int32>()
+    return entries.filter { seen.insert($0.pid).inserted }
+}
+
+/// Where the selection starts when ⌘Tab opens the switcher: on the window behind the front
+/// one, so a quick ⌘Tab goes back and forth between two; ⌘⇧Tab starts at the far end.
+public func heldSelection(count: Int, forward: Bool) -> Int {
+    guard count > 1 else { return 0 }
+    return forward ? 1 : count - 1
+}
+
+/// What a key does while Sonary's switcher has taken over ⌘Tab.
+public enum CommandTabStep: Equatable, Sendable {
+    /// Nothing for the switcher: the key goes on to the app.
+    case pass
+    /// ⌘Tab opened the switcher, going forward, or backward with ⇧.
+    case open(forward: Bool)
+    case move(forward: Bool)
+    /// ⌘ was let go, or Return pressed: bring the selected window forward.
+    case choose
+    case cancel
+    /// A key pressed while the switcher is open that does nothing there; the app never gets it.
+    case swallow
+}
+
+/// Follows ⌘Tab: opens on Tab while ⌘ is held, moves on each further Tab and chooses when ⌘
+/// is let go, the way the macOS switcher works.
+public struct CommandTabTracker: Sendable {
+    public private(set) var isOpen = false
+
+    public init() {}
+
+    public mutating func keyDown(keyCode: Int64, command: Bool, shift: Bool, option: Bool, control: Bool)
+        -> CommandTabStep {
+        if keyCode == 48, command, !option, !control {
+            if isOpen { return .move(forward: !shift) }
+            isOpen = true
+            return .open(forward: !shift)
+        }
+        guard isOpen else { return .pass }
+        switch keyCode {
+        case 53:
+            isOpen = false
+            return .cancel
+        case 36, 76:
+            isOpen = false
+            return .choose
+        case 123, 126, 50:  // left, up, and the key above Tab
+            return .move(forward: false)
+        case 124, 125:
+            return .move(forward: true)
+        default:
+            return .swallow
+        }
+    }
+
+    /// The Tab let go while the switcher is open stays away from the app, like its key-down.
+    public func keyUp(keyCode: Int64) -> CommandTabStep {
+        isOpen && keyCode == 48 ? .swallow : .pass
+    }
+
+    public mutating func flagsChanged(command: Bool) -> CommandTabStep {
+        guard isOpen, !command else { return .pass }
+        isOpen = false
+        return .choose
+    }
+
+    /// The switcher closed some other way: a click on a window, or nothing to show.
+    public mutating func closed() {
+        isOpen = false
+    }
+}
