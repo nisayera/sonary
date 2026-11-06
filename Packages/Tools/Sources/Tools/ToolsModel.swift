@@ -20,6 +20,8 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var snippetDelivery: SnippetDelivery = .type
     /// Open the editor on a fresh screenshot instead of only copying it.
     public var annotateAfterCapture = false
+    /// Typing a snippet's trigger anywhere replaces it with the snippet.
+    public var snippetTriggers = false
     public var activeTab: UUID?
     public init() {}
 }
@@ -63,6 +65,9 @@ public final class ToolsModel {
     /// Commands other modules add to the command bar, for example the clipboard history.
     @ObservationIgnored public var externalCommands: @MainActor () -> [ExternalCommand] = { [] }
     @ObservationIgnored private var running = false
+    @ObservationIgnored private let triggerTap = SnippetTriggerTap()
+    /// Set when the trigger watcher could not start, which means Accessibility is missing.
+    public private(set) var snippetTriggersNeedAccessibility = false
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
@@ -73,11 +78,13 @@ public final class ToolsModel {
     func start() {
         running = true
         applyShortcuts()
+        applyTriggers()
     }
 
     func stop() {
         running = false
         applyShortcuts()
+        applyTriggers()
         commandBar?.close()
         commandBar = nil
         radial.close()
@@ -151,9 +158,36 @@ public final class ToolsModel {
 
     public func update(_ change: (inout ToolsSettings) -> Void) {
         let before = settings.shortcuts
+        let triggersBefore = settings.snippetTriggers
         change(&settings)
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "tools.settings") }
         if before != settings.shortcuts { applyShortcuts() }
+        if triggersBefore != settings.snippetTriggers { applyTriggers() }
+    }
+
+    /// Starts or stops watching for snippet triggers.
+    private func applyTriggers() {
+        guard running, settings.snippetTriggers else {
+            triggerTap.stop()
+            snippetTriggersNeedAccessibility = false
+            return
+        }
+        triggerTap.snippets = { [weak self] in self?.settings.snippets ?? [] }
+        triggerTap.expand = { [weak self] snippet in self?.expandTrigger(snippet) }
+        snippetTriggersNeedAccessibility = !triggerTap.start()
+    }
+
+    /// Replaces a trigger that was just typed with its snippet: deletes the trigger, then
+    /// types the snippet, once the trigger's last key has reached the app.
+    private func expandTrigger(_ snippet: Snippet) {
+        let typedLength = snippet.trigger?.count ?? 0
+        let clipboard = NSPasteboard.general.string(forType: .string)
+        let text = expandSnippet(snippet.text, now: Date(), clipboard: clipboard)
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(30))
+            TypeText.deleteBackward(typedLength)
+            TypeText.type(text)
+        }
     }
 
     private static let ctrlOpt = KeyModifier.control | KeyModifier.option

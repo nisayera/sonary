@@ -154,7 +154,12 @@ final class EventTapController: @unchecked Sendable {
             let driver = driver
             Task { @MainActor in driver.withValue { $0 }?.wake() }
             return nil
-        case .swallow, .perform:
+        case let .perform(action):
+            // A sideways wheel with an action, or the wheel zooming: the scroll is
+            // replaced by the action, run once the tap has answered.
+            DispatchQueue.main.async { SyntheticEvents.perform(action) }
+            return nil
+        case .swallow:
             return nil
         }
     }

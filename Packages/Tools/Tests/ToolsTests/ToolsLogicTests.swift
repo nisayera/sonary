@@ -35,6 +35,39 @@ struct ToolsLogicTests {
         #expect(expandSnippet("{clipboard}", now: date, clipboard: nil) == "")
     }
 
+    @Test func snippetDatesTakeAFormatOfTheirOwn() {
+        // Mid-month at noon UTC, so the date is the same in every time zone.
+        let date = Date(timeIntervalSince1970: 1_781_524_800) // 2026-06-15 12:00 UTC
+        let result = expandSnippet("Due {date:yyyy-MM}", now: date, clipboard: nil, locale: Locale(identifier: "en_US_POSIX"))
+        #expect(result == "Due 2026-06")
+    }
+
+    @Test func typingATriggerFindsItsSnippet() {
+        let short = Snippet(title: "Sig", text: "Best, Luka", trigger: ";sig")
+        let long = Snippet(title: "Sig 2", text: "Cheers", trigger: ";sig2")
+        let tooShort = Snippet(title: "One", text: "x", trigger: ";")
+        var watcher = SnippetTriggerWatcher()
+        #expect(watcher.type(";", snippets: [tooShort]) == nil)
+        for character in ";si" { #expect(watcher.type(String(character), snippets: [short]) == nil) }
+        #expect(watcher.type("g", snippets: [short]) == short)
+
+        watcher.reset()
+        for character in ";sig" { _ = watcher.type(String(character), snippets: [long]) }
+        #expect(watcher.type("2", snippets: [short, long]) == long)
+    }
+
+    @Test func backspaceAndResetForgetWhatWasTyped() {
+        let snippet = Snippet(title: "Sig", text: "Best", trigger: ";sig")
+        var watcher = SnippetTriggerWatcher()
+        for character in ";six" { _ = watcher.type(String(character), snippets: [snippet]) }
+        watcher.backspace()
+        #expect(watcher.type("g", snippets: [snippet]) == snippet)
+
+        for character in ";si" { _ = watcher.type(String(character), snippets: [snippet]) }
+        watcher.reset()
+        #expect(watcher.type("g", snippets: [snippet]) == nil)
+    }
+
     @Test func recognizedLinesAreJoined() {
         #expect(joinRecognizedLines(["  Hello ", "", "World"]) == "Hello\nWorld")
     }

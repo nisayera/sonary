@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 public struct ScrollModifierSet: OptionSet, Sendable, Equatable {
@@ -64,13 +65,27 @@ public func linearized(_ sample: ScrollSample, linesPerStep: Int) -> ScrollSampl
     return result
 }
 
-/// Reverses the scroll direction of wheel events only.
+/// Reverses the scroll direction of wheel events only, both axes.
 public func reversed(_ sample: ScrollSample) -> ScrollSample {
-    guard isWheelEvent(sample) else { return sample }
+    reversed(sample, vertical: true, horizontal: true)
+}
+
+/// Reverses a wheel's vertical and sideways scrolling, each on its own.
+public func reversed(_ sample: ScrollSample, vertical: Bool, horizontal: Bool) -> ScrollSample {
+    guard isWheelEvent(sample), vertical || horizontal else { return sample }
     var result = sample
-    result.deltaY = -sample.deltaY
-    result.deltaX = -sample.deltaX
+    if vertical { result.deltaY = -sample.deltaY }
+    if horizontal { result.deltaX = -sample.deltaX }
     return result
+}
+
+/// While the chosen key is held, a wheel notch zooms instead of scrolling: ⌘= up, ⌘- down,
+/// the zoom shortcut nearly every app understands. Nil when the wheel should just scroll.
+public func zoomAction(for sample: ScrollSample, whileHolding modifier: ScrollModifier) -> ButtonAction? {
+    guard isWheelEvent(sample), let wanted = modifier.set, sample.modifiers.contains(wanted),
+          sample.deltaY != 0 else { return nil }
+    let command = UInt64(CGEventFlags.maskCommand.rawValue)
+    return .keyboardShortcut(keyCode: sample.deltaY > 0 ? 24 : 27, modifiers: command)
 }
 
 /// Turns a wheel's vertical scrolling into horizontal scrolling while the chosen key is held.

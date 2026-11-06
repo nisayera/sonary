@@ -131,6 +131,16 @@
         }
       }
     },
+    "For a tilting wheel or a thumb wheel, on its own.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für ein kippbares Rad oder ein Daumenrad, unabhängig vom Hauptrad."
+          }
+        }
+      }
+    },
     "Forward": {
       "localizations": {
         "de": {
@@ -349,6 +359,16 @@
         }
       }
     },
+    "Reverse sideways scrolling": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seitliches Scrollen umkehren"
+          }
+        }
+      }
+    },
     "Scroll sideways while holding": {
       "localizations": {
         "de": {
@@ -365,6 +385,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Scrollen"
+          }
+        }
+      }
+    },
+    "Sends ⌘= and ⌘−, which browsers, Preview and most apps zoom with.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sendet ⌘= und ⌘−, damit zoomen Browser, Vorschau und die meisten Apps."
           }
         }
       }
@@ -510,6 +540,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zeigerbeschleunigung ausschalten"
+          }
+        }
+      }
+    },
+    "Zoom with the wheel while holding": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit dem Rad zoomen beim Halten von"
           }
         }
       }

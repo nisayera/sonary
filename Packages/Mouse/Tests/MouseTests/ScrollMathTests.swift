@@ -1,3 +1,4 @@
+import CoreGraphics
 import Testing
 @testable import Mouse
 
@@ -64,5 +65,26 @@ struct HorizontalScrollTests {
     @Test func anotherKeyDoesNotCount() {
         let sample = ScrollSample(deltaY: 3, modifiers: .command)
         #expect(horizontalized(sample, whileHolding: .option) == sample)
+    }
+
+    @Test func eachAxisReversesOnItsOwn() {
+        let wheel = ScrollSample(deltaY: 2, deltaX: -1)
+        let vertical = reversed(wheel, vertical: true, horizontal: false)
+        #expect(vertical.deltaY == -2 && vertical.deltaX == -1)
+        let sideways = reversed(wheel, vertical: false, horizontal: true)
+        #expect(sideways.deltaY == 2 && sideways.deltaX == 1)
+        #expect(reversed(wheel, vertical: false, horizontal: false) == wheel)
+    }
+
+    @Test func holdingTheZoomKeyTurnsTheWheelIntoZoom() {
+        let command = UInt64(CGEventFlags.maskCommand.rawValue)
+        let up = ScrollSample(deltaY: 1, modifiers: .option)
+        #expect(zoomAction(for: up, whileHolding: .option) == .keyboardShortcut(keyCode: 24, modifiers: command))
+        let down = ScrollSample(deltaY: -1, modifiers: .option)
+        #expect(zoomAction(for: down, whileHolding: .option) == .keyboardShortcut(keyCode: 27, modifiers: command))
+        #expect(zoomAction(for: ScrollSample(deltaY: 1), whileHolding: .option) == nil)
+        #expect(zoomAction(for: up, whileHolding: .none) == nil)
+        let trackpad = ScrollSample(deltaY: 1, isContinuous: true, modifiers: .option)
+        #expect(zoomAction(for: trackpad, whileHolding: .option) == nil)
     }
 }

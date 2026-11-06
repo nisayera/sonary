@@ -75,6 +75,20 @@ struct MouseSettingsView: View {
             SettingsToggleRow(symbol: "arrow.up.arrow.down", title: Text("Reverse mouse wheel direction", bundle: .module),
                               caption: Text("Trackpads and Magic Mouse are not changed.", bundle: .module),
                               isOn: binding(\.reverseScroll))
+            SettingsToggleRow(symbol: "arrow.left.arrow.right", title: Text("Reverse sideways scrolling", bundle: .module),
+                              caption: Text("For a tilting wheel or a thumb wheel, on its own.", bundle: .module),
+                              isOn: binding(\.reverseHorizontalScroll))
+            Divider()
+            SettingsRow(symbol: "plus.magnifyingglass",
+                        title: Text("Zoom with the wheel while holding", bundle: .module),
+                        caption: Text("Sends ⌘= and ⌘−, which browsers, Preview and most apps zoom with.", bundle: .module)) {
+                Picker(selection: binding(\.zoomModifier)) {
+                    ForEach(ScrollModifier.allCases, id: \.self) { modifier in
+                        Text(modifierTitle(modifier), bundle: .module).tag(modifier)
+                    }
+                } label: { EmptyView() }
+                    .labelsHidden().frame(width: 150)
+            }
             Divider()
             SettingsRow(symbol: "arrow.left.and.right",
                         title: Text("Scroll sideways while holding", bundle: .module)) {
