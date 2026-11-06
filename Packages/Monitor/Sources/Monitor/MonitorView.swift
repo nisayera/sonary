@@ -1,7 +1,10 @@
+import Charts
 import Foundation
 import SonaryUI
 import SwiftUI
 
+/// The monitor in the menu bar panel: a row of tiles for what is read as one number, bars with
+/// a short history for what is a share of something, then network and the busiest apps.
 public struct MonitorView: View {
     let module: MonitorModule
 
@@ -12,96 +15,130 @@ public struct MonitorView: View {
     public var body: some View {
         if let latest = module.latest {
             let history = module.history
-            GlassEffectContainer(spacing: Spacing.s) {
-                VStack(spacing: Spacing.s) {
-                    MetricCard(title: "CPU", value: percent(latest.cpu), symbol: "cpu", series: history.map(\.cpu))
-                    MetricCard(title: "GPU", value: latest.gpu.map(percent) ?? "—", symbol: "display",
-                               series: history.compactMap(\.gpu))
-                    MetricCard(title: "Memory", value: percent(latest.memory.usedFraction), symbol: "memorychip",
-                               series: history.map(\.memory.usedFraction))
-                    MetricCard(title: "Network", value: "↓\(formatRate(latest.network.bytesInPerSec))",
-                               symbol: "network", series: history.map(\.network.bytesInPerSec),
-                               domain: 0...max(1, history.map(\.network.bytesInPerSec).max() ?? 1))
-                    MetricCard(title: "Disk", value: percent(1 - latest.disk.freeFraction), symbol: "internaldrive")
-                    if let battery = latest.battery {
-                        MetricCard(title: "Battery", value: percent(battery.level),
-                                   symbol: battery.isCharging ? "battery.100.bolt" : "battery.75percent")
-                    }
-                    if !module.topProcesses.isEmpty {
-                        GlassCard {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Busiest apps", bundle: .module).font(.headline)
-                                ForEach(module.topProcesses) { process in
-                                    HStack {
-                                        Text(process.name).lineLimit(1)
-                                        Spacer()
-                                        Text(verbatim: "\(Int(process.cpu.rounded()))%")
-                                            .font(.body.monospacedDigit()).foregroundStyle(.secondary)
-                                    }
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
-                    GlassCard {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("This session", bundle: .module).font(.headline)
-                                Spacer()
-                            }
-                            HStack {
-                                Text("Downloaded", bundle: .module)
-                                Spacer()
-                                Text(verbatim: formatBytes(module.totals.bytesIn)).monospacedDigit()
-                            }
-                            HStack {
-                                Text("Uploaded", bundle: .module)
-                                Spacer()
-                                Text(verbatim: formatBytes(module.totals.bytesOut)).monospacedDigit()
-                            }
-                            if let address = module.localAddress {
-                                HStack {
-                                    Text("Local address", bundle: .module)
-                                    Spacer()
-                                    Text(verbatim: address).monospacedDigit()
-                                }
-                            }
-                            HStack {
-                                Text("Connection speed", bundle: .module)
-                                Spacer()
-                                if module.isSpeedTesting {
-                                    ProgressView().controlSize(.small)
-                                } else if let result = module.speedTest {
-                                    Text(verbatim: "\(formatThroughput(result.downloadBitsPerSecond)) · \(formatLatency(result.latency))")
-                                        .monospacedDigit()
-                                } else {
-                                    Button { Task { await module.runSpeedTest() } } label: {
-                                        Text("Measure", bundle: .module)
-                                    }
-                                    .controlSize(.small)
-                                }
-                            }
-                            if let time = module.batteryTime {
-                                HStack {
-                                    Text("Battery left", bundle: .module)
-                                    Spacer()
-                                    Text(verbatim: formatDuration(time)).monospacedDigit()
-                                }
-                            }
-                        }
-                        .font(.callout)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    if let fastest = module.fans.map(\.rpm).max(), fastest > 0 {
-                        MetricCard(title: "Fans", value: formatFanSpeed(module.fans), symbol: "fan")
-                    }
-                    MetricCard(title: "Temperature",
-                               value: latest.temperatures.values.max().map { "\(Int($0.rounded()))°" } ?? "—",
-                               symbol: "thermometer.medium")
+            VStack(alignment: .leading, spacing: PanelMetrics.spacing) {
+                tiles(latest)
+                usage(latest, history: history)
+                network(latest, history: history)
+                if !module.topProcesses.isEmpty {
+                    busiest
                 }
             }
         } else {
-            ProgressView().padding(Spacing.m)
+            ProgressView()
+                .controlSize(.small)
+                .frame(maxWidth: .infinity)
+                .padding(Spacing.m)
+        }
+    }
+
+    // MARK: - Blocks
+
+    private func tiles(_ latest: MetricsSnapshot) -> some View {
+        HStack(spacing: 8) {
+            MonitorTile(symbol: "thermometer.medium", title: "Temperature",
+                        value: latest.temperatures.values.max().map { "\(Int($0.rounded())) °C" } ?? "—")
+            if let fastest = module.fans.map(\.rpm).max(), fastest > 0 {
+                MonitorTile(symbol: "fan", title: "Fans", value: formatFanSpeed(module.fans))
+            }
+            if let battery = latest.battery {
+                MonitorTile(symbol: battery.isCharging ? "battery.100.bolt" : "battery.75percent", title: "Battery",
+                            value: percent(battery.level),
+                            detail: module.batteryTime.map(formatDuration))
+            }
+        }
+    }
+
+    private func usage(_ latest: MetricsSnapshot, history: [MetricsSnapshot]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            PanelSectionTitle(Text("Usage", bundle: .module))
+                .padding(.horizontal, 2)
+            VStack(alignment: .leading, spacing: 10) {
+                UsageRow(title: "CPU", fraction: latest.cpu, color: .sonaryAccent, series: history.map(\.cpu))
+                if let gpu = latest.gpu {
+                    UsageRow(title: "GPU", fraction: gpu, color: .sonaryAccent, series: history.compactMap(\.gpu))
+                }
+                UsageRow(title: "Memory", fraction: latest.memory.usedFraction,
+                         color: pressureColor(latest.memory.pressure),
+                         series: history.map(\.memory.usedFraction))
+                UsageRow(title: "Disk", fraction: 1 - latest.disk.freeFraction, color: .secondary)
+            }
+            .panelCard()
+        }
+    }
+
+    private func network(_ latest: MetricsSnapshot, history: [MetricsSnapshot]) -> some View {
+        let incoming = history.map(\.network.bytesInPerSec)
+        return VStack(alignment: .leading, spacing: 6) {
+            PanelSectionTitle(Text("Network", bundle: .module))
+                .padding(.horizontal, 2)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Label { Text(verbatim: formatRate(latest.network.bytesInPerSec)) } icon: {
+                        Image(systemName: "arrow.down")
+                    }
+                    Spacer()
+                    Label { Text(verbatim: formatRate(latest.network.bytesOutPerSec)) } icon: {
+                        Image(systemName: "arrow.up")
+                    }
+                }
+                .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                if incoming.count > 1 {
+                    Sparkline(series: incoming, domain: 0...max(1, incoming.max() ?? 1), color: .teal)
+                }
+                Divider()
+                KeyValueRow(title: "Downloaded", value: formatBytes(module.totals.bytesIn))
+                KeyValueRow(title: "Uploaded", value: formatBytes(module.totals.bytesOut))
+                if let address = module.localAddress {
+                    KeyValueRow(title: "Local address", value: address)
+                }
+                HStack {
+                    Text("Connection speed", bundle: .module).foregroundStyle(.secondary)
+                    Spacer()
+                    if module.isSpeedTesting {
+                        ProgressView().controlSize(.mini)
+                    } else if let result = module.speedTest {
+                        Text(verbatim: "\(formatThroughput(result.downloadBitsPerSecond)) · \(formatLatency(result.latency))")
+                            .monospacedDigit()
+                    } else {
+                        Button { Task { await module.runSpeedTest() } } label: {
+                            Text("Measure", bundle: .module)
+                        }
+                        .controlSize(.mini)
+                    }
+                }
+                .font(.system(size: 11))
+            }
+            .panelCard()
+        }
+    }
+
+    private var busiest: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            PanelSectionTitle(Text("Busiest apps", bundle: .module))
+                .padding(.horizontal, 2)
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(module.topProcesses) { process in
+                    HStack {
+                        Text(process.name).lineLimit(1)
+                        Spacer()
+                        Text(verbatim: "\(Int(process.cpu.rounded())) %")
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                    .font(.system(size: 11))
+                }
+            }
+            .panelCard()
+        }
+    }
+
+    // MARK: - Formatting
+
+    private func pressureColor(_ pressure: MemoryStats.Pressure) -> Color {
+        switch pressure {
+        case .normal: .green
+        case .warning: .yellow
+        case .critical: .red
         }
     }
 
@@ -110,6 +147,110 @@ public struct MonitorView: View {
     }
 
     private func percent(_ fraction: Double) -> String {
-        "\(Int((fraction * 100).rounded()))%"
+        "\(Int((fraction * 100).rounded())) %"
+    }
+}
+
+// MARK: - Pieces
+
+/// One number with its name above it, on a slightly raised tile.
+private struct MonitorTile: View {
+    let symbol: String
+    let title: LocalizedStringKey
+    let value: String
+    var detail: String?
+
+    var body: some View {
+        VStack(spacing: 3) {
+            Label { Text(title, bundle: .module) } icon: { Image(systemName: symbol) }
+                .font(.system(size: 10.5, weight: .medium))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Text(verbatim: value)
+                .font(.system(size: 16, weight: .semibold).monospacedDigit())
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .contentTransition(.numericText())
+            if let detail {
+                Text(verbatim: detail)
+                    .font(.system(size: 9.5).monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .panelCard(padded: false)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// A share of something: name, bar, percentage, and the last few minutes under it.
+private struct UsageRow: View {
+    let title: LocalizedStringKey
+    let fraction: Double
+    let color: Color
+    var series: [Double] = []
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Text(title, bundle: .module)
+                    .font(.system(size: 12, weight: .medium))
+                    .frame(width: 62, alignment: .leading)
+                GeometryReader { proxy in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(PanelColors.control(colorScheme))
+                        Capsule().fill(color)
+                            .frame(width: max(4, proxy.size.width * min(max(fraction, 0), 1)))
+                    }
+                }
+                .frame(height: 5)
+                Text(verbatim: "\(Int((fraction * 100).rounded())) %")
+                    .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                    .frame(width: 44, alignment: .trailing)
+                    .contentTransition(.numericText())
+            }
+            if series.count > 1 {
+                Sparkline(series: series, domain: 0...1, color: color)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// The last few minutes as a thin line.
+private struct Sparkline: View {
+    let series: [Double]
+    let domain: ClosedRange<Double>
+    let color: Color
+
+    var body: some View {
+        Chart(Array(series.enumerated()), id: \.offset) { point in
+            LineMark(x: .value("t", point.offset), y: .value("v", point.element))
+                .interpolationMethod(.monotone)
+                .lineStyle(StrokeStyle(lineWidth: 1.2))
+                .foregroundStyle(color)
+        }
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartYScale(domain: domain)
+        .frame(height: 20)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct KeyValueRow: View {
+    let title: LocalizedStringKey
+    let value: String
+
+    var body: some View {
+        HStack {
+            Text(title, bundle: .module).foregroundStyle(.secondary)
+            Spacer()
+            Text(verbatim: value).monospacedDigit()
+        }
+        .font(.system(size: 11))
     }
 }

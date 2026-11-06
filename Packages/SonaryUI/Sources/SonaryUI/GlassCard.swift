@@ -11,9 +11,15 @@ public struct GlassCard<Content: View>: View {
         self.content = content()
     }
 
+    @Environment(\.sonarySurface) private var surface
+
     public var body: some View {
         let shape = RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-        if reduceTransparency || appearance != .glass {
+        if surface == .panel {
+            // The panel's own surface carries the glass; cards on it stay flat, so the
+            // content does not swim in reflections.
+            content.panelCard()
+        } else if reduceTransparency || appearance != .glass {
             content
                 .padding(Spacing.m)
                 .background(appearance == .solid ? AnyShapeStyle(.background) : AnyShapeStyle(.regularMaterial), in: shape)

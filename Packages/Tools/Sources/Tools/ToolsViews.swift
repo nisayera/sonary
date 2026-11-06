@@ -42,7 +42,7 @@ struct ToolsPopoverView: View {
     }
 
     private var toolsView: some View {
-        VStack(spacing: 6) {
+        PanelGroup {
             tool("magnifyingglass", "Command bar", "⌥Space") { model.showCommandBar() }
             tool("text.viewfinder", "Copy text from screen", "⌃⌥T") { model.recognizeText() }
             tool("eyedropper", "Pick a color", "⌃⌥P") { model.pickColor() }
@@ -61,15 +61,18 @@ struct ToolsPopoverView: View {
     }
 
     private var togglesView: some View {
-        VStack(spacing: 6) {
-            ForEach(quickToggleActions) { action in
-                Button { model.run(action) } label: {
-                    SettingsRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module)) {
-                        EmptyView()
+        VStack(alignment: .leading, spacing: 6) {
+            PanelGroup {
+                ForEach(quickToggleActions) { action in
+                    Button { model.run(action) } label: {
+                        SettingsRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module)) {
+                            EmptyView()
+                        }
+                        .contentShape(Rectangle())
                     }
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
+                    .panelRowInsets()
                 }
-                .buttonStyle(.plain)
             }
             Text("Dark mode and the Trash ask once for permission to control the system.", bundle: .module)
                 .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
@@ -142,22 +145,35 @@ struct ToolsPopoverView: View {
     private func tool(_ symbol: String, _ title: LocalizedStringKey, _ shortcut: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             SettingsRow(symbol: symbol, title: Text(title, bundle: .module)) {
-                Text(verbatim: shortcut).font(.caption.monospaced()).foregroundStyle(.secondary)
+                if !shortcut.isEmpty {
+                    Text(verbatim: shortcut)
+                        .font(.system(size: 10, weight: .medium).monospaced())
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
+                        .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                }
             }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .panelRowInsets()
     }
 
     private var snippetsView: some View {
-        VStack(spacing: 6) {
-            ForEach(model.settings.snippets) { snippet in
-                Button { model.insert(snippet) } label: {
-                    SettingsRow(symbol: "text.quote", title: Text(snippet.title),
-                                caption: Text(snippet.text).font(.caption)) { EmptyView() }
-                        .contentShape(Rectangle())
+        VStack(alignment: .leading, spacing: 6) {
+            if !model.settings.snippets.isEmpty {
+                PanelGroup {
+                    ForEach(model.settings.snippets) { snippet in
+                        Button { model.insert(snippet) } label: {
+                            SettingsRow(symbol: "text.quote", title: Text(snippet.title),
+                                        caption: Text(snippet.text)) { EmptyView() }
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .panelRowInsets()
+                    }
                 }
-                .buttonStyle(.plain)
             }
             Text("Edit snippets in Sonary's settings.", bundle: .module).font(.caption).foregroundStyle(.secondary)
         }

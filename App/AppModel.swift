@@ -33,6 +33,8 @@ final class AppModel {
     private(set) var onboardingCompleted: Bool
     /// How see-through Sonary's floating surfaces are.
     private(set) var appearance: SonaryAppearance
+    /// The page the settings window shows; the panel sets it before opening the window.
+    var settingsPage: SettingsDestination = .general
 
     @ObservationIgnored private let defaults: UserDefaults
 

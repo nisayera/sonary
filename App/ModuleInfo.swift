@@ -19,6 +19,23 @@ enum ModuleInfo {
         default: ""
         }
     }
+
+    /// The same line as a string in the user's language, for searching the settings.
+    static func summaryText(for id: String) -> String {
+        switch id {
+        case "monitor": String(localized: "CPU, GPU, memory, network, disk, battery and temperatures, with history and alerts.")
+        case "mouse": String(localized: "Linear or smooth scrolling, pointer acceleration, extra buttons, click filter and app exceptions.")
+        case "notch": String(localized: "An island at the notch with music, calendar, timer, downloads and accessory batteries.")
+        case "clipboard": String(localized: "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers.")
+        case "apps": String(localized: "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates.")
+        case "windows": String(localized: "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident.")
+        case "sound": String(localized: "Switch speakers and microphones, volume, microphone mute on ⌃⌥M and keep awake.")
+        case "tools": String(localized: "Command bar, text from screen, color picker, screenshots, scratchpad and snippets.")
+        case "keyboard": String(localized: "Super Key: one key becomes ⌃⌥⇧⌘ while held and runs an action when tapped.")
+        case "display": String(localized: "Brightness for every display, with shortcuts and dimming for displays without hardware control.")
+        default: ""
+        }
+    }
 }
 
 /// The name System Settings uses for a permission, in the user's language.

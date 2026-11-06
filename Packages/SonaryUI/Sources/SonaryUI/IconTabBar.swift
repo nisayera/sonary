@@ -18,6 +18,7 @@ public struct IconTabBar<ID: Hashable>: View {
     private let minimumItemWidth: CGFloat?
     @Binding private var selection: ID
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// `minimumItemWidth` keeps every tab readable when there are many of them; the row is meant
@@ -42,7 +43,7 @@ public struct IconTabBar<ID: Hashable>: View {
                         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(isActive ? Color.sonaryAccent : Color.secondary)
+                .foregroundStyle(isActive ? Color.sonaryAccent : Color.secondary.opacity(0.86))
                 .background(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(isActive ? Color.sonaryAccent.opacity(colorScheme == .light ? 0.14 : 0.22) : .clear)
@@ -53,10 +54,10 @@ public struct IconTabBar<ID: Hashable>: View {
             }
         }
         .padding(4)
-        .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(PanelColors.card(colorScheme), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(.separator.opacity(0.6), lineWidth: 0.7)
+                .strokeBorder(PanelColors.border(colorScheme, increasedContrast: contrast == .increased), lineWidth: 0.7)
         )
     }
 }

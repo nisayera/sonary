@@ -8,6 +8,8 @@ jobs:
   build-and-test:
     runs-on: macos-26
     timeout-minutes: 30
+    permissions:
+      contents: write  # only for pushing the interface snapshots, see the last step
     steps:
       - uses: actions/checkout@v4
 
@@ -51,6 +53,9 @@ jobs:
             build 2>&1 | tee build.log
 
       - name: Test app
+        env:
+          # SnapshotTests renders the panel and the settings into this folder.
+          TEST_RUNNER_SONARY_SNAPSHOT_DIR: ${{ runner.temp }}/snapshots
         run: |
           set -eo pipefail
           xcodebuild -project Sonary.xcodeproj -scheme Sonary \
@@ -66,3 +71,25 @@ jobs:
           name: logs
           path: "*.log"
           if-no-files-found: ignore
+
+      - name: Publish snapshots
+        # Pictures of the panel and the settings window, for reviewing interface changes. They go
+        # to the ci-snapshots branch, replaced on every run. Pull requests from forks cannot write.
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SNAPSHOTS: ${{ runner.temp }}/snapshots
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ ! -d "$SNAPSHOTS" ] || [ -z "$(ls -A "$SNAPSHOTS")" ]; then
+            echo "No snapshots were written."
+            exit 0
+          fi
+          cd "$SNAPSHOTS"
+          git init -q -b ci-snapshots
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Snapshots of #$PR at $SHA"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:ci-snapshots
+          echo "Snapshots: https://github.com/${GITHUB_REPOSITORY}/tree/ci-snapshots"

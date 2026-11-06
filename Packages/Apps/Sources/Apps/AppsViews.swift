@@ -49,6 +49,7 @@ struct AppsPopoverView: View {
                     }
                     Button { model.dismissInstaller() } label: { Text("Ignore", bundle: .module) }
                 }
+                .panelCard(padded: false)
             }
             if let message = model.message {
                 Text(message).font(.caption).foregroundStyle(.secondary)
@@ -66,14 +67,16 @@ struct AppsPopoverView: View {
     }
 
     private var cleanView: some View {
-        VStack(spacing: 6) {
-            ForEach(model.cleanTargets) { target in
-                row {
-                    Text(cleanTargetTitle(target.id), bundle: .module)
-                    Spacer()
-                    Text(target.size.map(formatBytes) ?? "…").foregroundStyle(.secondary).monospacedDigit()
-                    Button { Task { await model.clean(target) } } label: { Text("Clean", bundle: .module) }
-                        .disabled(model.isScanning || (target.size ?? 0) == 0)
+        VStack(alignment: .leading, spacing: 6) {
+            PanelGroup {
+                ForEach(model.cleanTargets) { target in
+                    row {
+                        Text(cleanTargetTitle(target.id), bundle: .module)
+                        Spacer()
+                        Text(target.size.map(formatBytes) ?? "…").foregroundStyle(.secondary).monospacedDigit()
+                        Button { Task { await model.clean(target) } } label: { Text("Clean", bundle: .module) }
+                            .disabled(model.isScanning || (target.size ?? 0) == 0)
+                    }
                 }
             }
             Text("Cleaning moves the files to the Trash. Apps rebuild their caches when needed.", bundle: .module)
@@ -82,7 +85,7 @@ struct AppsPopoverView: View {
     }
 
     private var appsView: some View {
-        VStack(spacing: 6) {
+        PanelGroup {
             ForEach(model.runningApps, id: \.processIdentifier) { app in
                 row {
                     if let icon = app.icon { Image(nsImage: icon).resizable().frame(width: 20, height: 20) }
@@ -96,18 +99,21 @@ struct AppsPopoverView: View {
     }
 
     private var portsView: some View {
-        VStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
             if model.ports.isEmpty {
                 Text("No app is listening on a TCP port.", bundle: .module).font(.callout).foregroundStyle(.secondary)
-            }
-            ForEach(model.ports) { port in
-                row {
-                    Text(verbatim: ":\(port.port)").font(.body.monospacedDigit()).frame(width: 64, alignment: .leading)
-                    Text(port.command).lineLimit(1)
-                    Text(verbatim: "PID \(port.pid)").font(.caption).foregroundStyle(.secondary)
-                    Spacer()
-                    Button(role: .destructive) { Task { await model.stopProcess(pid: port.pid) } } label: {
-                        Text("Stop", bundle: .module)
+            } else {
+                PanelGroup {
+                    ForEach(model.ports) { port in
+                        row {
+                            Text(verbatim: ":\(port.port)").monospacedDigit().frame(width: 56, alignment: .leading)
+                            Text(port.command).lineLimit(1)
+                            Text(verbatim: "PID \(port.pid)").font(.caption).foregroundStyle(.secondary)
+                            Spacer()
+                            Button(role: .destructive) { Task { await model.stopProcess(pid: port.pid) } } label: {
+                                Text("Stop", bundle: .module)
+                            }
+                        }
                     }
                 }
             }
@@ -117,7 +123,7 @@ struct AppsPopoverView: View {
     }
 
     private var updatesView: some View {
-        VStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
             if !model.brewAvailable {
                 Text("Install Homebrew (brew.sh) to see and install updates for your apps and tools.", bundle: .module)
                     .font(.callout).foregroundStyle(.secondary)
@@ -126,16 +132,21 @@ struct AppsPopoverView: View {
             } else if model.outdated.isEmpty {
                 Text("Everything installed with Homebrew is up to date.", bundle: .module).font(.callout).foregroundStyle(.secondary)
             }
-            ForEach(model.outdated) { package in
-                row {
-                    Image(systemName: package.isCask ? "app" : "terminal").foregroundStyle(Color.sonaryAccent)
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(package.name)
-                        Text(verbatim: "\(package.installed) → \(package.current)").font(.caption).foregroundStyle(.secondary)
+            if !model.outdated.isEmpty {
+                PanelGroup {
+                    ForEach(model.outdated) { package in
+                        row {
+                            Image(systemName: package.isCask ? "app" : "terminal").foregroundStyle(Color.sonaryAccent)
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(package.name)
+                                Text(verbatim: "\(package.installed) → \(package.current)")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button { Task { await model.upgrade(package) } } label: { Text("Update", bundle: .module) }
+                                .disabled(model.isBrewBusy)
+                        }
                     }
-                    Spacer()
-                    Button { Task { await model.upgrade(package) } } label: { Text("Update", bundle: .module) }
-                        .disabled(model.isBrewBusy)
                 }
             }
             if model.isCheckingApps {
@@ -145,26 +156,31 @@ struct AppsPopoverView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            ForEach(model.appUpdates) { update in
-                row {
-                    Image(systemName: "arrow.down.app").foregroundStyle(Color.sonaryAccent)
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(update.app.name)
-                        Text(verbatim: "\(update.app.shortVersion) → \(update.latestVersion)")
-                            .font(.caption).foregroundStyle(.secondary)
+            if !model.appUpdates.isEmpty {
+                PanelGroup {
+                    ForEach(model.appUpdates) { update in
+                        row {
+                            Image(systemName: "arrow.down.app").foregroundStyle(Color.sonaryAccent)
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(update.app.name)
+                                Text(verbatim: "\(update.app.shortVersion) → \(update.latestVersion)")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button { model.openApp(update) } label: { Text("Open", bundle: .module) }
+                        }
                     }
-                    Spacer()
-                    Button { model.openApp(update) } label: { Text("Open", bundle: .module) }
                 }
             }
         }
     }
 
+    /// One line of a list; lists sit in a `PanelGroup`, which draws the card and the hairlines.
     private func row<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 8) { content() }
+            .font(.system(size: 12))
             .controlSize(.small)
-            .padding(8)
-            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .panelRowInsets()
     }
 }
 
