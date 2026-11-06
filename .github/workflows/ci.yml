@@ -64,6 +64,22 @@ jobs:
             SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
             test 2>&1 | tee app-test.log
 
+      - name: Report errors
+        # Turns compiler errors and failed expectations from the logs into annotations, so they
+        # can be read on the pull request (and through the API) without downloading the logs.
+        if: failure()
+        run: |
+          grep -hE '^/[^:]+:[0-9]+:[0-9]+: (error|warning): ' *.log 2>/dev/null | sort -u | head -40 |
+            while IFS= read -r line; do
+              file=$(printf '%s' "$line" | cut -d: -f1)
+              row=$(printf '%s' "$line" | cut -d: -f2)
+              message=$(printf '%s' "$line" | cut -d: -f4- | sed 's/^ *//')
+              echo "::error file=${file#"$GITHUB_WORKSPACE"/},line=${row}::${message}"
+            done
+          grep -hE 'recorded an issue|Expectation failed|Test .* failed' *.log 2>/dev/null | sort -u | head -40 |
+            while IFS= read -r line; do echo "::error::${line}"; done
+          exit 0
+
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
