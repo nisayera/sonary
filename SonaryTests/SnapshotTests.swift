@@ -9,19 +9,23 @@ import Testing
 /// sets it); otherwise the test does nothing.
 @MainActor
 struct SnapshotTests {
-    @Test func panelAndSettings() async throws {
+    @Test(.timeLimit(.minutes(3)))
+    func panelAndSettings() async throws {
         guard let path = ProcessInfo.processInfo.environment["SONARY_SNAPSHOT_DIR"], !path.isEmpty else { return }
         let folder = URL(fileURLWithPath: path, isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
 
         let defaults = try #require(UserDefaults(suiteName: "sonary.snapshots.\(UUID().uuidString)"))
         let model = AppModel(defaults: defaults, startUpdater: false)
-        // Modules that need no permission can run on CI; the others show as off.
-        let running = ["monitor", "clipboard", "apps", "display", "sound", "tools"]
+        // Modules that need no permission and no audio or display hardware can run on CI (a CI
+        // machine has no microphone, and Core Audio and display services can stall there).
+        let running = ["monitor", "clipboard", "apps", "tools"]
         for id in running {
+            print("SNAPSHOT starting \(id)")
             await model.registry.setEnabled(id, true)
         }
         try await Task.sleep(for: .seconds(4))  // a few monitor samples
+        print("SNAPSHOT modules running")
 
         for scheme in [ColorScheme.dark, .light] {
             let suffix = scheme == .dark ? "dark" : "light"
@@ -50,6 +54,7 @@ struct SnapshotTests {
 
     /// Lays the view out in an off-screen window, lets it settle, and writes what it draws.
     private func render(_ view: some View, name: String, scheme: ColorScheme, in folder: URL) async {
+        print("SNAPSHOT rendering \(name)")
         let host = NSHostingView(rootView: view.environment(\.colorScheme, scheme))
         host.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
         let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 400, height: 400),

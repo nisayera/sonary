@@ -1,4 +1,5 @@
 import AppKit
+import SonaryCore
 import SonaryUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -43,19 +44,20 @@ struct ToolsPopoverView: View {
 
     private var toolsView: some View {
         PanelGroup {
-            tool("magnifyingglass", "Command bar", "⌥Space") { model.showCommandBar() }
-            tool("text.viewfinder", "Copy text from screen", "⌃⌥T") { model.recognizeText() }
-            tool("eyedropper", "Pick a color", "⌃⌥P") { model.pickColor() }
-            tool("camera.viewfinder", "Screenshot to clipboard", "⌃⌥S") { model.screenshotToClipboard() }
-            tool("circle.grid.cross", "Radial menu", "⌃⌥R") { model.showRadialMenu() }
-            tool("pin", "Pin a screenshot", "") { model.pinScreenshot() }
-            tool("web.camera", "Camera mirror", "") { model.toggleCamera() }
+            tool("magnifyingglass", "Command bar", shortcut: "tools.commandBar") { model.showCommandBar() }
+            tool("text.viewfinder", "Copy text from screen", shortcut: "tools.textFromScreen") { model.recognizeText() }
+            tool("eyedropper", "Pick a color", shortcut: "tools.colorPicker") { model.pickColor() }
+            tool("camera.viewfinder", "Screenshot to clipboard", shortcut: "tools.screenshot") { model.screenshotToClipboard() }
+            tool("circle.grid.cross", "Radial menu", shortcut: "tools.radialMenu") { model.showRadialMenu() }
+            tool("pin", "Pin a screenshot") { model.pinScreenshot() }
+            tool("web.camera", "Camera mirror") { model.toggleCamera() }
             tool(model.isRecording ? "stop.circle" : "record.circle",
-                 model.isRecording ? "Stop recording" : "Record the screen", "") { model.toggleRecording() }
-            tool("arrow.down.doc", "Scrolling screenshot", "") { model.scrollingScreenshot() }
-            tool("photo.on.rectangle.angled", "Convert images…", "") { convertingImages = true }
-            tool("film", "Make a video smaller…", "") { pickVideos(gif: false) }
-            tool("photo.stack", "Turn a video into a GIF…", "") { pickVideos(gif: true) }
+                 model.isRecording ? "Stop recording" : "Record the screen",
+                 shortcut: "tools.screenRecording") { model.toggleRecording() }
+            tool("arrow.down.doc", "Scrolling screenshot") { model.scrollingScreenshot() }
+            tool("photo.on.rectangle.angled", "Convert images…") { convertingImages = true }
+            tool("film", "Make a video smaller…") { pickVideos(gif: false) }
+            tool("photo.stack", "Turn a video into a GIF…") { pickVideos(gif: true) }
         }
         .sheet(isPresented: $convertingImages) { ImageConversionSheet(model: model) }
     }
@@ -142,8 +144,13 @@ struct ToolsPopoverView: View {
         if gif { model.makeGIFs(panel.urls) } else { model.compressVideos(panel.urls) }
     }
 
-    private func tool(_ symbol: String, _ title: LocalizedStringKey, _ shortcut: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+    /// A tool with the shortcut it has right now: the user may have changed it on the
+    /// Shortcuts page, and it shows only while the tools' shortcuts are on.
+    private func tool(_ symbol: String, _ title: LocalizedStringKey, shortcut id: String? = nil,
+                      action: @escaping () -> Void) -> some View {
+        let combo = id.map { ShortcutStore.shared.combo(for: $0) } ?? KeyCombo.none
+        let shortcut = model.settings.shortcuts ? shortcutDisplay(combo) : ""
+        return Button(action: action) {
             SettingsRow(symbol: symbol, title: Text(title, bundle: .module)) {
                 if !shortcut.isEmpty {
                     Text(verbatim: shortcut)
