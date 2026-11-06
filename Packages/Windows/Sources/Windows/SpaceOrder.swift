@@ -72,9 +72,9 @@ public func encodeSpaceOrderPreference(_ value: Bool?) -> Int {
 /// which is what releasing the order asks for.
 public func decodeSpaceOrderPreference(_ raw: Int?) -> Bool? {
     switch raw {
-    case 1?: true
-    case 0?: false
-    case -1?: nil
+    case .some(1): true
+    case .some(0): false
+    case .some(-1): nil
     default: true
     }
 }
