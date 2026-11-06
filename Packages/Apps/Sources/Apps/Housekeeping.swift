@@ -19,6 +19,20 @@ public func shouldClean(schedule: CleanSchedule, lastCleaned: Date?, now: Date) 
     return now.timeIntervalSince(lastCleaned) >= Double(days) * 86_400
 }
 
+/// What `lastCleaned` becomes when the schedule is changed.
+///
+/// Switching the schedule on starts the interval from now. Without this a fresh
+/// schedule has no last-cleaned date, `shouldClean` reads that as overdue, and the
+/// first check — seconds later — moves caches to the Trash the moment the user picks
+/// "weekly". Switching off, or changing between weekly and monthly, leaves the date
+/// alone so the interval already served still counts.
+public func lastCleanedAfterScheduleChange(from previousSchedule: CleanSchedule,
+                                           to newSchedule: CleanSchedule,
+                                           lastCleaned: Date?, now: Date) -> Date? {
+    guard previousSchedule == .off, newSchedule != .off else { return lastCleaned }
+    return now
+}
+
 public struct AgedFile: Equatable, Sendable {
     public var url: URL
     public var modified: Date

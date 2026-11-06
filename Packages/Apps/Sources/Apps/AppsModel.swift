@@ -149,6 +149,17 @@ public final class AppsModel {
         NSWorkspace.shared.activateFileViewerSelecting([destination])
     }
 
+    /// Changes the cleaning schedule. Switching it on also starts the interval from
+    /// now, so picking "weekly" does not clean within seconds.
+    public func setCleanSchedule(_ schedule: CleanSchedule, now: Date = Date()) {
+        update { settings in
+            let previous = settings.cleanSchedule
+            settings.cleanSchedule = schedule
+            settings.lastCleaned = lastCleanedAfterScheduleChange(
+                from: previous, to: schedule, lastCleaned: settings.lastCleaned, now: now)
+        }
+    }
+
     public func update(_ change: (inout AppsSettings) -> Void) {
         change(&settings)
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "apps.settings") }

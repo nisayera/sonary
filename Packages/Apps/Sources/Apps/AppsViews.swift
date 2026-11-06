@@ -199,7 +199,7 @@ struct AppsSettingsView: View {
             SettingsRow(symbol: "calendar.badge.clock", title: Text("Clean caches and logs", bundle: .module),
                         caption: Text("Runs in the background and moves everything to the Trash.", bundle: .module)) {
                 Picker(selection: Binding(get: { model.settings.cleanSchedule },
-                                          set: { value in model.update { $0.cleanSchedule = value } })) {
+                                          set: { value in model.setCleanSchedule(value) })) {
                     ForEach(CleanSchedule.allCases, id: \.self) { Text(scheduleTitle($0), bundle: .module).tag($0) }
                 } label: { EmptyView() }
                     .labelsHidden().frame(width: 150)
