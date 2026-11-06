@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld of %lld modules on": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld von %lld Modulen an"
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "de": {
@@ -73,12 +83,32 @@
         }
       }
     },
+    "Asked for each app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird pro App gefragt"
+          }
+        }
+      }
+    },
     "Asked for when you turn the module on.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Wird angefragt, wenn du das Modul einschaltest."
+          }
+        }
+      }
+    },
+    "Automation": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automation"
           }
         }
       }
@@ -124,6 +154,16 @@
         }
       }
     },
+    "Camera": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kamera"
+          }
+        }
+      }
+    },
     "Check for Updates…": {
       "localizations": {
         "de": {
@@ -150,6 +190,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aufräumen, Deinstallieren, Beenden und Sofort-Beenden, Port-Manager und Homebrew-Updates."
+          }
+        }
+      }
+    },
+    "Clear search": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suche löschen"
           }
         }
       }
@@ -195,12 +245,42 @@
         }
       }
     },
+    "Essentials": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grundlagen"
+          }
+        }
+      }
+    },
     "Explains Sonary and the permissions of your modules.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Erklärt Sonary und die Berechtigungen deiner Module."
+          }
+        }
+      }
+    },
+    "Features": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funktionen"
+          }
+        }
+      }
+    },
+    "Files & tools": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dateien & Werkzeuge"
           }
         }
       }
@@ -295,6 +375,76 @@
         }
       }
     },
+    "Lets Sonary capture the screen and show window previews.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Damit nimmt Sonary den Bildschirm auf und zeigt Fenstervorschauen."
+          }
+        }
+      }
+    },
+    "Lets Sonary control Music, Spotify, Finder and System Events. macOS asks once for each app.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Damit steuert Sonary Musik, Spotify, Finder und die Systemereignisse. macOS fragt für jede App einmal."
+          }
+        }
+      }
+    },
+    "Lets Sonary react to clicks and keys, and move windows.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Damit reagiert Sonary auf Klicks und Tasten und verschiebt Fenster."
+          }
+        }
+      }
+    },
+    "Lets Sonary show how loud the microphone is.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Damit zeigt Sonary, wie laut das Mikrofon ist."
+          }
+        }
+      }
+    },
+    "Lets Sonary show the camera image.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Damit zeigt Sonary das Kamerabild."
+          }
+        }
+      }
+    },
+    "Lets Sonary show today's events.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Damit zeigt Sonary die heutigen Termine."
+          }
+        }
+      }
+    },
+    "Lets Sonary warn you about the alerts you turned on.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Damit warnt Sonary dich bei den Warnungen, die du eingeschaltet hast."
+          }
+        }
+      }
+    },
     "License": {
       "localizations": {
         "de": {
@@ -315,12 +465,62 @@
         }
       }
     },
+    "Microphone": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon"
+          }
+        }
+      }
+    },
     "Modules": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Module"
+          }
+        }
+      }
+    },
+    "Monitor alerts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warnungen des Monitors"
+          }
+        }
+      }
+    },
+    "Mouse & keyboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maus & Tastatur"
+          }
+        }
+      }
+    },
+    "Mouse, Keyboard, Windows, paste as plain text, media keys, typed snippets, menu commands": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maus, Tastatur, Fenster, Einsetzen als reiner Text, Medientasten, getippte Textbausteine, Menübefehle"
+          }
+        }
+      }
+    },
+    "Music in the notch, media keys, Finder helpers, quick toggles": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musik in der Notch, Medientasten, Finder-Helfer, Schnellschalter"
           }
         }
       }
@@ -341,6 +541,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aktuell sind keine Berechtigungen nötig. Module fragen erst nach Zugriff, wenn du sie einschaltest."
+          }
+        }
+      }
+    },
+    "No results": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Treffer"
+          }
+        }
+      }
+    },
+    "Not granted": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht erteilt"
           }
         }
       }
@@ -381,6 +601,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Öffnen"
+          }
+        }
+      }
+    },
+    "Open System Settings": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Systemeinstellungen öffnen"
           }
         }
       }
@@ -456,6 +686,26 @@
         }
       }
     },
+    "Screenshots, text from screen, screen recording, window previews": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfotos, Text vom Bildschirm, Bildschirmaufnahme, Fenstervorschauen"
+          }
+        }
+      }
+    },
+    "Search settings": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen durchsuchen"
+          }
+        }
+      }
+    },
     "Settings…": {
       "localizations": {
         "de": {
@@ -493,6 +743,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deckend"
+          }
+        }
+      }
+    },
+    "Sonary": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary"
           }
         }
       }
@@ -567,6 +827,46 @@
         }
       }
     },
+    "System": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        }
+      }
+    },
+    "The calendar in the notch": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Kalender in der Notch"
+          }
+        }
+      }
+    },
+    "The camera in the notch, the camera preview": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Kamera in der Notch, die Kameravorschau"
+          }
+        }
+      }
+    },
+    "The microphone level in the sound panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Mikrofonpegel im Ton-Bereich"
+          }
+        }
+      }
+    },
     "Turn a module on to see the shortcuts it offers.": {
       "extractionState": "manual",
       "localizations": {
@@ -574,6 +874,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schalte ein Modul ein, um seine Kürzel zu sehen."
+          }
+        }
+      }
+    },
+    "Turn all off": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle ausschalten"
           }
         }
       }
@@ -594,6 +904,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schalte ein Modul ein, um es hier als eigenen Tab zu sehen."
+          }
+        }
+      }
+    },
+    "Turn on only what you use. A module that is off does not load, run in the background or ask for permissions.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte nur ein, was du brauchst. Ein ausgeschaltetes Modul lädt nicht, läuft nicht im Hintergrund und fragt nach keiner Berechtigung."
           }
         }
       }
@@ -648,12 +968,32 @@
         }
       }
     },
+    "What each permission does and what in Sonary uses it. Sonary asks only when you turn on something that needs it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wofür jede Berechtigung da ist und was in Sonary sie braucht. Sonary fragt erst, wenn du etwas einschaltest, das sie braucht."
+          }
+        }
+      }
+    },
     "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Fensteranordnung per ⌃⌥-Kürzel und Schutz vor versehentlichem Beenden."
+          }
+        }
+      }
+    },
+    "Windows": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster"
           }
         }
       }

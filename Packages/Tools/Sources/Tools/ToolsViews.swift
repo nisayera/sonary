@@ -1,4 +1,5 @@
 import AppKit
+import SonaryCore
 import SonaryUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -42,34 +43,38 @@ struct ToolsPopoverView: View {
     }
 
     private var toolsView: some View {
-        VStack(spacing: 6) {
-            tool("magnifyingglass", "Command bar", "⌥Space") { model.showCommandBar() }
-            tool("text.viewfinder", "Copy text from screen", "⌃⌥T") { model.recognizeText() }
-            tool("eyedropper", "Pick a color", "⌃⌥P") { model.pickColor() }
-            tool("camera.viewfinder", "Screenshot to clipboard", "⌃⌥S") { model.screenshotToClipboard() }
-            tool("circle.grid.cross", "Radial menu", "⌃⌥R") { model.showRadialMenu() }
-            tool("pin", "Pin a screenshot", "") { model.pinScreenshot() }
-            tool("web.camera", "Camera mirror", "") { model.toggleCamera() }
+        PanelGroup {
+            tool("magnifyingglass", "Command bar", shortcut: "tools.commandBar") { model.showCommandBar() }
+            tool("text.viewfinder", "Copy text from screen", shortcut: "tools.textFromScreen") { model.recognizeText() }
+            tool("eyedropper", "Pick a color", shortcut: "tools.colorPicker") { model.pickColor() }
+            tool("camera.viewfinder", "Screenshot to clipboard", shortcut: "tools.screenshot") { model.screenshotToClipboard() }
+            tool("circle.grid.cross", "Radial menu", shortcut: "tools.radialMenu") { model.showRadialMenu() }
+            tool("pin", "Pin a screenshot") { model.pinScreenshot() }
+            tool("web.camera", "Camera mirror") { model.toggleCamera() }
             tool(model.isRecording ? "stop.circle" : "record.circle",
-                 model.isRecording ? "Stop recording" : "Record the screen", "") { model.toggleRecording() }
-            tool("arrow.down.doc", "Scrolling screenshot", "") { model.scrollingScreenshot() }
-            tool("photo.on.rectangle.angled", "Convert images…", "") { convertingImages = true }
-            tool("film", "Make a video smaller…", "") { pickVideos(gif: false) }
-            tool("photo.stack", "Turn a video into a GIF…", "") { pickVideos(gif: true) }
+                 model.isRecording ? "Stop recording" : "Record the screen",
+                 shortcut: "tools.screenRecording") { model.toggleRecording() }
+            tool("arrow.down.doc", "Scrolling screenshot") { model.scrollingScreenshot() }
+            tool("photo.on.rectangle.angled", "Convert images…") { convertingImages = true }
+            tool("film", "Make a video smaller…") { pickVideos(gif: false) }
+            tool("photo.stack", "Turn a video into a GIF…") { pickVideos(gif: true) }
         }
         .sheet(isPresented: $convertingImages) { ImageConversionSheet(model: model) }
     }
 
     private var togglesView: some View {
-        VStack(spacing: 6) {
-            ForEach(quickToggleActions) { action in
-                Button { model.run(action) } label: {
-                    SettingsRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module)) {
-                        EmptyView()
+        VStack(alignment: .leading, spacing: 6) {
+            PanelGroup {
+                ForEach(quickToggleActions) { action in
+                    Button { model.run(action) } label: {
+                        SettingsRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module)) {
+                            EmptyView()
+                        }
+                        .contentShape(Rectangle())
                     }
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
+                    .panelRowInsets()
                 }
-                .buttonStyle(.plain)
             }
             Text("Dark mode and the Trash ask once for permission to control the system.", bundle: .module)
                 .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
@@ -139,25 +144,43 @@ struct ToolsPopoverView: View {
         if gif { model.makeGIFs(panel.urls) } else { model.compressVideos(panel.urls) }
     }
 
-    private func tool(_ symbol: String, _ title: LocalizedStringKey, _ shortcut: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+    /// A tool with the shortcut it has right now: the user may have changed it on the
+    /// Shortcuts page, and it shows only while the tools' shortcuts are on.
+    private func tool(_ symbol: String, _ title: LocalizedStringKey, shortcut id: String? = nil,
+                      action: @escaping () -> Void) -> some View {
+        let combo = id.map { ShortcutStore.shared.combo(for: $0) } ?? KeyCombo.none
+        let shortcut = model.settings.shortcuts ? shortcutDisplay(combo) : ""
+        return Button(action: action) {
             SettingsRow(symbol: symbol, title: Text(title, bundle: .module)) {
-                Text(verbatim: shortcut).font(.caption.monospaced()).foregroundStyle(.secondary)
+                if !shortcut.isEmpty {
+                    Text(verbatim: shortcut)
+                        .font(.system(size: 10, weight: .medium).monospaced())
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
+                        .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                }
             }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .panelRowInsets()
     }
 
     private var snippetsView: some View {
-        VStack(spacing: 6) {
-            ForEach(model.settings.snippets) { snippet in
-                Button { model.insert(snippet) } label: {
-                    SettingsRow(symbol: "text.quote", title: Text(snippet.title),
-                                caption: Text(snippet.text).font(.caption)) { EmptyView() }
-                        .contentShape(Rectangle())
+        VStack(alignment: .leading, spacing: 6) {
+            if !model.settings.snippets.isEmpty {
+                PanelGroup {
+                    ForEach(model.settings.snippets) { snippet in
+                        Button { model.insert(snippet) } label: {
+                            SettingsRow(symbol: "text.quote", title: Text(snippet.title),
+                                        caption: Text(snippet.text)) { EmptyView() }
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .panelRowInsets()
+                    }
                 }
-                .buttonStyle(.plain)
             }
             Text("Edit snippets in Sonary's settings.", bundle: .module).font(.caption).foregroundStyle(.secondary)
         }

@@ -15,6 +15,8 @@ jobs:
   build-and-test:
     runs-on: macos-26
     timeout-minutes: 30
+    permissions:
+      contents: write  # only for pushing the interface snapshots, see the last step
     steps:
       - uses: actions/checkout@v4
 
@@ -59,6 +61,10 @@ jobs:
             build 2>&1 | tee build.log
 
       - name: Test app
+        timeout-minutes: 12
+        env:
+          # SnapshotTests renders the panel and the settings into this folder.
+          TEST_RUNNER_SONARY_SNAPSHOT_DIR: ${{ runner.temp }}/snapshots
         run: |
           set -eo pipefail
           xcodebuild -project Sonary.xcodeproj -scheme Sonary \
@@ -67,6 +73,24 @@ jobs:
             SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
             test 2>&1 | tee app-test.log
 
+      - name: Report errors
+        # Turns compiler errors and failed expectations from the logs into annotations, so they
+        # can be read on the pull request (and through the API) without downloading the logs.
+        if: failure()
+        run: |
+          grep -hE '^/[^:]+:[0-9]+:[0-9]+: (error|warning): ' *.log 2>/dev/null | sort -u | head -40 |
+            while IFS= read -r line; do
+              file=$(printf '%s' "$line" | cut -d: -f1)
+              row=$(printf '%s' "$line" | cut -d: -f2)
+              message=$(printf '%s' "$line" | cut -d: -f4- | sed 's/^ *//')
+              echo "::error file=${file#"$GITHUB_WORKSPACE"/},line=${row}::${message}"
+            done
+          grep -hE 'recorded an issue|Expectation failed|Test .* failed' *.log 2>/dev/null | sort -u | head -40 |
+            while IFS= read -r line; do echo "::error::${line}"; done
+          # How far the snapshot test got, for when it stops instead of failing.
+          grep -h 'SNAPSHOT ' *.log 2>/dev/null | tail -5 | while IFS= read -r line; do echo "::warning::${line}"; done
+          exit 0
+
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -74,3 +98,25 @@ jobs:
           name: logs
           path: "*.log"
           if-no-files-found: ignore
+
+      - name: Publish snapshots
+        # Pictures of the panel and the settings window, for reviewing interface changes. They go
+        # to the ci-snapshots branch, replaced on every run. Pull requests from forks cannot write.
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SNAPSHOTS: ${{ runner.temp }}/snapshots
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ ! -d "$SNAPSHOTS" ] || [ -z "$(ls -A "$SNAPSHOTS")" ]; then
+            echo "No snapshots were written."
+            exit 0
+          fi
+          cd "$SNAPSHOTS"
+          git init -q -b ci-snapshots
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Snapshots of #$PR at $SHA"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:ci-snapshots
+          echo "Snapshots: https://github.com/${GITHUB_REPOSITORY}/tree/ci-snapshots"
