@@ -384,6 +384,15 @@ struct FocusFollowsMouseTests {
         #expect(held)
     }
 
+    @Test func knowsWhileAHoldIsRunning() {
+        var guardState = HoldGuard(duration: 0.6)
+        #expect(!guardState.isHolding)
+        _ = guardState.down(app: "a", key: .quit, at: 0)
+        #expect(guardState.isHolding, "the model resets the hold on the next unrelated key event")
+        guardState.up()
+        #expect(!guardState.isHolding)
+    }
+
     @Test func anotherAppOrKeyStartsOver() {
         var guardState = HoldGuard(duration: 0.6)
         let first = guardState.down(app: "a", key: .quit, at: 0)

@@ -59,6 +59,8 @@ public final class WindowsModel {
     @ObservationIgnored private var quitSource: CFRunLoopSource?
     @ObservationIgnored private var quitGuard = QuitGuard()
     @ObservationIgnored private var holdGuard = HoldGuard()
+    /// Set when the ⌘Q/⌘W tap could not be created, which means Accessibility is missing.
+    public private(set) var quitProtectionNeedsAccessibility = false
     @ObservationIgnored private var hudProgress: Double = 0
     /// The frame a window had before the last layout, so it can be put back.
     @ObservationIgnored private var previousFrames: [pid_t: CGRect] = [:]
@@ -85,12 +87,8 @@ public final class WindowsModel {
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
-        if let data = defaults.data(forKey: "windows.settings"),
-           let settings = try? JSONDecoder().decode(WindowsSettings.self, from: data) {
-            self.settings = settings
-        } else {
-            settings = WindowsSettings()
-        }
+        settings = StoredSettings.load(WindowsSettings.self, key: "windows.settings", from: defaults,
+                                       fallback: WindowsSettings())
     }
 
     func start() {
@@ -581,10 +579,15 @@ public final class WindowsModel {
 
     private func installQuitTap() {
         guard quitTap == nil else { return }
-        let mask = CGEventMask(1) << CGEventType.keyDown.rawValue
+        // Key-ups and modifier changes too: holding has to notice when the keys are let go,
+        // or the next press would count the old hold and quit at once.
+        let mask = (CGEventMask(1) << CGEventType.keyDown.rawValue)
+            | (CGEventMask(1) << CGEventType.keyUp.rawValue)
+            | (CGEventMask(1) << CGEventType.flagsChanged.rawValue)
         guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
                                           eventsOfInterest: mask, callback: quitTapCallback,
                                           userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
+            quitProtectionNeedsAccessibility = true
             _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
             return
         }
@@ -593,6 +596,7 @@ public final class WindowsModel {
         CGEvent.tapEnable(tap: tap, enable: true)
         quitTap = tap
         quitSource = source
+        quitProtectionNeedsAccessibility = false
     }
 
     private func removeQuitTap() {
@@ -600,6 +604,8 @@ public final class WindowsModel {
         if let quitSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), quitSource, .commonModes) }
         quitTap = nil
         quitSource = nil
+        holdGuard.up()
+        quitProtectionNeedsAccessibility = false
     }
 
     /// False swallows the key press.
@@ -621,7 +627,9 @@ public final class WindowsModel {
               let app = NSWorkspace.shared.frontmostApplication,
               let bundleID = app.bundleIdentifier, bundleID != "com.apple.finder",
               isProtected(bundleID: bundleID, onlyApps: settings.protectedApps) else {
-            if type == .keyUp, settings.quitConfirmation == .hold {
+            // Anything but the protected keys still going down ends a hold: a key let go,
+            // ⌘ released, another key pressed.
+            if settings.quitConfirmation == .hold, holdGuard.isHolding {
                 holdGuard.up()
                 hideHUD()
             }

@@ -134,6 +134,9 @@ struct WindowsSettingsView: View {
                                             set: { value in model.update { $0.quitWhenLastWindowCloses = value } }))
         }
         SettingsCard(Text("Quit protection", bundle: .module)) {
+            if model.quitProtectionNeedsAccessibility {
+                SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.", bundle: .module))
+            }
             SettingsToggleRow(symbol: "hand.raised", title: Text("Press ⌘Q twice to quit", bundle: .module),
                               caption: Text("Stops apps from closing by accident. Finder is never affected.", bundle: .module),
                               isOn: Binding(get: { model.settings.quitProtection },

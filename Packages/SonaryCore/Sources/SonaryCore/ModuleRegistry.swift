@@ -12,11 +12,16 @@ public final class ModuleRegistry {
     private var chains: [String: Task<Void, Never>] = [:]
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let permissions: any PermissionGate
+    @ObservationIgnored private let missingPermissionText: @MainActor ([SonaryPermission]) -> String
 
-    public init(modules: [any SonaryModule], defaults: UserDefaults, permissions: any PermissionGate) {
+    /// `missingPermissionText` turns a module's permissions into the failure shown when one of
+    /// them is missing; the app passes a localized sentence that names them.
+    public init(modules: [any SonaryModule], defaults: UserDefaults, permissions: any PermissionGate,
+                missingPermissionText: @escaping @MainActor ([SonaryPermission]) -> String = { _ in "Missing permission" }) {
         self.modules = modules
         self.defaults = defaults
         self.permissions = permissions
+        self.missingPermissionText = missingPermissionText
         self.enabled = Set(modules.map(\.id).filter { defaults.bool(forKey: Self.key($0)) })
     }
 
@@ -56,7 +61,7 @@ public final class ModuleRegistry {
         let id = module.id
         guard !running.contains(id) else { return }
         guard await permissions.ensure(module.requiredPermissions) else {
-            fail(id, "Missing permission")
+            fail(id, missingPermissionText(module.requiredPermissions))
             return
         }
         do {

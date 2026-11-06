@@ -89,4 +89,14 @@ struct ModuleRegistryTests {
         #expect(module.stopCount == 1)
         #expect(defaults.bool(forKey: "module.a.enabled") == false)
     }
+
+    @Test func missingPermissionUsesTheAppsText() async {
+        let module = FakeModule(id: "a", permissions: [.accessibility, .screenRecording])
+        let registry = ModuleRegistry(modules: [module], defaults: makeDefaults(), permissions: FakeGate(result: false),
+                                      missingPermissionText: { list in list.map(\.rawValue).joined(separator: "+") })
+        await registry.setEnabled("a", true)
+        #expect(registry.failures["a"] == "accessibility+screenRecording")
+        #expect(module.startCount == 0)
+        #expect(!registry.isEnabled("a"))
+    }
 }

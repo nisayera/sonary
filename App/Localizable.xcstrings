@@ -507,6 +507,16 @@
         }
       }
     },
+    "Sonary needs %@ for this module. Allow it under System Settings → Privacy & Security, then turn the module on again.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonary braucht für dieses Modul %@. Erlaube es unter Systemeinstellungen → Datenschutz & Sicherheit und schalte das Modul dann wieder ein."
+          }
+        }
+      }
+    },
     "Sonary updates itself from its GitHub releases.": {
       "localizations": {
         "de": {
@@ -594,6 +604,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Updates"
+          }
+        }
+      }
+    },
+    "Used by %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebraucht von %@"
           }
         }
       }

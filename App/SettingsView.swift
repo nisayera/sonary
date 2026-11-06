@@ -100,23 +100,12 @@ private struct ModulePage: View {
             if !module.requiredPermissions.isEmpty {
                 SettingsCard(Text("Permissions")) {
                     ForEach(module.requiredPermissions, id: \.self) { permission in
-                        SettingsRow(symbol: "lock.shield", title: Text(permissionName(permission)),
+                        SettingsRow(symbol: "lock.shield", title: Text(permissionTitle(permission)),
                                     caption: Text("Asked for when you turn the module on.")) { EmptyView() }
                     }
                 }
             }
             module.makeSettingsView()
-        }
-    }
-
-    private func permissionName(_ permission: SonaryPermission) -> LocalizedStringKey {
-        switch permission {
-        case .accessibility: "Accessibility"
-        case .inputMonitoring: "Input Monitoring"
-        case .screenRecording: "Screen Recording"
-        case .fullDiskAccess: "Full Disk Access"
-        case .notifications: "Notifications"
-        case .calendars: "Calendars"
         }
     }
 }

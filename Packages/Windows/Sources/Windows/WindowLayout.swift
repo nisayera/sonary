@@ -111,6 +111,9 @@ public struct HoldGuard: Sendable {
 
     public init(duration: Double = 0.6) { self.duration = duration }
 
+    /// True between the first key-down of a hold and `up()`.
+    public var isHolding: Bool { heldSince != nil }
+
     /// A key-down. Returns true when it has already been held long enough.
     public mutating func down(app: String, key: ProtectedKey, at time: Double) -> Bool {
         let identity = "\(app)#\(key.rawValue)"
