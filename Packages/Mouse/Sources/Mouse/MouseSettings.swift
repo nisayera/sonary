@@ -21,6 +21,10 @@ public struct MouseSettings: Codable, Equatable, Sendable {
     public var smoothScroll = false
     public var smoothness = 0.5
     public var reverseScroll = false
+    /// Reverses a sideways wheel (or tilting the wheel) on its own.
+    public var reverseHorizontalScroll = false
+    /// While this key is held, the wheel zooms instead of scrolling.
+    public var zoomModifier: ScrollModifier = .none
     public var disableAcceleration = false
     public var buttonMappings: [ButtonMapping] = []
     public var clickFilterMilliseconds = 0

@@ -48,9 +48,10 @@ public struct EventProcessor: Sendable {
                 let action = side == .left ? effective.sideWheelLeft : effective.sideWheelRight
                 if action != ButtonAction.none { return .perform(action) }
             }
+            if let zoom = zoomAction(for: sample, whileHolding: effective.zoomModifier) { return .perform(zoom) }
             var result = sample
             if effective.linearScroll { result = linearized(result, linesPerStep: effective.scrollLinesPerStep) }
-            if effective.reverseScroll { result = reversed(result) }
+            result = reversed(result, vertical: effective.reverseScroll, horizontal: effective.reverseHorizontalScroll)
             result = horizontalized(result, whileHolding: effective.horizontalScrollModifier)
             if effective.smoothScroll { return .injectSmooth(result) }
             return result == sample ? .passThrough : .replaceScroll(result)

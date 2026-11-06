@@ -293,6 +293,15 @@ struct ToolsSettingsView: View {
                 .buttonStyle(.borderless)
         }
         SettingsCard(Text("Snippets", bundle: .module)) {
+            SettingsToggleRow(symbol: "text.badge.plus", title: Text("Replace a trigger as you type it", bundle: .module),
+                              caption: Text("Give a snippet a trigger such as ;sig, and typing it anywhere puts the snippet in its place. Needs Accessibility.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.snippetTriggers },
+                                            set: { value in model.update { $0.snippetTriggers = value } }))
+            if model.snippetTriggersNeedAccessibility {
+                SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.",
+                                     bundle: .module))
+            }
             SettingsRow(symbol: "text.cursor", title: Text("Insert a snippet by", bundle: .module)) {
                 Picker(selection: Binding(get: { model.settings.snippetDelivery },
                                           set: { value in model.update { $0.snippetDelivery = value } })) {
@@ -301,13 +310,18 @@ struct ToolsSettingsView: View {
                 } label: { EmptyView() }
                     .labelsHidden().frame(width: 220)
             }
-            Text("Placeholders: {date}, {time} and {clipboard}.", bundle: .module).font(.caption).foregroundStyle(.secondary)
+            Text("Placeholders: {date}, {time}, {clipboard}, and {date:yyyy-MM-dd} for a date in a format of your own.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
             ForEach(model.settings.snippets) { snippet in
                 HStack(alignment: .top) {
                     VStack(spacing: 4) {
                         TextField(text: binding(snippet.id, \.title)) { Text("Title", bundle: .module) }
                         TextField(text: binding(snippet.id, \.text), axis: .vertical) { Text("Text", bundle: .module) }
                             .lineLimit(1...4)
+                        if model.settings.snippetTriggers {
+                            TextField(text: triggerBinding(snippet.id)) { Text("Trigger, such as ;sig", bundle: .module) }
+                        }
                     }
                     .textFieldStyle(.roundedBorder)
                     Button(role: .destructive) { model.removeSnippet(snippet.id) } label: { Image(systemName: "minus.circle") }
@@ -323,6 +337,21 @@ struct ToolsSettingsView: View {
             Text("Screenshots and text from screen ask once for the Screen Recording permission.", bundle: .module)
                 .font(.callout).foregroundStyle(.secondary)
         }
+    }
+
+    /// A snippet's trigger, with an empty field meaning none.
+    private func triggerBinding(_ id: UUID) -> Binding<String> {
+        Binding(
+            get: { model.settings.snippets.first { $0.id == id }?.trigger ?? "" },
+            set: { value in
+                let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                model.update { settings in
+                    if let index = settings.snippets.firstIndex(where: { $0.id == id }) {
+                        settings.snippets[index].trigger = trimmed.isEmpty ? nil : trimmed
+                    }
+                }
+            }
+        )
     }
 
     private func binding(_ id: UUID, _ keyPath: WritableKeyPath<Snippet, String>) -> Binding<String> {

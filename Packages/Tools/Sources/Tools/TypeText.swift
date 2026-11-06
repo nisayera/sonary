@@ -1,6 +1,10 @@
 import AppKit
 import CoreGraphics
 
+/// Marks the key events Sonary types itself, so its own snippet watcher does not read them
+/// back as typing ("SONT").
+let typedTextMarker: Int64 = 0x534F_4E54
+
 /// Types text into whatever has the keyboard, a chunk at a time. Each event carries the
 /// characters themselves rather than key codes, so it works on every keyboard layout.
 @MainActor
@@ -25,8 +29,23 @@ enum TypeText {
                 down.keyboardSetUnicodeString(stringLength: buffer.count, unicodeString: base)
                 up.keyboardSetUnicodeString(stringLength: buffer.count, unicodeString: base)
             }
+            down.setIntegerValueField(.eventSourceUserData, value: typedTextMarker)
+            up.setIntegerValueField(.eventSourceUserData, value: typedTextMarker)
             down.post(tap: .cghidEventTap)
             up.post(tap: .cghidEventTap)
+        }
+    }
+
+    /// Deletes the characters just before the cursor, for replacing a typed trigger.
+    static func deleteBackward(_ count: Int) {
+        guard count > 0 else { return }
+        for _ in 0..<count {
+            for down in [true, false] {
+                guard let event = CGEvent(keyboardEventSource: nil, virtualKey: 51, keyDown: down) else { continue }
+                event.flags = []
+                event.setIntegerValueField(.eventSourceUserData, value: typedTextMarker)
+                event.post(tap: .cghidEventTap)
+            }
         }
     }
 }

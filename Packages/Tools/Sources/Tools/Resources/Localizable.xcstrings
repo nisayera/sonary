@@ -380,6 +380,16 @@
         }
       }
     },
+    "Give a snippet a trigger such as ;sig, and typing it anywhere puts the snippet in its place. Needs Accessibility.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gib einem Textbaustein ein Kürzel wie ;sig. Tippst du es irgendwo, steht dort der Baustein. Braucht Bedienungshilfen."
+          }
+        }
+      }
+    },
     "Hide": {
       "extractionState": "manual",
       "localizations": {
@@ -667,12 +677,12 @@
         }
       }
     },
-    "Placeholders: {date}, {time} and {clipboard}.": {
+    "Placeholders: {date}, {time}, {clipboard}, and {date:yyyy-MM-dd} for a date in a format of your own.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Platzhalter: {date}, {time} und {clipboard}."
+            "value": "Platzhalter: {date}, {time}, {clipboard} und {date:yyyy-MM-dd} für ein Datum im eigenen Format."
           }
         }
       }
@@ -768,6 +778,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Textbaustein entfernen"
+          }
+        }
+      }
+    },
+    "Replace a trigger as you type it": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kürzel beim Tippen ersetzen"
           }
         }
       }
@@ -949,6 +969,16 @@
         }
       }
     },
+    "Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dafür braucht Sonary die Bedienungshilfen. Erlaube sie unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen und schalte das hier dann aus und wieder ein."
+          }
+        }
+      }
+    },
     "Sonary pink": {
       "extractionState": "manual",
       "localizations": {
@@ -1028,6 +1058,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Werkzeuge"
+          }
+        }
+      }
+    },
+    "Trigger, such as ;sig": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kürzel, z. B. ;sig"
           }
         }
       }

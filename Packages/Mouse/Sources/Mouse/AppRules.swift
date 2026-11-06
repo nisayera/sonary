@@ -8,6 +8,8 @@ public func effectiveSettings(_ base: MouseSettings, bundleID: String?) -> Mouse
         result.linearScroll = false
         result.smoothScroll = false
         result.reverseScroll = false
+        result.reverseHorizontalScroll = false
+        result.zoomModifier = .none
         result.buttonMappings = []
         result.gestureMappings = []
         result.sideWheelLeft = .none
