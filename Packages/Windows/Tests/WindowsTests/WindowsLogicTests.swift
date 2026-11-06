@@ -44,7 +44,7 @@ struct WindowLayoutTests {
     }
 
     @Test func everyActionHasADistinctKey() {
-        let codes = LayoutAction.allCases.map(\.keyCode)
+        let codes = LayoutAction.allCases.compactMap(\.keyCode)
         #expect(Set(codes).count == codes.count)
     }
 }
@@ -293,7 +293,7 @@ struct FocusFollowsMouseTests {
     }
 
     @Test func everyLayoutHasAKeyOfItsOwn() {
-        let codes = LayoutAction.allCases.map(\.keyCode)
+        let codes = LayoutAction.allCases.compactMap(\.keyCode)
         #expect(Set(codes).count == codes.count, "two layouts would fight over one shortcut")
         #expect(LayoutAction.fillScreen.shortcutLabel == "⌃⌥B")
     }
@@ -524,5 +524,60 @@ struct FocusFollowsMouseTests {
     @Test func theOldHelperStillAnswersTheTransition() {
         #expect(appsWithNoWindowsLeft(previous: [7: 2], current: [7: 0]) == [7])
         #expect(appsWithNoWindowsLeft(previous: [7: 0], current: [7: 0]).isEmpty)
+    }
+}
+
+struct WindowsGapTests {
+    private let visible = CGRect(x: 0, y: 0, width: 1200, height: 800)
+
+    @Test func sixthsSplitTheScreenIntoThreeColumnsAndTwoRows() {
+        #expect(layoutFrame(.topLeftSixth, visible: visible, current: .zero) == CGRect(x: 0, y: 400, width: 400, height: 400))
+        #expect(layoutFrame(.topCenterSixth, visible: visible, current: .zero) == CGRect(x: 400, y: 400, width: 400, height: 400))
+        #expect(layoutFrame(.bottomRightSixth, visible: visible, current: .zero) == CGRect(x: 800, y: 0, width: 400, height: 400))
+        #expect(LayoutAction.topLeftSixth.keyCode == nil)
+        #expect(LayoutAction.topLeftSixth.shortcutLabel.isEmpty)
+    }
+
+    @Test func framesMatchWithinAFewPoints() {
+        let a = CGRect(x: 0, y: 25, width: 1200, height: 775)
+        #expect(framesMatch(a, CGRect(x: 2, y: 25, width: 1196, height: 770)))
+        #expect(!framesMatch(a, CGRect(x: 0, y: 25, width: 600, height: 775)))
+    }
+
+    @Test func exclusionsUseTheBundleIdentifier() {
+        #expect(isExcluded(bundleID: "com.game", in: ["com.game"]))
+        #expect(!isExcluded(bundleID: "com.other", in: ["com.game"]))
+        #expect(!isExcluded(bundleID: nil, in: ["com.game"]))
+    }
+
+    @Test func optionConfirmsAndIsSentOnAsPlainCommand() {
+        #expect(modifierConfirmation(command: true, option: false, shift: false, control: false) == .holdBack)
+        #expect(modifierConfirmation(command: true, option: true, shift: false, control: false) == .sendPlain)
+        #expect(modifierConfirmation(command: true, option: true, shift: true, control: false) == .pass)
+        #expect(modifierConfirmation(command: false, option: true, shift: false, control: false) == .pass)
+    }
+
+    @Test func dockClicksActOnlyOnTheAppAlreadyInFront() {
+        #expect(dockClickApplies(clickedPID: 10, frontmostAtMouseDown: 10))
+        #expect(!dockClickApplies(clickedPID: 10, frontmostAtMouseDown: 11))
+        #expect(!dockClickApplies(clickedPID: 10, frontmostAtMouseDown: nil))
+    }
+
+    @Test func theSwitcherCanShowOneDisplay() {
+        let left = WindowEntry(id: 1, pid: 1, appName: "A", title: "", bounds: CGRect(x: 100, y: 100, width: 400, height: 300))
+        let right = WindowEntry(id: 2, pid: 2, appName: "B", title: "", bounds: CGRect(x: 2000, y: 100, width: 400, height: 300))
+        let main = CGRect(x: 0, y: 0, width: 1512, height: 982)
+        #expect(filteredEntries([left, right], query: "", app: nil, display: main) == [left])
+        #expect(filteredEntries([left, right], query: "", app: nil, display: nil) == [left, right])
+    }
+}
+
+struct SpaceOrderRestoreTests {
+    @Test func whatWasThereIsPutBack() {
+        #expect(decodeSpaceOrderPreference(encodeSpaceOrderPreference(nil)) == nil)
+        #expect(decodeSpaceOrderPreference(encodeSpaceOrderPreference(true)) == true)
+        #expect(decodeSpaceOrderPreference(encodeSpaceOrderPreference(false)) == false)
+        // Nothing saved: releasing the order means macOS rearranges again.
+        #expect(decodeSpaceOrderPreference(nil) == true)
     }
 }

@@ -3,6 +3,12 @@ import ScreenCaptureKit
 import SonaryUI
 import SwiftUI
 
+/// What can be done to a window from its Dock preview without bringing it forward.
+enum DockWindowAction: Sendable {
+    case close
+    case minimize
+}
+
 /// The previews that appear when the pointer rests on a Dock icon: every window of
 /// that app, including the ones on other Spaces, which is what the Dock itself will
 /// not show you.
@@ -11,11 +17,17 @@ final class DockPreviewController {
     private var panel: NSPanel?
 
     func show(app: NSRunningApplication, windows: [DockWindow], near point: CGPoint,
-              choose: @escaping (DockWindow) -> Void) {
+              choose: @escaping (DockWindow) -> Void,
+              act: @escaping (DockWindow, DockWindowAction) -> Void) {
         guard !windows.isEmpty else { return close() }
         let view = DockPreviewView(name: app.localizedName ?? "", windows: windows) { [weak self] window in
             self?.close()
             choose(window)
+        } act: { [weak self] window, action in
+            act(window, action)
+            // The window is gone from the list either way; show the rest, or nothing.
+            let rest = windows.filter { $0.id != window.id }
+            self?.show(app: app, windows: rest, near: point, choose: choose, act: act)
         }
         let hosting = NSHostingView(rootView: view)
         let width = min(CGFloat(windows.count) * 150 + 24, 700)
@@ -59,6 +71,8 @@ private struct DockPreviewView: View {
     let name: String
     let windows: [DockWindow]
     let choose: (DockWindow) -> Void
+    let act: (DockWindow, DockWindowAction) -> Void
+    @State private var hovered: UInt32?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -73,11 +87,33 @@ private struct DockPreviewView: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .overlay(alignment: .topTrailing) {
+                        if hovered == window.id {
+                            HStack(spacing: 4) {
+                                windowButton("minus", label: Text("Minimize", bundle: .module)) { act(window, .minimize) }
+                                windowButton("xmark", label: Text("Close", bundle: .module)) { act(window, .close) }
+                            }
+                            .padding(4)
+                        }
+                    }
+                    .onHover { inside in hovered = inside ? window.id : (hovered == window.id ? nil : hovered) }
                 }
             }
         }
         .padding(12)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private func windowButton(_ symbol: String, label: Text, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 9, weight: .bold))
+                .frame(width: 18, height: 18)
+                .background(.regularMaterial, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .help(label)
+        .accessibilityLabel(label)
     }
 }
 

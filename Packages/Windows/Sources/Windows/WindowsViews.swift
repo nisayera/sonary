@@ -1,4 +1,5 @@
 import AppKit
+import SonaryCore
 import SonaryUI
 import SwiftUI
 
@@ -8,6 +9,7 @@ func dockActionTitle(_ action: DockClickAction) -> LocalizedStringKey {
     case .cycleWindows: "Cycle through its windows"
     case .minimizeAll: "Minimize all its windows"
     case .showAllWindows: "Show all its windows"
+    case .hide: "Hide the app"
     }
 }
 
@@ -27,7 +29,20 @@ func layoutTitle(_ action: LayoutAction) -> LocalizedStringKey {
     case .maximize: "Maximize"
     case .center: "Center"
     case .fillScreen: "Fill the screen"
+    case .topLeftSixth: "Top left sixth"
+    case .topCenterSixth: "Top center sixth"
+    case .topRightSixth: "Top right sixth"
+    case .bottomLeftSixth: "Bottom left sixth"
+    case .bottomCenterSixth: "Bottom center sixth"
+    case .bottomRightSixth: "Bottom right sixth"
     }
+}
+
+/// The shortcut a window command has right now, as the Shortcuts page set it, or a dash.
+@MainActor
+func currentShortcut(_ id: String) -> String {
+    let combo = ShortcutStore.shared.combo(for: id)
+    return combo.isEmpty ? "—" : shortcutDisplay(combo)
 }
 
 struct WindowsSettingsView: View {
@@ -49,8 +64,8 @@ struct WindowsSettingsView: View {
             }
         }
         SettingsCard(Text("Dock", bundle: .module)) {
-            SettingsRow(symbol: "dock.rectangle", title: Text("A click on a running app's icon", bundle: .module),
-                        caption: Text("Sonary adds this after the Dock has had the click, so the Dock keeps working.",
+            SettingsRow(symbol: "dock.rectangle", title: Text("A click on the icon of the app in front", bundle: .module),
+                        caption: Text("A click on an app in the background only brings it forward. Sonary adds this after the Dock has had the click, so the Dock keeps working.",
                                       bundle: .module)) {
                 Picker(selection: Binding(get: { model.settings.dockClickAction },
                                           set: { value in model.update { $0.dockClickAction = value } })) {
@@ -64,6 +79,31 @@ struct WindowsSettingsView: View {
                                             bundle: .module),
                               isOn: Binding(get: { model.settings.dockPreviews },
                                             set: { value in model.update { $0.dockPreviews = value } }))
+            if model.settings.dockPreviews || model.settings.switcherPreviews {
+                Divider()
+                Text("No window pictures while one of these apps is in front, such as games or video players.",
+                     bundle: .module)
+                    .font(.caption).foregroundStyle(.secondary)
+                AppListEditor(bundleIDs: Binding(get: { model.settings.previewPausingApps },
+                                                 set: { value in model.update { $0.previewPausingApps = value } }),
+                              addTitle: Text("Add app…", bundle: .module), removeLabel: Text("Remove app", bundle: .module))
+            }
+        }
+        SettingsCard(Text("Green window button", bundle: .module)) {
+            SettingsToggleRow(symbol: "arrow.up.left.and.arrow.down.right",
+                              title: Text("The green button fills the screen", bundle: .module),
+                              caption: Text("Instead of a full-screen Space. A second click puts the window back; ⌥-click keeps what macOS does.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.greenButtonMaximizes },
+                                            set: { value in model.update { $0.greenButtonMaximizes = value } }))
+            if model.settings.greenButtonMaximizes {
+                Divider()
+                Text("These apps still go full screen, such as games, emulators and video players.", bundle: .module)
+                    .font(.caption).foregroundStyle(.secondary)
+                AppListEditor(bundleIDs: Binding(get: { model.settings.greenButtonExceptions },
+                                                 set: { value in model.update { $0.greenButtonExceptions = value } }),
+                              addTitle: Text("Add app…", bundle: .module), removeLabel: Text("Remove app", bundle: .module))
+            }
         }
         SettingsCard(Text("Spaces", bundle: .module)) {
             SettingsToggleRow(symbol: "rectangle.3.group",
@@ -85,21 +125,32 @@ struct WindowsSettingsView: View {
                         HStack {
                             Text(layoutTitle(action), bundle: .module)
                             Spacer()
-                            Text(verbatim: action.shortcutLabel).font(.body.monospaced()).foregroundStyle(.secondary)
+                            Text(verbatim: currentShortcut("windows.layout.\(action.rawValue)"))
+                                .font(.body.monospaced()).foregroundStyle(.secondary)
                         }
                     }
                     HStack {
                         Text("Move to the next display", bundle: .module)
                         Spacer()
-                        Text(verbatim: "⌃⌥\\").font(.body.monospaced()).foregroundStyle(.secondary)
+                        Text(verbatim: currentShortcut("windows.nextScreen")).font(.body.monospaced()).foregroundStyle(.secondary)
                     }
                     HStack {
                         Text("Put the window back", bundle: .module)
                         Spacer()
-                        Text(verbatim: "⌃⌥⌫").font(.body.monospaced()).foregroundStyle(.secondary)
+                        Text(verbatim: currentShortcut("windows.restore")).font(.body.monospaced()).foregroundStyle(.secondary)
                     }
                 }
+                Text("Change any of them on the Shortcuts page; the sixths have none until you give them one.",
+                     bundle: .module)
+                    .font(.caption).foregroundStyle(.secondary)
             }
+            Divider()
+            Text("These apps keep their own layout: shortcuts, screen edges and holding keys to drag leave them alone.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            AppListEditor(bundleIDs: Binding(get: { model.settings.layoutExcludedApps },
+                                             set: { value in model.update { $0.layoutExcludedApps = value } }),
+                          addTitle: Text("Add app…", bundle: .module), removeLabel: Text("Remove app", bundle: .module))
         }
         SettingsCard(Text("Window switcher", bundle: .module)) {
             SettingsToggleRow(symbol: "rectangle.stack", title: Text("Window switcher on ⌃⌥Tab", bundle: .module),
@@ -137,11 +188,11 @@ struct WindowsSettingsView: View {
             if model.quitProtectionNeedsAccessibility {
                 SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.", bundle: .module))
             }
-            SettingsToggleRow(symbol: "hand.raised", title: Text("Press ⌘Q twice to quit", bundle: .module),
+            SettingsToggleRow(symbol: "hand.raised", title: Text("Protect ⌘Q (quit)", bundle: .module),
                               caption: Text("Stops apps from closing by accident. Finder is never affected.", bundle: .module),
                               isOn: Binding(get: { model.settings.quitProtection },
                                             set: { value in model.update { $0.quitProtection = value } }))
-            SettingsToggleRow(symbol: "xmark.square", title: Text("Press ⌘W twice to close a window", bundle: .module),
+            SettingsToggleRow(symbol: "xmark.square", title: Text("Protect ⌘W (close a window)", bundle: .module),
                               isOn: Binding(get: { model.settings.closeProtection },
                                             set: { value in model.update { $0.closeProtection = value } }))
             if model.settings.quitProtection || model.settings.closeProtection {
@@ -150,6 +201,7 @@ struct WindowsSettingsView: View {
                                               set: { value in model.update { $0.quitConfirmation = value } })) {
                         Text("Pressing twice", bundle: .module).tag(QuitConfirmation.pressTwice)
                         Text("Holding the keys", bundle: .module).tag(QuitConfirmation.hold)
+                        Text("Adding ⌥ (⌥⌘Q)", bundle: .module).tag(QuitConfirmation.extraModifier)
                     } label: { EmptyView() }
                         .labelsHidden().frame(width: 180)
                 }

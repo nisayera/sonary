@@ -6,12 +6,15 @@ public struct WindowEntry: Equatable, Sendable, Identifiable {
     public var pid: Int32
     public var appName: String
     public var title: String
+    /// Where the window is, in window-server coordinates (origin top left of the main display).
+    public var bounds: CGRect
 
-    public init(id: UInt32, pid: Int32, appName: String, title: String) {
+    public init(id: UInt32, pid: Int32, appName: String, title: String, bounds: CGRect = .zero) {
         self.id = id
         self.pid = pid
         self.appName = appName
         self.title = title
+        self.bounds = bounds
     }
 
     /// What the list shows: the app, plus the window title when it says something extra.
@@ -32,7 +35,10 @@ public func switcherEntries(from windows: [[String: Any]], excludingPID ownPID: 
               let width = (bounds["Width"] as? NSNumber)?.doubleValue,
               let height = (bounds["Height"] as? NSNumber)?.doubleValue,
               width >= 120, height >= 80 else { return nil }
-        return WindowEntry(id: id, pid: pid, appName: appName, title: window["kCGWindowName"] as? String ?? "")
+        let x = (bounds["X"] as? NSNumber)?.doubleValue ?? 0
+        let y = (bounds["Y"] as? NSNumber)?.doubleValue ?? 0
+        return WindowEntry(id: id, pid: pid, appName: appName, title: window["kCGWindowName"] as? String ?? "",
+                           bounds: CGRect(x: x, y: y, width: width, height: height))
     }
 }
 
@@ -59,6 +65,14 @@ public func filteredEntries(_ entries: [WindowEntry], query: String, app: String
     return result.filter { entry in
         words.allSatisfy { entry.label.localizedCaseInsensitiveContains($0) }
     }
+}
+
+/// The same, narrowed to the windows whose middle is on one display, given by its bounds in
+/// window-server coordinates (`CGDisplayBounds`).
+public func filteredEntries(_ entries: [WindowEntry], query: String, app: String?, display: CGRect?) -> [WindowEntry] {
+    let result = filteredEntries(entries, query: query, app: app)
+    guard let display else { return result }
+    return result.filter { display.contains(CGPoint(x: $0.bounds.midX, y: $0.bounds.midY)) }
 }
 
 /// The apps that have windows open, for the filter row, in the order they appear.

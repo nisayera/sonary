@@ -12,6 +12,26 @@
         }
       }
     },
+    "A click on an app in the background only brings it forward. Sonary adds this after the Dock has had the click, so the Dock keeps working.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Klick auf eine App im Hintergrund holt sie nur nach vorn. Sonary ergänzt das, nachdem das Dock den Klick bekommen hat, damit das Dock weiter funktioniert."
+          }
+        }
+      }
+    },
+    "A click on the icon of the app in front": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Klick auf das Symbol der App im Vordergrund"
+          }
+        }
+      }
+    },
     "A window comes forward when the pointer rests on it.": {
       "localizations": {
         "de": {
@@ -28,6 +48,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "App hinzufügen …"
+          }
+        }
+      }
+    },
+    "Adding ⌥ (⌥⌘Q)": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zusätzliches ⌥ (⌥⌘Q)"
           }
         }
       }
@@ -53,6 +83,16 @@
         }
       }
     },
+    "Bottom center sixth": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unteres mittleres Sechstel"
+          }
+        }
+      }
+    },
     "Bottom half": {
       "localizations": {
         "de": {
@@ -73,12 +113,32 @@
         }
       }
     },
+    "Bottom left sixth": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unteres linkes Sechstel"
+          }
+        }
+      }
+    },
     "Bottom right quarter": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Unten rechts"
+          }
+        }
+      }
+    },
+    "Bottom right sixth": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unteres rechtes Sechstel"
           }
         }
       }
@@ -99,6 +159,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mittleres Drittel"
+          }
+        }
+      }
+    },
+    "Change any of them on the Shortcuts page; the sixths have none until you give them one.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ändern kannst du sie auf der Seite Kurzbefehle; die Sechstel haben keinen, bis du ihnen einen gibst."
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
           }
         }
       }
@@ -207,6 +287,26 @@
         }
       }
     },
+    "Green window button": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grüne Fenstertaste"
+          }
+        }
+      }
+    },
+    "Hide the app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die App ausblenden"
+          }
+        }
+      }
+    },
     "Hold ⌃⌘ and drag": {
       "extractionState": "manual",
       "localizations": {
@@ -247,6 +347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tasten halten"
+          }
+        }
+      }
+    },
+    "Instead of a full-screen Space. A second click puts the window back; ⌥-click keeps what macOS does.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statt eines Vollbild-Space. Ein zweiter Klick stellt das Fenster zurück; ⌥-Klick behält das Verhalten von macOS."
           }
         }
       }
@@ -319,6 +429,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maximieren"
+          }
+        }
+      }
+    },
+    "Minimize": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimieren"
           }
         }
       }
@@ -398,6 +518,16 @@
         }
       }
     },
+    "No window pictures while one of these apps is in front, such as games or video players.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Fensterbilder, solange eine dieser Apps vorn ist, etwa Spiele oder Videoplayer."
+          }
+        }
+      }
+    },
     "Off": {
       "extractionState": "manual",
       "localizations": {
@@ -459,6 +589,26 @@
         }
       }
     },
+    "Press ⌥⌘Q to quit %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drücke ⌥⌘Q, um %@ zu beenden"
+          }
+        }
+      }
+    },
+    "Press ⌥⌘W to close this window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drücke ⌥⌘W, um dieses Fenster zu schließen"
+          }
+        }
+      }
+    },
     "Pressing twice": {
       "extractionState": "manual",
       "localizations": {
@@ -466,6 +616,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zweimal drücken"
+          }
+        }
+      }
+    },
+    "Protect ⌘Q (quit)": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘Q schützen (Beenden)"
+          }
+        }
+      }
+    },
+    "Protect ⌘W (close a window)": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘W schützen (Fenster schließen)"
           }
         }
       }
@@ -656,6 +826,56 @@
         }
       }
     },
+    "The green button fills the screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die grüne Taste füllt den Bildschirm"
+          }
+        }
+      }
+    },
+    "These apps keep their own layout: shortcuts, screen edges and holding keys to drag leave them alone.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Apps behalten ihr eigenes Layout: Kurzbefehle, Bildschirmränder und Ziehen mit gehaltenen Tasten lassen sie in Ruhe."
+          }
+        }
+      }
+    },
+    "These apps still go full screen, such as games, emulators and video players.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Apps gehen weiter in den Vollbildmodus, etwa Spiele, Emulatoren und Videoplayer."
+          }
+        }
+      }
+    },
+    "This display": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Bildschirm"
+          }
+        }
+      }
+    },
+    "Top center sixth": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oberes mittleres Sechstel"
+          }
+        }
+      }
+    },
     "Top half": {
       "localizations": {
         "de": {
@@ -676,12 +896,32 @@
         }
       }
     },
+    "Top left sixth": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oberes linkes Sechstel"
+          }
+        }
+      }
+    },
     "Top right quarter": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Oben rechts"
+          }
+        }
+      }
+    },
+    "Top right sixth": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oberes rechtes Sechstel"
           }
         }
       }
