@@ -3,15 +3,39 @@ description: Something isn't working
 labels: [bug]
 body:
   - type: textarea
-    attributes: {label: What happened?, description: Steps to reproduce and what you expected.}
-    validations: {required: true}
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, what you expected and what you saw instead.
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Module
+      options:
+        - Monitor
+        - Mouse
+        - Keyboard
+        - Notch
+        - Clipboard
+        - Apps
+        - Windows
+        - Display
+        - Sound
+        - Tools
+        - The app itself (menu, settings, updates)
   - type: input
-    attributes: {label: Module, placeholder: e.g. System Monitor}
+    attributes:
+      label: Sonary version
+      description: Shown in the menu panel and under Settings → About.
+      placeholder: e.g. 0.22.0 (2200)
+    validations:
+      required: true
   - type: input
-    attributes: {label: Sonary version}
-    validations: {required: true}
-  - type: input
-    attributes: {label: macOS version, placeholder: e.g. 26.1}
-    validations: {required: true}
+    attributes:
+      label: macOS version
+      placeholder: e.g. 26.1
+    validations:
+      required: true
   - type: textarea
-    attributes: {label: Logs or screenshots}
+    attributes:
+      label: Logs or screenshots

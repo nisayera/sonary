@@ -3,9 +3,26 @@ description: Suggest an idea or a new module
 labels: [enhancement]
 body:
   - type: textarea
-    attributes: {label: What problem would this solve?}
-    validations: {required: true}
+    attributes:
+      label: What problem would this solve?
+    validations:
+      required: true
   - type: textarea
-    attributes: {label: Proposed solution}
-  - type: input
-    attributes: {label: Related module, placeholder: e.g. Clipboard & Files}
+    attributes:
+      label: Proposed solution
+  - type: dropdown
+    attributes:
+      label: Related module
+      options:
+        - Monitor
+        - Mouse
+        - Keyboard
+        - Notch
+        - Clipboard
+        - Apps
+        - Windows
+        - Display
+        - Sound
+        - Tools
+        - The app itself (menu, settings, updates)
+        - A new module

@@ -1,15 +1,15 @@
-Sonary – Drittcode und Herkunft
+Sonary — third-party code and origins
 
-Sonary ist lizenziert unter GPL-3.0-or-later (siehe LICENSE).
+Sonary is licensed under GPL-3.0-or-later (see LICENSE).
 
-Sonary ist von den Funktionen der freien App Vorssaint (vorssaint-utils, GPL-3.0)
-inspiriert. Name, Logo und Look von Vorssaint werden nicht verwendet.
+Sonary's features are inspired by the free app Vorssaint (vorssaint-utils, GPL-3.0).
+Vorssaint's name, logo and branding are not used.
 
-Aus Vorssaint übernommene Dateien behalten ihre originalen Copyright- und
-Lizenz-Header. Jede übernommene Datei wird hier eingetragen:
+Files taken from Vorssaint keep their original copyright and license headers.
+Every such file is listed here:
 
-| Datei in Sonary | Quelle (Pfad im Vorssaint-Repo) | Commit der Quelle |
+| File in Sonary | Source (path in the Vorssaint repository) | Source commit |
 |---|---|---|
-| Packages/Monitor/Sources/Monitor/SMC/SMCClient.swift (gekürzt auf Lesezugriff, siehe Header) | Sources/Vorssaint/Services/SystemMonitor/SMCClient.swift | a5694c4c2f426fbd0f97ecfba9bbaa5746398dc1 |
+| Packages/Monitor/Sources/Monitor/SMC/SMCClient.swift (reduced to read access, see header) | Sources/Vorssaint/Services/SystemMonitor/SMCClient.swift | a5694c4c2f426fbd0f97ecfba9bbaa5746398dc1 |
 
-Sparkle (https://sparkle-project.org) wird als Abhängigkeit für In-App-Updates eingebunden (MIT-Lizenz).
+Sparkle (https://sparkle-project.org) is used as a dependency for in-app updates (MIT license).
