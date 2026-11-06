@@ -12,6 +12,16 @@
         }
       }
     },
+    "%@ is in your Applications folder, and the disk image is in the Trash.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ liegt jetzt in deinem Programme-Ordner, das Disk-Image im Papierkorb."
+          }
+        }
+      }
+    },
     "%@ is in your Applications folder.": {
       "extractionState": "manual",
       "localizations": {
@@ -164,6 +174,16 @@
         }
       }
     },
+    "Disk images": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk-Images"
+          }
+        }
+      }
+    },
     "Every month": {
       "localizations": {
         "de": {
@@ -283,6 +303,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Protokolle"
+          }
+        }
+      }
+    },
+    "Move the disk image to the Trash after installing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk-Image nach der Installation in den Papierkorb legen"
           }
         }
       }
@@ -504,6 +534,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Updates"
+          }
+        }
+      }
+    },
+    "When a mounted image offers one app, the panel installs it into Applications and ejects the image. With this on, the downloaded file goes too.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bietet ein geöffnetes Image genau eine App an, kopiert das Panel sie in den Programme-Ordner und wirft das Image aus. Ist das hier an, landet auch die geladene Datei im Papierkorb."
           }
         }
       }

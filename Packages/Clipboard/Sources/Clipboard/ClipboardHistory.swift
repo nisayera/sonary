@@ -126,3 +126,23 @@ public let concealedPasteboardTypes: Set<String> = [
 public func shouldRecord(types: [String]) -> Bool {
     !types.contains { concealedPasteboardTypes.contains($0) }
 }
+
+/// The entry ⌘1 to ⌘9 picks in the quick panel: "1" is the first. Nil for anything else.
+public func quickPasteIndex(_ characters: String) -> Int? {
+    guard characters.count == 1, let digit = Int(characters), (1...9).contains(digit) else { return nil }
+    return digit - 1
+}
+
+/// Text that reads like code (indented lines, braces, semicolons) is shown in a fixed-width font.
+public func looksLikeCode(_ text: String) -> Bool {
+    let lines = text.split(separator: "\n", omittingEmptySubsequences: true).prefix(40)
+    guard lines.count > 1 else { return false }
+    let indented = lines.filter { $0.hasPrefix("    ") || $0.hasPrefix("\t") }.count
+    let symbols = text.prefix(4000).filter { "{};<>=".contains($0) }.count
+    return indented * 3 >= lines.count || symbols * 25 >= min(text.count, 4000)
+}
+
+/// What the preview shows of a long text: the first part, so a huge copy never stalls it.
+public func previewText(_ text: String, limit: Int = 20_000) -> String {
+    text.count > limit ? String(text.prefix(limit)) + "\n…" : text
+}

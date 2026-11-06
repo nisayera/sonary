@@ -211,6 +211,14 @@ struct AppsSettingsView: View {
                 Text(message).font(.caption).foregroundStyle(.secondary)
             }
         }
+        SettingsCard(Text("Disk images", bundle: .module)) {
+            SettingsToggleRow(symbol: "externaldrive.badge.minus",
+                              title: Text("Move the disk image to the Trash after installing", bundle: .module),
+                              caption: Text("When a mounted image offers one app, the panel installs it into Applications and ejects the image. With this on, the downloaded file goes too.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.trashDiskImageAfterInstall },
+                                            set: { value in model.update { $0.trashDiskImageAfterInstall = value } }))
+        }
         SettingsCard(Text("Scheduled cleaning", bundle: .module)) {
             SettingsRow(symbol: "calendar.badge.clock", title: Text("Clean caches and logs", bundle: .module),
                         caption: Text("Runs in the background and moves everything to the Trash.", bundle: .module)) {

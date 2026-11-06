@@ -142,9 +142,22 @@ public final class AppsModel {
                              bundle: .module)
             return
         }
-        _ = try? NSWorkspace.shared.unmountAndEjectDevice(at: installer.volume)
+        // Ask where the image file is before ejecting: afterwards hdiutil no longer knows.
+        var imagePath: String?
+        if settings.trashDiskImageAfterInstall {
+            let info = await runProcess("/usr/bin/hdiutil", ["info", "-plist"])
+            if info.status == 0 { imagePath = diskImagePath(mountedAt: installer.volume.path, hdiutilInfo: info.output) }
+        }
+        let ejected = (try? NSWorkspace.shared.unmountAndEjectDevice(at: installer.volume)) != nil
         self.installer = nil
         message = String(localized: "\(installer.name) is in your Applications folder.", bundle: .module)
+        if ejected, let imagePath, isTrashableDiskImage(imagePath) {
+            let image = URL(fileURLWithPath: imagePath)
+            if (try? FileManager.default.trashItem(at: image, resultingItemURL: nil)) != nil {
+                message = String(localized: "\(installer.name) is in your Applications folder, and the disk image is in the Trash.",
+                                 bundle: .module)
+            }
+        }
         NSWorkspace.shared.activateFileViewerSelecting([destination])
     }
 

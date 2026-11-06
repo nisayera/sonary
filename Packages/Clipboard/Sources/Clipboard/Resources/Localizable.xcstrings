@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld characters": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Zeichen"
+          }
+        }
+      }
+    },
     "%lld files moved.": {
       "extractionState": "manual",
       "localizations": {
@@ -29,6 +39,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erlaube Sonary unter Systemeinstellungen > Datenschutz & Sicherheit > Automation, den Finder zu steuern."
+          }
+        }
+      }
+    },
+    "Clean link copied.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereinigter Link kopiert."
           }
         }
       }
@@ -93,6 +113,26 @@
         }
       }
     },
+    "Clipboard history on ⌃⌥V": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwischenablage-Verlauf auf ⌃⌥V"
+          }
+        }
+      }
+    },
+    "Clipboard quick panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellpanel für die Zwischenablage"
+          }
+        }
+      }
+    },
     "Copied images are kept as files and opened again from the list.": {
       "localizations": {
         "de": {
@@ -119,6 +159,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erneut kopieren"
+          }
+        }
+      }
+    },
+    "Copy clean": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereinigt kopieren"
           }
         }
       }
@@ -276,6 +326,26 @@
         }
       }
     },
+    "Nothing copied yet, or nothing matches.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch nichts kopiert oder kein Treffer."
+          }
+        }
+      }
+    },
+    "Nothing to remove from this one.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier gibt es nichts zu entfernen."
+          }
+        }
+      }
+    },
     "Nothing was cut.": {
       "extractionState": "manual",
       "localizations": {
@@ -283,6 +353,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es wurde nichts ausgeschnitten."
+          }
+        }
+      }
+    },
+    "Off, the entry only goes on the clipboard. Pasting needs the Accessibility permission.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus, landet der Eintrag nur in der Zwischenablage. Zum Einfügen braucht Sonary die Bedienungshilfen."
+          }
+        }
+      }
+    },
+    "Open": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnen"
           }
         }
       }
@@ -307,6 +397,16 @@
         }
       }
     },
+    "Paste a link to clean": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link zum Bereinigen einfügen"
+          }
+        }
+      }
+    },
     "Paste as plain text": {
       "extractionState": "manual",
       "localizations": {
@@ -324,6 +424,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mit ⌘⌥⇧V als reinen Text einsetzen"
+          }
+        }
+      }
+    },
+    "Paste the entry straight away": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag direkt einfügen"
           }
         }
       }
@@ -368,6 +478,16 @@
         }
       }
     },
+    "Quick panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellpanel"
+          }
+        }
+      }
+    },
     "Remove": {
       "localizations": {
         "de": {
@@ -395,6 +515,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ausgewählte Datei umbenennen"
+          }
+        }
+      }
+    },
+    "Return or ⌘1–9 copies, Esc closes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return oder ⌘1–9 kopiert, Esc schließt"
+          }
+        }
+      }
+    },
+    "Return or ⌘1–9 pastes, Esc closes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return oder ⌘1–9 fügt ein, Esc schließt"
           }
         }
       }
@@ -427,6 +567,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Suchen"
+          }
+        }
+      }
+    },
+    "Search everything you copied, see each entry in full, and pick one with Return or ⌘1 to ⌘9. Change the shortcut on the Shortcuts page.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durchsuche alles Kopierte, sieh jeden Eintrag vollständig und wähle einen mit Return oder ⌘1 bis ⌘9. Das Kürzel änderst du auf der Seite „Tastaturkürzel“."
+          }
+        }
+      }
+    },
+    "Search the clipboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwischenablage durchsuchen"
           }
         }
       }

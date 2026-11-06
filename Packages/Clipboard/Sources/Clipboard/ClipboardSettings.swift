@@ -13,6 +13,8 @@ public struct ClipboardSettings: Codable, Equatable, Sendable {
     public var autoClearMinutes = 0
     public var clearOnSleep = false
     public var clearOnLock = false
+    /// The quick panel pastes the entry you pick; off, it only puts it on the clipboard.
+    public var quickPanelPastes = true
 
     public init() {}
 }
