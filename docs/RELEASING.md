@@ -1,23 +1,38 @@
-# Releases und Updates
+# Releases and updates
 
-## Versionen
-Jeder Meilenstein bekommt eine Version: M0 = 0.1, M1 = 0.2, ... M8 = 0.9. Wenn der Hauptplan fertig ist, erscheint 1.0.
-Tags heißen `v0.2.0`, `v0.3.0`, ... Die Build-Nummer ergibt sich aus dem Tag (`major*10000 + minor*100 + patch`) und wächst immer.
+## Versions
 
-## Release erstellen
-1. `MARKETING_VERSION` und `CURRENT_PROJECT_VERSION` in `project.yml` setzen (z. B. `0.4.0` und `400`).
-2. Den Branch nach `main` mergen.
-3. Der Workflow `Release` sieht, dass es für diese Version noch kein Release gibt, baut die App (macOS 26, arm64), erzeugt `Sonary-<Version>.zip` und `.dmg`, signiert das ZIP mit Sparkle (EdDSA) und veröffentlicht alles inklusive `appcast.xml` als GitHub-Release mit Tag `v<Version>`.
+Every feature release raises the minor version (0.21 → 0.22), fixes raise the patch version (0.22.0 → 0.22.1). 1.0 comes when the [feature checklist](FEATURES.md) is done.
 
-Ein Merge ohne neue Version löst kein Release aus. Ein Tag `v*` von Hand oder ein im Web veröffentlichtes Release funktionieren weiterhin.
+Tags are named `v0.22.0`. The build number follows from the version, `major*10000 + minor*100 + patch` (0.22.0 → 2200), so it always grows. `scripts/release_tools.py` computes it and refuses minor or patch numbers above 99.
 
-## Auto-Update
-Die App fragt `https://github.com/nisayera/sonary/releases/latest/download/appcast.xml` ab (Sparkle 2, automatische Prüfung an). Ein Klick auf "Nach Updates suchen" installiert die neue Version.
+## Making a release
 
-## Einmalig: Signaturschlüssel
-- Der öffentliche Schlüssel steht in `project.yml` (`SUPublicEDKey`).
-- Der private Schlüssel gehört als GitHub-Secret `SPARKLE_ED_PRIVATE_KEY` ins Repo (Settings, Secrets and variables, Actions). Er darf nie committet werden.
-- Ohne das Secret bricht der Release-Workflow ab.
+1. Set `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in `project.yml` (for example `0.23.0` and `2300`).
+2. Merge the branch into `main`.
+3. The `Release` workflow sees that this version has no release yet. It builds the app (macOS 26, arm64), signs it with the stable certificate, creates `Sonary-<version>.zip` and `.dmg`, signs the ZIP for Sparkle (EdDSA) and publishes both together with `appcast.xml` as a GitHub release tagged `v<version>`.
 
-## Hinweis zu Gatekeeper
-Solange es kein Apple-Developer-Konto gibt, ist die App nur ad-hoc signiert und nicht notarisiert. Beim ersten Start: Rechtsklick auf Sonary, Öffnen. Updates über Sparkle laufen danach ohne diese Hürde. Mit einem Developer-ID-Zertifikat (99 $/Jahr) kommen Signierung und Notarisierung in den Workflow, und der Entitlement `disable-library-validation` entfällt.
+A merge without a new version does not release anything. Pushing a `v*` tag by hand, or publishing a release in the web UI, still works.
+
+## In-app updates
+
+The app reads `https://github.com/nisayera/sonary/releases/latest/download/appcast.xml` (Sparkle 2, automatic checks on). "Check for Updates…" installs a new version in one click.
+
+## Secrets
+
+The release workflow stops if any of these repository secrets (Settings → Secrets and variables → Actions) is missing:
+
+| Secret | What it is |
+| --- | --- |
+| `SPARKLE_ED_PRIVATE_KEY` | Base64 Ed25519 seed that signs the update archive. The matching public key is `SUPublicEDKey` in `project.yml`. Never commit it. |
+| `SIGNING_CERT_P12` | The self-signed code-signing certificate with its private key, as a base64 `.p12` |
+| `SIGNING_CERT_PASSWORD` | The password of that `.p12` |
+| `SIGNING_CERT_SHA1` | The certificate's SHA-1 fingerprint, used to pick it for `codesign` |
+
+`release_tools.py public-key` prints the public key for the seed in `SPARKLE_ED_PRIVATE_KEY`, to check that the two still match.
+
+## Signing and Gatekeeper
+
+Builds are signed with a fixed self-signed certificate. A fixed identity lets macOS keep the permissions you granted (Accessibility, Screen Recording, …) across updates; ad-hoc signatures change with every build, so macOS would treat each update as a new app.
+
+The app is not notarized, so the first launch needs a right-click on Sonary and **Open**. Updates through Sparkle install without that step. With an Apple Developer ID certificate (99 $/year) signing and notarization move into the workflow, and the `disable-library-validation` entitlement can go.

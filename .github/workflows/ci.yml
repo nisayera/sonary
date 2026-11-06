@@ -1,8 +1,15 @@
 name: CI
 
+# Pull requests are tested once (not again for the push to their branch); main is tested after every merge.
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
@@ -28,7 +35,8 @@ jobs:
         run: |
           set -o pipefail
           failed=""
-          for p in SonaryCore SonaryUI Monitor Mouse Notch Clipboard Apps Windows Sound Tools Keyboard Display; do
+          for dir in Packages/*/; do
+            p=$(basename "$dir")
             echo "::group::swift test $p"
             swift test --package-path "Packages/$p" -Xswiftc -warnings-as-errors 2>&1 | tee "test-$p.log" || failed="$failed $p"
             echo "::endgroup::"
