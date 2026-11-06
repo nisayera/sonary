@@ -45,29 +45,33 @@ struct ClipboardPopoverView: View {
                 Text("Copied text appears here.", bundle: .module)
                     .font(.callout).foregroundStyle(.secondary).padding(.vertical, Spacing.s)
             }
-            ForEach(entries) { entry in
-                HStack(spacing: 8) {
-                    Button { model.copy(entry) } label: {
+            if !entries.isEmpty {
+                PanelGroup {
+                    ForEach(entries) { entry in
                         HStack(spacing: 8) {
-                            preview(for: entry)
-                            Text(entry.searchText.replacingOccurrences(of: "\n", with: " "))
-                                .lineLimit(2)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Button { model.copy(entry) } label: {
+                                HStack(spacing: 8) {
+                                    preview(for: entry)
+                                    Text(entry.searchText.replacingOccurrences(of: "\n", with: " "))
+                                        .lineLimit(2)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .help(Text("Copy again", bundle: .module))
+                            Button { model.togglePin(entry) } label: {
+                                Image(systemName: entry.isPinned ? "pin.fill" : "pin")
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel(entry.isPinned ? Text("Unpin", bundle: .module) : Text("Pin", bundle: .module))
+                            Button { model.remove(entry) } label: { Image(systemName: "xmark") }
+                                .buttonStyle(.borderless)
+                                .accessibilityLabel(Text("Remove", bundle: .module))
                         }
+                        .font(.system(size: 12))
+                        .panelRowInsets()
                     }
-                    .buttonStyle(.plain)
-                    .help(Text("Copy again", bundle: .module))
-                    Button { model.togglePin(entry) } label: {
-                        Image(systemName: entry.isPinned ? "pin.fill" : "pin")
-                    }
-                    .buttonStyle(.borderless)
-                    .accessibilityLabel(entry.isPinned ? Text("Unpin", bundle: .module) : Text("Pin", bundle: .module))
-                    Button { model.remove(entry) } label: { Image(systemName: "xmark") }
-                        .buttonStyle(.borderless)
-                        .accessibilityLabel(Text("Remove", bundle: .module))
                 }
-                .padding(8)
-                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
             if !model.history.entries.isEmpty {
                 Button(role: .destructive) { model.clearHistory() } label: {
@@ -117,18 +121,22 @@ struct ClipboardPopoverView: View {
                 }
                 return true
             }
-            ForEach(model.shelf, id: \.self) { url in
-                HStack(spacing: 8) {
-                    Image(nsImage: NSWorkspace.shared.icon(forFile: url.path)).resizable().frame(width: 22, height: 22)
-                    Text(url.lastPathComponent).lineLimit(1).truncationMode(.middle)
-                    Spacer()
-                    Button { model.removeFromShelf(url) } label: { Image(systemName: "xmark") }
-                        .buttonStyle(.borderless)
-                        .accessibilityLabel(Text("Remove", bundle: .module))
+            if !model.shelf.isEmpty {
+                PanelGroup {
+                    ForEach(model.shelf, id: \.self) { url in
+                        HStack(spacing: 8) {
+                            Image(nsImage: NSWorkspace.shared.icon(forFile: url.path)).resizable().frame(width: 22, height: 22)
+                            Text(url.lastPathComponent).lineLimit(1).truncationMode(.middle)
+                            Spacer()
+                            Button { model.removeFromShelf(url) } label: { Image(systemName: "xmark") }
+                                .buttonStyle(.borderless)
+                                .accessibilityLabel(Text("Remove", bundle: .module))
+                        }
+                        .font(.system(size: 12))
+                        .panelRowInsets()
+                        .onDrag { NSItemProvider(contentsOf: url) ?? NSItemProvider() }
+                    }
                 }
-                .padding(6)
-                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .onDrag { NSItemProvider(contentsOf: url) ?? NSItemProvider() }
             }
             if !model.shelf.isEmpty {
                 Text("Drag files out of the shelf to move or copy them.", bundle: .module)
@@ -139,27 +147,34 @@ struct ClipboardPopoverView: View {
 
     private var finderView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Button { model.copyFinderSelectionPaths() } label: {
-                Label { Text("Copy path of selected items", bundle: .module) } icon: { Image(systemName: "doc.on.clipboard") }
-            }
-            Button { model.openTerminalInFinderFolder() } label: {
-                Label { Text("Open Terminal in current folder", bundle: .module) } icon: { Image(systemName: "terminal") }
-            }
-            Button { model.newTextFileInFinderFolder() } label: {
-                Label { Text("New text file in current folder", bundle: .module) } icon: { Image(systemName: "doc.badge.plus") }
-            }
-            Button { model.cutFinderSelection() } label: {
-                Label { Text("Cut the selected files", bundle: .module) } icon: { Image(systemName: "scissors") }
-            }
-            Button { model.pasteCutFiles() } label: {
-                Label { Text("Move them into this folder", bundle: .module) } icon: { Image(systemName: "arrow.right.doc.on.clipboard") }
-            }
-            .disabled(model.cutFiles.isEmpty)
-            Button { model.renameFinderSelection() } label: {
-                Label { Text("Rename the selected file", bundle: .module) } icon: { Image(systemName: "pencil") }
-            }
-            Button { model.saveClipboardImageToFinderFolder() } label: {
-                Label { Text("Save clipboard image here as PNG", bundle: .module) } icon: { Image(systemName: "photo.badge.arrow.down") }
+            PanelGroup {
+                Group {
+                    Button { model.copyFinderSelectionPaths() } label: {
+                        Label { Text("Copy path of selected items", bundle: .module) } icon: { Image(systemName: "doc.on.clipboard") }
+                    }
+                    Button { model.openTerminalInFinderFolder() } label: {
+                        Label { Text("Open Terminal in current folder", bundle: .module) } icon: { Image(systemName: "terminal") }
+                    }
+                    Button { model.newTextFileInFinderFolder() } label: {
+                        Label { Text("New text file in current folder", bundle: .module) } icon: { Image(systemName: "doc.badge.plus") }
+                    }
+                    Button { model.cutFinderSelection() } label: {
+                        Label { Text("Cut the selected files", bundle: .module) } icon: { Image(systemName: "scissors") }
+                    }
+                    Button { model.pasteCutFiles() } label: {
+                        Label { Text("Move them into this folder", bundle: .module) } icon: { Image(systemName: "arrow.right.doc.on.clipboard") }
+                    }
+                    .disabled(model.cutFiles.isEmpty)
+                    Button { model.renameFinderSelection() } label: {
+                        Label { Text("Rename the selected file", bundle: .module) } icon: { Image(systemName: "pencil") }
+                    }
+                    Button { model.saveClipboardImageToFinderFolder() } label: {
+                        Label { Text("Save clipboard image here as PNG", bundle: .module) } icon: { Image(systemName: "photo.badge.arrow.down") }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .font(.system(size: 12))
+                .panelRowInsets()
             }
             if let message = model.lastMessage {
                 Text(message).font(.caption).foregroundStyle(.secondary)

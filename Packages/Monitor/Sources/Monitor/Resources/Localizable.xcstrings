@@ -342,6 +342,16 @@
           }
         }
       }
+    },
+    "Usage": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auslastung"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

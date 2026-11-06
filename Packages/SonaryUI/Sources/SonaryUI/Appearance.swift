@@ -54,3 +54,30 @@ public extension View {
         modifier(PanelBackground(shape: shape))
     }
 }
+
+/// The surface behind the whole menu bar panel, edge to edge. The menu bar window already brings
+/// the system's glass; Glass only darkens it a little so text stays readable, Frosted lays a
+/// thicker material over it, and Solid (or Reduce Transparency) covers it.
+public struct PanelSurfaceBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.sonaryAppearance) private var appearance
+
+    public init() {}
+
+    public var body: some View {
+        surface.ignoresSafeArea()
+    }
+
+    @ViewBuilder
+    private var surface: some View {
+        if reduceTransparency || appearance == .solid {
+            Rectangle().fill(.background)
+        } else if appearance == .frosted {
+            Rectangle().fill(.regularMaterial)
+                .overlay(Rectangle().fill(PanelColors.base(colorScheme)))
+        } else {
+            Rectangle().fill(PanelColors.base(colorScheme).opacity(colorScheme == .light ? 0.35 : 0.45))
+        }
+    }
+}

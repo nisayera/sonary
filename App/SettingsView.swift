@@ -2,66 +2,122 @@ import SonaryCore
 import SonaryUI
 import SwiftUI
 
-private enum SettingsPageID: Hashable {
-    case general
-    case shortcuts
-    case updates
-    case about
-    case module(String)
-}
-
-/// Settings window: sidebar with Sonary's own pages and one page per module; each page is a header plus cards.
+/// Settings window: a search field and a grouped sidebar (Sonary's own pages, then the modules by
+/// category), and on the right one page per entry, each a header plus cards.
 struct SettingsView: View {
     let model: AppModel
-    @State private var selection: SettingsPageID? = .general
+    @State private var query = ""
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selection) {
-                Section("Sonary") {
-                    sidebarRow(.general, symbol: "gearshape", title: Text("General"))
-                    sidebarRow(.shortcuts, symbol: "keyboard", title: Text("Shortcuts"))
-                    sidebarRow(.updates, symbol: "arrow.down.circle", title: Text("Updates"))
-                    sidebarRow(.about, symbol: "info.circle", title: Text("About"))
-                }
-                Section("Modules") {
-                    ForEach(model.registry.modules, id: \.id) { module in
-                        sidebarRow(.module(module.id), symbol: module.symbol, title: Text(module.title),
-                                   isOn: model.registry.isEnabled(module.id))
+            VStack(spacing: 0) {
+                SidebarSearchField(query: $query)
+                List(selection: Binding(get: { Optional(model.settingsPage) },
+                                        set: { if let page = $0 { model.settingsPage = page } })) {
+                    if isSearching {
+                        searchResults
+                    } else {
+                        sections
                     }
                 }
+                .listStyle(.sidebar)
             }
-            .listStyle(.sidebar)
-            .navigationSplitViewColumnWidth(min: 200, ideal: 214, max: 260)
+            .navigationSplitViewColumnWidth(min: 198, ideal: 214, max: 260)
         } detail: {
             detail
         }
-        .frame(minWidth: 760, minHeight: 520)
+        .frame(minWidth: 772, minHeight: 528)
         .tint(Color.sonaryAccent)
         .environment(\.sonaryAppearance, model.appearance)
     }
 
-    private func sidebarRow(_ id: SettingsPageID, symbol: String, title: Text, isOn: Bool? = nil) -> some View {
+    // MARK: - Sidebar
+
+    private struct Entry: Identifiable {
+        let id: SettingsDestination
+        let symbol: String
+        let title: String
+        var detail = ""
+        var isOn: Bool?
+    }
+
+    private var essentials: [Entry] {
+        [Entry(id: .general, symbol: "gearshape", title: String(localized: "General")),
+         Entry(id: .features, symbol: "square.grid.2x2", title: String(localized: "Features")),
+         Entry(id: .permissions, symbol: "lock.shield", title: String(localized: "Permissions")),
+         Entry(id: .shortcuts, symbol: "keyboard", title: String(localized: "Shortcuts"))]
+    }
+
+    private var appEntries: [Entry] {
+        [Entry(id: .updates, symbol: "arrow.down.circle", title: String(localized: "Updates")),
+         Entry(id: .about, symbol: "info.circle", title: String(localized: "About"))]
+    }
+
+    private func moduleEntries(_ category: ModuleCategory) -> [Entry] {
+        category.moduleIDs.compactMap { id in
+            guard let module = model.registry.modules.first(where: { $0.id == id }) else { return nil }
+            return Entry(id: .module(id), symbol: module.symbol, title: String(localized: module.title),
+                         detail: ModuleInfo.summaryText(for: id), isOn: model.registry.isEnabled(id))
+        }
+    }
+
+    @ViewBuilder
+    private var sections: some View {
+        Section("Essentials") {
+            ForEach(essentials) { sidebarRow($0) }
+        }
+        ForEach(ModuleCategory.allCases, id: \.self) { category in
+            Section(category.title) {
+                ForEach(moduleEntries(category)) { sidebarRow($0) }
+            }
+        }
+        Section("Sonary") {
+            ForEach(appEntries) { sidebarRow($0) }
+        }
+    }
+
+    private var isSearching: Bool {
+        !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    @ViewBuilder
+    private var searchResults: some View {
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let all = essentials + ModuleCategory.allCases.flatMap(moduleEntries) + appEntries
+        let found = all.filter { $0.title.localizedStandardContains(needle) || $0.detail.localizedStandardContains(needle) }
+        if found.isEmpty {
+            Text("No results").foregroundStyle(.secondary)
+        } else {
+            ForEach(found) { sidebarRow($0) }
+        }
+    }
+
+    private func sidebarRow(_ entry: Entry) -> some View {
         HStack(spacing: 9) {
-            Image(systemName: symbol)
-                .foregroundStyle(selection == id ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.sonaryAccent))
+            Image(systemName: entry.symbol)
+                .foregroundStyle(model.settingsPage == entry.id ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.sonaryAccent))
                 .frame(width: 18)
-            title
+            Text(verbatim: entry.title)
+                .lineLimit(1)
             Spacer(minLength: 4)
-            if let isOn {
+            if let isOn = entry.isOn {
                 Circle()
                     .fill(isOn ? Color.green : Color.secondary.opacity(0.35))
                     .frame(width: 7, height: 7)
                     .accessibilityLabel(isOn ? Text("On") : Text("Off"))
             }
         }
-        .tag(id)
+        .tag(entry.id)
     }
+
+    // MARK: - Detail
 
     @ViewBuilder
     private var detail: some View {
-        switch selection ?? .general {
+        switch model.settingsPage {
         case .general: GeneralPage(model: model)
+        case .features: FeaturesPage(model: model)
+        case .permissions: PermissionsPage(model: model)
         case .shortcuts: ShortcutsPage()
         case .updates: UpdatesPage(model: model)
         case .about: AboutPage()
@@ -72,6 +128,38 @@ struct SettingsView: View {
                 GeneralPage(model: model)
             }
         }
+    }
+}
+
+/// A search field that sits above the sidebar list. The system's sidebar search lets rows slide
+/// under the field on macOS 26, so this one has a fixed place of its own.
+private struct SidebarSearchField: View {
+    @Binding var query: String
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField(text: $query, prompt: Text("Search settings")) { Text("Search settings") }
+                .textFieldStyle(.plain)
+                .onExitCommand { query = "" }
+            if !query.isEmpty {
+                Button {
+                    query = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Clear search"))
+            }
+        }
+        .padding(.vertical, 5)
+        .padding(.horizontal, 7)
+        .background(.quaternary.opacity(0.5), in: Capsule())
+        .padding(.horizontal, 10)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
     }
 }
 
