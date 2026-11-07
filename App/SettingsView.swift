@@ -233,6 +233,11 @@ private struct ModulePage: View {
 
 private struct GeneralPage: View {
     let model: AppModel
+
+    private func optionBinding<Value>(_ keyPath: WritableKeyPath<PanelOptions, Value>) -> Binding<Value> {
+        Binding(get: { model.panelOptions[keyPath: keyPath] },
+                set: { value in model.updatePanelOptions { $0[keyPath: keyPath] = value } })
+    }
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -247,6 +252,10 @@ private struct GeneralPage: View {
                                                 set: { model.launchAtLogin.set($0) }))
             }
             SettingsCard(Text("Appearance")) {
+                SettingsRow(symbol: "paintpalette", title: Text("Accent colour"),
+                            caption: Text("Used for icons, tabs, rings and bars everywhere in Sonary.")) {
+                    AccentPicker(selection: SonaryTheme.shared.accent) { SonaryTheme.shared.setAccent($0) }
+                }
                 SettingsRow(symbol: "square.on.square.dashed", title: Text("Panels and the island"),
                             caption: Text("How much of the desktop shows through.")) {
                     Picker(selection: Binding(get: { model.appearance }, set: { model.setAppearance($0) })) {
@@ -254,6 +263,34 @@ private struct GeneralPage: View {
                     } label: { EmptyView() }
                         .labelsHidden().frame(width: 150)
                 }
+            }
+            SettingsCard(Text("Panel header and overview")) {
+                SettingsToggleRow(symbol: "clock", title: Text("Show the date and time"),
+                                  isOn: optionBinding(\.showsClock))
+                if model.panelOptions.showsClock {
+                    SettingsToggleRow(symbol: "timer", title: Text("With seconds"), isOn: optionBinding(\.clockSeconds))
+                }
+                SettingsToggleRow(symbol: "square.grid.2x2", title: Text("Show live values at the top"),
+                                  caption: Text("Tiles with the values of the running modules, such as CPU, volume or the track playing."),
+                                  isOn: optionBinding(\.showsGlance))
+                if model.panelOptions.showsGlance {
+                    SettingsRow(symbol: "rectangle.split.3x1", title: Text("Tiles per row")) {
+                        Picker(selection: optionBinding(\.glanceColumns)) {
+                            Text(verbatim: "2").tag(2)
+                            Text(verbatim: "3").tag(3)
+                        } label: { EmptyView() }
+                            .pickerStyle(.segmented).labelsHidden().frame(width: 90)
+                    }
+                    SettingsRow(symbol: "number", title: Text("At most")) {
+                        Stepper(value: optionBinding(\.glanceLimit), in: 2...12, step: 1) {
+                            Text("\(model.panelOptions.glanceLimit) tiles")
+                        }
+                    }
+                    GlanceValuePicker(model: model)
+                }
+                SettingsToggleRow(symbol: "text.below.photo", title: Text("Live values under each module"),
+                                  caption: Text("A second line in the module list with each module's values, such as its CPU load."),
+                                  isOn: optionBinding(\.showsStatusLines))
             }
             SettingsCard(Text("Menu panel")) {
                 Text("Which module tabs the panel shows, and in what order. The overview always comes first.")
@@ -358,5 +395,40 @@ func appearanceTitle(_ appearance: SonaryAppearance) -> LocalizedStringKey {
     case .glass: "Glass"
     case .frosted: "Frosted"
     case .solid: "Solid"
+    }
+}
+
+/// Every live value the running modules offer, each with a switch for the overview.
+private struct GlanceValuePicker: View {
+    let model: AppModel
+
+    var body: some View {
+        let running = model.registry.modules.filter { model.registry.isEnabled($0.id) }
+        let entries = running.flatMap { module in module.status.map { (module: module, status: $0) } }
+        if !entries.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Values on the overview").font(.callout.weight(.medium))
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .leading), count: 2), alignment: .leading,
+                          spacing: 6) {
+                    ForEach(Array(entries.enumerated()), id: \.offset) { _, entry in
+                        let key = glanceKey(entry.module.id, entry.status.id)
+                        Toggle(isOn: Binding(
+                            get: { !model.panelOptions.hiddenGlance.contains(key) },
+                            set: { on in
+                                model.updatePanelOptions { options in
+                                    options.hiddenGlance.removeAll { $0 == key }
+                                    if !on { options.hiddenGlance.append(key) }
+                                }
+                            }
+                        )) {
+                            Label { Text(verbatim: entry.status.title) } icon: { Image(systemName: entry.status.symbol) }
+                        }
+                        .toggleStyle(.checkbox)
+                    }
+                }
+                Text("Values of modules that are off appear once they run.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
     }
 }

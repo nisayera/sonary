@@ -71,6 +71,16 @@
         }
       }
     },
+    "Battery temperature": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akkutemperatur"
+          }
+        }
+      }
+    },
     "Busiest apps": {
       "localizations": {
         "de": {
@@ -101,12 +111,32 @@
         }
       }
     },
+    "Capacity": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapazität"
+          }
+        }
+      }
+    },
     "Charge cycles": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Ladezyklen"
+          }
+        }
+      }
+    },
+    "Charger": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netzteil"
           }
         }
       }
@@ -127,6 +157,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lädt mit"
+          }
+        }
+      }
+    },
+    "Charging, full in %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lädt, voll in %@"
           }
         }
       }
@@ -222,6 +262,16 @@
         }
       }
     },
+    "Fully charged": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voll geladen"
+          }
+        }
+      }
+    },
     "GPU": {
       "localizations": {
         "de": {
@@ -262,6 +312,16 @@
         }
       }
     },
+    "In the panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Menü"
+          }
+        }
+      }
+    },
     "Local address": {
       "localizations": {
         "de": {
@@ -288,6 +348,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wenig Speicherplatz"
+          }
+        }
+      }
+    },
+    "Mac": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
           }
         }
       }
@@ -383,6 +453,26 @@
         }
       }
     },
+    "On battery": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akkubetrieb"
+          }
+        }
+      }
+    },
+    "On battery, %@ left": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akkubetrieb, noch %@"
+          }
+        }
+      }
+    },
     "Plug in your Mac soon.": {
       "localizations": {
         "de": {
@@ -393,12 +483,82 @@
         }
       }
     },
+    "Plugged in, not charging": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angeschlossen, lädt nicht"
+          }
+        }
+      }
+    },
+    "Power": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strom"
+          }
+        }
+      }
+    },
+    "Power and battery": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strom und Akku"
+          }
+        }
+      }
+    },
+    "Power draw": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leistungsaufnahme"
+          }
+        }
+      }
+    },
     "Read": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Gelesen"
+          }
+        }
+      }
+    },
+    "Read every": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messen alle"
+          }
+        }
+      }
+    },
+    "Readings": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messung"
+          }
+        }
+      }
+    },
+    "Rings for CPU, memory, disk and battery": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ringe für CPU, Speicher, Festplatte und Akku"
           }
         }
       }
@@ -423,12 +583,32 @@
         }
       }
     },
+    "Slower readings use a little less energy. The graphs always cover about five minutes.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seltener messen spart etwas Energie. Die Graphen zeigen immer etwa fünf Minuten."
+          }
+        }
+      }
+    },
     "Temperature": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Temperatur"
+          }
+        }
+      }
+    },
+    "Temperatures in Fahrenheit": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temperaturen in Fahrenheit"
           }
         }
       }
@@ -489,6 +669,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Auslastung"
+          }
+        }
+      }
+    },
+    "Usage over time": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auslastung im Verlauf"
+          }
+        }
+      }
+    },
+    "Voltage": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spannung"
           }
         }
       }

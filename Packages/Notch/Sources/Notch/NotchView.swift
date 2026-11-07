@@ -271,7 +271,7 @@ private struct TimerWidget: View {
             }
         } else {
             HStack(spacing: 8) {
-                ForEach([1, 5, 10, 25], id: \.self) { minutes in
+                ForEach(model.settings.timerPresets.prefix(5), id: \.self) { minutes in
                     Button { model.startTimer(minutes: minutes) } label: {
                         Text("\(minutes) min", bundle: .module).frame(maxWidth: .infinity)
                     }

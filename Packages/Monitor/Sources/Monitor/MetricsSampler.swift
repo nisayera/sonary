@@ -109,7 +109,8 @@ public actor MetricsSampler {
             battery: sources.battery(),
             temperatures: sources.temperatures(),
             cores: coreUsage,
-            diskIO: disk
+            diskIO: disk,
+            power: sources.power()
         )
     }
 }

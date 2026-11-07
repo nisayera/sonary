@@ -29,6 +29,12 @@ public final class MonitorModule: SonaryModule {
     public private(set) var menuBarBars: Bool
     /// Each metric as a menu bar item of its own.
     public private(set) var separateMenuBarItems: Bool
+    /// Seconds between readings: 1, 2 or 5.
+    public private(set) var sampleInterval: Int
+    /// Temperatures in °F instead of °C.
+    public private(set) var fahrenheit: Bool
+    /// Blocks of the monitor tab the user switched off.
+    public private(set) var hiddenSections: Set<MonitorSection>
     public private(set) var usbDevices: [USBDevice] = []
     @ObservationIgnored private let statusItems = MonitorStatusItems()
 
@@ -55,11 +61,17 @@ public final class MonitorModule: SonaryModule {
         self.showsMenuBarValues = defaults.bool(forKey: "monitor.menubar.values")
         self.menuBarBars = defaults.bool(forKey: "monitor.menubar.bars")
         self.separateMenuBarItems = defaults.bool(forKey: "monitor.menubar.separate")
+        let interval = defaults.integer(forKey: "monitor.interval")
+        self.sampleInterval = [1, 2, 5].contains(interval) ? interval : 1
+        self.fahrenheit = defaults.bool(forKey: "monitor.fahrenheit")
+        self.hiddenSections = Set((defaults.stringArray(forKey: "monitor.sections.hidden") ?? [])
+            .compactMap(MonitorSection.init(rawValue:)))
     }
 
     public func start() async throws {
         guard sampler == nil else { return }
-        let sampler = MetricsSampler(sources: sourcesFactory())
+        let sampler = MetricsSampler(sources: sourcesFactory(), interval: .seconds(sampleInterval),
+                                     capacity: 300 / sampleInterval)
         self.sampler = sampler
         let stream = await sampler.snapshots()
         guard self.sampler === sampler else { return }
@@ -138,6 +150,28 @@ public final class MonitorModule: SonaryModule {
         defaults.set(metrics.map(\.rawValue), forKey: "monitor.readout")
     }
 
+    /// Changes how often Sonary reads the sensors, starting the sampling over.
+    public func setSampleInterval(_ seconds: Int) async {
+        guard seconds != sampleInterval, [1, 2, 5].contains(seconds) else { return }
+        sampleInterval = seconds
+        defaults.set(seconds, forKey: "monitor.interval")
+        guard sampler != nil else { return }
+        await stop()
+        try? await start()
+    }
+
+    public func setFahrenheit(_ on: Bool) {
+        fahrenheit = on
+        defaults.set(on, forKey: "monitor.fahrenheit")
+    }
+
+    public func setSection(_ section: MonitorSection, visible: Bool) {
+        if visible { hiddenSections.remove(section) } else { hiddenSections.insert(section) }
+        defaults.set(hiddenSections.map(\.rawValue).sorted(), forKey: "monitor.sections.hidden")
+    }
+
+    public func shows(_ section: MonitorSection) -> Bool { !hiddenSections.contains(section) }
+
     public func setAlertsEnabled(_ enabled: Bool) async {
         if enabled {
             guard await AlertNotifier().requestAuthorization() else { return }
@@ -200,13 +234,24 @@ public final class MonitorModule: SonaryModule {
                                       value: percentText(battery.level), fraction: battery.level,
                                       level: low ? (battery.level < 0.1 ? .critical : .warning) : .normal))
         }
+        if let watts = latest.power?.systemWatts {
+            items.append(ModuleStatus(id: "power", symbol: "bolt.fill", title: String(localized: "Power", bundle: .module),
+                                      value: formatWatts(watts)))
+        }
         if let temperature = latest.temperatures["CPU"] ?? latest.temperatures.values.max() {
             items.append(ModuleStatus(id: "temperature", symbol: "thermometer.medium",
                                       title: String(localized: "Temperature", bundle: .module),
-                                      value: "\(Int(temperature.rounded())) °C",
+                                      value: formatTemperature(temperature, fahrenheit: fahrenheit),
                                       level: temperature >= 95 ? .critical : temperature >= 85 ? .warning : .normal))
         }
         return items
     }
     public func makePopoverView() -> AnyView? { AnyView(MonitorView(module: self)) }
+}
+
+/// The blocks of the monitor tab, each of which can be switched off.
+public enum MonitorSection: String, CaseIterable, Codable, Sendable, Identifiable {
+    case rings, power, usage, network, processes, usb
+
+    public var id: String { rawValue }
 }

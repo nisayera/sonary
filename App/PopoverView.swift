@@ -78,19 +78,26 @@ struct PopoverView: View {
                 .frame(width: 32, height: 32)
                 .background(Color.sonaryAccent.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
                 .shadow(color: Color.sonaryAccent.opacity(0.35), radius: 6, y: 2)
-            TimelineView(.everyMinute) { context in
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(verbatim: "Sonary").font(.system(size: 13, weight: .bold))
-                        Text(context.date, format: .dateTime.weekday(.wide).day().month(.wide))
-                            .font(.system(size: 10.5))
-                            .foregroundStyle(.secondary)
+            if model.panelOptions.showsClock {
+                TimelineView(.periodic(from: Calendar.current.dateInterval(of: .minute, for: .now)?.start ?? .now,
+                                       by: model.panelOptions.clockSeconds ? 1 : 60)) { context in
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(verbatim: "Sonary").font(.system(size: 13, weight: .bold))
+                            Text(context.date, format: .dateTime.weekday(.wide).day().month(.wide))
+                                .font(.system(size: 10.5))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 8)
+                        Text(context.date, format: model.panelOptions.clockSeconds
+                             ? .dateTime.hour().minute().second() : .dateTime.hour().minute())
+                            .font(.system(size: 22, weight: .semibold, design: .rounded).monospacedDigit())
+                            .contentTransition(.numericText())
                     }
-                    Spacer(minLength: 8)
-                    Text(context.date, format: .dateTime.hour().minute())
-                        .font(.system(size: 22, weight: .semibold, design: .rounded).monospacedDigit())
-                        .contentTransition(.numericText())
                 }
+            } else {
+                Text(verbatim: "Sonary").font(.system(size: 13, weight: .bold))
+                Spacer()
             }
         }
         .padding(.horizontal, 2)
@@ -103,7 +110,8 @@ struct PopoverView: View {
         case .overview:
             let running = model.registry.modules.filter { model.registry.isEnabled($0.id) }
             // With live values the overview opens on them; the count says how many modules run.
-            PanelSectionTitle(running.contains { !$0.status.isEmpty } ? Text("At a glance") : Text("Modules")) {
+            let glancing = model.panelOptions.showsGlance && running.contains { !$0.status.isEmpty }
+            PanelSectionTitle(glancing ? Text("At a glance") : Text("Modules")) {
                 count(running.count, of: model.registry.modules.count)
             }
         case let .module(id):
@@ -191,10 +199,14 @@ struct PopoverView: View {
     /// The live values of every running module, two to a row.
     @ViewBuilder
     private var glance: some View {
-        let values = model.registry.modules.filter { model.registry.isEnabled($0.id) }.flatMap(\.status)
-        if !values.isEmpty {
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
-                ForEach(Array(values.prefix(8).enumerated()), id: \.offset) { _, status in
+        let options = model.panelOptions
+        let values = model.registry.modules.filter { model.registry.isEnabled($0.id) }.flatMap { module in
+            module.status.filter { !options.hiddenGlance.contains(glanceKey(module.id, $0.id)) }
+        }
+        if options.showsGlance, !values.isEmpty {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: max(2, min(3, options.glanceColumns))),
+                      spacing: 8) {
+                ForEach(Array(values.prefix(options.glanceLimit).enumerated()), id: \.offset) { _, status in
                     GlanceTile(symbol: status.symbol, title: Text(verbatim: status.title), value: status.value,
                                fraction: status.fraction, tint: statusTint(status.level))
                 }
@@ -210,7 +222,8 @@ struct PopoverView: View {
         let failure = model.registry.failures[module.id]
         let isOn = model.registry.isEnabled(module.id)
         return PanelRow(symbol: module.symbol, title: Text(module.title),
-                        caption: failure.map { Text($0) } ?? (isOn ? statusLine(module) : nil),
+                        caption: failure.map { Text($0) }
+                            ?? (isOn && model.panelOptions.showsStatusLines ? statusLine(module) : nil),
                         isActive: model.registry.isEnabled(module.id),
                         needsAttention: failure != nil) {
             Toggle(isOn: Binding(

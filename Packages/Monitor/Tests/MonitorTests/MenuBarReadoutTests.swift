@@ -107,3 +107,37 @@ struct MonitorGapTests {
         #expect(devices.last?.vendor == "Keychron")
     }
 }
+
+struct PowerTests {
+    @Test func batteryAndChargerFiguresAreRead() {
+        let battery: [String: Any] = ["Voltage": NSNumber(value: 12_500), "InstantAmperage": NSNumber(value: 2000),
+                                      "Temperature": NSNumber(value: 3150), "DesignCapacity": NSNumber(value: 5000),
+                                      "AppleRawMaxCapacity": NSNumber(value: 4600), "AppleRawCurrentCapacity": NSNumber(value: 2300),
+                                      "ExternalConnected": true, "FullyCharged": false]
+        let adapter: [String: Any] = ["Watts": NSNumber(value: 96), "Name": "96W USB-C Power Adapter"]
+        let stats = powerStats(battery: battery, adapter: adapter, systemWatts: 18.4, adapterInputWatts: 43.0)
+        #expect(stats.batteryWatts == 25)
+        #expect(stats.batteryTemperature == 31.5)
+        #expect(stats.voltage == 12.5)
+        #expect(stats.fullCapacity == 4600)
+        #expect(stats.adapterRatedWatts == 96)
+        #expect(stats.adapterName == "96W USB-C Power Adapter")
+        #expect(stats.systemWatts == 18.4)
+        #expect(stats.isPluggedIn)
+    }
+
+    @Test func aDesktopWithoutBatteryStillHasItsDraw() {
+        let stats = powerStats(battery: [:], adapter: [:], systemWatts: 7.2, adapterInputWatts: nil)
+        #expect(stats.batteryWatts == nil)
+        #expect(stats.systemWatts == 7.2)
+        #expect(!stats.isEmpty)
+        #expect(powerStats(battery: [:], adapter: [:], systemWatts: 0, adapterInputWatts: nil).isEmpty)
+    }
+
+    @Test func wattsAndTemperaturesReadWell() {
+        #expect(formatWatts(18.44) == "18.4 W")
+        #expect(formatWatts(140) == "140 W")
+        #expect(formatTemperature(30, fahrenheit: false) == "30 °C")
+        #expect(formatTemperature(30, fahrenheit: true) == "86 °F")
+    }
+}

@@ -52,6 +52,52 @@ public struct BatteryStats: Sendable, Equatable {
     }
 }
 
+/// Where the power goes: what the whole Mac draws, what comes in from the charger, and the
+/// battery's side of it, plus the battery's own measurements.
+public struct PowerStats: Sendable, Equatable {
+    /// The whole Mac, in watts.
+    public var systemWatts: Double?
+    /// What arrives from the charger, in watts.
+    public var adapterWatts: Double?
+    /// What the charger is rated for, in watts.
+    public var adapterRatedWatts: Double?
+    public var adapterName: String?
+    /// Positive while charging, negative on battery.
+    public var batteryWatts: Double?
+    public var voltage: Double?
+    public var amperage: Double?
+    /// The battery's temperature in °C.
+    public var batteryTemperature: Double?
+    /// Capacities in mAh.
+    public var designCapacity: Int?
+    public var fullCapacity: Int?
+    public var currentCapacity: Int?
+    public var isPluggedIn: Bool
+    public var isFullyCharged: Bool
+
+    public init(systemWatts: Double? = nil, adapterWatts: Double? = nil, adapterRatedWatts: Double? = nil,
+                adapterName: String? = nil, batteryWatts: Double? = nil, voltage: Double? = nil, amperage: Double? = nil,
+                batteryTemperature: Double? = nil, designCapacity: Int? = nil, fullCapacity: Int? = nil,
+                currentCapacity: Int? = nil, isPluggedIn: Bool = false, isFullyCharged: Bool = false) {
+        self.systemWatts = systemWatts
+        self.adapterWatts = adapterWatts
+        self.adapterRatedWatts = adapterRatedWatts
+        self.adapterName = adapterName
+        self.batteryWatts = batteryWatts
+        self.voltage = voltage
+        self.amperage = amperage
+        self.batteryTemperature = batteryTemperature
+        self.designCapacity = designCapacity
+        self.fullCapacity = fullCapacity
+        self.currentCapacity = currentCapacity
+        self.isPluggedIn = isPluggedIn
+        self.isFullyCharged = isFullyCharged
+    }
+
+    /// Whether there is anything to show at all.
+    public var isEmpty: Bool { systemWatts == nil && adapterWatts == nil && batteryWatts == nil && adapterRatedWatts == nil }
+}
+
 public struct MetricsSnapshot: Sendable, Equatable {
     public var timestamp: Date
     public var cpu: Double
@@ -64,10 +110,12 @@ public struct MetricsSnapshot: Sendable, Equatable {
     /// The load of each core, 0...1.
     public var cores: [Double]
     public var diskIO: DiskRates
+    public var power: PowerStats?
 
     public init(timestamp: Date, cpu: Double, gpu: Double?, memory: MemoryStats, network: NetworkRates,
                 disk: DiskStats, battery: BatteryStats?, temperatures: [String: Double],
-                cores: [Double] = [], diskIO: DiskRates = .zero) {
+                cores: [Double] = [], diskIO: DiskRates = .zero, power: PowerStats? = nil) {
+        self.power = power
         self.cores = cores
         self.diskIO = diskIO
         self.timestamp = timestamp
@@ -92,9 +140,11 @@ public protocol MetricsSources: Sendable {
     /// Ticks for each core; empty where they cannot be read.
     func coreTicks() -> [CPUTicks]
     func diskCounters() -> DiskCounters?
+    func power() -> PowerStats?
 }
 
 public extension MetricsSources {
     func coreTicks() -> [CPUTicks] { [] }
     func diskCounters() -> DiskCounters? { nil }
+    func power() -> PowerStats? { nil }
 }

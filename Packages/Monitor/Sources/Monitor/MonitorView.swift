@@ -18,16 +18,17 @@ public struct MonitorView: View {
         if let latest = module.latest {
             let history = module.history
             VStack(alignment: .leading, spacing: PanelMetrics.spacing) {
-                tiles(latest)
-                usage(latest, history: history)
-                network(latest, history: history)
-                if let battery = latest.battery, battery.health != nil || battery.cycleCount != nil || battery.watts != nil {
-                    batteryDetails(battery)
+                if module.shows(.rings) { tiles(latest) }
+                if module.shows(.power), latest.power != nil || latest.battery != nil {
+                    PowerSection(latest: latest, history: history, batteryTime: module.batteryTime,
+                                 fahrenheit: module.fahrenheit)
                 }
-                if !module.topProcesses.isEmpty {
+                if module.shows(.usage) { usage(latest, history: history) }
+                if module.shows(.network) { network(latest, history: history) }
+                if module.shows(.processes), !module.topProcesses.isEmpty {
                     busiest
                 }
-                if !module.usbDevices.isEmpty {
+                if module.shows(.usb), !module.usbDevices.isEmpty {
                     usb
                 }
             }
@@ -79,7 +80,7 @@ public struct MonitorView: View {
         HStack(spacing: 8) {
             MonitorTile(symbol: "thermometer.medium", title: "Temperature",
                         value: (latest.temperatures["CPU"] ?? latest.temperatures.values.max())
-                            .map { "\(Int($0.rounded())) °C" } ?? "—",
+                            .map { formatTemperature($0, fahrenheit: module.fahrenheit) } ?? "—",
                         detail: temperatureDetail(latest.temperatures))
             if let fastest = module.fans.map(\.rpm).max(), fastest > 0 {
                 MonitorTile(symbol: "fan", title: "Fans", value: formatFanSpeed(module.fans))
@@ -136,7 +137,7 @@ public struct MonitorView: View {
                 }
                 .font(.system(size: 12, weight: .semibold).monospacedDigit())
                 if incoming.count > 1 {
-                    Sparkline(series: incoming, domain: 0...max(1, incoming.max() ?? 1), color: .teal)
+                    NetworkChart(incoming: incoming, outgoing: history.map(\.network.bytesOutPerSec))
                 }
                 Divider()
                 KeyValueRow(title: "Downloaded", value: formatBytes(module.totals.bytesIn))
@@ -178,26 +179,6 @@ public struct MonitorView: View {
             value.map { "\(label) \(Int($0.rounded()))°" }
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
-    }
-
-    private func batteryDetails(_ battery: BatteryStats) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            PanelSectionTitle(Text("Battery", bundle: .module))
-                .padding(.horizontal, 2)
-            VStack(alignment: .leading, spacing: 6) {
-                if let health = battery.health {
-                    KeyValueRow(title: "Health", value: percent(health))
-                }
-                if let cycles = battery.cycleCount {
-                    KeyValueRow(title: "Charge cycles", value: "\(cycles)")
-                }
-                if let watts = battery.watts {
-                    KeyValueRow(title: watts >= 0 ? "Charging with" : "Drawing",
-                                value: String(format: "%.1f W", abs(watts)))
-                }
-            }
-            .panelCard()
-        }
     }
 
     private var usb: some View {
@@ -415,5 +396,36 @@ private struct KeyValueRow: View {
             Text(verbatim: value).monospacedDigit()
         }
         .font(.system(size: 11))
+    }
+}
+
+/// Down and up over the last minutes, one line each, on the same scale.
+private struct NetworkChart: View {
+    let incoming: [Double]
+    let outgoing: [Double]
+
+    var body: some View {
+        let top = max(1, (incoming + outgoing).max() ?? 1) * 1.1
+        Chart {
+            ForEach(Array(incoming.enumerated()), id: \.offset) { point in
+                AreaMark(x: .value("t", point.offset), y: .value("down", point.element), series: .value("way", "down"))
+                    .foregroundStyle(Color.teal.opacity(0.16))
+                LineMark(x: .value("t", point.offset), y: .value("down", point.element), series: .value("way", "down"))
+                    .interpolationMethod(.monotone)
+                    .lineStyle(StrokeStyle(lineWidth: 1.3))
+                    .foregroundStyle(Color.teal)
+            }
+            ForEach(Array(outgoing.enumerated()), id: \.offset) { point in
+                LineMark(x: .value("t", point.offset), y: .value("up", point.element), series: .value("way", "up"))
+                    .interpolationMethod(.monotone)
+                    .lineStyle(StrokeStyle(lineWidth: 1.1, dash: [3, 2]))
+                    .foregroundStyle(Color.sonaryAccent)
+            }
+        }
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartYScale(domain: 0...top)
+        .frame(height: 34)
+        .accessibilityHidden(true)
     }
 }

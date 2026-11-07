@@ -31,6 +31,38 @@ struct NotchSettingsView: View {
                 }
             }
         }
+        SettingsCard(Text("Opening", bundle: .module)) {
+            SettingsToggleRow(symbol: "cursorarrow.rays", title: Text("Open when the pointer rests on it", bundle: .module),
+                              caption: Text("Off, the island only opens with a click or a scroll.", bundle: .module),
+                              isOn: Binding(get: { model.settings.openOnHover },
+                                            set: { value in model.updateSettings { $0.openOnHover = value } }))
+            if model.settings.openOnHover {
+                SettingsRow(symbol: "hourglass", title: Text("Wait before opening", bundle: .module)) {
+                    Picker(selection: Binding(get: { model.settings.hoverDelay },
+                                              set: { value in model.updateSettings { $0.hoverDelay = value } })) {
+                        Text("At once", bundle: .module).tag(0.0)
+                        Text(verbatim: "0.2 s").tag(0.2)
+                        Text(verbatim: "0.5 s").tag(0.5)
+                        Text(verbatim: "1 s").tag(1.0)
+                    } label: { EmptyView() }
+                        .labelsHidden().frame(width: 120)
+                }
+            }
+        }
+        SettingsCard(Text("Timer", bundle: .module)) {
+            SettingsRow(symbol: "timer", title: Text("Countdowns offered", bundle: .module),
+                        caption: Text("Minutes, separated by commas. Up to five.", bundle: .module)) {
+                TextField(text: Binding(
+                    get: { model.settings.timerPresets.map(String.init).joined(separator: ", ") },
+                    set: { text in
+                        let minutes = parseTimerPresets(text)
+                        if !minutes.isEmpty { model.updateSettings { $0.timerPresets = minutes } }
+                    }
+                )) { EmptyView() }
+                    .labelsHidden()
+                    .frame(width: 140)
+            }
+        }
         SettingsCard(Text("Batteries", bundle: .module)) {
             SettingsToggleRow(
                 symbol: "battery.25percent",

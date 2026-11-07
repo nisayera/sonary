@@ -77,7 +77,27 @@ public final class NotchModel {
 
     func setNotchSize(_ size: CGSize) { notchSize = size }
 
-    func hoverChanged(_ inside: Bool) { update { $0.hoverChanged(inside) } }
+    @ObservationIgnored private var hoverTask: Task<Void, Never>?
+
+    /// Leaving closes at once; arriving opens after the chosen delay, or not at all when
+    /// the island only opens on a click.
+    func hoverChanged(_ inside: Bool) {
+        hoverTask?.cancel()
+        guard inside else { return update { $0.hoverChanged(false) } }
+        guard settings.openOnHover else { return }
+        let delay = settings.hoverDelay
+        guard delay > 0 else { return update { $0.hoverChanged(true) } }
+        hoverTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled else { return }
+            self?.update { $0.hoverChanged(true) }
+        }
+    }
+
+    public func updateSettings(_ change: (inout NotchSettings) -> Void) {
+        change(&settings)
+        store.save(settings)
+    }
     func clicked() { update { $0.clicked() } }
     func clickedOutside() { update { $0.clickedOutside() } }
 
