@@ -316,3 +316,11 @@ struct NotchGapTests {
         #expect(weekdaySymbols(calendar: calendar).count == 7)
     }
 }
+
+struct TimerPresetTests {
+    @Test func typedMinutesBecomePresets() {
+        #expect(parseTimerPresets("25, 5,1 5;90") == [1, 5, 25, 90])
+        #expect(parseTimerPresets("0, 700, x") == [])
+        #expect(parseTimerPresets("1 2 3 4 5 6") == [1, 2, 3, 4, 5])
+    }
+}

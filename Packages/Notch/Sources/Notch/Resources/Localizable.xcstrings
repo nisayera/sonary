@@ -83,6 +83,16 @@
         }
       }
     },
+    "At once": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sofort"
+          }
+        }
+      }
+    },
     "Back to the month": {
       "localizations": {
         "de": {
@@ -155,6 +165,16 @@
         }
       }
     },
+    "Countdowns offered": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angebotene Countdowns"
+          }
+        }
+      }
+    },
     "Display": {
       "localizations": {
         "de": {
@@ -192,6 +212,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lege Dateien hier ab, um sie zu parken."
+          }
+        }
+      }
+    },
+    "Minutes, separated by commas. Up to five.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minuten, durch Kommas getrennt. Bis zu fünf."
           }
         }
       }
@@ -356,8 +386,38 @@
         }
       }
     },
+    "Off, the island only opens with a click or a scroll.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus öffnet sich die Insel nur per Klick oder Scrollen."
+          }
+        }
+      }
+    },
     "Open": {
       "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnen"
+          }
+        }
+      }
+    },
+    "Open when the pointer rests on it": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnen, wenn der Zeiger darauf ruht"
+          }
+        }
+      }
+    },
+    "Opening": {
       "localizations": {
         "de": {
           "stringUnit": {
@@ -607,6 +667,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Regler für Lautstärke und Helligkeit, solange Ton und Anzeige an sind."
+          }
+        }
+      }
+    },
+    "Wait before opening": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vor dem Öffnen warten"
           }
         }
       }

@@ -25,6 +25,12 @@ public struct NotchSettings: Codable, Equatable, Sendable {
     public var showOnScreensWithoutNotch = true
     /// A notice once an accessory's battery falls to 20 %.
     public var lowBatteryWarning = true
+    /// The island opens when the pointer rests on it; off, only a click opens it.
+    public var openOnHover = true
+    /// How long the pointer has to rest before the island opens, in seconds.
+    public var hoverDelay = 0.0
+    /// The countdowns the timer offers, in minutes.
+    public var timerPresets: [Int] = [1, 5, 10, 25]
 
     public init() {}
 
@@ -59,4 +65,14 @@ public struct NotchSettingsStore {
         guard let data = try? JSONEncoder().encode(settings) else { return }
         defaults.set(data, forKey: key)
     }
+}
+
+/// The timer's countdowns from what the user typed: whole minutes from 1 to 600, each once,
+/// in order, at most five.
+public func parseTimerPresets(_ text: String) -> [Int] {
+    var seen = Set<Int>()
+    let minutes = text.split(whereSeparator: { $0 == "," || $0 == " " || $0 == ";" })
+        .compactMap { Int($0) }
+        .filter { (1...600).contains($0) && seen.insert($0).inserted }
+    return Array(minutes.sorted().prefix(5))
 }
