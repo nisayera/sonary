@@ -101,9 +101,10 @@ struct PopoverView: View {
     private func sectionTitle(for tab: PanelTab, panelModules: [any SonaryModule]) -> some View {
         switch tab {
         case .overview:
-            let on = model.registry.modules.filter { model.registry.isEnabled($0.id) }.count
-            PanelSectionTitle(Text("Modules")) {
-                count(on, of: model.registry.modules.count)
+            let running = model.registry.modules.filter { model.registry.isEnabled($0.id) }
+            // With live values the overview opens on them; the count says how many modules run.
+            PanelSectionTitle(running.contains { !$0.status.isEmpty } ? Text("At a glance") : Text("Modules")) {
+                count(running.count, of: model.registry.modules.count)
             }
         case let .module(id):
             if let module = panelModules.first(where: { $0.id == id }) {
@@ -192,14 +193,10 @@ struct PopoverView: View {
     private var glance: some View {
         let values = model.registry.modules.filter { model.registry.isEnabled($0.id) }.flatMap(\.status)
         if !values.isEmpty {
-            VStack(alignment: .leading, spacing: 6) {
-                PanelSectionTitle(Text("At a glance"))
-                    .padding(.horizontal, 2)
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
-                    ForEach(Array(values.prefix(8).enumerated()), id: \.offset) { _, status in
-                        GlanceTile(symbol: status.symbol, title: Text(verbatim: status.title), value: status.value,
-                                   fraction: status.fraction, tint: statusTint(status.level))
-                    }
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                ForEach(Array(values.prefix(8).enumerated()), id: \.offset) { _, status in
+                    GlanceTile(symbol: status.symbol, title: Text(verbatim: status.title), value: status.value,
+                               fraction: status.fraction, tint: statusTint(status.level))
                 }
             }
         }

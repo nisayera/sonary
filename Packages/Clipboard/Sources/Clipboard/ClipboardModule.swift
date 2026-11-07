@@ -33,8 +33,12 @@ public final class ClipboardModule: SonaryModule {
     public var resourceBundle: Bundle? { .module }
 
     public var status: [ModuleStatus] {
-        var items = [ModuleStatus(id: "history", symbol: "doc.on.clipboard", title: String(localized: "History", bundle: .module),
-                                  value: "\(model.history.entries.count)")]
+        var items: [ModuleStatus] = []
+        if !model.history.entries.isEmpty {
+            items.append(ModuleStatus(id: "history", symbol: "doc.on.clipboard",
+                                      title: String(localized: "History", bundle: .module),
+                                      value: "\(model.history.entries.count)"))
+        }
         if !model.shelf.isEmpty {
             items.append(ModuleStatus(id: "shelf", symbol: "tray.full", title: String(localized: "Shelf", bundle: .module),
                                       value: "\(model.shelf.count)"))

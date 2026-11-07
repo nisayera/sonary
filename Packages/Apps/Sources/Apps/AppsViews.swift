@@ -16,6 +16,15 @@ private enum AppsSection: String, CaseIterable, Identifiable {
     }
 }
 
+func cleanTargetSymbol(_ id: String) -> String {
+    switch id {
+    case "caches": "shippingbox"
+    case "logs": "doc.text"
+    case "derivedData": "hammer"
+    default: "folder"
+    }
+}
+
 func cleanTargetTitle(_ id: String) -> LocalizedStringKey {
     switch id {
     case "caches": "App caches"
@@ -81,6 +90,7 @@ struct AppsPopoverView: View {
             PanelGroup {
                 ForEach(model.cleanTargets) { target in
                     row {
+                        IconBadge(symbol: cleanTargetSymbol(target.id), size: PanelMetrics.rowIconWidth)
                         Text(cleanTargetTitle(target.id), bundle: .module)
                         Spacer()
                         Text(target.size.map(formatBytes) ?? "…").foregroundStyle(.secondary).monospacedDigit()
