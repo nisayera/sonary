@@ -181,5 +181,32 @@ public final class MonitorModule: SonaryModule {
 
     public func makeSettingsView() -> AnyView { AnyView(MonitorSettingsView(module: self)) }
     public var resourceBundle: Bundle? { .module }
+
+    public var status: [ModuleStatus] {
+        guard let latest else { return [] }
+        let memory = latest.memory.usedFraction
+        var items = [
+            ModuleStatus(id: "cpu", symbol: "cpu", title: "CPU", value: percentText(latest.cpu), fraction: latest.cpu,
+                         level: loadLevel(latest.cpu, warning: 0.8, critical: 0.95)),
+            ModuleStatus(id: "memory", symbol: "memorychip", title: String(localized: "Memory", bundle: .module),
+                         value: percentText(memory), fraction: memory,
+                         level: latest.memory.pressure == .critical ? .critical
+                             : latest.memory.pressure == .warning ? .warning : .normal),
+        ]
+        if let battery = latest.battery {
+            let low = !battery.isCharging && battery.level < 0.2
+            items.append(ModuleStatus(id: "battery", symbol: battery.isCharging ? "battery.100.bolt" : "battery.75percent",
+                                      title: String(localized: "Battery", bundle: .module),
+                                      value: percentText(battery.level), fraction: battery.level,
+                                      level: low ? (battery.level < 0.1 ? .critical : .warning) : .normal))
+        }
+        if let temperature = latest.temperatures["CPU"] ?? latest.temperatures.values.max() {
+            items.append(ModuleStatus(id: "temperature", symbol: "thermometer.medium",
+                                      title: String(localized: "Temperature", bundle: .module),
+                                      value: "\(Int(temperature.rounded())) °C",
+                                      level: temperature >= 95 ? .critical : temperature >= 85 ? .warning : .normal))
+        }
+        return items
+    }
     public func makePopoverView() -> AnyView? { AnyView(MonitorView(module: self)) }
 }

@@ -39,4 +39,11 @@ public final class NotchModule: SonaryModule {
     }
 
     public var resourceBundle: Bundle? { .module }
+
+    public var status: [ModuleStatus] {
+        guard let track = model.music.nowPlaying else { return [] }
+        return [ModuleStatus(id: "music", symbol: track.isPlaying ? "music.note" : "pause.fill",
+                             title: track.artist.isEmpty ? String(localized: "Music", bundle: .module) : track.artist,
+                             value: track.title)]
+    }
 }

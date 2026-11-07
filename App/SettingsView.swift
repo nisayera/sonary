@@ -208,6 +208,16 @@ private struct ModulePage: View {
                         .foregroundStyle(.red)
                 }
             }
+            if model.registry.isEnabled(module.id), !module.status.isEmpty {
+                SettingsCard(Text("Right now")) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
+                        ForEach(module.status) { status in
+                            GlanceTile(symbol: status.symbol, title: Text(verbatim: status.title), value: status.value,
+                                       fraction: status.fraction, tint: statusTint(status.level))
+                        }
+                    }
+                }
+            }
             if !module.requiredPermissions.isEmpty {
                 SettingsCard(Text("Permissions")) {
                     ForEach(module.requiredPermissions, id: \.self) { permission in

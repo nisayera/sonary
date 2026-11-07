@@ -22,5 +22,12 @@ public final class AppsModule: SonaryModule {
 
     public func makeSettingsView() -> AnyView { AnyView(AppsSettingsView(model: model)) }
     public var resourceBundle: Bundle? { .module }
+
+    public var status: [ModuleStatus] {
+        let updates = model.outdated.count + model.appUpdates.count
+        guard updates > 0 else { return [] }
+        return [ModuleStatus(id: "updates", symbol: "arrow.down.app", title: String(localized: "Updates", bundle: .module),
+                             value: "\(updates)", level: .warning)]
+    }
     public func makePopoverView() -> AnyView? { AnyView(AppsPopoverView(model: model)) }
 }

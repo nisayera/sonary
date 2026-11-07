@@ -68,12 +68,33 @@ struct PopoverView: View {
 
     // MARK: - Header and section title
 
+    /// The mark on its badge, the date and the time: the panel opens with something worth
+    /// a glance even before a tab is picked.
     private var header: some View {
-        SonaryMark()
-            .foregroundStyle(.primary)
-            .frame(width: 28, height: 28)
-            .frame(maxWidth: .infinity)
-            .padding(.top, 2)
+        HStack(spacing: 10) {
+            SonaryMark()
+                .foregroundStyle(.white)
+                .padding(6)
+                .frame(width: 32, height: 32)
+                .background(Color.sonaryAccent.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                .shadow(color: Color.sonaryAccent.opacity(0.35), radius: 6, y: 2)
+            TimelineView(.everyMinute) { context in
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(verbatim: "Sonary").font(.system(size: 13, weight: .bold))
+                        Text(context.date, format: .dateTime.weekday(.wide).day().month(.wide))
+                            .font(.system(size: 10.5))
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 8)
+                    Text(context.date, format: .dateTime.hour().minute())
+                        .font(.system(size: 22, weight: .semibold, design: .rounded).monospacedDigit())
+                        .contentTransition(.numericText())
+                }
+            }
+        }
+        .padding(.horizontal, 2)
+        .padding(.top, 2)
     }
 
     @ViewBuilder
@@ -142,6 +163,7 @@ struct PopoverView: View {
     private func content(for tab: PanelTab, panelModules: [any SonaryModule]) -> some View {
         switch tab {
         case .overview:
+            glance
             ForEach(ModuleCategory.allCases, id: \.self) { category in
                 let members = modules(in: category)
                 if !members.isEmpty {
@@ -165,14 +187,33 @@ struct PopoverView: View {
         }
     }
 
+    /// The live values of every running module, two to a row.
+    @ViewBuilder
+    private var glance: some View {
+        let values = model.registry.modules.filter { model.registry.isEnabled($0.id) }.flatMap(\.status)
+        if !values.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                PanelSectionTitle(Text("At a glance"))
+                    .padding(.horizontal, 2)
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                    ForEach(Array(values.prefix(8).enumerated()), id: \.offset) { _, status in
+                        GlanceTile(symbol: status.symbol, title: Text(verbatim: status.title), value: status.value,
+                                   fraction: status.fraction, tint: statusTint(status.level))
+                    }
+                }
+            }
+        }
+    }
+
     private func modules(in category: ModuleCategory) -> [any SonaryModule] {
         category.moduleIDs.compactMap { id in model.registry.modules.first { $0.id == id } }
     }
 
     private func moduleRow(_ module: any SonaryModule) -> some View {
         let failure = model.registry.failures[module.id]
+        let isOn = model.registry.isEnabled(module.id)
         return PanelRow(symbol: module.symbol, title: Text(module.title),
-                        caption: failure.map { Text($0) },
+                        caption: failure.map { Text($0) } ?? (isOn ? statusLine(module) : nil),
                         isActive: model.registry.isEnabled(module.id),
                         needsAttention: failure != nil) {
             Toggle(isOn: Binding(
@@ -215,4 +256,21 @@ struct PopoverView: View {
         NSApp.activate()
         openSettings()
     }
+}
+
+/// The colour of a live value: the accent while it is fine, orange or red when it is not.
+func statusTint(_ level: ModuleStatus.Level) -> Color {
+    switch level {
+    case .normal: .sonaryAccent
+    case .warning: .orange
+    case .critical: .red
+    }
+}
+
+/// A module's first live values as one line, such as "CPU 13 % · Memory 64 %".
+@MainActor
+func statusLine(_ module: any SonaryModule) -> Text? {
+    let values = module.status.prefix(2)
+    guard !values.isEmpty else { return nil }
+    return Text(verbatim: values.map { "\($0.title) \($0.value)" }.joined(separator: " · "))
 }

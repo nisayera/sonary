@@ -22,5 +22,25 @@ public final class SoundModule: SonaryModule {
 
     public func makeSettingsView() -> AnyView { AnyView(SoundSettingsView(model: model)) }
     public var resourceBundle: Bundle? { .module }
+
+    public var status: [ModuleStatus] {
+        var items: [ModuleStatus] = []
+        if let volume = model.outputVolume {
+            let output = model.outputs.first { $0.id == model.defaultOutput }?.name
+            items.append(ModuleStatus(id: "volume", symbol: volume == 0 ? "speaker.slash.fill" : "speaker.wave.2.fill",
+                                      title: output ?? String(localized: "Volume", bundle: .module),
+                                      value: percentText(volume), fraction: volume))
+        }
+        if model.micMuted {
+            items.append(ModuleStatus(id: "mic", symbol: "mic.slash.fill", title: String(localized: "Microphone", bundle: .module),
+                                      value: String(localized: "Muted", bundle: .module), level: .warning))
+        }
+        if model.keepAwakeActive {
+            items.append(ModuleStatus(id: "awake", symbol: "cup.and.saucer.fill",
+                                      title: String(localized: "Keep awake", bundle: .module),
+                                      value: model.keepAwakeEndsAt.map { $0.formatted(date: .omitted, time: .shortened) } ?? "∞"))
+        }
+        return items
+    }
     public func makePopoverView() -> AnyView? { AnyView(SoundPopoverView(model: model)) }
 }

@@ -22,5 +22,11 @@ public final class ToolsModule: SonaryModule {
 
     public func makeSettingsView() -> AnyView { AnyView(ToolsSettingsView(model: model)) }
     public var resourceBundle: Bundle? { .module }
+
+    public var status: [ModuleStatus] {
+        guard model.isRecording else { return [] }
+        return [ModuleStatus(id: "recording", symbol: "record.circle", title: String(localized: "Record the screen", bundle: .module),
+                             value: String(localized: "Recording", bundle: .module), level: .critical)]
+    }
     public func makePopoverView() -> AnyView? { AnyView(ToolsPopoverView(model: model)) }
 }

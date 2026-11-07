@@ -113,6 +113,16 @@
         }
       }
     },
+    "At a glance": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf einen Blick"
+          }
+        }
+      }
+    },
     "Automation": {
       "localizations": {
         "de": {
@@ -862,6 +872,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ersetzt deine Einstellungen durch die aus der Datei und startet Sonary neu."
+          }
+        }
+      }
+    },
+    "Right now": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerade jetzt"
           }
         }
       }

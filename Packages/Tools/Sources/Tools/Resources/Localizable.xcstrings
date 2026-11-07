@@ -443,6 +443,17 @@
         }
       }
     },
+    "Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkelt den Bildschirm ab und zeigt beim Ziehen eine Lupe und die Pixelgröße. Aus benutzt die Systemauswahl."
+          }
+        }
+      }
+    },
     "Drag an area, or click for the whole screen": {
       "localizations": {
         "de": {
