@@ -133,7 +133,7 @@ struct AppsPopoverView: View {
     private var portsView: some View {
         VStack(alignment: .leading, spacing: 6) {
             if model.ports.isEmpty {
-                Text("No app is listening on a TCP port.", bundle: .module).font(.callout).foregroundStyle(.secondary)
+                PanelEmptyState(symbol: "network", text: Text("No app is listening on a TCP port.", bundle: .module))
             } else {
                 PanelGroup {
                     ForEach(model.ports) { port in
@@ -200,7 +200,8 @@ struct AppsPopoverView: View {
             } else if model.isBrewBusy && model.outdated.isEmpty {
                 ProgressView().controlSize(.small)
             } else if model.outdated.isEmpty {
-                Text("Everything installed with Homebrew is up to date.", bundle: .module).font(.callout).foregroundStyle(.secondary)
+                PanelEmptyState(symbol: "checkmark.seal",
+                                text: Text("Everything installed with Homebrew is up to date.", bundle: .module))
             }
             if !model.outdated.isEmpty {
                 PanelGroup {

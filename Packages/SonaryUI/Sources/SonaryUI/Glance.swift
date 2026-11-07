@@ -148,3 +148,31 @@ public struct GlanceTile: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+/// What a list shows while it is empty: a large, quiet symbol and one line of text.
+public struct PanelEmptyState: View {
+    private let symbol: String
+    private let text: Text
+
+    public init(symbol: String, text: Text) {
+        self.symbol = symbol
+        self.text = text
+    }
+
+    public var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: symbol)
+                .font(.system(size: 26, weight: .light))
+                .foregroundStyle(Color.sonaryAccent.opacity(0.7))
+                .accessibilityHidden(true)
+            text
+                .font(.system(size: 11.5))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
+        .padding(.horizontal, 12)
+        .panelCard(padded: false)
+    }
+}

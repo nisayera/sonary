@@ -43,8 +43,7 @@ struct ClipboardPopoverView: View {
                 .textFieldStyle(.roundedBorder)
             let entries = model.history.search(query)
             if entries.isEmpty {
-                Text("Copied text appears here.", bundle: .module)
-                    .font(.callout).foregroundStyle(.secondary).padding(.vertical, Spacing.s)
+                PanelEmptyState(symbol: "doc.on.clipboard", text: Text("Copied text appears here.", bundle: .module))
             }
             if !entries.isEmpty {
                 PanelGroup {
