@@ -15,6 +15,8 @@ public struct DisplaySettings: Codable, Equatable, Sendable {
     public var stepSize: BrightnessStepSize = .normal
     /// Stepping down past the display's minimum keeps going with an overlay.
     public var dimBelowMinimum = false
+    /// The user's own folders of desktop pictures, besides the system's.
+    public var wallpaperFolders: [String] = []
 
     public init() {}
 }

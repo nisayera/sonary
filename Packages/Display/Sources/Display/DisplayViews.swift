@@ -81,6 +81,7 @@ struct DisplaySettingsView: View {
                 }
             }
         }
+        WallpaperCard(model: model)
         if model.canSwitchBluetooth {
             SettingsCard(Text("Energy", bundle: .module)) {
                 SettingsToggleRow(symbol: "bolt.horizontal",

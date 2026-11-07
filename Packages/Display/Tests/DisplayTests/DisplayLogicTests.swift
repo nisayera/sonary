@@ -29,3 +29,19 @@ import Testing
         #expect(abs(extraBrightnessValue(amount: -2, maxPotentialEDR: 1.6) - 1) < 0.0001)
     }
 }
+
+struct WallpaperTests {
+    @Test func onlyStillPicturesCount() {
+        #expect(isWallpaperFile("Sonoma.heic"))
+        #expect(isWallpaperFile("beach.JPG"))
+        #expect(!isWallpaperFile("Sequoia.madesktop"))
+        #expect(!isWallpaperFile(".hidden.png"))
+    }
+
+    @Test func foldersComeSystemFirstWithoutRepeats() {
+        let home = URL(fileURLWithPath: "/Users/me")
+        let folders = wallpaperFolders(extra: ["/Users/me/Pictures/Wallpapers", "/Volumes/Art"], home: home).map(\.path)
+        #expect(folders == ["/System/Library/Desktop Pictures", "/Library/Desktop Pictures",
+                            "/Users/me/Pictures/Wallpapers", "/Volumes/Art"])
+    }
+}
