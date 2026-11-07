@@ -184,7 +184,8 @@ struct NotchSettingsTests {
         settings.showOnScreensWithoutNotch = false
         store.save(settings)
         #expect(store.load() == settings)
-        #expect(store.load().widgets == [.calendar, .timer, .downloads, .batteries])
+        // A widget turned on goes last, so the order the user picked stays.
+        #expect(store.load().widgets == [.timer, .downloads, .batteries, .calendar])
     }
 }
 
@@ -271,5 +272,47 @@ struct NotchGestureTests {
         #expect(long.count <= 19)
         #expect(long.contains("…"))
         #expect(long.hasSuffix(".txt"))
+    }
+}
+
+struct NotchGapTests {
+    @Test func widgetsMoveOnePlaceAtATime() {
+        var settings = NotchSettings()
+        settings.widgets = [.music, .timer, .downloads]
+        settings.move(.downloads, forward: true)
+        #expect(settings.widgets == [.music, .downloads, .timer])
+        settings.move(.music, forward: true)
+        #expect(settings.widgets == [.music, .downloads, .timer], "the first one stays first")
+        settings.move(.music, forward: false)
+        #expect(settings.widgets == [.downloads, .music, .timer])
+    }
+
+    @Test func aLowBatteryWarnsOnceUntilItIsCharged() {
+        let low = [AccessoryBattery(name: "Mouse", percent: 18), AccessoryBattery(name: "Keyboard", percent: 60)]
+        let first = lowBatteryAlerts(low, warned: [])
+        #expect(first.alerts.map(\.name) == ["Mouse"])
+        let again = lowBatteryAlerts([AccessoryBattery(name: "Mouse", percent: 15)], warned: first.warned)
+        #expect(again.alerts.isEmpty)
+        let charged = lowBatteryAlerts([AccessoryBattery(name: "Mouse", percent: 80)], warned: again.warned)
+        #expect(charged.warned.isEmpty)
+        #expect(lowBatteryAlerts([AccessoryBattery(name: "Mouse", percent: 20)], warned: charged.warned).alerts.count == 1)
+    }
+
+    @Test func aBatteryJustAboveTheLineKeepsItsWarning() {
+        let result = lowBatteryAlerts([AccessoryBattery(name: "Mouse", percent: 23)], warned: ["Mouse"])
+        #expect(result.warned == ["Mouse"])
+    }
+
+    @Test func theMonthGridStartsOnTheFirstWeekday() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Europe/Berlin") ?? .gmt
+        calendar.firstWeekday = 2 // Monday
+        let november = try #require(calendar.date(from: DateComponents(year: 2026, month: 11, day: 7)))
+        let grid = monthGrid(for: november, calendar: calendar)
+        // 1 November 2026 is a Sunday: six empty cells before it when weeks start on Monday.
+        #expect(grid.prefix(6).allSatisfy { $0 == nil })
+        #expect(grid[6].map { calendar.component(.day, from: $0) } == 1)
+        #expect(grid.compactMap { $0 }.count == 30)
+        #expect(weekdaySymbols(calendar: calendar).count == 7)
     }
 }

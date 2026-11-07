@@ -85,6 +85,21 @@ final class AppModel {
         }
         let display = DisplayModule(defaults: defaults)
         self.display = display
+        // The island's controls and notes reach into the modules that own them.
+        notch.model.controls = NotchControls(
+            volume: { [weak sound] in sound?.model.outputVolume },
+            setVolume: { [weak sound] value in sound?.model.setOutputVolume(value) },
+            brightness: { [weak display] in display?.model.displays.first?.brightness },
+            setBrightness: { [weak display] value in
+                guard let display, let first = display.model.displays.first else { return }
+                display.model.setBrightness(value, for: first.id)
+            },
+            notes: { [weak tools] in tools?.model.currentTab.text ?? "" },
+            setNotes: { [weak tools] text in
+                guard let tools else { return }
+                tools.model.setText(text, for: tools.model.currentTab.id)
+            }
+        )
         self.registry = ModuleRegistry(modules: [monitor, mouse, keyboard, notch, clipboard, apps, windows, display, sound, tools],
                                        defaults: defaults, permissions: broker,
                                        missingPermissionText: { missingPermissionText($0) })

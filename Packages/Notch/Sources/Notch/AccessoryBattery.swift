@@ -21,3 +21,19 @@ public func parseAccessoryBatteries(_ services: [[String: Any]]) -> [AccessoryBa
     }
     return byName.values.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
 }
+
+/// The batteries to warn about now: at or below the threshold and not warned about yet.
+/// A battery that is charged again (five points above the threshold) can warn once more.
+public func lowBatteryAlerts(_ batteries: [AccessoryBattery], warned: Set<String>, threshold: Int = 20)
+    -> (alerts: [AccessoryBattery], warned: Set<String>) {
+    var still = warned
+    var alerts: [AccessoryBattery] = []
+    for battery in batteries {
+        if battery.percent <= threshold {
+            if still.insert(battery.name).inserted { alerts.append(battery) }
+        } else if battery.percent > threshold + 5 {
+            still.remove(battery.name)
+        }
+    }
+    return (alerts, still)
+}
