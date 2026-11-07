@@ -1,5 +1,6 @@
 import Darwin
 import Foundation
+import IOKit
 import IOKit.ps
 
 /// Real readings from the running Mac. GPU and temperatures are provided by `SensorReading` (see SensorReader).
@@ -11,27 +12,47 @@ public struct SystemSources: MetricsSources {
     }
 
     public func cpuTicks() -> CPUTicks {
+        coreTicks().reduce(into: CPUTicks(user: 0, system: 0, idle: 0, nice: 0)) { total, core in
+            total.user += core.user
+            total.system += core.system
+            total.idle += core.idle
+            total.nice += core.nice
+        }
+    }
+
+    public func coreTicks() -> [CPUTicks] {
         var cpuCount: natural_t = 0
         var info: processor_info_array_t?
         var infoCount: mach_msg_type_number_t = 0
         let result = host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO, &cpuCount, &info, &infoCount)
-        guard result == KERN_SUCCESS, let info else {
-            return CPUTicks(user: 0, system: 0, idle: 0, nice: 0)
-        }
+        guard result == KERN_SUCCESS, let info else { return [] }
         defer {
             let size = vm_size_t(infoCount) * vm_size_t(MemoryLayout<integer_t>.stride)
             vm_deallocate(task_self_trap(), vm_address_t(bitPattern: info), size)
         }
-        var ticks = CPUTicks(user: 0, system: 0, idle: 0, nice: 0)
         let stride = Int(CPU_STATE_MAX)
-        for cpu in 0..<Int(cpuCount) {
+        return (0..<Int(cpuCount)).map { cpu in
             let base = stride * cpu
-            ticks.user += tickCount(info[base + Int(CPU_STATE_USER)])
-            ticks.system += tickCount(info[base + Int(CPU_STATE_SYSTEM)])
-            ticks.idle += tickCount(info[base + Int(CPU_STATE_IDLE)])
-            ticks.nice += tickCount(info[base + Int(CPU_STATE_NICE)])
+            return CPUTicks(user: tickCount(info[base + Int(CPU_STATE_USER)]),
+                            system: tickCount(info[base + Int(CPU_STATE_SYSTEM)]),
+                            idle: tickCount(info[base + Int(CPU_STATE_IDLE)]),
+                            nice: tickCount(info[base + Int(CPU_STATE_NICE)]))
         }
-        return ticks
+    }
+
+    /// Bytes read and written by every disk since the Mac started, from the storage drivers.
+    public func diskCounters() -> DiskCounters? {
+        let statistics = registryProperties(matching: "IOBlockStorageDriver").compactMap {
+            $0["Statistics"] as? [String: Any]
+        }
+        guard !statistics.isEmpty else { return nil }
+        var read: UInt64 = 0
+        var written: UInt64 = 0
+        for entry in statistics {
+            read += (entry["Bytes (Read)"] as? NSNumber)?.uint64Value ?? 0
+            written += (entry["Bytes (Write)"] as? NSNumber)?.uint64Value ?? 0
+        }
+        return DiskCounters(bytesRead: read, bytesWritten: written)
     }
 
     public func gpuUsage() -> Double? { sensors.gpuUsage() }
@@ -102,8 +123,10 @@ public struct SystemSources: MetricsSources {
             if let value = description[charging ? "Time to Full Charge" : "Time to Empty"] as? Int, value >= 0 {
                 minutes = value
             }
+            let details = batteryDetails(registryProperties(matching: "AppleSmartBattery").first ?? [:])
             return BatteryStats(level: min(1, Double(current) / Double(maximum)), isCharging: charging,
-                                watts: nil, minutesRemaining: minutes)
+                                watts: details.watts, minutesRemaining: minutes,
+                                cycleCount: details.cycles, health: details.health)
         }
         return nil
     }
@@ -162,4 +185,29 @@ public func systemTopProcesses(limit: Int) -> [ProcessUsage] {
     process.waitUntilExit()
     return parseProcessUsage(String(decoding: data, as: UTF8.self), limit: limit,
                              excluding: ProcessInfo.processInfo.processIdentifier)
+}
+
+/// The properties of every registry entry of one class.
+func registryProperties(matching className: String) -> [[String: Any]] {
+    var iterator: io_iterator_t = 0
+    guard IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching(className), &iterator) == KERN_SUCCESS
+    else { return [] }
+    defer { IOObjectRelease(iterator) }
+    var result: [[String: Any]] = []
+    var service = IOIteratorNext(iterator)
+    while service != 0 {
+        var properties: Unmanaged<CFMutableDictionary>?
+        if IORegistryEntryCreateCFProperties(service, &properties, kCFAllocatorDefault, 0) == KERN_SUCCESS,
+           let dictionary = properties?.takeRetainedValue() as? [String: Any] {
+            result.append(dictionary)
+        }
+        IOObjectRelease(service)
+        service = IOIteratorNext(iterator)
+    }
+    return result
+}
+
+/// The USB devices plugged in right now.
+public func systemUSBDevices() -> [USBDevice] {
+    parseUSBDevices(registryProperties(matching: "IOUSBHostDevice"))
 }

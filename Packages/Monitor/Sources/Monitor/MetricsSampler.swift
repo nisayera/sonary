@@ -12,6 +12,8 @@ public actor MetricsSampler {
     private var previousTicks: CPUTicks?
     private var previousNetwork: NetworkCounters?
     private var previousTime: Date?
+    private var previousCores: [CPUTicks] = []
+    private var previousDisk: DiskCounters?
     private var sessionTotals = NetworkTotals()
 
     public init(
@@ -74,18 +76,28 @@ public actor MetricsSampler {
         let ticks = sources.cpuTicks()
         let counters = sources.networkCounters()
 
+        let cores = sources.coreTicks()
+        let diskCounters = sources.diskCounters()
+
         let cpu = previousTicks.map { cpuUsage(previous: $0, current: ticks) } ?? 0
+        let coreUsage = perCoreUsage(previous: previousCores, current: cores)
         let rates: NetworkRates
+        var disk = DiskRates.zero
         if let previousNetwork, let previousTime {
-            rates = networkRates(previous: previousNetwork, current: counters,
-                                 interval: time.timeIntervalSince(previousTime))
+            let interval = time.timeIntervalSince(previousTime)
+            rates = networkRates(previous: previousNetwork, current: counters, interval: interval)
             sessionTotals.add(previous: previousNetwork, current: counters)
+            if let previousDisk, let diskCounters {
+                disk = diskRates(previous: previousDisk, current: diskCounters, interval: interval)
+            }
         } else {
             rates = .zero
         }
         previousTicks = ticks
         previousNetwork = counters
         previousTime = time
+        previousCores = cores
+        previousDisk = diskCounters
 
         return MetricsSnapshot(
             timestamp: time,
@@ -95,7 +107,9 @@ public actor MetricsSampler {
             network: rates,
             disk: sources.disk(),
             battery: sources.battery(),
-            temperatures: sources.temperatures()
+            temperatures: sources.temperatures(),
+            cores: coreUsage,
+            diskIO: disk
         )
     }
 }

@@ -25,6 +25,12 @@ public final class MonitorModule: SonaryModule {
     public private(set) var isSpeedTesting = false
     /// Rough time left on battery while it is discharging.
     public private(set) var batteryTime: TimeInterval?
+    /// Shares in the menu bar as small bars instead of numbers.
+    public private(set) var menuBarBars: Bool
+    /// Each metric as a menu bar item of its own.
+    public private(set) var separateMenuBarItems: Bool
+    public private(set) var usbDevices: [USBDevice] = []
+    @ObservationIgnored private let statusItems = MonitorStatusItems()
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let sourcesFactory: @Sendable () -> any MetricsSources
@@ -47,6 +53,8 @@ public final class MonitorModule: SonaryModule {
         self.readoutMetrics = stored ?? [.cpu, .memory]
         self.alertsEnabled = defaults.bool(forKey: "monitor.alerts")
         self.showsMenuBarValues = defaults.bool(forKey: "monitor.menubar.values")
+        self.menuBarBars = defaults.bool(forKey: "monitor.menubar.bars")
+        self.separateMenuBarItems = defaults.bool(forKey: "monitor.menubar.separate")
     }
 
     public func start() async throws {
@@ -59,10 +67,13 @@ public final class MonitorModule: SonaryModule {
         processTask = Task { [weak self] in
             while !Task.isCancelled {
                 let source = self?.fanSource ?? NoFans()
-                let readings = await Task.detached { (processes: systemTopProcesses(limit: 5), fans: source.fans()) }.value
+                let readings = await Task.detached {
+                    (processes: systemTopProcesses(limit: 5), fans: source.fans(), usb: systemUSBDevices())
+                }.value
                 guard let self else { return }
                 self.topProcesses = readings.processes
                 self.fans = readings.fans
+                self.usbDevices = readings.usb
                 try? await Task.sleep(for: .seconds(5))
             }
         }
@@ -77,6 +88,7 @@ public final class MonitorModule: SonaryModule {
                 self.history = recent
                 self.totals = totals
                 self.noteBattery(snapshot)
+                self.updateStatusItems()
                 let fired = evaluator.evaluate(snapshot)
                 if self.alertsEnabled {
                     for kind in fired { await notifier.send(kind) }
@@ -99,6 +111,7 @@ public final class MonitorModule: SonaryModule {
     }
 
     public func stop() async {
+        statusItems.removeAll()
         processTask?.cancel()
         processTask = nil
         topProcesses = []
@@ -136,11 +149,34 @@ public final class MonitorModule: SonaryModule {
     public func setShowsMenuBarValues(_ show: Bool) {
         showsMenuBarValues = show
         defaults.set(show, forKey: "monitor.menubar.values")
+        updateStatusItems()
     }
 
+    public func setMenuBarBars(_ on: Bool) {
+        menuBarBars = on
+        defaults.set(on, forKey: "monitor.menubar.bars")
+        updateStatusItems()
+    }
+
+    public func setSeparateMenuBarItems(_ on: Bool) {
+        separateMenuBarItems = on
+        defaults.set(on, forKey: "monitor.menubar.separate")
+        updateStatusItems()
+    }
+
+    /// The values next to the Sonary icon; nil when they are off or have items of their own.
     public func menuBarText() -> String? {
-        guard showsMenuBarValues, let latest, !readoutMetrics.isEmpty else { return nil }
-        return formatReadout(latest, metrics: readoutMetrics, fans: fans)
+        guard showsMenuBarValues, !separateMenuBarItems, let latest, !readoutMetrics.isEmpty else { return nil }
+        return formatReadout(latest, metrics: readoutMetrics, fans: fans, bars: menuBarBars, batteryTime: batteryTime)
+    }
+
+    private func updateStatusItems() {
+        guard showsMenuBarValues, separateMenuBarItems, let latest else {
+            statusItems.removeAll()
+            return
+        }
+        statusItems.show(readoutItems(latest, metrics: readoutMetrics, fans: fans, bars: menuBarBars,
+                                      batteryTime: batteryTime))
     }
 
     public func makeSettingsView() -> AnyView { AnyView(MonitorSettingsView(module: self)) }

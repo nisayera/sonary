@@ -13,6 +13,18 @@ struct MonitorSettingsView: View {
                 isOn: Binding(get: { module.showsMenuBarValues }, set: { module.setShowsMenuBarValues($0) })
             )
             if module.showsMenuBarValues {
+                SettingsToggleRow(
+                    symbol: "chart.bar.fill",
+                    title: Text("Bars instead of numbers", bundle: .module),
+                    caption: Text("CPU, memory and battery as a small bar.", bundle: .module),
+                    isOn: Binding(get: { module.menuBarBars }, set: { module.setMenuBarBars($0) })
+                )
+                SettingsToggleRow(
+                    symbol: "rectangle.split.3x1",
+                    title: Text("Each value as its own item", bundle: .module),
+                    caption: Text("Separate menu bar items you can rearrange with ⌘ and drag.", bundle: .module),
+                    isOn: Binding(get: { module.separateMenuBarItems }, set: { module.setSeparateMenuBarItems($0) })
+                )
                 Divider()
                 ForEach(ReadoutMetric.allCases, id: \.self) { metric in
                     SettingsToggleRow(
@@ -45,6 +57,7 @@ struct MonitorSettingsView: View {
         case .cpu: "CPU"
         case .memory: "Memory"
         case .network: "Network"
+        case .disk: "Disk activity"
         case .battery: "Battery"
         case .temperature: "Temperature"
         case .fan: "Fan speed"
@@ -56,6 +69,7 @@ struct MonitorSettingsView: View {
         case .cpu: "cpu"
         case .memory: "memorychip"
         case .network: "network"
+        case .disk: "internaldrive"
         case .battery: "battery.75percent"
         case .temperature: "thermometer.medium"
         case .fan: "fan"
