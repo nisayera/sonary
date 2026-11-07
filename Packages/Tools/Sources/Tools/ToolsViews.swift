@@ -561,6 +561,9 @@ struct ScratchpadEditor: View {
             }
             .buttonStyle(.borderless)
         }
+    }
+}
+
 /// Picks a video, then the part of it to keep, in seconds.
 struct VideoTrimSheet: View {
     let model: ToolsModel
