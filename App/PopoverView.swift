@@ -79,7 +79,8 @@ struct PopoverView: View {
                 .background(Color.sonaryAccent.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
                 .shadow(color: Color.sonaryAccent.opacity(0.35), radius: 6, y: 2)
             if model.panelOptions.showsClock {
-                TimelineView(model.panelOptions.clockSeconds ? .periodic(from: .now, by: 1) : .everyMinute) { context in
+                TimelineView(.periodic(from: Calendar.current.dateInterval(of: .minute, for: .now)?.start ?? .now,
+                                       by: model.panelOptions.clockSeconds ? 1 : 60)) { context in
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 1) {
                             Text(verbatim: "Sonary").font(.system(size: 13, weight: .bold))
