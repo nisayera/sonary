@@ -40,6 +40,10 @@ struct AnnotationEditorView: View {
     @State private var background: ExportBackground = .none
     @State private var margin: Double = 48
     @State private var pendingText = ""
+    /// While on, a drag sets the crop instead of drawing a mark.
+    @State private var cropping = false
+    @State private var crop: CGRect?
+    @State private var watermark = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -63,11 +67,22 @@ struct AnnotationEditorView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .frame(width: 260)
-            if kind == .text {
+            if kind == .text, !cropping {
                 TextField(text: $pendingText) { Text("Text", bundle: .module) }
                     .frame(width: 140)
             }
+            Toggle(isOn: $cropping) { Image(systemName: "crop") }
+                .toggleStyle(.button)
+                .help(Text("Crop: drag over the part to keep", bundle: .module))
+                .accessibilityLabel(Text("Crop", bundle: .module))
+            if crop != nil {
+                Button { crop = nil } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
+                    .help(Text("Undo the crop", bundle: .module))
+                    .accessibilityLabel(Text("Undo the crop", bundle: .module))
+            }
             Spacer()
+            TextField(text: $watermark) { Text("Watermark", bundle: .module) }
+                .frame(width: 120)
             Picker(selection: $background) {
                 ForEach(ExportBackground.allCases) { Text(backgroundTitle($0), bundle: .module).tag($0) }
             } label: { EmptyView() }
@@ -76,6 +91,7 @@ struct AnnotationEditorView: View {
             Button { annotations = undoing(annotations) } label: { Image(systemName: "arrow.uturn.backward") }
                 .disabled(annotations.isEmpty)
                 .help(Text("Undo the last mark", bundle: .module))
+            ShareButton { shareFile() }
             Button { copy() } label: { Text("Copy", bundle: .module) }
             Button { save() } label: { Text("Save", bundle: .module) }
                 .keyboardShortcut(.defaultAction)
@@ -92,9 +108,18 @@ struct AnnotationEditorView: View {
                 Image(nsImage: image)
                     .resizable()
                     .frame(width: shown.width, height: shown.height)
-                Canvas { context, _ in
+                Canvas { context, size in
                     for annotation in annotations + [drawing].compactMap({ $0 }) {
                         stroke(annotation, in: &context, scale: scale)
+                    }
+                    if let crop {
+                        // Dim what the crop leaves out, and outline what it keeps.
+                        let kept = CGRect(x: crop.minX * scale, y: (image.size.height - crop.maxY) * scale,
+                                          width: crop.width * scale, height: crop.height * scale)
+                        var outside = Path(CGRect(origin: .zero, size: size))
+                        outside.addRect(kept)
+                        context.fill(outside, with: .color(.black.opacity(0.5)), style: FillStyle(eoFill: true))
+                        context.stroke(Path(kept), with: .color(.white), lineWidth: 1)
                     }
                 }
                 .frame(width: shown.width, height: shown.height)
@@ -105,10 +130,20 @@ struct AnnotationEditorView: View {
                             // Views grow downwards, the picture upwards.
                             let start = flip(value.startLocation, height: shown.height, scale: scale)
                             let now = flip(value.location, height: shown.height, scale: scale)
-                            drawing = Annotation(kind: kind, start: start, end: now,
-                                                 text: pendingText, weight: 4)
+                            if cropping {
+                                crop = CGRect(x: min(start.x, now.x), y: min(start.y, now.y),
+                                              width: abs(now.x - start.x), height: abs(now.y - start.y))
+                            } else {
+                                drawing = Annotation(kind: kind, start: start, end: now,
+                                                     text: pendingText, weight: 4)
+                            }
                         }
                         .onEnded { _ in
+                            if cropping {
+                                let area = exportCropArea(crop, imageSize: image.size)
+                                crop = area.size == image.size ? nil : area
+                                cropping = false
+                            }
                             if let drawing, isAnnotationWorthKeeping(drawing) { annotations.append(drawing) }
                             drawing = nil
                         }
@@ -147,7 +182,17 @@ struct AnnotationEditorView: View {
     }
 
     private func rendered() -> NSImage? {
-        renderAnnotated(image, annotations: annotations, background: background, margin: margin)
+        renderAnnotated(image, annotations: annotations, background: background, margin: margin,
+                        crop: crop, watermark: watermark)
+    }
+
+    /// The finished picture as a file for the Share menu, in a temporary folder.
+    private func shareFile() -> URL? {
+        guard let result = rendered(), let tiff = result.tiffRepresentation,
+              let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { return nil }
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent(screenshotFileName(now: Date())).appendingPathExtension("png")
+        return (try? png.write(to: url)) != nil ? url : nil
     }
 
     private func copy() {
@@ -202,6 +247,46 @@ struct AnnotationEditorView: View {
         case .white: "White"
         case .dark: "Dark"
         case .accent: "Sonary pink"
+        }
+    }
+}
+
+/// A Share button that makes its file only when pressed, then shows the system's Share
+/// menu below itself.
+struct ShareButton: NSViewRepresentable {
+    let file: () -> URL?
+
+    init(file: @escaping () -> URL?) {
+        self.file = file
+    }
+
+    func makeNSView(context: Context) -> NSButton {
+        let button = NSButton(image: NSImage(systemSymbolName: "square.and.arrow.up",
+                                             accessibilityDescription: String(localized: "Share", bundle: .module))
+                                  ?? NSImage(),
+                              target: context.coordinator, action: #selector(Coordinator.share(_:)))
+        button.bezelStyle = .push
+        button.toolTip = String(localized: "Share", bundle: .module)
+        return button
+    }
+
+    func updateNSView(_ button: NSButton, context: Context) {
+        context.coordinator.file = file
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(file: file) }
+
+    @MainActor
+    final class Coordinator: NSObject {
+        var file: () -> URL?
+
+        init(file: @escaping () -> URL?) {
+            self.file = file
+        }
+
+        @objc func share(_ sender: NSButton) {
+            guard let url = file() else { return }
+            NSSharingServicePicker(items: [url]).show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
         }
     }
 }

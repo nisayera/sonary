@@ -62,6 +62,21 @@ public func exportSize(image: CGSize, margin: Double) -> CGSize {
     CGSize(width: image.width + margin * 2, height: image.height + margin * 2)
 }
 
+/// The part of the shot that is exported: the crop, kept inside the picture and on whole
+/// points, or all of it when there is no crop or the crop is too small to have been meant.
+public func exportCropArea(_ crop: CGRect?, imageSize: CGSize) -> CGRect {
+    let full = CGRect(origin: .zero, size: imageSize)
+    guard let crop else { return full }
+    let clipped = crop.standardized.integral.intersection(full)
+    guard !clipped.isNull, clipped.width >= 8, clipped.height >= 8 else { return full }
+    return clipped
+}
+
+/// Where a watermark goes: the bottom right corner of the picture, a little way in.
+public func watermarkOrigin(textSize: CGSize, in area: CGRect, padding: Double) -> CGPoint {
+    CGPoint(x: max(area.minX + padding, area.maxX - textSize.width - padding), y: area.minY + padding)
+}
+
 /// Where the picture sits inside the exported one.
 public func exportImageOrigin(margin: Double) -> CGPoint {
     CGPoint(x: margin, y: margin)

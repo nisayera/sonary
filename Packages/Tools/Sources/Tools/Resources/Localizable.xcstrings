@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "0 as the end keeps everything to the end. The trimmed copy lands next to the original.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 als Ende behält alles bis zum Schluss. Die gekürzte Kopie landet neben dem Original."
+          }
+        }
+      }
+    },
     "Add a file…": {
       "localizations": {
         "de": {
@@ -94,6 +104,16 @@
         }
       }
     },
+    "Asks for the microphone the first time.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fragt beim ersten Mal nach dem Mikrofon."
+          }
+        }
+      }
+    },
     "Back": {
       "extractionState": "manual",
       "localizations": {
@@ -147,6 +167,16 @@
         }
       }
     },
+    "Choose a video…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video auswählen …"
+          }
+        }
+      }
+    },
     "Choose images…": {
       "extractionState": "manual",
       "localizations": {
@@ -178,12 +208,32 @@
         }
       }
     },
+    "Click a point": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf einen Punkt klicken"
+          }
+        }
+      }
+    },
     "Close": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Schließen"
+          }
+        }
+      }
+    },
+    "Colour": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farbe"
           }
         }
       }
@@ -272,6 +322,16 @@
         }
       }
     },
+    "Copy text from image files…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text aus Bilddateien kopieren …"
+          }
+        }
+      }
+    },
     "Copy text from screen": {
       "localizations": {
         "de": {
@@ -288,6 +348,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die Notiz konnte nicht gesichert werden."
+          }
+        }
+      }
+    },
+    "Crop": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuschneiden"
+          }
+        }
+      }
+    },
+    "Crop: drag over the part to keep": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuschneiden: über den Teil ziehen, der bleiben soll"
           }
         }
       }
@@ -343,13 +423,22 @@
         }
       }
     },
-    "Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.": {
-      "extractionState": "manual",
+    "Dims the screen, shows a magnifier and the pixel size while you drag. 1 to 4 switch between screenshot, text, colour and recording, and a click takes the whole screen. Off uses the system selector.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dunkelt den Bildschirm ab und zeigt beim Ziehen eine Lupe und die Pixelgröße. Aus benutzt die Systemauswahl."
+            "value": "Dunkelt den Bildschirm ab und zeigt beim Ziehen eine Lupe und die Größe in Pixeln. 1 bis 4 wechseln zwischen Bildschirmfoto, Text, Farbe und Aufnahme, ein Klick nimmt den ganzen Bildschirm. Aus nutzt die Auswahl des Systems."
+          }
+        }
+      }
+    },
+    "Drag an area, or click for the whole screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereich ziehen oder für den ganzen Bildschirm klicken"
           }
         }
       }
@@ -500,6 +589,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Baustein einfügen durch"
+          }
+        }
+      }
+    },
+    "Keep from": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Behalten von"
           }
         }
       }
@@ -684,6 +783,16 @@
         }
       }
     },
+    "Nothing would be left of the video.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vom Video bliebe nichts übrig."
+          }
+        }
+      }
+    },
     "Open in a window": {
       "localizations": {
         "de": {
@@ -829,6 +938,16 @@
         }
       }
     },
+    "Record the microphone": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Mikrofon mit aufnehmen"
+          }
+        }
+      }
+    },
     "Record the screen": {
       "extractionState": "manual",
       "localizations": {
@@ -836,6 +955,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bildschirm aufnehmen"
+          }
+        }
+      }
+    },
+    "Record the sound the Mac plays": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den Ton des Macs mit aufnehmen"
+          }
+        }
+      }
+    },
+    "Recording": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufnahme"
           }
         }
       }
@@ -878,6 +1017,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Textbaustein entfernen"
+          }
+        }
+      }
+    },
+    "Remove the sound": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton entfernen"
           }
         }
       }
@@ -939,6 +1088,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Notizblock im Fenster"
+          }
+        }
+      }
+    },
+    "Screen recording": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmaufnahme"
           }
         }
       }
@@ -1034,6 +1193,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apps, Bausteine, Dateien und Werkzeuge suchen"
+          }
+        }
+      }
+    },
+    "Share": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teilen"
           }
         }
       }
@@ -1162,6 +1331,16 @@
         }
       }
     },
+    "The video could not be trimmed.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Video ließ sich nicht kürzen."
+          }
+        }
+      }
+    },
     "Title": {
       "localizations": {
         "de": {
@@ -1202,6 +1381,36 @@
         }
       }
     },
+    "Trim": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kürzen"
+          }
+        }
+      }
+    },
+    "Trim a video": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video kürzen"
+          }
+        }
+      }
+    },
+    "Trim a video…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video kürzen …"
+          }
+        }
+      }
+    },
     "Turn a video into a GIF…": {
       "extractionState": "manual",
       "localizations": {
@@ -1220,6 +1429,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tippen"
+          }
+        }
+      }
+    },
+    "Undo the crop": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuschnitt aufheben"
           }
         }
       }
@@ -1264,6 +1483,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "px, 0 behält die Größe"
+          }
+        }
+      }
+    },
+    "seconds": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sekunden"
+          }
+        }
+      }
+    },
+    "to": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bis"
           }
         }
       }

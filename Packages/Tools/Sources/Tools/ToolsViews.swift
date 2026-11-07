@@ -21,6 +21,7 @@ struct ToolsPopoverView: View {
     let model: ToolsModel
     @State private var section: ToolsSection = .tools
     @State private var convertingImages = false
+    @State private var trimmingVideo = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
@@ -57,8 +58,11 @@ struct ToolsPopoverView: View {
             tool("photo.on.rectangle.angled", "Convert images…") { convertingImages = true }
             tool("film", "Make a video smaller…") { pickVideos(gif: false) }
             tool("photo.stack", "Turn a video into a GIF…") { pickVideos(gif: true) }
+            tool("doc.text.viewfinder", "Copy text from image files…") { pickImagesForText() }
+            tool("scissors", "Trim a video…") { trimmingVideo = true }
         }
         .sheet(isPresented: $convertingImages) { ImageConversionSheet(model: model) }
+        .sheet(isPresented: $trimmingVideo) { VideoTrimSheet(model: model) }
     }
 
     private var togglesView: some View {
@@ -82,6 +86,14 @@ struct ToolsPopoverView: View {
 
     private var scratchpadView: some View {
         ScratchpadEditor(model: model, editorHeight: 260)
+    }
+
+    private func pickImagesForText() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.allowedContentTypes = [.image]
+        guard panel.runModal() == .OK else { return }
+        model.textFromImageFiles(panel.urls)
     }
 
     private func pickVideos(gif: Bool) {
@@ -154,10 +166,19 @@ struct ToolsSettingsView: View {
                                             set: { value in model.update { $0.annotateAfterCapture = value } }))
             SettingsToggleRow(symbol: "viewfinder.rectangular",
                               title: Text("Pick regions with Sonary's own selector", bundle: .module),
-                              caption: Text("Dims the screen, shows a magnifier and the pixel size while you drag. Off uses the system selector.",
+                              caption: Text("Dims the screen, shows a magnifier and the pixel size while you drag. 1 to 4 switch between screenshot, text, colour and recording, and a click takes the whole screen. Off uses the system selector.",
                                             bundle: .module),
                               isOn: Binding(get: { model.settings.ownCaptureSelector },
                                             set: { value in model.update { $0.ownCaptureSelector = value } }))
+        }
+        SettingsCard(Text("Screen recording", bundle: .module)) {
+            SettingsToggleRow(symbol: "speaker.wave.2", title: Text("Record the sound the Mac plays", bundle: .module),
+                              isOn: Binding(get: { model.settings.recordSystemAudio },
+                                            set: { value in model.update { $0.recordSystemAudio = value } }))
+            SettingsToggleRow(symbol: "mic", title: Text("Record the microphone", bundle: .module),
+                              caption: Text("Asks for the microphone the first time.", bundle: .module),
+                              isOn: Binding(get: { model.settings.recordMicrophone },
+                                            set: { value in model.update { $0.recordMicrophone = value } }))
         }
         SettingsCard(Text("Colour picker", bundle: .module)) {
             SettingsRow(symbol: "eyedropper", title: Text("Copy colours as", bundle: .module)) {
@@ -540,5 +561,58 @@ struct ScratchpadEditor: View {
             }
             .buttonStyle(.borderless)
         }
+    }
+}
+
+/// Picks a video, then the part of it to keep, in seconds.
+struct VideoTrimSheet: View {
+    let model: ToolsModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var video: URL?
+    @State private var start = 0.0
+    @State private var end = 0.0
+    @State private var removeAudio = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.m) {
+            Text("Trim a video", bundle: .module).font(.headline)
+            HStack {
+                Text(verbatim: video?.lastPathComponent ?? "—").lineLimit(1).truncationMode(.middle)
+                Spacer()
+                Button { choose() } label: { Text("Choose a video…", bundle: .module) }
+            }
+            HStack {
+                Text("Keep from", bundle: .module)
+                TextField(value: $start, format: .number.precision(.fractionLength(0...2))) { EmptyView() }
+                    .labelsHidden().frame(width: 70)
+                Text("to", bundle: .module)
+                TextField(value: $end, format: .number.precision(.fractionLength(0...2))) { EmptyView() }
+                    .labelsHidden().frame(width: 70)
+                Text("seconds", bundle: .module)
+            }
+            Text("0 as the end keeps everything to the end. The trimmed copy lands next to the original.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            Toggle(isOn: $removeAudio) { Text("Remove the sound", bundle: .module) }
+            HStack {
+                Spacer()
+                Button { dismiss() } label: { Text("Cancel", bundle: .module) }
+                Button {
+                    if let video { model.trimVideo(video, start: start, end: end, removeAudio: removeAudio) }
+                    dismiss()
+                } label: { Text("Trim", bundle: .module) }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(video == nil)
+            }
+        }
+        .padding(Spacing.l)
+        .frame(width: 420)
+    }
+
+    private func choose() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.movie]
+        guard panel.runModal() == .OK else { return }
+        video = panel.url
     }
 }

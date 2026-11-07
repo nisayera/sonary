@@ -1,45 +1,72 @@
 import AppKit
 
-/// Draws the marks onto a copy of the shot and gives back a new picture. Nothing is
-/// drawn into the original, so the editor can always start over.
+/// Draws the marks onto a copy of the shot and gives back a new picture: cropped, put on
+/// a background and signed with a watermark when asked. Nothing is drawn into the
+/// original, so the editor can always start over.
 @MainActor
 func renderAnnotated(_ image: NSImage, annotations: [Annotation],
                      background: ExportBackground, margin: Double,
+                     crop: CGRect? = nil, watermark: String = "",
                      accent: NSColor = .systemPink) -> NSImage? {
-    let imageSize = image.size
+    // The marks go on the whole shot first, so a crop never cuts what a redaction reads.
+    guard let marked = bitmapImage(size: image.size, {
+        image.draw(in: CGRect(origin: .zero, size: image.size))
+        for annotation in annotations {
+            draw(annotation, offset: .zero, in: image, accent: accent)
+        }
+    }) else { return nil }
+    let area = exportCropArea(crop, imageSize: image.size)
     let inset = background.margin(margin)
-    let size = exportSize(image: imageSize, margin: inset)
+    let size = exportSize(image: area.size, margin: inset)
+    return bitmapImage(size: size) {
+        switch background {
+        case .none: break
+        case .white: NSColor.white.setFill()
+        case .dark: NSColor(white: 0.12, alpha: 1).setFill()
+        case .accent: accent.withAlphaComponent(0.85).setFill()
+        }
+        if background != .none { CGRect(origin: .zero, size: size).fill() }
+        let placed = CGRect(origin: exportImageOrigin(margin: inset), size: area.size)
+        marked.draw(in: placed, from: area, operation: .copy, fraction: 1)
+        let text = watermark.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !text.isEmpty { drawWatermark(text, in: placed) }
+    }
+}
+
+/// A picture of the given size, drawn by `body` into a fresh bitmap.
+@MainActor
+private func bitmapImage(size: CGSize, _ body: () -> Void) -> NSImage? {
     guard size.width >= 1, size.height >= 1,
-          let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width),
-                                        pixelsHigh: Int(size.height), bitsPerSample: 8,
+          let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width.rounded()),
+                                        pixelsHigh: Int(size.height.rounded()), bitsPerSample: 8,
                                         samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
                                         colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0),
           let context = NSGraphicsContext(bitmapImageRep: bitmap) else { return nil }
-
     NSGraphicsContext.saveGraphicsState()
     NSGraphicsContext.current = context
-
-    switch background {
-    case .none: break
-    case .white: NSColor.white.setFill()
-    case .dark: NSColor(white: 0.12, alpha: 1).setFill()
-    case .accent: accent.withAlphaComponent(0.85).setFill()
-    }
-    if background != .none { CGRect(origin: .zero, size: size).fill() }
-
-    let origin = exportImageOrigin(margin: inset)
-    image.draw(in: CGRect(origin: origin, size: imageSize))
-
-    // The marks were drawn in the picture's own coordinates, so they move with it.
-    for annotation in annotations {
-        draw(annotation, offset: origin, in: image, accent: accent)
-    }
-
+    body()
     context.flushGraphics()
     NSGraphicsContext.restoreGraphicsState()
     let result = NSImage(size: size)
     result.addRepresentation(bitmap)
     return result
+}
+
+/// White text with a soft shadow, so it reads on light and dark shots alike.
+@MainActor
+private func drawWatermark(_ text: String, in area: CGRect) {
+    let shadow = NSShadow()
+    shadow.shadowColor = NSColor.black.withAlphaComponent(0.55)
+    shadow.shadowBlurRadius = 3
+    shadow.shadowOffset = CGSize(width: 0, height: -1)
+    let size = max(12, min(area.width, area.height) * 0.035)
+    let attributes: [NSAttributedString.Key: Any] = [
+        .font: NSFont.systemFont(ofSize: size, weight: .semibold),
+        .foregroundColor: NSColor.white.withAlphaComponent(0.85),
+        .shadow: shadow,
+    ]
+    let string = NSAttributedString(string: text, attributes: attributes)
+    string.draw(at: watermarkOrigin(textSize: string.size(), in: area, padding: size * 0.8))
 }
 
 @MainActor

@@ -79,7 +79,7 @@ targets:
         NSCalendarsFullAccessUsageDescription: "Sonary shows today's events in the notch when you turn on the calendar widget."
         NSDownloadsFolderUsageDescription: "Sonary shows your newest downloads in the notch."
         NSCameraUsageDescription: "Sonary shows a small camera preview when you turn it on from the tools tab."
-        NSMicrophoneUsageDescription: "Sonary shows the microphone level in the sound tab so you can see that it works."
+        NSMicrophoneUsageDescription: "Sonary shows the microphone level in the sound tab, and records the microphone with the screen when you turn that on."
         NSHumanReadableCopyright: "GPL-3.0-or-later"
     settings:
       base:

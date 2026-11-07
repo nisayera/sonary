@@ -8,13 +8,28 @@ import SwiftUI
 @MainActor
 final class CaptureSelectorController {
     private var panels: [NSPanel] = []
-    private var finish: ((CGRect?) -> Void)?
+    private var views: [SelectionView] = []
+    private var finish: ((CaptureChoice?) -> Void)?
+    /// What the region will be used for; 1 to 4 switch it while the selector is open.
+    private var mode: CaptureMode = .screenshot {
+        didSet { for view in views { view.mode = mode } }
+    }
+    /// Whether the mode bar is shown. Off for captures that only make sense one way,
+    /// such as a scrolling screenshot.
+    private var switchable = true
+
+    /// Picks a region, for one purpose only.
+    func show(completion: @escaping (CGRect?) -> Void) {
+        show(mode: .screenshot, switchable: false) { completion($0?.rect) }
+    }
 
     /// Freezes a picture of each screen first, so the magnifier can zoom into it
     /// without capturing again on every pointer move.
-    func show(completion: @escaping (CGRect?) -> Void) {
+    func show(mode: CaptureMode, switchable: Bool = true, completion: @escaping (CaptureChoice?) -> Void) {
         close()
         finish = completion
+        self.switchable = switchable
+        self.mode = mode
         let screens = NSScreen.screens
         Task {
             var shots: [CGDirectDisplayID: CGImage] = [:]
@@ -49,29 +64,34 @@ final class CaptureSelectorController {
             panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
             let view = SelectionView(frame: CGRect(origin: .zero, size: screen.frame.size))
             view.screenOrigin = screen.frame.origin
+            view.mode = mode
+            view.showsModes = switchable
+            view.onMode = { [weak self] mode in self?.mode = mode }
             if let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber {
                 view.backdrop = shots[CGDirectDisplayID(number.uint32Value)]
             }
-            view.onFinish = { [weak self] rect in self?.report(rect) }
+            view.onFinish = { [weak self] choice in self?.report(choice) }
             panel.contentView = view
             panel.orderFrontRegardless()
             panel.makeFirstResponder(view)
             panels.append(panel)
+            views.append(view)
         }
         NSCursor.crosshair.push()
     }
 
-    private func report(_ rect: CGRect?) {
+    private func report(_ choice: CaptureChoice?) {
         let finish = self.finish
         self.finish = nil
         close()
-        finish?(rect)
+        finish?(choice)
     }
 
     func close() {
         guard !panels.isEmpty else { return }
         panels.forEach { $0.orderOut(nil) }
         panels = []
+        views = []
         NSCursor.pop()
     }
 }
@@ -79,8 +99,13 @@ final class CaptureSelectorController {
 /// Draws the dimming, the hole the user is cutting out of it, the size readout and the
 /// magnifier. Coordinates are the panel's; `screenOrigin` turns them back into screen ones.
 private final class SelectionView: NSView {
-    var onFinish: ((CGRect?) -> Void)?
+    var onFinish: ((CaptureChoice?) -> Void)?
+    var onMode: ((CaptureMode) -> Void)?
     var screenOrigin: CGPoint = .zero
+    var mode: CaptureMode = .screenshot { didSet { needsDisplay = true } }
+    var showsModes = true
+    /// Where each mode's label was drawn, so a click on it switches.
+    private var modeLabels: [CaptureMode: CGRect] = [:]
 
     private var start: CGPoint?
     private var current: CGPoint?
@@ -99,7 +124,12 @@ private final class SelectionView: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
-        start = convert(event.locationInWindow, from: nil)
+        let point = convert(event.locationInWindow, from: nil)
+        if showsModes, let hit = modeLabels.first(where: { $0.value.contains(point) })?.key {
+            onMode?(hit)
+            return
+        }
+        start = point
         current = start
         needsDisplay = true
     }
@@ -122,21 +152,45 @@ private final class SelectionView: NSView {
             start = nil
             current = nil
         }
-        guard let start, let current else {
+        guard let start, let current else { return }
+        guard let rect = captureRegion(start: start, end: current, screen: bounds, mode: mode) else {
             onFinish?(nil)
             return
         }
-        let rect = clampSelection(selectionRect(from: start, to: current), to: bounds)
-        guard isSelectionUsable(rect) else {
-            onFinish?(nil)
-            return
-        }
-        onFinish?(CGRect(x: rect.minX + screenOrigin.x, y: rect.minY + screenOrigin.y,
-                         width: rect.width, height: rect.height))
+        let color = mode == .color ? sampledColor(at: current) : nil
+        onFinish?(CaptureChoice(rect: CGRect(x: rect.minX + screenOrigin.x, y: rect.minY + screenOrigin.y,
+                                             width: rect.width, height: rect.height),
+                                mode: mode, color: color))
     }
 
     override func keyDown(with event: NSEvent) {
-        if event.keyCode == 53 { onFinish?(nil) } else { super.keyDown(with: event) }
+        if event.keyCode == 53 {
+            onFinish?(nil)
+        } else if showsModes, let picked = CaptureMode(keyCode: event.keyCode) {
+            onMode?(picked)
+        } else {
+            super.keyDown(with: event)
+        }
+    }
+
+    /// The colour of the frozen screen picture under a point. Nil without the Screen
+    /// Recording permission, when there is no picture to read.
+    private func sampledColor(at point: CGPoint) -> SampledColor? {
+        guard let backdrop else { return nil }
+        let scale = CGFloat(backdrop.width) / max(bounds.width, 1)
+        let pixel = CGRect(x: (point.x * scale).rounded(.down), y: ((bounds.height - point.y) * scale).rounded(.down),
+                           width: 1, height: 1)
+        guard let patch = backdrop.cropping(to: pixel) else { return nil }
+        var bytes = [UInt8](repeating: 0, count: 4)
+        let drawn = bytes.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(data: buffer.baseAddress, width: 1, height: 1, bitsPerComponent: 8,
+                                          bytesPerRow: 4, space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+                                          bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+            context.draw(patch, in: CGRect(x: 0, y: 0, width: 1, height: 1))
+            return true
+        }
+        guard drawn else { return nil }
+        return SampledColor(red: Double(bytes[0]) / 255, green: Double(bytes[1]) / 255, blue: Double(bytes[2]) / 255)
     }
 
     /// Crops the loupe's patch out of the frozen screen picture. Without the Screen
@@ -168,6 +222,48 @@ private final class SelectionView: NSView {
             drawLabel(selectionSizeLabel(rect), near: rect)
         }
         drawMagnifier()
+        if showsModes { drawModeBar() }
+    }
+
+    /// The four modes along the top, the current one marked, with a hint for the click.
+    private func drawModeBar() {
+        let names: [(CaptureMode, String)] = [
+            (.screenshot, String(localized: "Screenshot", bundle: .module)),
+            (.text, String(localized: "Text", bundle: .module)),
+            (.color, String(localized: "Colour", bundle: .module)),
+            (.recording, String(localized: "Recording", bundle: .module)),
+        ]
+        let font = NSFont.systemFont(ofSize: 12, weight: .semibold)
+        let labels = names.map { mode, name in
+            NSAttributedString(string: "\(mode.rawValue)  \(name)",
+                               attributes: [.font: font, .foregroundColor: NSColor.white])
+        }
+        let hint = NSAttributedString(
+            string: mode == .color ? String(localized: "Click a point", bundle: .module)
+                : String(localized: "Drag an area, or click for the whole screen", bundle: .module),
+            attributes: [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.white.withAlphaComponent(0.75)])
+        let padding: CGFloat = 10
+        let widths = labels.map { $0.size().width + padding * 2 }
+        let total = widths.reduce(0, +) + hint.size().width + padding * 2
+        let height: CGFloat = 28
+        var x = bounds.midX - total / 2
+        let y = bounds.maxY - height - 40
+        let bar = CGRect(x: x - 4, y: y - 4, width: total + 8, height: height + 8)
+        NSColor.black.withAlphaComponent(0.72).setFill()
+        NSBezierPath(roundedRect: bar, xRadius: 10, yRadius: 10).fill()
+        modeLabels = [:]
+        for (index, label) in labels.enumerated() {
+            let box = CGRect(x: x, y: y, width: widths[index], height: height)
+            let entry = names[index].0
+            if entry == mode {
+                NSColor.systemPink.withAlphaComponent(0.85).setFill()
+                NSBezierPath(roundedRect: box, xRadius: 7, yRadius: 7).fill()
+            }
+            label.draw(at: CGPoint(x: box.minX + padding, y: box.midY - label.size().height / 2))
+            modeLabels[entry] = box
+            x += widths[index]
+        }
+        hint.draw(at: CGPoint(x: x + padding, y: y + height / 2 - hint.size().height / 2))
     }
 
     private func drawLabel(_ text: String, near rect: CGRect) {
