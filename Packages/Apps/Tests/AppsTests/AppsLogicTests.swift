@@ -265,3 +265,71 @@ struct QuitAllTests {
         #expect(appsToQuit(running: running, front: nil, keepFront: true, keepRunning: []) == [1, 2, 3, 4])
     }
 }
+
+struct AppStoreAndBrewTests {
+    @Test func masOutdatedLinesBecomeUpdates() {
+        let text = "497799835  Xcode  (15.0 -> 15.1)\n1475387142 Tailscale (1.48.1 -> 1.50.0)\nNo updates\n"
+        let updates = parseMasOutdated(text)
+        #expect(updates.map(\.id) == ["497799835", "1475387142"])
+        #expect(updates.first?.name == "Xcode")
+        #expect(updates.last?.current == "1.50.0")
+    }
+
+    @Test func brewNamesSkipHeadingsAndNotes() {
+        let text = "==> Formulae\nwget\nwget2\n\nIf you meant something else, try again\n"
+        #expect(parseBrewNames(text, isCask: false).map(\.name) == ["wget", "wget2"])
+    }
+
+    @Test func casksGetTheirFlag() {
+        #expect(brewArguments("install", BrewPackage(name: "firefox", isCask: true)) == ["install", "--cask", "firefox"])
+        #expect(brewArguments("uninstall", BrewPackage(name: "wget", isCask: false)) == ["uninstall", "wget"])
+    }
+}
+
+struct ProcessListTests {
+    private let text = """
+      1   0.0   12000 root     /sbin/launchd
+    420  12.5  204800 luka     /Applications/Safari.app/Contents/MacOS/Safari
+    512   3.0   51200 luka     /usr/bin/some tool with spaces
+    """
+
+    @Test func linesBecomeProcesses() {
+        let list = parseProcessList(text)
+        #expect(list.count == 3)
+        #expect(list[1].name == "Safari")
+        #expect(list[1].memory == 204_800 * 1024)
+        #expect(list[2].name == "some tool with spaces")
+    }
+
+    @Test func theBusiestComeFirstAndTheQueryNarrows() {
+        let list = parseProcessList(text)
+        #expect(filteredProcesses(list, query: "").first?.pid == 420)
+        #expect(filteredProcesses(list, query: "launch").map(\.pid) == [1])
+        #expect(filteredProcesses(list, query: "512").map(\.pid) == [512])
+    }
+}
+
+struct DownloadSortingTests {
+    private let now = Date(timeIntervalSince1970: 10_000)
+
+    @Test func partialAndFreshFilesAreNotFinished() {
+        #expect(!isFinishedDownload(name: "movie.mp4.crdownload", modified: now.addingTimeInterval(-3600), now: now))
+        #expect(!isFinishedDownload(name: "photo.jpg", modified: now.addingTimeInterval(-30), now: now))
+        #expect(isFinishedDownload(name: "photo.jpg", modified: now.addingTimeInterval(-600), now: now))
+    }
+
+    @Test func copiesOfTheSameDownloadAreFound() {
+        let files = [
+            FolderFile(name: "photo.jpg", size: 100), FolderFile(name: "photo (1).jpg", size: 100),
+            FolderFile(name: "photo-2.jpg", size: 100), FolderFile(name: "photo (3).jpg", size: 99),
+            FolderFile(name: "notes (1).txt", size: 5),
+        ]
+        #expect(repeatedDownloads(in: files) == ["photo (1).jpg", "photo-2.jpg"])
+    }
+
+    @Test func freeNamesCountUp() {
+        let taken: Set<String> = ["a.pdf", "a 2.pdf"]
+        #expect(uniqueFileName("a.pdf") { taken.contains($0) } == "a 3.pdf")
+        #expect(uniqueFileName("b.pdf") { taken.contains($0) } == "b.pdf")
+    }
+}

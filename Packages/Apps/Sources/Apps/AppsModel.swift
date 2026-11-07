@@ -49,6 +49,12 @@ public final class AppsModel {
     public private(set) var installer: MountedInstaller?
     public private(set) var brewAvailable = brewExecutable() != nil
     public private(set) var isBrewBusy = false
+    /// App Store apps with an update, read through the mas tool when it is installed.
+    public private(set) var appStoreUpdates: [AppStoreUpdate] = []
+    public private(set) var masAvailable = masExecutable() != nil
+    public private(set) var brewResults: [BrewPackage] = []
+    public private(set) var brewInstalled: [BrewPackage] = []
+    public private(set) var processes: [RunningProcess] = []
     public private(set) var uninstallPlan: UninstallPlan?
     public private(set) var message: String?
     public private(set) var settings = AppsSettings()
@@ -245,8 +251,9 @@ public final class AppsModel {
     public func tidyWatchedFolders() async {
         let folders = settings.watchedFolders
         guard !folders.isEmpty else { return }
-        let removed = await Task.detached { () -> Int in
+        let (removed, moved) = await Task.detached { () -> (Int, Int) in
             var removed = 0
+            var moved = 0
             for folder in folders {
                 let url = URL(fileURLWithPath: folder.path, isDirectory: true)
                 let contents = (try? FileManager.default.contentsOfDirectory(
@@ -256,14 +263,47 @@ public final class AppsModel {
                              modified: (try? item.resourceValues(forKeys: [.contentModificationDateKey]))?
                                  .contentModificationDate ?? Date())
                 }
+                var trashed = Set<URL>()
                 for file in filesPastRetention(files, days: folder.retentionDays, now: Date()) {
-                    if (try? FileManager.default.trashItem(at: file.url, resultingItemURL: nil)) != nil { removed += 1 }
+                    if (try? FileManager.default.trashItem(at: file.url, resultingItemURL: nil)) != nil {
+                        removed += 1
+                        trashed.insert(file.url)
+                    }
+                }
+                if folder.removeRepeats == true {
+                    let sized = contents.filter { !trashed.contains($0) }.map { item in
+                        FolderFile(name: item.lastPathComponent,
+                                   size: Int64((try? item.resourceValues(forKeys: [.fileSizeKey]))?.fileSize ?? -1))
+                    }
+                    for name in repeatedDownloads(in: sized.filter { $0.size >= 0 }) {
+                        let copy = url.appendingPathComponent(name)
+                        if (try? FileManager.default.trashItem(at: copy, resultingItemURL: nil)) != nil {
+                            removed += 1
+                            trashed.insert(copy)
+                        }
+                    }
+                }
+                if let target = folder.moveFinishedTo, !target.isEmpty {
+                    let destination = URL(fileURLWithPath: target, isDirectory: true)
+                    try? FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+                    for file in files where !trashed.contains(file.url)
+                        && isFinishedDownload(name: file.url.lastPathComponent, modified: file.modified, now: Date()) {
+                        let free = uniqueFileName(file.url.lastPathComponent) {
+                            FileManager.default.fileExists(atPath: destination.appendingPathComponent($0).path)
+                        }
+                        if (try? FileManager.default.moveItem(at: file.url, to: destination.appendingPathComponent(free))) != nil {
+                            moved += 1
+                        }
+                    }
                 }
             }
-            return removed
+            return (removed, moved)
         }.value
         if removed > 0 {
             message = String(localized: "Moved \(removed) old files to the Trash.", bundle: .module)
+        }
+        if moved > 0 {
+            message = String(localized: "Sorted \(moved) finished downloads.", bundle: .module)
         }
     }
 
@@ -413,5 +453,112 @@ public final class AppsModel {
         }
         isBrewBusy = false
         await refreshOutdated()
+    }
+
+    /// Everything Sonary can update by itself at once: Homebrew's formulae and casks, and the
+    /// App Store apps when mas is there. Apps with their own updater still need opening.
+    public func updateAll() async {
+        isBrewBusy = true
+        var failed = false
+        if let brew = brewExecutable(), !outdated.isEmpty {
+            failed = await runProcess(brew, ["upgrade"]).status != 0 || failed
+        }
+        if let mas = masExecutable(), !appStoreUpdates.isEmpty {
+            failed = await runProcess(mas, ["upgrade"]).status != 0 || failed
+        }
+        isBrewBusy = false
+        message = failed ? String(localized: "Some updates did not go through.", bundle: .module)
+            : String(localized: "Everything Sonary manages is up to date.", bundle: .module)
+        await refreshOutdated()
+        await refreshAppStore()
+    }
+
+    // MARK: App Store
+
+    public func refreshAppStore() async {
+        guard let mas = masExecutable() else {
+            masAvailable = false
+            appStoreUpdates = []
+            return
+        }
+        masAvailable = true
+        let result = await runProcess(mas, ["outdated"])
+        appStoreUpdates = parseMasOutdated(String(decoding: result.output, as: UTF8.self))
+    }
+
+    public func upgrade(_ update: AppStoreUpdate) async {
+        guard let mas = masExecutable() else { return }
+        isBrewBusy = true
+        let result = await runProcess(mas, ["upgrade", update.id])
+        if result.status != 0 {
+            message = String(localized: "The App Store could not update \(update.name).", bundle: .module)
+        }
+        isBrewBusy = false
+        await refreshAppStore()
+    }
+
+    /// The App Store's own updates page, for when mas is not installed.
+    public func openAppStoreUpdates() {
+        if let url = URL(string: "macappstore://showUpdatesPage") { NSWorkspace.shared.open(url) }
+    }
+
+    // MARK: Homebrew installs
+
+    public func searchBrew(_ query: String) async {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        guard let brew = brewExecutable(), q.count >= 2 else {
+            brewResults = []
+            return
+        }
+        isBrewBusy = true
+        async let formulae = runProcess(brew, ["search", "--formula", q])
+        async let casks = runProcess(brew, ["search", "--cask", q])
+        let found = parseBrewNames(String(decoding: await formulae.output, as: UTF8.self), isCask: false)
+            + parseBrewNames(String(decoding: await casks.output, as: UTF8.self), isCask: true)
+        brewResults = Array(found.prefix(40))
+        isBrewBusy = false
+    }
+
+    public func refreshBrewInstalled() async {
+        guard let brew = brewExecutable() else { return }
+        async let formulae = runProcess(brew, ["list", "--formula", "-1"])
+        async let casks = runProcess(brew, ["list", "--cask", "-1"])
+        brewInstalled = parseBrewNames(String(decoding: await formulae.output, as: UTF8.self), isCask: false)
+            + parseBrewNames(String(decoding: await casks.output, as: UTF8.self), isCask: true)
+    }
+
+    public func install(_ package: BrewPackage) async {
+        await runBrew("install", package,
+                      failure: String(localized: "Homebrew could not install \(package.name).", bundle: .module))
+    }
+
+    public func uninstall(_ package: BrewPackage) async {
+        await runBrew("uninstall", package,
+                      failure: String(localized: "Homebrew could not remove \(package.name).", bundle: .module))
+    }
+
+    private func runBrew(_ verb: String, _ package: BrewPackage, failure: String) async {
+        guard let brew = brewExecutable() else { return }
+        isBrewBusy = true
+        let result = await runProcess(brew, brewArguments(verb, package))
+        message = result.status == 0 ? nil : failure
+        isBrewBusy = false
+        await refreshBrewInstalled()
+    }
+
+    // MARK: Processes
+
+    public func refreshProcesses() async {
+        let result = await runProcess("/bin/ps", ["-axo", "pid=,pcpu=,rss=,user=,comm="])
+        processes = parseProcessList(String(decoding: result.output, as: UTF8.self))
+    }
+
+    /// Asks a process to end, or ends it at once when `force` is set.
+    public func end(_ process: RunningProcess, force: Bool) async {
+        if kill(process.pid, force ? SIGKILL : SIGTERM) != 0 {
+            message = String(localized: "\(process.name) could not be stopped. It may belong to the system.", bundle: .module)
+        }
+        try? await Task.sleep(for: .milliseconds(400))
+        await refreshProcesses()
     }
 }
