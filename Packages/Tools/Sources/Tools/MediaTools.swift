@@ -136,6 +136,45 @@ public func compressVideo(at source: URL, preset: String = AVAssetExportPreset12
     return url
 }
 
+/// The part of a clip to keep, in seconds, pulled inside the clip. Nil when nothing would
+/// be left.
+public func trimRange(start: Double, end: Double, duration: Double) -> ClosedRange<Double>? {
+    let from = min(max(start, 0), duration)
+    let to = end <= 0 ? duration : min(max(end, 0), duration)
+    guard to - from >= 0.1 else { return nil }
+    return from...to
+}
+
+/// Keeps part of a video, without its sound when asked, as a new file next to it. The
+/// picture is passed through as it is where the format allows.
+public func trimVideo(at source: URL, keeping range: ClosedRange<Double>, removeAudio: Bool) async throws -> URL {
+    let asset = AVURLAsset(url: source)
+    let timeRange = CMTimeRange(start: CMTime(seconds: range.lowerBound, preferredTimescale: 600),
+                                end: CMTime(seconds: range.upperBound, preferredTimescale: 600))
+    var exported: AVAsset = asset
+    if removeAudio {
+        let composition = AVMutableComposition()
+        for track in try await asset.loadTracks(withMediaType: .video) {
+            guard let copy = composition.addMutableTrack(withMediaType: .video,
+                                                         preferredTrackID: kCMPersistentTrackID_Invalid) else { continue }
+            try copy.insertTimeRange(timeRange, of: track, at: .zero)
+            copy.preferredTransform = try await track.load(.preferredTransform)
+        }
+        exported = composition
+    }
+    guard let session = AVAssetExportSession(asset: exported, presetName: AVAssetExportPresetHighestQuality) else {
+        throw MediaError.cannotEncode
+    }
+    if !removeAudio { session.timeRange = timeRange }
+    let name = uniqueMediaName(base: source.deletingPathExtension().lastPathComponent + " trimmed",
+                               extension: "mp4") {
+        FileManager.default.fileExists(atPath: source.deletingLastPathComponent().appendingPathComponent($0).path)
+    }
+    let url = source.deletingLastPathComponent().appendingPathComponent(name)
+    try await session.export(to: url, as: .mp4)
+    return url
+}
+
 public enum MediaError: Error { case unreadable, cannotEncode }
 
 /// How many frames a GIF of this length gets, and the delay between them. Capped so a

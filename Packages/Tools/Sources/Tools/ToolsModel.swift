@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import Observation
 import SonaryCore
 import Vision
@@ -22,6 +23,10 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var snippetDelivery: SnippetDelivery = .type
     /// Open the editor on a fresh screenshot instead of only copying it.
     public var annotateAfterCapture = false
+    /// Screen recordings carry what the Mac plays.
+    public var recordSystemAudio = true
+    /// Screen recordings carry the microphone too.
+    public var recordMicrophone = false
     /// Typing a snippet's trigger anywhere replaces it with the snippet.
     public var snippetTriggers = false
     /// Cleaning mode also swallows brightness, volume, media and Mission Control keys.
@@ -257,13 +262,14 @@ public final class ToolsModel {
             guard let color = color?.usingColorSpace(.sRGB) else { return }
             // NSColor is not Sendable, so only the numbers cross into the main actor.
             let red = Double(color.redComponent), green = Double(color.greenComponent), blue = Double(color.blueComponent)
-            Task { @MainActor in
-                guard let self else { return }
-                let value = formatColor(red: red, green: green, blue: blue, format: self.settings.colorFormat)
-                self.copy(value)
-                self.report(String(localized: "Copied \(value)", bundle: .module))
-            }
+            Task { @MainActor in self?.copyColor(red: red, green: green, blue: blue) }
         }
+    }
+
+    private func copyColor(red: Double, green: Double, blue: Double) {
+        let value = formatColor(red: red, green: green, blue: blue, format: settings.colorFormat)
+        copy(value)
+        report(String(localized: "Copied \(value)", bundle: .module))
     }
 
     /// Takes a screenshot and keeps it floating on top until it is closed.
@@ -314,11 +320,14 @@ public final class ToolsModel {
         Task { isRecording ? await stopRecording() : await startRecording() }
     }
 
-    private func startRecording() async {
-        guard let folder = FileManager.default.urls(for: .moviesDirectory, in: .userDomainMask).first else { return }
+    /// Records the whole main display, or the region picked in the selector.
+    private func startRecording(region: CGRect? = nil) async {
+        guard !isRecording,
+              let folder = FileManager.default.urls(for: .moviesDirectory, in: .userDomainMask).first else { return }
         let url = folder.appendingPathComponent(recordingFileName(now: Date()))
         do {
-            try await recorder.start(to: url)
+            try await recorder.start(to: url, region: region.flatMap(Self.displayRegion),
+                                     systemAudio: settings.recordSystemAudio, microphone: settings.recordMicrophone)
             isRecording = true
             report(String(localized: "Recording the screen.", bundle: .module))
         } catch {
@@ -336,6 +345,17 @@ public final class ToolsModel {
         }
         NSWorkspace.shared.activateFileViewerSelecting([url])
         report(String(localized: "Saved to \(url.lastPathComponent)", bundle: .module))
+    }
+
+    /// The display a region in screen coordinates is on, and the region within it with the
+    /// origin at the top left, which is how ScreenCaptureKit measures.
+    private static func displayRegion(_ rect: CGRect) -> RecordingRegion? {
+        let middle = CGPoint(x: rect.midX, y: rect.midY)
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(middle) }),
+              let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+        else { return nil }
+        let local = recordingSourceRect(rect, screenFrame: screen.frame)
+        return RecordingRegion(displayID: number.uint32Value, rect: local, scale: screen.backingScaleFactor)
     }
 
     // MARK: Media tools
@@ -377,6 +397,24 @@ public final class ToolsModel {
         }
     }
 
+    /// Keeps part of a video as a new file next to it.
+    public func trimVideo(_ url: URL, start: Double, end: Double, removeAudio: Bool) {
+        Task {
+            let duration = (try? await AVURLAsset(url: url).load(.duration).seconds) ?? 0
+            guard let range = trimRange(start: start, end: end, duration: duration) else {
+                report(String(localized: "Nothing would be left of the video.", bundle: .module))
+                return
+            }
+            do {
+                let written = try await Tools.trimVideo(at: url, keeping: range, removeAudio: removeAudio)
+                NSWorkspace.shared.activateFileViewerSelecting([written])
+                report(String(localized: "Saved to \(written.lastPathComponent)", bundle: .module))
+            } catch {
+                report(String(localized: "The video could not be trimmed.", bundle: .module))
+            }
+        }
+    }
+
     /// Re-encodes a video smaller, next to the original.
     public func compressVideos(_ urls: [URL]) {
         guard !urls.isEmpty else { return }
@@ -393,47 +431,76 @@ public final class ToolsModel {
         }
     }
 
-    public func screenshotToClipboard() {
-        guard settings.annotateAfterCapture else {
-            Task {
-                guard let arguments = await captureArguments(["-c"]) else { return }
-                _ = await capture(arguments: arguments)
-                report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
+    public func screenshotToClipboard() { startCapture(.screenshot) }
+
+    /// Lets you select an area of the screen and copies the text in it.
+    public func recognizeText() { startCapture(.text) }
+
+    /// Opens Sonary's selector in a mode, where 1 to 4 switch to another before the region
+    /// is picked; with the system's selector the mode stays as it is.
+    private func startCapture(_ mode: CaptureMode) {
+        Task {
+            guard settings.ownCaptureSelector else {
+                await capture(mode, where: ["-i"])
+                return
             }
+            guard let choice = await withCheckedContinuation({ continuation in
+                selector.show(mode: mode) { continuation.resume(returning: $0) }
+            }) else { return }
+            switch choice.mode {
+            case .color:
+                if let color = choice.color {
+                    copyColor(red: color.red, green: color.green, blue: color.blue)
+                } else {
+                    pickColor()
+                }
+            case .recording:
+                await startRecording(region: choice.rect)
+            case .screenshot, .text:
+                let rect = choice.rect
+                await capture(choice.mode, where: ["-R", "\(Int(rect.minX)),\(Int(rect.minY)),\(Int(rect.width)),\(Int(rect.height))"])
+            }
+        }
+    }
+
+    /// A screenshot or text from the region the arguments name.
+    private func capture(_ mode: CaptureMode, where region: [String]) async {
+        if mode == .text {
+            await textFromScreen(region)
+            return
+        }
+        guard settings.annotateAfterCapture else {
+            guard await capture(arguments: region + ["-c"]) else { return }
+            report(String(localized: "Screenshot copied to the clipboard.", bundle: .module))
             return
         }
         // The shot goes to a file first, so the editor has something to work on.
         let file = FileManager.default.temporaryDirectory
             .appendingPathComponent("sonary-shot-\(UUID().uuidString).png")
-        Task {
-            guard let arguments = await captureArguments(["-x", file.path]),
-                  await capture(arguments: arguments), let image = NSImage(contentsOf: file) else { return }
-            try? FileManager.default.removeItem(at: file)
-            editor.open(image) { [weak self] message in self?.report(message) }
+        guard await capture(arguments: region + ["-x", file.path]), let image = NSImage(contentsOf: file) else { return }
+        try? FileManager.default.removeItem(at: file)
+        editor.open(image) { [weak self] message in self?.report(message) }
+    }
+
+    private func textFromScreen(_ region: [String]) async {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("sonary-ocr-\(UUID().uuidString).png")
+        guard await capture(arguments: region + ["-x", file.path]) else { return }
+        defer { try? FileManager.default.removeItem(at: file) }
+        let text = await Task.detached { recognizedText(inImageAt: file) }.value
+        if text.isEmpty {
+            report(String(localized: "No text found.", bundle: .module))
+        } else {
+            copy(text)
+            report(String(localized: "Text copied to the clipboard.", bundle: .module))
         }
     }
 
-    /// Lets you select an area of the screen and copies the text in it.
-    public func recognizeText() {
-        let file = FileManager.default.temporaryDirectory.appendingPathComponent("sonary-ocr-\(UUID().uuidString).png")
+    /// Reads the text in image files the user picked and copies it, one file after another.
+    public func textFromImageFiles(_ urls: [URL]) {
+        guard !urls.isEmpty else { return }
         Task {
-            guard let arguments = await captureArguments(["-x", file.path]),
-                  await capture(arguments: arguments) else { return }
-            defer { try? FileManager.default.removeItem(at: file) }
             let text = await Task.detached { () -> String in
-                guard let image = NSImage(contentsOf: file)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return "" }
-                let handler = VNImageRequestHandler(cgImage: image)
-                // A QR code or barcode in the selection is what the user is after, so it wins over loose text.
-                let barcodes = VNDetectBarcodesRequest()
-                try? handler.perform([barcodes])
-                let payloads = (barcodes.results ?? []).compactMap(\.payloadStringValue)
-                if !payloads.isEmpty { return joinRecognizedLines(payloads) }
-                let request = VNRecognizeTextRequest()
-                request.recognitionLevel = .accurate
-                request.usesLanguageCorrection = true
-                try? handler.perform([request])
-                let lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
-                return joinRecognizedLines(lines)
+                urls.map { recognizedText(inImageAt: $0) }.filter { !$0.isEmpty }.joined(separator: "\n\n")
             }.value
             if text.isEmpty {
                 report(String(localized: "No text found.", bundle: .module))
@@ -593,4 +660,21 @@ public final class ToolsModel {
         if commandBar == nil { commandBar = CommandBarController(model: self) }
         commandBar?.show()
     }
+}
+
+/// The text in a picture, or a QR code's or barcode's contents when it has one, since that
+/// is what someone pointing at one is after. Empty when there is nothing to read.
+func recognizedText(inImageAt url: URL) -> String {
+    guard let image = NSImage(contentsOf: url)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return "" }
+    let handler = VNImageRequestHandler(cgImage: image)
+    let barcodes = VNDetectBarcodesRequest()
+    try? handler.perform([barcodes])
+    let payloads = (barcodes.results ?? []).compactMap(\.payloadStringValue)
+    if !payloads.isEmpty { return joinRecognizedLines(payloads) }
+    let request = VNRecognizeTextRequest()
+    request.recognitionLevel = .accurate
+    request.usesLanguageCorrection = true
+    try? handler.perform([request])
+    let lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
+    return joinRecognizedLines(lines)
 }
