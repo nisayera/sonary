@@ -41,7 +41,41 @@ public struct MonitorView: View {
 
     // MARK: - Blocks
 
+    /// Rings for the shares at the top, then the values that are not shares.
     private func tiles(_ latest: MetricsSnapshot) -> some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 4) {
+                LabeledRing(Text(verbatim: "CPU"), fraction: latest.cpu, value: percentNumber(latest.cpu),
+                            tint: ringTint(latest.cpu),
+                            detail: latest.cores.isEmpty ? nil : Text("\(latest.cores.count) cores", bundle: .module))
+                LabeledRing(Text("Memory", bundle: .module), fraction: latest.memory.usedFraction,
+                            value: percentNumber(latest.memory.usedFraction), tint: pressureColor(latest.memory.pressure),
+                            detail: Text(verbatim: formatBytes(latest.memory.usedBytes)))
+                LabeledRing(Text("Disk", bundle: .module), fraction: 1 - latest.disk.freeFraction,
+                            value: percentNumber(1 - latest.disk.freeFraction), tint: ringTint(1 - latest.disk.freeFraction),
+                            detail: Text("\(formatBytes(latest.disk.freeBytes)) free", bundle: .module))
+                if let battery = latest.battery {
+                    LabeledRing(Text("Battery", bundle: .module), fraction: battery.level, value: percentNumber(battery.level),
+                                tint: battery.isCharging ? .green : (battery.level < 0.2 ? .orange : .sonaryAccent),
+                                detail: battery.isCharging ? Text("Charging", bundle: .module)
+                                    : module.batteryTime.map { Text(verbatim: formatDuration($0)) })
+                }
+            }
+            .padding(.vertical, 10)
+            .panelCard(padded: false)
+            otherTiles(latest)
+        }
+    }
+
+    private func percentNumber(_ fraction: Double) -> String {
+        "\(Int((min(max(fraction, 0), 1) * 100).rounded()))%"
+    }
+
+    private func ringTint(_ fraction: Double) -> Color {
+        fraction >= 0.9 ? .red : fraction >= 0.75 ? .orange : .sonaryAccent
+    }
+
+    private func otherTiles(_ latest: MetricsSnapshot) -> some View {
         HStack(spacing: 8) {
             MonitorTile(symbol: "thermometer.medium", title: "Temperature",
                         value: (latest.temperatures["CPU"] ?? latest.temperatures.values.max())
@@ -50,11 +84,9 @@ public struct MonitorView: View {
             if let fastest = module.fans.map(\.rpm).max(), fastest > 0 {
                 MonitorTile(symbol: "fan", title: "Fans", value: formatFanSpeed(module.fans))
             }
-            if let battery = latest.battery {
-                MonitorTile(symbol: battery.isCharging ? "battery.100.bolt" : "battery.75percent", title: "Battery",
-                            value: percent(battery.level),
-                            detail: module.batteryTime.map(formatDuration))
-            }
+            MonitorTile(symbol: "network", title: "Network",
+                        value: formatRate(latest.network.bytesInPerSec),
+                        detail: "↑ " + formatRate(latest.network.bytesOutPerSec))
         }
     }
 

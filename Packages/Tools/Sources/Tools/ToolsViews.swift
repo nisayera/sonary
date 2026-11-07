@@ -42,13 +42,15 @@ struct ToolsPopoverView: View {
         }
     }
 
+    /// The tools as tiles, three to a row, each with its shortcut under it.
     private var toolsView: some View {
-        PanelGroup {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 7), count: 3), spacing: 7) {
             tool("magnifyingglass", "Command bar", shortcut: "tools.commandBar") { model.showCommandBar() }
             tool("text.viewfinder", "Copy text from screen", shortcut: "tools.textFromScreen") { model.recognizeText() }
             tool("eyedropper", "Pick a color", shortcut: "tools.colorPicker") { model.pickColor() }
             tool("camera.viewfinder", "Screenshot to clipboard", shortcut: "tools.screenshot") { model.screenshotToClipboard() }
             tool("circle.grid.cross", "Radial menu", shortcut: "tools.radialMenu") { model.showRadialMenu() }
+            tool("square.grid.3x3", "Quick panel", shortcut: "tools.quickPanel") { model.toggleQuickPanel() }
             tool("pin", "Pin a screenshot") { model.pinScreenshot() }
             tool("web.camera", "Camera mirror") { model.toggleCamera() }
             tool(model.isRecording ? "stop.circle" : "record.circle",
@@ -112,20 +114,25 @@ struct ToolsPopoverView: View {
         let combo = id.map { ShortcutStore.shared.combo(for: $0) } ?? KeyCombo.none
         let shortcut = model.settings.shortcuts ? shortcutDisplay(combo) : ""
         return Button(action: action) {
-            SettingsRow(symbol: symbol, title: Text(title, bundle: .module)) {
-                if !shortcut.isEmpty {
-                    Text(verbatim: shortcut)
-                        .font(.system(size: 10, weight: .medium).monospaced())
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
-                }
+            VStack(spacing: 5) {
+                IconBadge(symbol: symbol, size: 28)
+                Text(title, bundle: .module)
+                    .font(.system(size: 10.5, weight: .medium))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(verbatim: shortcut.isEmpty ? " " : shortcut)
+                    .font(.system(size: 9, weight: .medium).monospaced())
+                    .foregroundStyle(.secondary)
             }
-            .contentShape(Rectangle())
+            .padding(.horizontal, 4)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, minHeight: 92, alignment: .top)
+            .panelCard(padded: false)
+            .contentShape(RoundedRectangle(cornerRadius: PanelMetrics.cardRadius, style: .continuous))
         }
         .buttonStyle(.plain)
-        .panelRowInsets()
+        .help(Text(title, bundle: .module))
     }
 
     private var snippetsView: some View {

@@ -12,7 +12,8 @@ public struct IconTab<ID: Hashable>: Identifiable {
     }
 }
 
-/// A row of icon-only tabs in a rounded bar; the active one is tinted. VoiceOver reads each tab's title.
+/// A row of icon-only tabs in a rounded bar; the active one sits on the accent colour.
+/// VoiceOver reads each tab's title.
 public struct IconTabBar<ID: Hashable>: View {
     private let tabs: [IconTab<ID>]
     private let minimumItemWidth: CGFloat?
@@ -43,11 +44,14 @@ public struct IconTabBar<ID: Hashable>: View {
                         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(isActive ? Color.sonaryAccent : Color.secondary.opacity(0.86))
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(isActive ? Color.sonaryAccent.opacity(colorScheme == .light ? 0.14 : 0.22) : .clear)
-                )
+                .foregroundStyle(isActive ? Color.white : Color.secondary.opacity(0.86))
+                .background {
+                    if isActive {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color.sonaryAccent.gradient)
+                            .shadow(color: Color.sonaryAccent.opacity(0.35), radius: 4, y: 1)
+                    }
+                }
                 .help(tab.title)
                 .accessibilityLabel(tab.title)
                 .accessibilityAddTraits(isActive ? .isSelected : [])

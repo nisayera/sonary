@@ -39,7 +39,7 @@ struct SnapshotTests {
         let pages: [(SettingsDestination, String)] = [
             (.general, "general"), (.features, "features"), (.permissions, "permissions"),
             (.shortcuts, "shortcuts"), (.module("mouse"), "mouse"), (.module("windows"), "windows"),
-            (.module("monitor"), "monitor"),
+            (.module("monitor"), "monitor"), (.module("tools"), "tools"), (.module("clipboard"), "clipboard"),
         ]
         // The settings window's materials are not drawn off screen, so the page gets the window's
         // own colour behind it, or its text would stand on nothing.

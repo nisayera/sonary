@@ -16,12 +16,8 @@ public struct SettingsPageHeader<Accessory: View>: View {
 
     public var body: some View {
         HStack(alignment: .center, spacing: 14) {
-            Image(systemName: symbol)
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background(Color.sonaryAccent.gradient, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
-                .accessibilityHidden(true)
+            IconBadge(symbol: symbol, size: 46)
+                .shadow(color: Color.sonaryAccent.opacity(0.3), radius: 8, y: 3)
             VStack(alignment: .leading, spacing: 2) {
                 title.font(.title2.weight(.semibold))
                 if let subtitle {
@@ -65,6 +61,7 @@ public struct SettingsCard<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Spacing.m)
             .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.primary.opacity(0.07), lineWidth: 0.5))
         case .panel:
             VStack(alignment: .leading, spacing: 6) {
                 if let title {
@@ -102,12 +99,7 @@ public struct SettingsRow<Accessory: View>: View {
         switch surface {
         case .settings:
             HStack(spacing: 12) {
-                Image(systemName: symbol)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.sonaryAccent)
-                    .frame(width: 26, height: 26)
-                    .background(Color.sonaryAccent.opacity(0.13), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-                    .accessibilityHidden(true)
+                IconBadge(symbol: symbol, size: 26)
                 VStack(alignment: .leading, spacing: 2) {
                     title
                     if let caption {
@@ -121,11 +113,7 @@ public struct SettingsRow<Accessory: View>: View {
             .accessibilityElement(children: .combine)
         case .panel:
             HStack(spacing: PanelMetrics.rowIconSpacing) {
-                Image(systemName: symbol)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.sonaryAccent)
-                    .frame(width: PanelMetrics.rowIconWidth)
-                    .accessibilityHidden(true)
+                IconBadge(symbol: symbol, size: PanelMetrics.rowIconWidth)
                 VStack(alignment: .leading, spacing: 1) {
                     title
                         .font(.system(size: 12, weight: .medium))

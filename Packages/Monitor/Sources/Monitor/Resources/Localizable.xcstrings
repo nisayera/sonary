@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ free": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ frei"
+          }
+        }
+      }
+    },
     "%lld cores": {
       "localizations": {
         "de": {
@@ -97,6 +107,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ladezyklen"
+          }
+        }
+      }
+    },
+    "Charging": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lädt"
           }
         }
       }

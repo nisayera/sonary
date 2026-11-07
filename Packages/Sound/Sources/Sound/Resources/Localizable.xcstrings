@@ -255,6 +255,16 @@
         }
       }
     },
+    "Muted": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stumm"
+          }
+        }
+      }
+    },
     "None": {
       "extractionState": "manual",
       "localizations": {

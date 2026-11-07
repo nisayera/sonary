@@ -16,6 +16,15 @@ private enum AppsSection: String, CaseIterable, Identifiable {
     }
 }
 
+func cleanTargetSymbol(_ id: String) -> String {
+    switch id {
+    case "caches": "shippingbox"
+    case "logs": "doc.text"
+    case "derivedData": "hammer"
+    default: "folder"
+    }
+}
+
 func cleanTargetTitle(_ id: String) -> LocalizedStringKey {
     switch id {
     case "caches": "App caches"
@@ -81,6 +90,7 @@ struct AppsPopoverView: View {
             PanelGroup {
                 ForEach(model.cleanTargets) { target in
                     row {
+                        IconBadge(symbol: cleanTargetSymbol(target.id), size: PanelMetrics.rowIconWidth)
                         Text(cleanTargetTitle(target.id), bundle: .module)
                         Spacer()
                         Text(target.size.map(formatBytes) ?? "…").foregroundStyle(.secondary).monospacedDigit()
@@ -123,7 +133,7 @@ struct AppsPopoverView: View {
     private var portsView: some View {
         VStack(alignment: .leading, spacing: 6) {
             if model.ports.isEmpty {
-                Text("No app is listening on a TCP port.", bundle: .module).font(.callout).foregroundStyle(.secondary)
+                PanelEmptyState(symbol: "network", text: Text("No app is listening on a TCP port.", bundle: .module))
             } else {
                 PanelGroup {
                     ForEach(model.ports) { port in
@@ -190,7 +200,8 @@ struct AppsPopoverView: View {
             } else if model.isBrewBusy && model.outdated.isEmpty {
                 ProgressView().controlSize(.small)
             } else if model.outdated.isEmpty {
-                Text("Everything installed with Homebrew is up to date.", bundle: .module).font(.callout).foregroundStyle(.secondary)
+                PanelEmptyState(symbol: "checkmark.seal",
+                                text: Text("Everything installed with Homebrew is up to date.", bundle: .module))
             }
             if !model.outdated.isEmpty {
                 PanelGroup {

@@ -152,8 +152,8 @@ public extension View {
     }
 }
 
-/// A row of the panel: a plain icon, a title, an optional second line, and a control on the right.
-/// The icon takes the accent colour while the thing it stands for is on.
+/// A row of the panel: an icon badge, a title, an optional second line, and a control on the
+/// right. The badge is filled with the accent colour while the thing it stands for is on.
 public struct PanelRow<Accessory: View>: View {
     private let symbol: String
     private let title: Text
@@ -174,11 +174,8 @@ public struct PanelRow<Accessory: View>: View {
 
     public var body: some View {
         HStack(spacing: PanelMetrics.rowIconSpacing) {
-            Image(systemName: symbol)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(iconStyle)
-                .frame(width: PanelMetrics.rowIconWidth)
-                .accessibilityHidden(true)
+            IconBadge(symbol: symbol, isActive: isActive || needsAttention,
+                      tint: needsAttention ? .orange : .sonaryAccent, size: PanelMetrics.rowIconWidth)
             VStack(alignment: .leading, spacing: 2) {
                 title
                     .font(.system(size: 12, weight: .semibold))
@@ -198,11 +195,6 @@ public struct PanelRow<Accessory: View>: View {
         .panelRowInsets()
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-    }
-
-    private var iconStyle: AnyShapeStyle {
-        if needsAttention { return AnyShapeStyle(Color.orange) }
-        return isActive ? AnyShapeStyle(Color.sonaryAccent) : AnyShapeStyle(.secondary)
     }
 }
 
