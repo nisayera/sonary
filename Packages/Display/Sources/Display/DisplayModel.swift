@@ -11,6 +11,10 @@ public struct DisplaySettings: Codable, Equatable, Sendable {
     public var bluetoothOffDuringSleep = false
     /// Extra brightness per display, 0…1, on panels that have headroom above white.
     public var extraBrightness: [String: Double] = [:]
+    /// How finely the brightness shortcuts step.
+    public var stepSize: BrightnessStepSize = .normal
+    /// Stepping down past the display's minimum keeps going with an overlay.
+    public var dimBelowMinimum = false
 
     public init() {}
 }
@@ -32,6 +36,9 @@ public final class DisplayModel {
     /// Sonary only switches Bluetooth back on when it was the one that switched it off.
     @ObservationIgnored private var turnedOffBluetooth = false
     @ObservationIgnored private var running = false
+    /// How far below its minimum each hardware display is dimmed, 0 to 1. Not kept across
+    /// restarts: a display should never wake up darker than its own minimum.
+    public private(set) var belowMinimum: [CGDirectDisplayID: Double] = [:]
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
@@ -94,6 +101,7 @@ public final class DisplayModel {
         wakeObserver = nil
         for window in overlays.values { window.orderOut(nil) }
         overlays.removeAll()
+        belowMinimum.removeAll()
         extraLight.removeAll()
     }
 
@@ -106,8 +114,12 @@ public final class DisplayModel {
             return DisplayInfo(id: id, name: screen.localizedName, isBuiltIn: CGDisplayIsBuiltin(id) != 0,
                                hasHardwareControl: hardware != nil, brightness: hardware ?? software)
         }
-        for display in displays where !display.hasHardwareControl {
-            applyOverlay(to: display.id, brightness: display.brightness)
+        for display in displays {
+            if !display.hasHardwareControl {
+                applyOverlay(to: display.id, brightness: display.brightness)
+            } else {
+                applyOverlay(to: display.id, brightness: 1 - (belowMinimum[display.id] ?? 0))
+            }
         }
         applyExtraBrightness()
     }
@@ -151,6 +163,7 @@ public final class DisplayModel {
         let brightness = clampedBrightness(value)
         if DisplayServicesBridge.setBrightness(brightness, of: id) {
             update(id: id, brightness: brightness)
+            if belowMinimum[id] != nil, brightness > 0 { setBelowMinimum(0, for: id) }
             return
         }
         update(id: id, brightness: brightness)
@@ -166,7 +179,26 @@ public final class DisplayModel {
         let screen = NSScreen.screens.first { $0.frame.contains(point) } ?? NSScreen.main
         guard let number = screen?.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber,
               let display = displays.first(where: { $0.id == number.uint32Value }) else { return }
-        setBrightness(steppedBrightness(display.brightness, up: up), for: display.id)
+        let steps = settings.stepSize.rawValue
+        // Below the minimum only makes sense where the hardware has one; an overlay-only
+        // display already goes as dark as the overlay allows.
+        let canGoBelow = settings.dimBelowMinimum && display.hasHardwareControl
+        let level = display.brightness > 0 ? display.brightness : -(belowMinimum[display.id] ?? 0)
+        let next = steppedLevel(level, up: up, steps: steps, belowMinimum: canGoBelow)
+        if next < 0 {
+            if display.brightness > 0 { setBrightness(0, for: display.id) }
+            setBelowMinimum(-next, for: display.id)
+        } else {
+            setBelowMinimum(0, for: display.id)
+            setBrightness(next, for: display.id)
+        }
+    }
+
+    /// Darkens a hardware display past its minimum with an overlay, or lifts that again.
+    public func setBelowMinimum(_ amount: Double, for id: CGDirectDisplayID) {
+        let amount = min(max(amount, 0), 1)
+        if amount > 0 { belowMinimum[id] = amount } else { belowMinimum[id] = nil }
+        applyOverlay(to: id, brightness: 1 - amount)
     }
 
     public func update(_ change: (inout DisplaySettings) -> Void) {
@@ -174,6 +206,9 @@ public final class DisplayModel {
         change(&settings)
         save(settings)
         applyShortcuts()
+        if !settings.dimBelowMinimum {
+            for id in belowMinimum.keys { setBelowMinimum(0, for: id) }
+        }
     }
 
     private func save(_ settings: DisplaySettings) {

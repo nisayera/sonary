@@ -12,6 +12,8 @@ func keepAwakeTitle(_ duration: KeepAwakeDuration) -> LocalizedStringKey {
 
 struct SoundPopoverView: View {
     let model: SoundModel
+    /// The time picked for "awake until", an hour from when the panel opened.
+    @State private var awakeUntil = Date().addingTimeInterval(3600)
 
     var body: some View {
         SettingsCard(Text("Output", bundle: .module)) {
@@ -42,6 +44,15 @@ struct SoundPopoverView: View {
                 try? await Task.sleep(for: .seconds(3600))
             }
             .onDisappear { model.stopWatchingInputLevel() }
+            if let volume = model.inputVolume {
+                HStack {
+                    Image(systemName: "mic").foregroundStyle(.secondary)
+                    Slider(value: Binding(get: { volume }, set: { model.setInputVolume($0) }), in: 0...1)
+                    Image(systemName: "mic.fill").foregroundStyle(.secondary)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(Text("Input level", bundle: .module))
+            }
             SettingsToggleRow(symbol: model.micMuted ? "mic.slash.fill" : "mic.fill",
                               title: Text("Mute microphone", bundle: .module),
                               caption: model.settings.micMuteShortcut ? Text(verbatim: "⌃⌥M") : nil,
@@ -94,6 +105,14 @@ struct SoundPopoverView: View {
                 }
                 .controlSize(.small)
                 HStack(spacing: 6) {
+                    Text("Until", bundle: .module).font(.callout)
+                    DatePicker(selection: $awakeUntil, displayedComponents: .hourAndMinute) { EmptyView() }
+                        .labelsHidden()
+                    Button { model.keepAwake(until: awakeUntil) } label: { Text("Start", bundle: .module) }
+                    Spacer()
+                }
+                .controlSize(.small)
+                HStack(spacing: 6) {
                     if !model.settings.keepAwakeApp.isEmpty {
                         Button { model.keepAwakeWhileAppRuns(model.settings.keepAwakeApp) } label: {
                             Text("While \(model.appName(for: model.settings.keepAwakeApp)) runs", bundle: .module)
@@ -143,6 +162,15 @@ struct SoundSettingsView: View {
                               isOn: Binding(get: { model.settings.volumeAfterUnplug > 0 },
                                             set: { value in model.update { $0.volumeAfterUnplug = value ? 0.25 : 0 } }))
         }
+        SettingsCard(Text("Preferred devices", bundle: .module)) {
+            Text("When one of these appears, Sonary switches to it. The higher it is in the list, the more it is wanted. A device you pick by hand stays until another one from the list connects.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            DevicePriorityEditor(title: Text("Output", bundle: .module), names: model.settings.outputPriority,
+                                 known: model.outputs.map(\.name)) { names in model.update { $0.outputPriority = names } }
+            DevicePriorityEditor(title: Text("Input", bundle: .module), names: model.settings.inputPriority,
+                                 known: model.inputs.map(\.name)) { names in model.update { $0.inputPriority = names } }
+        }
         SettingsCard(Text("Microphone", bundle: .module)) {
             SettingsToggleRow(symbol: "circle.fill",
                               title: Text("Show a dot while the microphone is live", bundle: .module),
@@ -164,6 +192,15 @@ struct SoundSettingsView: View {
                               caption: Text("Holds the stronger assertion, so an external display keeps working.", bundle: .module),
                               isOn: Binding(get: { model.settings.keepAwakeWithClosedLid },
                                             set: { value in model.update { $0.keepAwakeWithClosedLid = value } }))
+            SettingsToggleRow(symbol: "cup.and.saucer", title: Text("Show a cup in the menu bar while awake", bundle: .module),
+                              caption: Text("Its menu says until when, and stops keep awake.", bundle: .module),
+                              isOn: Binding(get: { model.settings.keepAwakeMenuBarIcon },
+                                            set: { value in model.update { $0.keepAwakeMenuBarIcon = value } }))
+            SettingsToggleRow(symbol: "cursorarrow.motionlines", title: Text("Nudge the pointer now and then", bundle: .module),
+                              caption: Text("Moves it by one pixel and back every minute or so, for apps that mark you away when there is no input. Needs Accessibility.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.keepAwakeNudgesPointer },
+                                            set: { value in model.update { $0.keepAwakeNudgesPointer = value } }))
             HStack {
                 Text("Keep awake while this app runs", bundle: .module)
                 Spacer()
@@ -192,4 +229,60 @@ struct MicIndicatorDot: View {
             .overlay(Circle().strokeBorder(.white.opacity(0.7), lineWidth: 1))
             .accessibilityHidden(true)
     }
+}
+
+/// An ordered list of device names: move one up, take one out, add one that is connected.
+struct DevicePriorityEditor: View {
+    let title: Text
+    let names: [String]
+    /// The devices connected now, offered for adding.
+    let known: [String]
+    let change: ([String]) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                title.font(.callout.weight(.medium))
+                Spacer()
+                let addable = known.filter { !names.contains($0) }
+                Menu {
+                    ForEach(addable, id: \.self) { name in
+                        Button { change(names + [name]) } label: { Text(verbatim: name) }
+                    }
+                } label: { Text("Add", bundle: .module) }
+                    .menuStyle(.borderlessButton)
+                    .fixedSize()
+                    .disabled(addable.isEmpty)
+            }
+            if names.isEmpty {
+                Text("None yet", bundle: .module).font(.caption).foregroundStyle(.secondary)
+            }
+            ForEach(Array(names.enumerated()), id: \.element) { index, name in
+                HStack(spacing: 8) {
+                    Text(verbatim: "\(index + 1).").monospacedDigit().foregroundStyle(.secondary)
+                    Text(verbatim: name).lineLimit(1)
+                    if !known.contains(name) {
+                        Text("Not connected", bundle: .module).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button { change(movedUp(names, at: index)) } label: { Image(systemName: "arrow.up") }
+                        .buttonStyle(.borderless)
+                        .disabled(index == 0)
+                        .accessibilityLabel(Text("Move up", bundle: .module))
+                    Button { change(names.filter { $0 != name }) } label: { Image(systemName: "xmark") }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(Text("Remove", bundle: .module))
+                }
+                .font(.system(size: 12))
+            }
+        }
+    }
+}
+
+/// The list with the entry at `index` swapped with the one above it.
+func movedUp(_ names: [String], at index: Int) -> [String] {
+    guard index > 0, names.indices.contains(index) else { return names }
+    var result = names
+    result.swapAt(index, index - 1)
+    return result
 }

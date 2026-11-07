@@ -34,6 +34,25 @@ private extension Double {
     }
 }
 
+/// How finely the brightness shortcuts step: the 16 steps of the brightness keys, or
+/// quarters of them, as ⌥⇧ with the keys does.
+public enum BrightnessStepSize: Int, CaseIterable, Codable, Sendable {
+    case normal = 16
+    case fine = 32
+    case finest = 64
+}
+
+/// One step on a scale that reaches below the display's own minimum. From 0 to 1 it is the
+/// display's brightness; below 0, down to -1, the display stays at its minimum and an
+/// overlay darkens it further, by the same steps.
+public func steppedLevel(_ level: Double, up: Bool, steps: Int, belowMinimum: Bool) -> Double {
+    let atOrBelowMinimum = level < 0 || (level <= 0.0001 && !up)
+    guard belowMinimum, atOrBelowMinimum else { return steppedBrightness(max(level, 0), up: up, steps: steps) }
+    let step = 1.0 / Double(max(steps, 1))
+    let next = ((level + (up ? step : -step) * 1.0001) / step).rounded() * step
+    return min(max(next, -1), 1)
+}
+
 /// How dark the overlay has to be for a display without hardware control.
 /// Never fully black, so the screen cannot be dimmed into uselessness.
 public func overlayAlpha(for brightness: Double, maximumDim: Double = 0.75) -> Double {

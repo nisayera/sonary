@@ -189,3 +189,76 @@ struct MediaKeyTests {
         #expect(found.map(\.bundleID) == ["com.apple.Music", "com.spotify.client", "com.zed.Zed"])
     }
 }
+
+@Suite struct KeepAwakeUntilTests {
+    private var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Europe/Berlin") ?? .gmt
+        return calendar
+    }
+
+    private func date(_ day: Int, _ hour: Int, _ minute: Int) -> Date {
+        calendar.date(from: DateComponents(year: 2026, month: 11, day: day, hour: hour, minute: minute)) ?? .distantPast
+    }
+
+    @Test func laterTodayStaysToday() {
+        #expect(nextOccurrence(of: date(1, 18, 30), after: date(7, 9, 0), calendar: calendar) == date(7, 18, 30))
+    }
+
+    @Test func aTimeThatHasPassedMeansTomorrow() {
+        #expect(nextOccurrence(of: date(1, 8, 0), after: date(7, 9, 0), calendar: calendar) == date(8, 8, 0))
+    }
+
+    @Test func untilAlwaysHoldsUntilItsTimer() {
+        #expect(keepAwakeShouldContinue(condition: .until(date(7, 9, 0)), runningBundleIDs: [], onPower: false))
+    }
+}
+
+@Suite struct DevicePriorityTests {
+    private let speakers = AudioDevice(id: 1, name: "MacBook Speakers", hasOutput: true, hasInput: false)
+    private let airPods = AudioDevice(id: 2, name: "AirPods", hasOutput: true, hasInput: true)
+    private let monitor = AudioDevice(id: 3, name: "Studio Display", hasOutput: true, hasInput: false)
+    private let priority = ["AirPods", "Studio Display"]
+
+    @Test func aPreferredDeviceThatAppearsIsChosen() {
+        let chosen = priorityDevice(priority: priority, available: [speakers, airPods], previouslyAvailable: [speakers.name],
+                                    current: speakers.id)
+        #expect(chosen == airPods)
+    }
+
+    @Test func aHandPickedDeviceStaysWhileNothingNewArrives() {
+        #expect(priorityDevice(priority: priority, available: [speakers, airPods],
+                               previouslyAvailable: [speakers.name, airPods.name], current: speakers.id) == nil)
+    }
+
+    @Test func theBestRankedOneWins() {
+        let chosen = priorityDevice(priority: priority, available: [speakers, monitor, airPods],
+                                    previouslyAvailable: [speakers.name], current: speakers.id)
+        #expect(chosen == airPods)
+    }
+
+    @Test func losingTheCurrentDeviceFallsBackToTheList() {
+        let chosen = priorityDevice(priority: priority, available: [speakers, monitor],
+                                    previouslyAvailable: [speakers.name, monitor.name, airPods.name], current: airPods.id)
+        #expect(chosen == monitor)
+    }
+
+    @Test func whenMacOSMovedOnByItselfTheListStillDecides() {
+        // AirPods were in use, went away, and macOS picked the speakers before Sonary looked.
+        let chosen = priorityDevice(priority: priority, available: [speakers, monitor],
+                                    previouslyAvailable: [speakers.name, monitor.name, airPods.name],
+                                    current: speakers.id, previousDefault: airPods.name)
+        #expect(chosen == monitor)
+    }
+
+    @Test func nothingHappensAtStartOrWithoutAList() {
+        #expect(priorityDevice(priority: priority, available: [airPods], previouslyAvailable: nil, current: speakers.id) == nil)
+        #expect(priorityDevice(priority: [], available: [airPods], previouslyAvailable: [], current: speakers.id) == nil)
+        #expect(priorityDevice(priority: priority, available: [airPods], previouslyAvailable: [], current: airPods.id) == nil)
+    }
+
+    @Test func movingUpSwapsWithTheOneAbove() {
+        #expect(movedUp(["a", "b", "c"], at: 2) == ["a", "c", "b"])
+        #expect(movedUp(["a", "b"], at: 0) == ["a", "b"])
+    }
+}

@@ -16,6 +16,13 @@ struct DisplayPopoverView: View {
                         Spacer()
                         if !display.hasHardwareControl {
                             Text("dimmed by Sonary", bundle: .module).font(.caption2).foregroundStyle(.secondary)
+                        } else if let dim = model.belowMinimum[display.id] {
+                            Text("\(dim.formatted(.percent.precision(.fractionLength(0)))) below its minimum", bundle: .module)
+                                .font(.caption2).foregroundStyle(.secondary)
+                            Button { model.setBelowMinimum(0, for: display.id) } label: {
+                                Text("Lift", bundle: .module).font(.caption2)
+                            }
+                            .buttonStyle(.borderless)
                         }
                     }
                     HStack {
@@ -42,6 +49,22 @@ struct DisplaySettingsView: View {
                               caption: Text("Changes the display the pointer is on.", bundle: .module),
                               isOn: Binding(get: { model.settings.shortcuts },
                                             set: { value in model.update { $0.shortcuts = value } }))
+            SettingsRow(symbol: "slider.horizontal.3", title: Text("Step size", bundle: .module),
+                        caption: Text("Finer steps for the shortcuts, like ⌥⇧ with the brightness keys.", bundle: .module)) {
+                Picker(selection: Binding(get: { model.settings.stepSize },
+                                          set: { value in model.update { $0.stepSize = value } })) {
+                    Text("16 steps", bundle: .module).tag(BrightnessStepSize.normal)
+                    Text("32 steps", bundle: .module).tag(BrightnessStepSize.fine)
+                    Text("64 steps", bundle: .module).tag(BrightnessStepSize.finest)
+                } label: { EmptyView() }
+                    .labelsHidden()
+                    .fixedSize()
+            }
+            SettingsToggleRow(symbol: "moon", title: Text("Go darker than the display's minimum", bundle: .module),
+                              caption: Text("Stepping down past the lowest brightness keeps going with an overlay. Sonary lifts it again on restart.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.dimBelowMinimum },
+                                            set: { value in model.update { $0.dimBelowMinimum = value } }))
         }
         if !model.extraBrightnessCapable.isEmpty {
             SettingsCard(Text("Extra brightness", bundle: .module)) {

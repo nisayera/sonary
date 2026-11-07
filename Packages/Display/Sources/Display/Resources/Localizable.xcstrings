@@ -1,6 +1,46 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ below its minimum": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ unter dem Minimum"
+          }
+        }
+      }
+    },
+    "16 steps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 Stufen"
+          }
+        }
+      }
+    },
+    "32 steps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "32 Stufen"
+          }
+        }
+      }
+    },
+    "64 steps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "64 Stufen"
+          }
+        }
+      }
+    },
     "Brighter": {
       "extractionState": "manual",
       "localizations": {
@@ -106,12 +146,42 @@
         }
       }
     },
+    "Finer steps for the shortcuts, like ⌥⇧ with the brightness keys.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feinere Schritte für die Kurzbefehle, wie ⌥⇧ mit den Helligkeitstasten."
+          }
+        }
+      }
+    },
+    "Go darker than the display's minimum": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkler als das Minimum des Displays"
+          }
+        }
+      }
+    },
     "Hardware brightness": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Hardware-Helligkeit"
+          }
+        }
+      }
+    },
+    "Lift": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufheben"
           }
         }
       }
@@ -142,6 +212,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Step size": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schrittweite"
+          }
+        }
+      }
+    },
+    "Stepping down past the lowest brightness keeps going with an overlay. Sonary lifts it again on restart.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unter der niedrigsten Helligkeit dunkelt Sonary mit einer Abdeckung weiter ab. Nach einem Neustart ist sie wieder weg."
           }
         }
       }
