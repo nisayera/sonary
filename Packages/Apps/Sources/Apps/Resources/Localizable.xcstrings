@@ -12,6 +12,16 @@
         }
       }
     },
+    "%@ could not be stopped. It may belong to the system.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ließ sich nicht stoppen. Vielleicht gehört der Prozess zum System."
+          }
+        }
+      }
+    },
     "%@ is in your Applications folder, and the disk image is in the Trash.": {
       "localizations": {
         "de": {
@@ -69,6 +79,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ordner hinzufügen …"
+          }
+        }
+      }
+    },
+    "App Store": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store"
+          }
+        }
+      }
+    },
+    "App Store updates show here with the mas tool (brew install mas).": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App-Store-Updates erscheinen hier mit dem Werkzeug mas (brew install mas)."
           }
         }
       }
@@ -154,12 +184,12 @@
         }
       }
     },
-    "Clean caches and logs, quit or force quit apps, stop processes that block a port and update Homebrew apps from the menu panel's apps tab.": {
+    "Clean caches and logs, quit or force quit apps and processes, stop processes that block a port and update Homebrew and App Store apps from the menu panel's apps tab.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Im Apps-Tab des Menüs räumst du Caches und Protokolle auf, beendest Apps, stoppst Prozesse, die einen Port blockieren, und aktualisierst Homebrew-Apps."
+            "value": "Caches und Protokolle leeren, Apps und Prozesse beenden, Prozesse stoppen, die einen Port belegen, und Homebrew- und App-Store-Apps aktualisieren – alles im Apps-Tab des Menüs."
           }
         }
       }
@@ -224,12 +254,42 @@
         }
       }
     },
+    "Everything Sonary manages is up to date.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles, was Sonary verwaltet, ist aktuell."
+          }
+        }
+      }
+    },
     "Everything installed with Homebrew is up to date.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Alles, was mit Homebrew installiert ist, ist aktuell."
+          }
+        }
+      }
+    },
+    "Find a process": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prozess suchen"
+          }
+        }
+      }
+    },
+    "Finished ones go to %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertige landen in %@"
           }
         }
       }
@@ -251,6 +311,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Auf einem eingebundenen Image gefunden"
+          }
+        }
+      }
+    },
+    "Homebrew": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew"
+          }
+        }
+      }
+    },
+    "Homebrew could not install %@.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew konnte %@ nicht installieren."
+          }
+        }
+      }
+    },
+    "Homebrew could not remove %@.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew konnte %@ nicht entfernen."
           }
         }
       }
@@ -303,6 +393,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Installiere Homebrew (brew.sh), um Updates für deine Apps und Werkzeuge zu sehen und zu installieren."
+          }
+        }
+      }
+    },
+    "Installed": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installiert"
           }
         }
       }
@@ -418,6 +518,16 @@
         }
       }
     },
+    "Processes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prozesse"
+          }
+        }
+      }
+    },
     "Quit": {
       "localizations": {
         "de": {
@@ -488,6 +598,16 @@
         }
       }
     },
+    "Remove repeated downloads": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doppelte Downloads entfernen"
+          }
+        }
+      }
+    },
     "Runs in the background and moves everything to the Trash.": {
       "localizations": {
         "de": {
@@ -508,12 +628,42 @@
         }
       }
     },
+    "Search": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suchen"
+          }
+        }
+      }
+    },
+    "Search formulae and casks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formeln und Casks suchen"
+          }
+        }
+      }
+    },
     "Some items are in use and were skipped.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Einige Objekte werden gerade benutzt und wurden übersprungen."
+          }
+        }
+      }
+    },
+    "Some updates did not go through.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einige Updates sind nicht durchgelaufen."
           }
         }
       }
@@ -528,12 +678,72 @@
         }
       }
     },
+    "Sort finished ones into…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertige einsortieren in …"
+          }
+        }
+      }
+    },
+    "Sort into this folder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In diesen Ordner einsortieren"
+          }
+        }
+      }
+    },
+    "Sorted %lld finished downloads.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld fertige Downloads einsortiert."
+          }
+        }
+      }
+    },
+    "Sorted by CPU. Quit asks a process to end; Force Quit ends it at once and loses unsaved work.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach CPU sortiert. Beenden bittet einen Prozess aufzuhören; Sofort beenden stoppt ihn gleich, Ungesichertes geht verloren."
+          }
+        }
+      }
+    },
     "Stop": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Stoppen"
+          }
+        }
+      }
+    },
+    "Stop sorting": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht mehr einsortieren"
+          }
+        }
+      }
+    },
+    "The App Store could not update %@.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der App Store konnte %@ nicht aktualisieren."
           }
         }
       }
@@ -574,6 +784,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aktualisieren"
+          }
+        }
+      }
+    },
+    "Update all": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle aktualisieren"
           }
         }
       }

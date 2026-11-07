@@ -98,3 +98,92 @@ public func parseBrewOutdated(_ data: Data) -> [OutdatedPackage] {
 public func brewExecutable(fileExists: (String) -> Bool = { FileManager.default.isExecutableFile(atPath: $0) }) -> String? {
     ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"].first(where: fileExists)
 }
+
+// MARK: - App Store, through the mas tool
+
+/// An App Store app with a newer version waiting.
+public struct AppStoreUpdate: Equatable, Sendable, Identifiable {
+    public var id: String
+    public var name: String
+    public var installed: String
+    public var current: String
+}
+
+/// Parses `mas outdated`: "497799835  Xcode  (15.0 -> 15.1)" per line.
+public func parseMasOutdated(_ text: String) -> [AppStoreUpdate] {
+    text.split(whereSeparator: \.isNewline).compactMap { line in
+        guard let match = String(line).firstMatch(of: #/^\s*(\d+)\s+(.+?)\s+\((.+?)\s*->\s*(.+?)\)\s*$/#) else { return nil }
+        return AppStoreUpdate(id: String(match.1), name: String(match.2), installed: String(match.3),
+                              current: String(match.4))
+    }
+}
+
+/// The mas binary, installed with Homebrew; nil when it is not there.
+public func masExecutable(fileExists: (String) -> Bool = { FileManager.default.isExecutableFile(atPath: $0) }) -> String? {
+    ["/opt/homebrew/bin/mas", "/usr/local/bin/mas"].first(where: fileExists)
+}
+
+// MARK: - Homebrew search and installs
+
+/// A formula or cask found by a search or installed already.
+public struct BrewPackage: Equatable, Hashable, Sendable, Identifiable {
+    public var name: String
+    public var isCask: Bool
+    public var id: String { (isCask ? "cask:" : "formula:") + name }
+
+    public init(name: String, isCask: Bool) {
+        self.name = name
+        self.isCask = isCask
+    }
+}
+
+/// Names from `brew search` or `brew list -1`, one per line, without headings or notes.
+public func parseBrewNames(_ text: String, isCask: Bool) -> [BrewPackage] {
+    text.split(whereSeparator: \.isNewline).compactMap { line in
+        let name = line.trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty, !name.hasPrefix("==>"), !name.contains(" ") else { return nil }
+        return BrewPackage(name: name, isCask: isCask)
+    }
+}
+
+/// The Homebrew command for installing or removing a package.
+public func brewArguments(_ verb: String, _ package: BrewPackage) -> [String] {
+    package.isCask ? [verb, "--cask", package.name] : [verb, package.name]
+}
+
+// MARK: - Processes
+
+/// One process, as `ps` lists it.
+public struct RunningProcess: Equatable, Sendable, Identifiable {
+    public var pid: Int32
+    /// Share of one core, in percent.
+    public var cpu: Double
+    /// Resident memory, in bytes.
+    public var memory: Int64
+    public var user: String
+    public var name: String
+    public var id: Int32 { pid }
+}
+
+/// Parses `ps -axo pid=,pcpu=,rss=,user=,comm=`. The command is a path; its last part is
+/// the name shown.
+public func parseProcessList(_ text: String) -> [RunningProcess] {
+    text.split(whereSeparator: \.isNewline).compactMap { line in
+        let fields = line.split(separator: " ", maxSplits: 4, omittingEmptySubsequences: true)
+        guard fields.count == 5, let pid = Int32(fields[0]), let cpu = Double(fields[1]),
+              let rss = Int64(fields[2]) else { return nil }
+        let command = String(fields[4]).trimmingCharacters(in: .whitespaces)
+        let name = (command as NSString).lastPathComponent
+        return RunningProcess(pid: pid, cpu: cpu, memory: rss * 1024, user: String(fields[3]),
+                              name: name.isEmpty ? command : name)
+    }
+}
+
+/// The busiest processes first, narrowed to those whose name or number contains the query.
+public func filteredProcesses(_ list: [RunningProcess], query: String, limit: Int = 60) -> [RunningProcess] {
+    let q = query.trimmingCharacters(in: .whitespaces)
+    let matching = q.isEmpty ? list : list.filter {
+        $0.name.localizedCaseInsensitiveContains(q) || String($0.pid) == q
+    }
+    return Array(matching.sorted { ($0.cpu, $0.memory) > ($1.cpu, $1.memory) }.prefix(limit))
+}
