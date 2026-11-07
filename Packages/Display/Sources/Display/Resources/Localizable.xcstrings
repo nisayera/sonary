@@ -41,6 +41,26 @@
         }
       }
     },
+    "Add folder…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner hinzufügen …"
+          }
+        }
+      }
+    },
+    "All displays": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Displays"
+          }
+        }
+      }
+    },
     "Brighter": {
       "extractionState": "manual",
       "localizations": {
@@ -206,6 +226,16 @@
         }
       }
     },
+    "No pictures found. Add a folder with your own.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Bilder gefunden. Füge einen Ordner mit eigenen hinzu."
+          }
+        }
+      }
+    },
     "Shortcuts": {
       "localizations": {
         "de": {
@@ -269,12 +299,32 @@
         }
       }
     },
+    "Wallpaper": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schreibtischhintergrund"
+          }
+        }
+      }
+    },
     "dimmed by Sonary": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "von Sonary abgedunkelt"
+          }
+        }
+      }
+    },
+    "macOS did not take that picture.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS hat dieses Bild nicht übernommen."
           }
         }
       }
