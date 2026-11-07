@@ -44,10 +44,19 @@ The Xcode project is generated from `project.yml` with XcodeGen. Every module is
     func stop() async
     func makeSettingsView() -> AnyView
     func makePopoverView() -> AnyView?   // optional tab in the menu bar panel
+    var resourceBundle: Bundle? { get }  // the module's texts, for the settings search
 }
 ```
 
 `ModuleRegistry` keeps which modules are on (`module.<id>.enabled` in UserDefaults) and starts and stops them. Calls for the same module are serialized, so a quick on-off-on cannot interleave. Before `start()` the registry asks the `PermissionGate` for the module's permissions. If a permission is missing or `start()` throws, the module is switched off, the reason is stored in `failures` and shown in the settings, and the rest of the app keeps running.
+
+### Settings
+
+Each module keeps its settings as one `Codable` struct in UserDefaults and reads it through `StoredSettings.load`, which decodes field by field: a field it cannot read falls back to its default instead of throwing the whole struct away. So a new field needs a default value. A new field inside a struct that sits in a list (a snippet, a watched folder, a radial ring) has to be Optional, because list elements are decoded by the synthesized decoder, and one missing key there drops the element.
+
+### Modules talking to each other
+
+Packages never import each other. Where one feature needs another module, the app hands it a closure: the command bar gets clipboard entries and open windows through `ToolsModel.externalCommands`, the Super Key opens the command bar through `commandBarAction`, and the island gets volume, brightness and the scratchpad note through `NotchControls`. A feature whose way in is missing simply does not show.
 
 ### Permissions
 
@@ -64,7 +73,8 @@ The Xcode project is generated from `project.yml` with XcodeGen. Every module is
 ## User interface
 
 - **Menu bar panel** (`PopoverView`): a `MenuBarExtra` in window style with a header, icon tabs (an overview with every module's switch, plus one tab per running module that offers a panel), the content and a footer with settings, update check and quit.
-- **Settings window** (`SettingsView`): a sidebar with General, Shortcuts, Updates and About, then one page per module. Each page is a header with the module's switch and a stack of cards.
+- **Settings window** (`SettingsView`): a sidebar with General, Features, Permissions, Shortcuts, Updates and About, then one page per module. Each page is a header with the module's switch and a stack of cards. The search finds pages and, through each module's `resourceBundle`, single options by their text.
+- **Shared components** (SonaryUI): `SettingsCard`, `SettingsRow`, `SettingsToggleRow` and `SettingsWarning` for settings pages; `PanelGroup`, `PanelRow` and `panelCard` for the menu panel; `AppListEditor` for lists of apps; `KeyPressRecorderButton` for recording a shortcut. Texts are always passed in by the caller, so each package keeps its own translations.
 - **Onboarding**: shown on first launch; it collects the permissions the modules need and can be opened again from the settings.
 - **Design**: Liquid Glass (`.glassEffect()`, `GlassEffectContainer`) only for floating elements such as the panel, the notch and HUDs; settings use system materials. 8-point grid (`Spacing`), SF Symbols, springs under 0.5 s (`SonaryMotion`), an opacity fade when Reduce Motion is on, VoiceOver labels, light and dark mode.
 
