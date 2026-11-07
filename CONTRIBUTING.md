@@ -41,12 +41,16 @@ swift test --package-path Packages/Mouse
 
 The app target's tests run through Xcode (`⌘U`) or `xcodebuild … test`. CI runs every package with warnings treated as errors, builds the app and runs the app tests for every pull request and every merge to `main`; see `.github/workflows/ci.yml`.
 
+The app tests include snapshot tests that render the panel and the settings pages in light and dark mode. CI pushes the pictures to the `ci-snapshots` branch, which is the quickest way to look at a UI change without a Mac at hand.
+
 ## Guidelines
 
 - Swift 6 with strict concurrency, SwiftUI first, AppKit only where needed. No compiler warnings, no force unwraps in production code.
 - Each feature lives in a module and is fully off when the module is off: no timers, no event taps, no permission prompts.
 - Keep decisions in pure functions or value types and test them; keep the system calls around them thin.
-- Every user-facing string goes into the package's String Catalog, in English and German.
+- Every user-facing string goes into the package's String Catalog, in English and German. Each package has a test that fails when a German translation is missing.
+- New settings fields get a default value; new fields in structs that live in a list are Optional (see "Settings" in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
+- Event taps run on the main run loop. Read what you need from the event in the C callback, pass only Sendable values into `MainActor.assumeIsolated`, re-enable the tap on `tapDisabledByTimeout`, and mark events Sonary posts itself through `.eventSourceUserData` so its own taps let them pass.
 - Every new permission goes into [docs/PERMISSIONS.md](docs/PERMISSIONS.md), every new feature into [docs/FEATURES.md](docs/FEATURES.md).
 - Keep pull requests small and focused, describe what and why, and add screenshots for UI changes.
 
