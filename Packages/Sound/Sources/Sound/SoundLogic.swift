@@ -78,6 +78,8 @@ public func shouldHandleMediaKey(playersRunning: Bool, guardEnabled: Bool) -> Bo
 /// What keeps the Mac awake: a countdown, an app that is running, or being plugged in.
 public enum KeepAwakeCondition: Codable, Equatable, Sendable {
     case duration(KeepAwakeDuration)
+    /// Until a time the user picked.
+    case until(Date)
     case whileAppRuns(String)
     case whilePowered
     case whileDisplayConnected
@@ -96,10 +98,35 @@ public func keepAwakeShouldContinue(
     externalDisplays: Int = 0
 ) -> Bool {
     switch condition {
-    case .duration: true
+    case .duration, .until: true
     case .whileAppRuns(let bundleID):
         runningBundleIDs.contains { $0.caseInsensitiveCompare(bundleID) == .orderedSame }
     case .whilePowered: onPower
     case .whileDisplayConnected: externalDisplays > 0
     }
+}
+
+/// The next time the clock shows this hour and minute: later today, or tomorrow when that
+/// time has passed already.
+public func nextOccurrence(of time: Date, after now: Date, calendar: Calendar = .current) -> Date {
+    let parts = calendar.dateComponents([.hour, .minute], from: time)
+    let today = calendar.date(bySettingHour: parts.hour ?? 0, minute: parts.minute ?? 0, second: 0, of: now) ?? now
+    guard today <= now else { return today }
+    return calendar.date(byAdding: .day, value: 1, to: today) ?? today
+}
+
+/// The device to switch to after the list of devices changed. The best-ranked device in the
+/// priority list is chosen when it has just appeared, or when the device in use went away
+/// (`previousDefault` is the one that was in use at the last check, since macOS may already
+/// have moved on by itself); otherwise a device the user picked by hand stays. Nil when
+/// nothing should change, and always nil when there was no earlier list to compare with
+/// (Sonary just started).
+public func priorityDevice(priority: [String], available: [AudioDevice], previouslyAvailable: Set<String>?,
+                           current: UInt32?, previousDefault: String? = nil) -> AudioDevice? {
+    guard let previouslyAvailable, !priority.isEmpty else { return nil }
+    guard let best = priority.lazy.compactMap({ name in available.first { $0.name == name } }).first,
+          best.id != current else { return nil }
+    let currentGone = current.map { id in !available.contains { $0.id == id } } ?? true
+    let previousGone = previousDefault.map { name in !available.contains { $0.name == name } } ?? false
+    return currentGone || previousGone || !previouslyAvailable.contains(best.name) ? best : nil
 }

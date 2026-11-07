@@ -19,6 +19,16 @@ public struct SoundSettings: Codable, Equatable, Sendable {
     public var keepAwakeApp = ""
     /// Show a small dot on screen while the microphone is live.
     public var micIndicator = false
+    /// Speakers and headphones by name, most wanted first: one of them that appears is
+    /// switched to automatically.
+    public var outputPriority: [String] = []
+    /// The same for microphones.
+    public var inputPriority: [String] = []
+    /// While keep awake runs, move the pointer by a pixel now and then, for apps that set
+    /// you away after a while without input.
+    public var keepAwakeNudgesPointer = false
+    /// A cup in the menu bar while keep awake runs.
+    public var keepAwakeMenuBarIcon = true
     public init() {}
 }
 
@@ -59,6 +69,8 @@ public final class SoundModel {
     public private(set) var micMuted = false
     /// The microphone's loudness while the meter is being watched, 0 to 1.
     public private(set) var inputLevel: Double = 0
+    /// How sensitive the microphone is, 0 to 1; nil when it has no level to set.
+    public private(set) var inputVolume: Double?
     /// The apps playing sound right now. Read-only: Sonary cannot set their volume
     /// without taking over the output path, which it does not do.
     public private(set) var playingApps: [AudioProcess] = []
@@ -83,6 +95,13 @@ public final class SoundModel {
     @ObservationIgnored private var volumeBeforeMute: Double?
     @ObservationIgnored private var listening = false
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
+    /// The device names seen at the last refresh, for device priority. Nil until the first.
+    @ObservationIgnored private var seenOutputs: Set<String>?
+    @ObservationIgnored private var seenInputs: Set<String>?
+    @ObservationIgnored private var seenDefaultOutput: String?
+    @ObservationIgnored private var seenDefaultInput: String?
+    @ObservationIgnored private var nudgeTask: Task<Void, Never>?
+    @ObservationIgnored private let statusItem = KeepAwakeStatusItem()
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
@@ -132,6 +151,7 @@ public final class SoundModel {
         let currentName = outputs.first { $0.id == defaultOutput }?.name
         lastOutputName = currentName
         refreshLevels()
+        applyDevicePriority()
         // Headphones gone and the speakers took over: turn the volume down before it startles anyone.
         if settings.volumeAfterUnplug > 0, let previousName, isHeadphoneLike(previousName),
            let currentName, !isHeadphoneLike(currentName), let volume = outputVolume {
@@ -142,6 +162,7 @@ public final class SoundModel {
 
     private func refreshLevels() {
         outputVolume = defaultOutput.flatMap { AudioSystem.volume(of: $0, output: true) }
+        inputVolume = defaultInput.flatMap { AudioSystem.volume(of: $0, output: false) }
         if let input = defaultInput {
             micMuted = AudioSystem.isMuted(input, output: false) ?? ((AudioSystem.volume(of: input, output: false) ?? 1) == 0)
         }
@@ -155,6 +176,32 @@ public final class SoundModel {
         selectOutput(next.id)
     }
     public func selectInput(_ id: UInt32) { AudioSystem.setDefaultDevice(id, output: false); refresh() }
+
+    /// Sets how sensitive the microphone is.
+    public func setInputVolume(_ value: Double) {
+        guard let input = defaultInput else { return }
+        AudioSystem.setVolume(value, of: input, output: false)
+        inputVolume = AudioSystem.volume(of: input, output: false)
+    }
+
+    /// Switches to a preferred device that has just appeared. The switch itself causes
+    /// another refresh, which finds nothing new and leaves it there.
+    private func applyDevicePriority() {
+        let outputNames = Set(outputs.map(\.name))
+        let inputNames = Set(inputs.map(\.name))
+        let output = priorityDevice(priority: settings.outputPriority, available: outputs,
+                                    previouslyAvailable: seenOutputs, current: defaultOutput,
+                                    previousDefault: seenDefaultOutput)
+        let input = priorityDevice(priority: settings.inputPriority, available: inputs,
+                                   previouslyAvailable: seenInputs, current: defaultInput,
+                                   previousDefault: seenDefaultInput)
+        seenOutputs = outputNames
+        seenInputs = inputNames
+        seenDefaultOutput = (output ?? outputs.first { $0.id == defaultOutput })?.name
+        seenDefaultInput = (input ?? inputs.first { $0.id == defaultInput })?.name
+        if let output { AudioSystem.setDefaultDevice(output.id, output: true) }
+        if let input { AudioSystem.setDefaultDevice(input.id, output: false) }
+    }
 
     public func setOutputVolume(_ value: Double) {
         guard let output = defaultOutput else { return }
@@ -182,6 +229,7 @@ public final class SoundModel {
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "sound.settings") }
         applyShortcut(running: refreshTask != nil)
         if refreshTask != nil, settings.mediaKeyGuard { installMediaTap() } else { removeMediaTap() }
+        applyKeepAwakeExtras()
     }
 
     // MARK: Media keys
@@ -348,6 +396,7 @@ public final class SoundModel {
         keepAwakeActive = false
         keepAwakeEndsAt = nil
         keepAwakeCondition = nil
+        defer { applyKeepAwakeExtras() }
         guard let condition else { return }
         let reason = "Sonary keeps your Mac awake" as CFString
         let type = keepAwakeAssertionType(closedLid: settings.keepAwakeWithClosedLid) as CFString
@@ -361,12 +410,9 @@ public final class SoundModel {
         switch condition {
         case .duration(let duration):
             guard let seconds = duration.seconds else { return }
-            keepAwakeEndsAt = Date().addingTimeInterval(seconds)
-            keepAwakeTask = Task { [weak self] in
-                try? await Task.sleep(for: .seconds(seconds))
-                guard !Task.isCancelled else { return }
-                self?.setKeepAwake(nil)
-            }
+            endKeepAwake(at: Date().addingTimeInterval(seconds))
+        case .until(let end):
+            endKeepAwake(at: end)
         case .whileAppRuns, .whilePowered, .whileDisplayConnected:
             keepAwakeTask = Task { [weak self] in
                 while !Task.isCancelled {
@@ -382,6 +428,50 @@ public final class SoundModel {
                     }
                 }
             }
+        }
+    }
+
+    private func endKeepAwake(at end: Date) {
+        keepAwakeEndsAt = end
+        keepAwakeTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(max(0, end.timeIntervalSinceNow)))
+            guard !Task.isCancelled else { return }
+            self?.setKeepAwake(nil)
+        }
+    }
+
+    /// Keep awake until the clock next shows this time.
+    public func keepAwake(until time: Date) {
+        setKeepAwake(.until(nextOccurrence(of: time, after: Date())))
+    }
+
+    /// The menu bar cup and the pointer nudge, which run alongside keep awake.
+    private func applyKeepAwakeExtras() {
+        if keepAwakeActive, settings.keepAwakeMenuBarIcon {
+            statusItem.show(endsAt: keepAwakeEndsAt) { [weak self] in self?.setKeepAwake(nil) }
+        } else {
+            statusItem.hide()
+        }
+        nudgeTask?.cancel()
+        nudgeTask = nil
+        guard keepAwakeActive, settings.keepAwakeNudgesPointer else { return }
+        nudgeTask = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(50))
+                guard !Task.isCancelled else { return }
+                Self.nudgePointer()
+            }
+        }
+    }
+
+    /// One pixel over and back: counts as input for apps that watch for idle, and is too
+    /// small to notice. Skipped while a button is down, so a drag is never disturbed.
+    private static func nudgePointer() {
+        guard NSEvent.pressedMouseButtons == 0,
+              let position = CGEvent(source: nil)?.location else { return }
+        for point in [CGPoint(x: position.x + 1, y: position.y), position] {
+            CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: point,
+                    mouseButton: .left)?.post(tap: .cghidEventTap)
         }
     }
 

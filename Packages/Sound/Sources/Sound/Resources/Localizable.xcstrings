@@ -31,6 +31,16 @@
         }
       }
     },
+    "Add": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinzufügen"
+          }
+        }
+      }
+    },
     "Appears in the top right corner when something is picked up.": {
       "extractionState": "manual",
       "localizations": {
@@ -89,6 +99,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Im Menü"
+          }
+        }
+      }
+    },
+    "Input": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eingabe"
+          }
+        }
+      }
+    },
+    "Input level": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eingangspegel"
+          }
+        }
+      }
+    },
+    "Its menu says until when, and stops keep awake.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ihr Menü zeigt, bis wann, und beendet das Wachhalten."
           }
         }
       }
@@ -165,6 +205,26 @@
         }
       }
     },
+    "Move up": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach oben"
+          }
+        }
+      }
+    },
+    "Moves it by one pixel and back every minute or so, for apps that mark you away when there is no input. Needs Accessibility.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewegt ihn etwa jede Minute um ein Pixel hin und zurück, für Apps, die dich ohne Eingabe auf abwesend setzen. Braucht Bedienungshilfen."
+          }
+        }
+      }
+    },
     "Moves to the next speaker or headphones.": {
       "localizations": {
         "de": {
@@ -206,6 +266,26 @@
         }
       }
     },
+    "None yet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine"
+          }
+        }
+      }
+    },
+    "Not connected": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht verbunden"
+          }
+        }
+      }
+    },
     "Nothing is playing.": {
       "extractionState": "manual",
       "localizations": {
@@ -213,6 +293,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es spielt nichts."
+          }
+        }
+      }
+    },
+    "Nudge the pointer now and then": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeiger ab und zu anstupsen"
           }
         }
       }
@@ -238,6 +328,26 @@
         }
       }
     },
+    "Preferred devices": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bevorzugte Geräte"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen"
+          }
+        }
+      }
+    },
     "Shortcuts": {
       "localizations": {
         "de": {
@@ -255,6 +365,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zeigen"
+          }
+        }
+      }
+    },
+    "Show a cup in the menu bar while awake": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beim Wachhalten eine Tasse in der Menüleiste zeigen"
           }
         }
       }
@@ -297,6 +417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ton"
+          }
+        }
+      }
+    },
+    "Start": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starten"
           }
         }
       }
@@ -363,6 +493,16 @@
         }
       }
     },
+    "Until": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bis"
+          }
+        }
+      }
+    },
     "Until I turn it off": {
       "localizations": {
         "de": {
@@ -379,6 +519,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lautstärke"
+          }
+        }
+      }
+    },
+    "When one of these appears, Sonary switches to it. The higher it is in the list, the more it is wanted. A device you pick by hand stays until another one from the list connects.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taucht eines dieser Geräte auf, wechselt Sonary dorthin. Je weiter oben, desto lieber. Ein Gerät, das du selbst wählst, bleibt, bis ein anderes aus der Liste verbunden wird."
           }
         }
       }
