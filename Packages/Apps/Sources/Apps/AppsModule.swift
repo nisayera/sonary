@@ -24,7 +24,7 @@ public final class AppsModule: SonaryModule {
     public var resourceBundle: Bundle? { .module }
 
     public var status: [ModuleStatus] {
-        let updates = model.outdated.count + model.appUpdates.count
+        let updates = model.outdated.count + model.appUpdates.count + model.appStoreUpdates.count
         guard updates > 0 else { return [] }
         return [ModuleStatus(id: "updates", symbol: "arrow.down.app", title: String(localized: "Updates", bundle: .module),
                              value: "\(updates)", level: .warning)]

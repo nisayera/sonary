@@ -50,6 +50,7 @@ struct ToolsPopoverView: View {
             tool("eyedropper", "Pick a color", shortcut: "tools.colorPicker") { model.pickColor() }
             tool("camera.viewfinder", "Screenshot to clipboard", shortcut: "tools.screenshot") { model.screenshotToClipboard() }
             tool("circle.grid.cross", "Radial menu", shortcut: "tools.radialMenu") { model.showRadialMenu() }
+            tool("square.grid.3x3", "Quick panel", shortcut: "tools.quickPanel") { model.toggleQuickPanel() }
             tool("pin", "Pin a screenshot") { model.pinScreenshot() }
             tool("web.camera", "Camera mirror") { model.toggleCamera() }
             tool(model.isRecording ? "stop.circle" : "record.circle",
