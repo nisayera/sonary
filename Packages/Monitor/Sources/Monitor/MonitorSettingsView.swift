@@ -42,6 +42,28 @@ struct MonitorSettingsView: View {
                 }
             }
         }
+        SettingsCard(Text("Readings", bundle: .module)) {
+            SettingsRow(symbol: "timer", title: Text("Read every", bundle: .module),
+                        caption: Text("Slower readings use a little less energy. The graphs always cover about five minutes.",
+                                      bundle: .module)) {
+                Picker(selection: Binding(get: { module.sampleInterval },
+                                          set: { value in Task { await module.setSampleInterval(value) } })) {
+                    Text(verbatim: "1 s").tag(1)
+                    Text(verbatim: "2 s").tag(2)
+                    Text(verbatim: "5 s").tag(5)
+                } label: { EmptyView() }
+                    .pickerStyle(.segmented).labelsHidden().frame(width: 150)
+            }
+            SettingsToggleRow(symbol: "thermometer.medium", title: Text("Temperatures in Fahrenheit", bundle: .module),
+                              isOn: Binding(get: { module.fahrenheit }, set: { module.setFahrenheit($0) }))
+        }
+        SettingsCard(Text("In the panel", bundle: .module)) {
+            ForEach(MonitorSection.allCases) { section in
+                SettingsToggleRow(symbol: sectionSymbol(section), title: Text(sectionTitle(section), bundle: .module),
+                                  isOn: Binding(get: { module.shows(section) },
+                                                set: { module.setSection(section, visible: $0) }))
+            }
+        }
         SettingsCard(Text("Alerts", bundle: .module)) {
             SettingsToggleRow(
                 symbol: "bell.badge",
@@ -52,12 +74,35 @@ struct MonitorSettingsView: View {
         }
     }
 
+    private func sectionTitle(_ section: MonitorSection) -> LocalizedStringKey {
+        switch section {
+        case .rings: "Rings for CPU, memory, disk and battery"
+        case .power: "Power and battery"
+        case .usage: "Usage over time"
+        case .network: "Network"
+        case .processes: "Busiest apps"
+        case .usb: "USB devices"
+        }
+    }
+
+    private func sectionSymbol(_ section: MonitorSection) -> String {
+        switch section {
+        case .rings: "circle.dashed"
+        case .power: "bolt.fill"
+        case .usage: "chart.xyaxis.line"
+        case .network: "network"
+        case .processes: "list.number"
+        case .usb: "cable.connector"
+        }
+    }
+
     private func label(for metric: ReadoutMetric) -> LocalizedStringKey {
         switch metric {
         case .cpu: "CPU"
         case .memory: "Memory"
         case .network: "Network"
         case .disk: "Disk activity"
+        case .power: "Power"
         case .battery: "Battery"
         case .temperature: "Temperature"
         case .fan: "Fan speed"
@@ -70,6 +115,7 @@ struct MonitorSettingsView: View {
         case .memory: "memorychip"
         case .network: "network"
         case .disk: "internaldrive"
+        case .power: "bolt"
         case .battery: "battery.75percent"
         case .temperature: "thermometer.medium"
         case .fan: "fan"

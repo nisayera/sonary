@@ -133,6 +133,15 @@ public struct SystemSources: MetricsSources {
 
     public func temperatures() -> [String: Double] { sensors.temperatures() }
 
+    public func power() -> PowerStats? {
+        let battery = registryProperties(matching: "AppleSmartBattery").first ?? [:]
+        let adapter = IOPSCopyExternalPowerAdapterDetails()?.takeRetainedValue() as? [String: Any] ?? [:]
+        let sensors = SMCPowerProvider.shared.read()
+        let stats = powerStats(battery: battery, adapter: adapter, systemWatts: sensors.system,
+                               adapterInputWatts: sensors.adapter)
+        return stats.isEmpty ? nil : stats
+    }
+
     private static func memoryPressure() -> MemoryStats.Pressure {
         var level: Int32 = 0
         var size = MemoryLayout<Int32>.size
@@ -210,4 +219,29 @@ func registryProperties(matching className: String) -> [[String: Any]] {
 /// The USB devices plugged in right now.
 public func systemUSBDevices() -> [USBDevice] {
     parseUSBDevices(registryProperties(matching: "IOUSBHostDevice"))
+}
+
+/// The SMC's power sensors: PSTR for the whole Mac, PDTR (laptops) or PD0R (desktops) for
+/// what comes in. Looked up once; a Mac without them reads nil.
+final class SMCPowerProvider: @unchecked Sendable {
+    static let shared = SMCPowerProvider()
+
+    private let lock = NSLock()
+    private var client: SMCClient?
+    private var systemKey: SMCClient.Key?
+    private var adapterKey: SMCClient.Key?
+    private var prepared = false
+
+    func read() -> (system: Double?, adapter: Double?) {
+        lock.lock()
+        defer { lock.unlock() }
+        if !prepared {
+            prepared = true
+            client = SMCClient()
+            systemKey = client?.key(named: "PSTR")
+            adapterKey = client?.key(named: "PDTR") ?? client?.key(named: "PD0R")
+        }
+        guard let client else { return (nil, nil) }
+        return (systemKey.flatMap(client.readValue), adapterKey.flatMap(client.readValue))
+    }
 }

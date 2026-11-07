@@ -1,7 +1,7 @@
 import Foundation
 
 public enum ReadoutMetric: String, CaseIterable, Codable, Sendable {
-    case cpu, memory, network, disk, battery, temperature, fan
+    case cpu, memory, network, disk, battery, power, temperature, fan
 }
 
 /// A share drawn as one block, from ▁ to █, for a menu bar that shows bars.
@@ -44,6 +44,7 @@ public func readoutItems(_ snapshot: MetricsSnapshot, metrics: [ReadoutMetric], 
             let time = batteryTime.map { " " + formatClockDuration($0) } ?? ""
             return share("BAT", battery.level) + time
         }
+        case .power: snapshot.power?.systemWatts.map { "⚡︎" + formatWatts($0) }
         case .temperature: snapshot.temperatures.values.max().map { "TEMP \(Int($0.rounded()))°" } ?? "TEMP —"
         case .fan: fans.isEmpty ? nil : "FAN \(formatFanSpeed(fans))"
         }

@@ -147,3 +147,24 @@ func movedUp(_ ids: [String], at index: Int) -> [String] {
     result.swapAt(index, index - 1)
     return result
 }
+
+/// What the menu panel shows besides the modules.
+struct PanelOptions: Codable, Equatable, Sendable {
+    /// The time and date in the header.
+    var showsClock = true
+    /// Seconds on the clock.
+    var clockSeconds = false
+    /// The live values at the top of the overview.
+    var showsGlance = true
+    /// Two or three tiles to a row.
+    var glanceColumns = 2
+    /// How many tiles at most.
+    var glanceLimit = 8
+    /// Live values left out of the overview, as "module.value".
+    var hiddenGlance: [String] = []
+    /// A second line with live values under each running module.
+    var showsStatusLines = true
+}
+
+/// The key a live value is hidden under.
+func glanceKey(_ moduleID: String, _ statusID: String) -> String { moduleID + "." + statusID }

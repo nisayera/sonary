@@ -41,6 +41,8 @@ final class AppModel {
     private(set) var hiddenPanelTabs: Set<String>
     /// Set after an update until the user has looked at what changed or dismissed it.
     private(set) var updatedToVersion: String?
+    /// What the panel's header and overview show.
+    private(set) var panelOptions: PanelOptions
 
     @ObservationIgnored let defaults: UserDefaults
 
@@ -113,6 +115,8 @@ final class AppModel {
         self.appearance = SonaryAppearance.stored(in: defaults)
         self.panelTabOrder = defaults.stringArray(forKey: "panel.tabs.order") ?? []
         self.hiddenPanelTabs = Set(defaults.stringArray(forKey: "panel.tabs.hidden") ?? [])
+        self.panelOptions = StoredSettings.load(PanelOptions.self, key: "panel.options", from: defaults,
+                                                fallback: PanelOptions())
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
         let seen = defaults.string(forKey: "app.lastVersion")
         // A first launch has nothing new to tell; only a change of version does.
@@ -128,6 +132,11 @@ final class AppModel {
     func setPanelTab(_ id: String, hidden: Bool) {
         if hidden { hiddenPanelTabs.insert(id) } else { hiddenPanelTabs.remove(id) }
         defaults.set(Array(hiddenPanelTabs).sorted(), forKey: "panel.tabs.hidden")
+    }
+
+    func updatePanelOptions(_ change: (inout PanelOptions) -> Void) {
+        change(&panelOptions)
+        if let data = try? JSONEncoder().encode(panelOptions) { defaults.set(data, forKey: "panel.options") }
     }
 
     func dismissWhatsNew() {
