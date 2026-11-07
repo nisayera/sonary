@@ -51,6 +51,8 @@ public final class ScreenRecorder: NSObject, SCStreamOutput, SCRecordingOutputDe
     private var stream: SCStream?
     private var output: SCRecordingOutput?
     private var finished: CheckedContinuation<Void, Never>?
+    /// Set once the file output says it is done, which can come before anyone waits for it.
+    private var didFinish = false
     private var failed = false
     private let queue = DispatchQueue(label: "app.sonary.recorder")
 
@@ -100,6 +102,7 @@ public final class ScreenRecorder: NSObject, SCStreamOutput, SCRecordingOutputDe
             self.stream = stream
             self.output = output
             self.failed = false
+            self.didFinish = false
         }
         outputURL = url
     }
@@ -107,14 +110,19 @@ public final class ScreenRecorder: NSObject, SCStreamOutput, SCRecordingOutputDe
     /// Stops recording and returns the finished file, or nil when nothing was written.
     public func stop() async -> URL? {
         guard let stream = lock.withLock({ self.stream }) else { return nil }
-        await withCheckedContinuation { continuation in
-            lock.withLock { finished = continuation }
-            Task {
-                do {
-                    try await stream.stopCapture()
-                } catch {
-                    self.resumeFinished()
+        if (try? await stream.stopCapture()) != nil {
+            // The file is complete once the output says so; never wait on it for ever.
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(5))
+                self?.resumeFinished()
+            }
+            await withCheckedContinuation { continuation in
+                let done = lock.withLock { () -> Bool in
+                    if didFinish { return true }
+                    finished = continuation
+                    return false
                 }
+                if done { continuation.resume() }
             }
         }
         let url = outputURL
@@ -143,6 +151,7 @@ public final class ScreenRecorder: NSObject, SCStreamOutput, SCRecordingOutputDe
 
     private func resumeFinished() {
         let continuation = lock.withLock { () -> CheckedContinuation<Void, Never>? in
+            didFinish = true
             let continuation = finished
             finished = nil
             return continuation
