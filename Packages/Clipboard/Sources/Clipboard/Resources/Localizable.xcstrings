@@ -63,6 +63,16 @@
         }
       }
     },
+    "Clear": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leeren"
+          }
+        }
+      }
+    },
     "Clear history (keeps pinned)": {
       "localizations": {
         "de": {
@@ -129,6 +139,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schnellpanel für die Zwischenablage"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
           }
         }
       }
@@ -204,6 +224,16 @@
         }
       }
     },
+    "Cut and paste files with ⌘X and ⌘V": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dateien mit ⌘X und ⌘V ausschneiden und einsetzen"
+          }
+        }
+      }
+    },
     "Cut the selected files": {
       "extractionState": "manual",
       "localizations": {
@@ -215,22 +245,42 @@
         }
       }
     },
-    "Drag files out of the shelf to move or copy them.": {
+    "Drag things out of the shelf to move or copy them, or share them.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ziehe Dateien aus der Ablage, um sie zu verschieben oder zu kopieren."
+            "value": "Zieh etwas aus der Ablage, um es zu bewegen oder zu kopieren, oder teile es."
           }
         }
       }
     },
-    "Drop files here to keep them handy": {
+    "Drop files on it to park them on the way, and drag them out again later. It stays while it holds something.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dateien hier ablegen, um sie griffbereit zu haben"
+            "value": "Leg Dateien unterwegs darauf ab und zieh sie später wieder heraus. Sie bleibt, solange etwas darauf liegt."
+          }
+        }
+      }
+    },
+    "Drop files, text or links here to keep them handy": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dateien, Text oder Links hier ablegen, um sie griffbereit zu haben"
+          }
+        }
+      }
+    },
+    "Drop here to keep it for later": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hier ablegen, um es für später aufzuheben"
           }
         }
       }
@@ -387,16 +437,6 @@
         }
       }
     },
-    "Open the menu panel's clipboard tab to use the file shelf and the Finder helpers. The Finder helpers ask once for permission to control Finder.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Ablage und die Finder-Helfer findest du im Zwischenablage-Tab des Menüs. Die Finder-Helfer fragen einmal nach der Erlaubnis, Finder zu steuern."
-          }
-        }
-      }
-    },
     "Paste a link to clean": {
       "localizations": {
         "de": {
@@ -519,6 +559,16 @@
         }
       }
     },
+    "Rename with F2": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit F2 umbenennen"
+          }
+        }
+      }
+    },
     "Return or ⌘1–9 copies, Esc closes": {
       "localizations": {
         "de": {
@@ -601,6 +651,16 @@
         }
       }
     },
+    "Share": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teilen"
+          }
+        }
+      }
+    },
     "Shelf": {
       "localizations": {
         "de": {
@@ -611,12 +671,32 @@
         }
       }
     },
-    "Shelf and Finder": {
+    "Show a shelf next to the pointer while dragging": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ablage und Finder"
+            "value": "Beim Ziehen eine Ablage neben dem Zeiger zeigen"
+          }
+        }
+      }
+    },
+    "Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dafür braucht Sonary die Bedienungshilfen. Erlaube sie unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen und schalte das hier dann aus und wieder ein."
+          }
+        }
+      }
+    },
+    "Starts renaming the selected item, as Return does.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Benennt das ausgewählte Objekt um, wie es der Zeilenschalter tut."
           }
         }
       }
@@ -627,6 +707,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Entfernt die Formatierung, setzt ein und stellt den ursprünglichen Inhalt danach wieder her. Braucht die Berechtigung Bedienungshilfen."
+          }
+        }
+      }
+    },
+    "The buttons in the menu panel's clipboard tab ask once for permission to control Finder.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Tasten im Zwischenablage-Tab des Menüs fragen einmal nach der Erlaubnis, den Finder zu steuern."
           }
         }
       }
@@ -679,6 +769,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Was gespeichert wird"
+          }
+        }
+      }
+    },
+    "⌘X marks the selection, ⌘V moves it to the folder in front. Text fields keep their own cut and paste.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘X merkt sich die Auswahl, ⌘V bewegt sie in den vorderen Ordner. Textfelder behalten ihr eigenes Ausschneiden und Einsetzen."
           }
         }
       }

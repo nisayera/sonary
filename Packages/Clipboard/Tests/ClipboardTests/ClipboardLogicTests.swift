@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 @testable import Clipboard
@@ -233,5 +234,61 @@ struct QuickPanelTests {
         let long = String(repeating: "a", count: 30)
         #expect(previewText(long, limit: 10) == String(repeating: "a", count: 10) + "\n…")
         #expect(previewText("short", limit: 10) == "short")
+    }
+}
+
+struct ShelfTests {
+    @Test func aSingleWebAddressBecomesALink() throws {
+        let link = try #require(URL(string: "https://example.com/a"))
+        #expect(shelfItem(fromText: "  https://example.com/a \n") == .link(link))
+        #expect(shelfItem(fromText: "see https://example.com/a") == .text("see https://example.com/a"))
+        #expect(shelfItem(fromText: "ftp://example.com") == .text("ftp://example.com"))
+        #expect(shelfItem(fromText: "   \n") == nil)
+    }
+
+    @Test func droppedURLsKeepTheirKind() throws {
+        let file = URL(filePath: "/tmp/a.txt")
+        let web = try #require(URL(string: "https://example.com"))
+        let mail = try #require(URL(string: "mailto:a@example.com"))
+        #expect(shelfItem(fromURL: file) == .file(file))
+        #expect(shelfItem(fromURL: web) == .link(web))
+        #expect(shelfItem(fromURL: mail) == nil)
+    }
+
+    @Test func theFloatingShelfStaysOnScreenAndOffThePointer() {
+        let screen = CGRect(x: 0, y: 0, width: 1000, height: 800)
+        let size = CGSize(width: 240, height: 168)
+        #expect(floatingShelfOrigin(pointer: CGPoint(x: 100, y: 100), size: size, screen: screen)
+            == CGPoint(x: 128, y: 128))
+        // Near the top right corner it flips to the other side of the pointer.
+        #expect(floatingShelfOrigin(pointer: CGPoint(x: 950, y: 780), size: size, screen: screen)
+            == CGPoint(x: 950 - 28 - 240, y: 780 - 28 - 168))
+    }
+}
+
+struct FinderKeyTests {
+    private func action(_ keyCode: Int64, command: Bool = true, option: Bool = false, editing: Bool = false,
+                        cutPending: Bool = false, cutAndPaste: Bool = true, rename: Bool = true) -> FinderKeyAction {
+        finderKeyAction(keyCode: keyCode, command: command, option: option, shift: false, control: false,
+                        editingText: editing, cutPending: cutPending, cutAndPaste: cutAndPaste, renameWithF2: rename)
+    }
+
+    @Test func cutThenPasteMoves() {
+        #expect(action(7) == .cut)
+        #expect(action(9, cutPending: true) == .moveHere)
+        // Without a cut first, ⌘V is Finder's own copy.
+        #expect(action(9) == .pass)
+    }
+
+    @Test func f2Renames() {
+        #expect(action(120, command: false) == .rename)
+        #expect(action(120, command: false, rename: false) == .pass)
+    }
+
+    @Test func textFieldsAndOtherModifiersAreLeftAlone() {
+        #expect(action(7, editing: true) == .pass)
+        #expect(action(120, command: false, editing: true) == .pass)
+        #expect(action(9, option: true, cutPending: true) == .pass)
+        #expect(action(7, cutAndPaste: false) == .pass)
     }
 }
