@@ -33,9 +33,10 @@ public final class NotchModule: SonaryModule {
     }
 
     public func makeSettingsView() -> AnyView {
-    public var resourceBundle: Bundle? { .module }
         AnyView(NotchSettingsView(model: model).onChange(of: model.settings.showOnScreensWithoutNotch) { _, _ in
             self.window?.placeOnScreen()
         })
     }
+
+    public var resourceBundle: Bundle? { .module }
 }
