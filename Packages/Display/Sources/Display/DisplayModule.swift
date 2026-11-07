@@ -21,5 +21,6 @@ public final class DisplayModule: SonaryModule {
     public func stop() async { model.stop() }
 
     public func makeSettingsView() -> AnyView { AnyView(DisplaySettingsView(model: model)) }
+    public var resourceBundle: Bundle? { .module }
     public func makePopoverView() -> AnyView? { AnyView(DisplayPopoverView(model: model)) }
 }

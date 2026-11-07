@@ -11,6 +11,16 @@
         }
       }
     },
+    "A file with every choice you made, to take to another Mac.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Datei mit allen deinen Einstellungen, für einen anderen Mac."
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "de": {
@@ -164,6 +174,16 @@
         }
       }
     },
+    "Cancel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbrechen"
+          }
+        }
+      }
+    },
     "Check for Updates…": {
       "localizations": {
         "de": {
@@ -235,6 +255,16 @@
         }
       }
     },
+    "Dismiss": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausblenden"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "de": {
@@ -255,12 +285,42 @@
         }
       }
     },
+    "Everything": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles"
+          }
+        }
+      }
+    },
     "Explains Sonary and the permissions of your modules.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Erklärt Sonary und die Berechtigungen deiner Module."
+          }
+        }
+      }
+    },
+    "Export settings": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen exportieren"
+          }
+        }
+      }
+    },
+    "Export…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportieren …"
           }
         }
       }
@@ -355,6 +415,26 @@
         }
       }
     },
+    "Import settings": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen importieren"
+          }
+        }
+      }
+    },
+    "Import…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importieren …"
+          }
+        }
+      }
+    },
     "Input Monitoring": {
       "localizations": {
         "de": {
@@ -371,6 +451,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Einführung"
+          }
+        }
+      }
+    },
+    "Keyboard & mouse": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastatur & Maus"
           }
         }
       }
@@ -465,6 +555,16 @@
         }
       }
     },
+    "Menu panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü"
+          }
+        }
+      }
+    },
     "Microphone": {
       "localizations": {
         "de": {
@@ -511,6 +611,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maus, Tastatur, Fenster, Einsetzen als reiner Text, Medientasten, getippte Textbausteine, Menübefehle"
+          }
+        }
+      }
+    },
+    "Move up": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach oben"
           }
         }
       }
@@ -625,6 +735,26 @@
         }
       }
     },
+    "Open the menu panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü öffnen"
+          }
+        }
+      }
+    },
+    "Options": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optionen"
+          }
+        }
+      }
+    },
     "Overview": {
       "localizations": {
         "de": {
@@ -666,12 +796,72 @@
         }
       }
     },
+    "Puts back what Sonary changed, deletes its settings and data, and quits.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stellt zurück, was Sonary geändert hat, löscht seine Einstellungen und Daten und beendet es."
+          }
+        }
+      }
+    },
     "Quit Sonary": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Sonary beenden"
+          }
+        }
+      }
+    },
+    "Remove all data": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Daten entfernen"
+          }
+        }
+      }
+    },
+    "Remove all of Sonary's data?": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Daten von Sonary entfernen?"
+          }
+        }
+      }
+    },
+    "Remove and quit": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen und beenden"
+          }
+        }
+      }
+    },
+    "Remove…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen …"
+          }
+        }
+      }
+    },
+    "Replaces your settings with the ones in the file and restarts Sonary.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ersetzt deine Einstellungen durch die aus der Datei und startet Sonary neu."
           }
         }
       }
@@ -702,6 +892,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Einstellungen durchsuchen"
+          }
+        }
+      }
+    },
+    "Settings, the clipboard history and everything else Sonary keeps are deleted, and Sonary quits. Your scripts folder stays.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen, der Verlauf der Zwischenablage und alles andere, was Sonary aufbewahrt, werden gelöscht, und Sonary wird beendet. Dein Skripte-Ordner bleibt."
           }
         }
       }
@@ -793,6 +993,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quellcode"
+          }
+        }
+      }
+    },
+    "Start with": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starten mit"
           }
         }
       }
@@ -918,6 +1128,16 @@
         }
       }
     },
+    "Updated to %@": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisiert auf %@"
+          }
+        }
+      }
+    },
     "Updates": {
       "localizations": {
         "de": {
@@ -978,6 +1198,26 @@
         }
       }
     },
+    "What's new": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was ist neu"
+          }
+        }
+      }
+    },
+    "Which module tabs the panel shows, and in what order. The overview always comes first.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welche Modul-Tabs das Menü zeigt und in welcher Reihenfolge. Die Übersicht steht immer vorne."
+          }
+        }
+      }
+    },
     "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident.": {
       "localizations": {
         "de": {
@@ -1004,6 +1244,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Der Werkzeugkasten für deine Mac-Menüleiste. Quelloffen, modular, nativ für macOS 26."
+          }
+        }
+      }
+    },
+    "Your data": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Daten"
           }
         }
       }

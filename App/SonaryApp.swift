@@ -11,7 +11,10 @@ struct SonaryApp: App {
             PopoverView(model: model)
         } label: {
             MenuBarLabel(model: model)
-                .task { await model.registry.startEnabled() }
+                .task {
+                    model.registerPanelShortcut()
+                    await model.registry.startEnabled()
+                }
         }
         .menuBarExtraStyle(.window)
 

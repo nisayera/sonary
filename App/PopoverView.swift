@@ -17,12 +17,18 @@ struct PopoverView: View {
     }
 
     var body: some View {
-        let panelModules = model.registry.modules.filter {
+        let available = model.registry.modules.filter {
             model.registry.isEnabled($0.id) && $0.makePopoverView() != nil
         }
+        let order = orderedPanelTabs(available: available.map(\.id), order: model.panelTabOrder,
+                                     hidden: model.hiddenPanelTabs)
+        let panelModules = order.compactMap { id in available.first { $0.id == id } }
         let current = currentTab(in: panelModules)
         VStack(alignment: .leading, spacing: PanelMetrics.spacing) {
             header
+            if let version = model.updatedToVersion {
+                whatsNew(version)
+            }
             IconTabBar(tabs: tabs(for: panelModules), selection: Binding(get: { current }, set: { tab = $0 }))
             sectionTitle(for: current, panelModules: panelModules)
                 .padding(.horizontal, 2)
@@ -85,6 +91,28 @@ struct PopoverView: View {
                 }
             }
         }
+    }
+
+    /// Shown once after an update: what version this is, and a way to its release notes.
+    private func whatsNew(_ version: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "sparkles").foregroundStyle(Color.sonaryAccent)
+            Text("Updated to \(version)").font(.system(size: 11, weight: .medium))
+            Spacer()
+            Button {
+                if let url = URL(string: "https://github.com/nisayera/sonary/releases/tag/v\(version)") {
+                    NSWorkspace.shared.open(url)
+                }
+                model.dismissWhatsNew()
+            } label: { Text("What's new") }
+            Button { model.dismissWhatsNew() } label: { Image(systemName: "xmark") }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(Text("Dismiss"))
+        }
+        .controlSize(.small)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .panelCard(padded: false)
     }
 
     private func count(_ on: Int, of total: Int) -> some View {

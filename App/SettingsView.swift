@@ -7,6 +7,8 @@ import SwiftUI
 struct SettingsView: View {
     let model: AppModel
     @State private var query = ""
+    /// Every option's text, read once when the window opens.
+    @State private var optionIndex: [(moduleID: String, text: String)] = []
 
     var body: some View {
         NavigationSplitView {
@@ -27,6 +29,7 @@ struct SettingsView: View {
             detail
         }
         .frame(minWidth: 772, minHeight: 528)
+        .task { optionIndex = model.searchableOptions() }
         .tint(Color.sonaryAccent)
         .environment(\.sonaryAppearance, model.appearance)
     }
@@ -85,11 +88,31 @@ struct SettingsView: View {
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let all = essentials + ModuleCategory.allCases.flatMap(moduleEntries) + appEntries
         let found = all.filter { $0.title.localizedStandardContains(needle) || $0.detail.localizedStandardContains(needle) }
-        if found.isEmpty {
+        let options = optionIndex.filter { $0.text.localizedStandardContains(needle) }.prefix(30)
+        if found.isEmpty && options.isEmpty {
             Text("No results").foregroundStyle(.secondary)
         } else {
             ForEach(found) { sidebarRow($0) }
+            if !options.isEmpty {
+                Section("Options") {
+                    ForEach(Array(options.enumerated()), id: \.offset) { _, option in
+                        optionRow(option)
+                    }
+                }
+            }
         }
+    }
+
+    /// An option found by its text: the text, and the module page it is on.
+    private func optionRow(_ option: (moduleID: String, text: String)) -> some View {
+        let module = model.registry.modules.first { $0.id == option.moduleID }
+        return VStack(alignment: .leading, spacing: 1) {
+            Text(verbatim: option.text).lineLimit(2)
+            if let module {
+                Text(module.title).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .tag(SettingsDestination.module(option.moduleID))
     }
 
     private func sidebarRow(_ entry: Entry) -> some View {
@@ -220,6 +243,41 @@ private struct GeneralPage: View {
                         ForEach(SonaryAppearance.allCases, id: \.self) { Text(appearanceTitle($0)).tag($0) }
                     } label: { EmptyView() }
                         .labelsHidden().frame(width: 150)
+                }
+            }
+            SettingsCard(Text("Menu panel")) {
+                Text("Which module tabs the panel shows, and in what order. The overview always comes first.")
+                    .font(.caption).foregroundStyle(.secondary)
+                let ids = orderedPanelTabs(available: model.registry.modules.filter { $0.makePopoverView() != nil }.map(\.id),
+                                           order: model.panelTabOrder, hidden: [])
+                ForEach(Array(ids.enumerated()), id: \.element) { index, id in
+                    if let module = model.registry.modules.first(where: { $0.id == id }) {
+                        SettingsRow(symbol: module.symbol, title: Text(module.title)) {
+                            Button { model.setPanelTabOrder(movedUp(ids, at: index)) } label: { Image(systemName: "arrow.up") }
+                                .buttonStyle(.borderless)
+                                .disabled(index == 0)
+                                .accessibilityLabel(Text("Move up"))
+                            Toggle(isOn: Binding(get: { !model.hiddenPanelTabs.contains(id) },
+                                                 set: { model.setPanelTab(id, hidden: !$0) })) { Text(module.title) }
+                                .labelsHidden()
+                                .toggleStyle(.switch)
+                                .controlSize(.small)
+                        }
+                    }
+                }
+            }
+            SettingsCard(Text("Your data")) {
+                SettingsRow(symbol: "square.and.arrow.up", title: Text("Export settings"),
+                            caption: Text("A file with every choice you made, to take to another Mac.")) {
+                    Button("Export…") { model.exportSettings() }
+                }
+                SettingsRow(symbol: "square.and.arrow.down", title: Text("Import settings"),
+                            caption: Text("Replaces your settings with the ones in the file and restarts Sonary.")) {
+                    Button("Import…") { model.importSettings() }
+                }
+                SettingsRow(symbol: "trash", title: Text("Remove all data"),
+                            caption: Text("Puts back what Sonary changed, deletes its settings and data, and quits.")) {
+                    Button("Remove…", role: .destructive) { model.removeAllData() }
                 }
             }
             SettingsCard(Text("Introduction")) {
