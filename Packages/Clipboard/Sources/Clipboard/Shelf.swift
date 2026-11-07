@@ -55,12 +55,13 @@ func loadShelfItems(from providers: [NSItemProvider], add: @escaping @Sendable @
     for provider in providers {
         if provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier)
             || provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
-            _ = provider.loadObject(ofClass: URL.self) { url, _ in
+            // These answer on a background thread, so the blocks must not belong to the main actor.
+            _ = provider.loadObject(ofClass: URL.self) { @Sendable url, _ in
                 guard let url, let item = shelfItem(fromURL: url) else { return }
                 Task { @MainActor in add([item]) }
             }
         } else if provider.canLoadObject(ofClass: String.self) {
-            _ = provider.loadObject(ofClass: String.self) { text, _ in
+            _ = provider.loadObject(ofClass: String.self) { @Sendable text, _ in
                 guard let text, let item = shelfItem(fromText: text) else { return }
                 Task { @MainActor in add([item]) }
             }
