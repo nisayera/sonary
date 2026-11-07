@@ -137,7 +137,7 @@ public struct MonitorView: View {
                 }
                 .font(.system(size: 12, weight: .semibold).monospacedDigit())
                 if incoming.count > 1 {
-                    Sparkline(series: incoming, domain: 0...max(1, incoming.max() ?? 1), color: .teal)
+                    NetworkChart(incoming: incoming, outgoing: history.map(\.network.bytesOutPerSec))
                 }
                 Divider()
                 KeyValueRow(title: "Downloaded", value: formatBytes(module.totals.bytesIn))
@@ -396,5 +396,36 @@ private struct KeyValueRow: View {
             Text(verbatim: value).monospacedDigit()
         }
         .font(.system(size: 11))
+    }
+}
+
+/// Down and up over the last minutes, one line each, on the same scale.
+private struct NetworkChart: View {
+    let incoming: [Double]
+    let outgoing: [Double]
+
+    var body: some View {
+        let top = max(1, (incoming + outgoing).max() ?? 1) * 1.1
+        Chart {
+            ForEach(Array(incoming.enumerated()), id: \.offset) { point in
+                AreaMark(x: .value("t", point.offset), y: .value("down", point.element), series: .value("way", "down"))
+                    .foregroundStyle(Color.teal.opacity(0.16))
+                LineMark(x: .value("t", point.offset), y: .value("down", point.element), series: .value("way", "down"))
+                    .interpolationMethod(.monotone)
+                    .lineStyle(StrokeStyle(lineWidth: 1.3))
+                    .foregroundStyle(Color.teal)
+            }
+            ForEach(Array(outgoing.enumerated()), id: \.offset) { point in
+                LineMark(x: .value("t", point.offset), y: .value("up", point.element), series: .value("way", "up"))
+                    .interpolationMethod(.monotone)
+                    .lineStyle(StrokeStyle(lineWidth: 1.1, dash: [3, 2]))
+                    .foregroundStyle(Color.sonaryAccent)
+            }
+        }
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartYScale(domain: 0...top)
+        .frame(height: 34)
+        .accessibilityHidden(true)
     }
 }
