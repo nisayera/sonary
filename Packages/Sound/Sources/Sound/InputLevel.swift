@@ -29,18 +29,33 @@ final class InputLevelReader {
         let engine = AVAudioEngine()
         let input = engine.inputNode
         let format = input.inputFormat(forBus: 0)
-        guard format.channelCount > 0 else { return }
-        input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
-            guard let channel = buffer.floatChannelData?[0] else { return }
-            let samples = Array(UnsafeBufferPointer(start: channel, count: Int(buffer.frameLength)))
-            let value = inputBar(rms: rootMeanSquare(samples))
+        guard format.channelCount > 0, format.sampleRate > 0 else { return }
+        let tap = Self.levelTap { [weak self] value in
             Task { @MainActor [weak self] in
                 self?.level = value
                 self?.onChange?(value)
             }
         }
-        do { try engine.start() } catch { return }
+        input.installTap(onBus: 0, bufferSize: 1024, format: format, block: tap)
+        do {
+            try engine.start()
+        } catch {
+            input.removeTap(onBus: 0)
+            return
+        }
         self.engine = engine
+    }
+
+    /// The block Core Audio calls with each buffer, on its own audio thread. It is made
+    /// here, outside the main actor, on purpose: a block written inside `start()` would
+    /// belong to the main actor, Swift checks that when it runs, and the app stopped the
+    /// moment the first buffer arrived.
+    nonisolated private static func levelTap(_ report: @escaping @Sendable (Double) -> Void) -> AVAudioNodeTapBlock {
+        { buffer, _ in
+            guard let channel = buffer.floatChannelData?[0], buffer.frameLength > 0 else { return }
+            let samples = Array(UnsafeBufferPointer(start: channel, count: Int(buffer.frameLength)))
+            report(inputBar(rms: rootMeanSquare(samples)))
+        }
     }
 
     func stop() {

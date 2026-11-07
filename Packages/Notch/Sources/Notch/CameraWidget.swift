@@ -16,7 +16,8 @@ public final class NotchCamera {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized: open()
         case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
+            // The answer comes on a background thread.
+            AVCaptureDevice.requestAccess(for: .video) { @Sendable granted in
                 Task { @MainActor [weak self] in
                     if granted { self?.open() } else { self?.isDenied = true }
                 }
