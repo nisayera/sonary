@@ -21,4 +21,5 @@ public final class KeyboardModule: SonaryModule {
     public func stop() async { model.stop() }
 
     public func makeSettingsView() -> AnyView { AnyView(KeyboardSettingsView(model: model)) }
+    public var resourceBundle: Bundle? { .module }
 }

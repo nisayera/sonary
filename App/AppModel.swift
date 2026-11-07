@@ -35,8 +35,14 @@ final class AppModel {
     private(set) var appearance: SonaryAppearance
     /// The page the settings window shows; the panel sets it before opening the window.
     var settingsPage: SettingsDestination = .general
+    /// The module tabs of the menu panel the user placed first, by module ID.
+    private(set) var panelTabOrder: [String]
+    /// Module tabs the user keeps out of the menu panel.
+    private(set) var hiddenPanelTabs: Set<String>
+    /// Set after an update until the user has looked at what changed or dismissed it.
+    private(set) var updatedToVersion: String?
 
-    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard, startUpdater: Bool = true) {
         let broker = PermissionBroker()
@@ -105,6 +111,27 @@ final class AppModel {
                                        missingPermissionText: { missingPermissionText($0) })
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
         self.appearance = SonaryAppearance.stored(in: defaults)
+        self.panelTabOrder = defaults.stringArray(forKey: "panel.tabs.order") ?? []
+        self.hiddenPanelTabs = Set(defaults.stringArray(forKey: "panel.tabs.hidden") ?? [])
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        let seen = defaults.string(forKey: "app.lastVersion")
+        // A first launch has nothing new to tell; only a change of version does.
+        self.updatedToVersion = seen != nil && seen != version && !version.isEmpty ? version : nil
+        defaults.set(version, forKey: "app.lastVersion")
+    }
+
+    func setPanelTabOrder(_ order: [String]) {
+        panelTabOrder = order
+        defaults.set(order, forKey: "panel.tabs.order")
+    }
+
+    func setPanelTab(_ id: String, hidden: Bool) {
+        if hidden { hiddenPanelTabs.insert(id) } else { hiddenPanelTabs.remove(id) }
+        defaults.set(Array(hiddenPanelTabs).sorted(), forKey: "panel.tabs.hidden")
+    }
+
+    func dismissWhatsNew() {
+        updatedToVersion = nil
     }
 
     /// True while the app is the host of the unit-test bundle (Sparkle must not start then).

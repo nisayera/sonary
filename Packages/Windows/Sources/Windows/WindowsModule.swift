@@ -21,4 +21,5 @@ public final class WindowsModule: SonaryModule {
     public func stop() async { model.stop() }
 
     public func makeSettingsView() -> AnyView { AnyView(WindowsSettingsView(model: model)) }
+    public var resourceBundle: Bundle? { .module }
 }

@@ -30,5 +30,6 @@ public final class ClipboardModule: SonaryModule {
     }
 
     public func makeSettingsView() -> AnyView { AnyView(ClipboardSettingsView(model: model)) }
+    public var resourceBundle: Bundle? { .module }
     public func makePopoverView() -> AnyView? { AnyView(ClipboardPopoverView(model: model)) }
 }

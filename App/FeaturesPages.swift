@@ -36,6 +36,14 @@ struct FeaturesPage: View {
                     }
                     .disabled(on == 0)
                 }
+                HStack(spacing: 6) {
+                    Text("Start with").font(.caption).foregroundStyle(.secondary)
+                    ForEach(StarterBundle.allCases) { bundle in
+                        Button(bundle.title) { Task { await model.apply(bundle) } }
+                            .controlSize(.small)
+                    }
+                    Spacer()
+                }
             }
             ForEach(ModuleCategory.allCases, id: \.self) { category in
                 let members = category.moduleIDs.compactMap { id in

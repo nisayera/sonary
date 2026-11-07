@@ -180,5 +180,6 @@ public final class MonitorModule: SonaryModule {
     }
 
     public func makeSettingsView() -> AnyView { AnyView(MonitorSettingsView(module: self)) }
+    public var resourceBundle: Bundle? { .module }
     public func makePopoverView() -> AnyView? { AnyView(MonitorView(module: self)) }
 }

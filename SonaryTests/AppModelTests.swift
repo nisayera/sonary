@@ -38,3 +38,18 @@ struct AppModelTests {
         #expect(AppModel(defaults: defaults, startUpdater: false).onboardingCompleted)
     }
 }
+
+@MainActor
+struct AppDataTests {
+    @Test func theUpdaterAndAppKitKeysStayOutOfAnExport() {
+        #expect(!isTransferableSettingsKey("SUEnableAutomaticChecks"))
+        #expect(!isTransferableSettingsKey("NSWindow Frame SonaryScratchpad"))
+        #expect(!isTransferableSettingsKey("app.lastVersion"))
+        #expect(isTransferableSettingsKey("mouse.settings"))
+    }
+
+    @Test func everythingTurnsOnEveryModule() {
+        #expect(Set(StarterBundle.everything.moduleIDs).count == 10)
+        #expect(movedUp(["a", "b", "c"], at: 1) == ["b", "a", "c"])
+    }
+}

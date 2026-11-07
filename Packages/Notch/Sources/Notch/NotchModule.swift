@@ -37,4 +37,6 @@ public final class NotchModule: SonaryModule {
             self.window?.placeOnScreen()
         })
     }
+
+    public var resourceBundle: Bundle? { .module }
 }
