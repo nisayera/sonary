@@ -191,6 +191,34 @@ struct ToolsSettingsView: View {
                     .labelsHidden().frame(width: 220)
             }
         }
+        SettingsCard(Text("Quick panel", bundle: .module)) {
+            Text("A small palette of your favourite tools next to the pointer. Give it a shortcut on the Shortcuts page.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(QuickAction.allCases) { action in
+                        let isOn = model.settings.quickPanelActions.contains(action)
+                        Button {
+                            model.update { settings in
+                                settings.quickPanelActions.removeAll { $0 == action }
+                                if !isOn { settings.quickPanelActions.append(action) }
+                            }
+                        } label: {
+                            Image(systemName: action.symbol)
+                                .frame(width: 28, height: 24)
+                                .background(isOn ? Color.sonaryAccent.opacity(0.3) : Color.secondary.opacity(0.12),
+                                            in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                        .help(Text(quickActionTitle(action), bundle: .module))
+                        .accessibilityLabel(Text(quickActionTitle(action), bundle: .module))
+                    }
+                }
+            }
+            Button { model.toggleQuickPanel() } label: { Text("Try it", bundle: .module) }
+                .buttonStyle(.borderless)
+        }
         SettingsCard(Text("Cleaning mode", bundle: .module)) {
             SettingsToggleRow(symbol: "keyboard.badge.ellipsis", title: Text("Also block the system keys", bundle: .module),
                               caption: Text("Brightness, volume, media and Mission Control keys do nothing while you wipe. Needs Accessibility.",

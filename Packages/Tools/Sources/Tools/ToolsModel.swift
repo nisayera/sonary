@@ -15,6 +15,9 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var radialProfiles: [RadialProfile] = []
     /// Apps, files and shortcuts on wedges of the first ring, after its actions.
     public var radialLaunches: [RadialLaunch] = []
+    /// The tools on the quick panel, in this order.
+    public var quickPanelActions: [QuickAction] = [.screenshot, .textFromScreen, .colorPicker, .pinScreenshot,
+                                                   .darkMode, .lockScreen, .cleaningMode, .commandBar]
     public var colorFormat: ColorFormat = .hex
     public var scratchpadTabs: [ScratchpadTab] = []
     /// Use Sonary's own region selector, with a magnifier, instead of the system one.
@@ -78,6 +81,7 @@ public final class ToolsModel {
     @ObservationIgnored private var running = false
     @ObservationIgnored private let triggerTap = SnippetTriggerTap()
     @ObservationIgnored private let scratchpadWindow = ScratchpadWindowController()
+    @ObservationIgnored private let quickPanel = QuickPanelController()
     /// Set when the trigger watcher could not start, which means Accessibility is missing.
     public private(set) var snippetTriggersNeedAccessibility = false
 
@@ -107,6 +111,12 @@ public final class ToolsModel {
         selector.close()
         editor.close()
         scratchpadWindow.close()
+        quickPanel.close()
+    }
+
+    /// The palette of favourite tools next to the pointer, or closes it when it is open.
+    public func toggleQuickPanel() {
+        quickPanel.toggle(actions: settings.quickPanelActions) { [weak self] action in self?.run(action) }
     }
 
     /// Opens the notes in a floating window of their own.
@@ -234,6 +244,9 @@ public final class ToolsModel {
         ShortcutDefinition(id: "tools.scratchpad", title: String(localized: "Scratchpad in a window", bundle: .module),
                            group: String(localized: "Tools", bundle: .module),
                            defaultCombo: .none),
+        ShortcutDefinition(id: "tools.quickPanel", title: String(localized: "Quick panel", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: .none),
     ] }
 
     private func applyShortcuts() {
@@ -248,6 +261,7 @@ public final class ToolsModel {
         shortcuts.bind("tools.radialMenu") { [weak self] in self?.showRadialMenu() }
         shortcuts.bind("tools.screenRecording") { [weak self] in self?.toggleRecording() }
         shortcuts.bind("tools.scratchpad") { [weak self] in self?.showScratchpadWindow() }
+        shortcuts.bind("tools.quickPanel") { [weak self] in self?.toggleQuickPanel() }
     }
 
     // MARK: Tools

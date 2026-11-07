@@ -11,6 +11,16 @@
         }
       }
     },
+    "A small palette of your favourite tools next to the pointer. Give it a shortcut on the Shortcuts page.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine kleine Palette deiner Lieblingswerkzeuge neben dem Zeiger. Gib ihr auf der Kurzbefehl-Seite einen Kurzbefehl."
+          }
+        }
+      }
+    },
     "Add a file…": {
       "localizations": {
         "de": {
@@ -917,6 +927,16 @@
         }
       }
     },
+    "Quick panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellpalette"
+          }
+        }
+      }
+    },
     "Radial menu": {
       "localizations": {
         "de": {
@@ -1407,6 +1427,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Video kürzen …"
+          }
+        }
+      }
+    },
+    "Try it": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausprobieren"
           }
         }
       }
