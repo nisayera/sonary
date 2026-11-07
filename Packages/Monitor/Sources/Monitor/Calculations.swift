@@ -59,3 +59,87 @@ public func networkRates(previous: NetworkCounters, current: NetworkCounters, in
         bytesOutPerSec: delta(current.bytesOut, previous.bytesOut) / interval
     )
 }
+
+/// The load of each core between two readings, 0...1 per core. Empty when the core count
+/// changed in between.
+public func perCoreUsage(previous: [CPUTicks], current: [CPUTicks]) -> [Double] {
+    guard previous.count == current.count else { return [] }
+    return zip(previous, current).map { cpuUsage(previous: $0, current: $1) }
+}
+
+public struct DiskCounters: Sendable, Equatable {
+    public var bytesRead: UInt64
+    public var bytesWritten: UInt64
+
+    public init(bytesRead: UInt64, bytesWritten: UInt64) {
+        self.bytesRead = bytesRead
+        self.bytesWritten = bytesWritten
+    }
+}
+
+public struct DiskRates: Sendable, Equatable {
+    public var readPerSec: Double
+    public var writePerSec: Double
+
+    public init(readPerSec: Double, writePerSec: Double) {
+        self.readPerSec = readPerSec
+        self.writePerSec = writePerSec
+    }
+
+    public static let zero = DiskRates(readPerSec: 0, writePerSec: 0)
+}
+
+/// Bytes read and written per second between two readings; resets yield 0.
+public func diskRates(previous: DiskCounters, current: DiskCounters, interval: TimeInterval) -> DiskRates {
+    guard interval > 0 else { return .zero }
+    func delta(_ now: UInt64, _ before: UInt64) -> Double { now >= before ? Double(now - before) : 0 }
+    return DiskRates(readPerSec: delta(current.bytesRead, previous.bytesRead) / interval,
+                     writePerSec: delta(current.bytesWritten, previous.bytesWritten) / interval)
+}
+
+/// Cycle count, health and power draw from the battery's own registry entry
+/// (AppleSmartBattery). Health is the full charge now against the design capacity; the
+/// draw is positive while charging and negative on battery. Missing values stay nil.
+public func batteryDetails(_ properties: [String: Any]) -> (cycles: Int?, health: Double?, watts: Double?) {
+    let cycles = (properties["CycleCount"] as? NSNumber)?.intValue
+    var health: Double?
+    if let design = (properties["DesignCapacity"] as? NSNumber)?.doubleValue, design > 0,
+       let full = ((properties["AppleRawMaxCapacity"] ?? properties["NominalChargeCapacity"]) as? NSNumber)?.doubleValue,
+       full > 0 {
+        health = min(1, full / design)
+    }
+    var watts: Double?
+    if let millivolts = (properties["Voltage"] as? NSNumber)?.doubleValue,
+       let milliamps = ((properties["InstantAmperage"] ?? properties["Amperage"]) as? NSNumber)?.int64Value {
+        watts = millivolts * Double(milliamps) / 1_000_000
+    }
+    return (cycles, health, watts)
+}
+
+/// A USB device that is plugged in.
+public struct USBDevice: Sendable, Equatable, Identifiable {
+    public var name: String
+    public var vendor: String?
+    public var id: String
+
+    public init(name: String, vendor: String?, id: String) {
+        self.name = name
+        self.vendor = vendor
+        self.id = id
+    }
+}
+
+/// Turns IOKit USB device properties into named devices, without the hubs and the Mac's
+/// own internal parts that have no name.
+public func parseUSBDevices(_ services: [[String: Any]]) -> [USBDevice] {
+    var seen = Set<String>()
+    return services.compactMap { service in
+        let name = (service["USB Product Name"] as? String) ?? (service["kUSBProductString"] as? String)
+        guard let name, !name.isEmpty, !name.localizedCaseInsensitiveContains("hub") else { return nil }
+        let vendor = (service["USB Vendor Name"] as? String) ?? (service["kUSBVendorString"] as? String)
+        let location = (service["locationID"] as? NSNumber)?.stringValue ?? name
+        guard seen.insert(location).inserted else { return nil }
+        return USBDevice(name: name, vendor: vendor, id: location)
+    }
+    .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+}

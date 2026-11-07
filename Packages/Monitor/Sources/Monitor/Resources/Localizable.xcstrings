@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld cores": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Kerne"
+          }
+        }
+      }
+    },
     "A chip temperature is unusually high.": {
       "localizations": {
         "de": {
@@ -17,6 +27,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Warnungen"
+          }
+        }
+      }
+    },
+    "Bars instead of numbers": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balken statt Zahlen"
           }
         }
       }
@@ -61,6 +81,36 @@
         }
       }
     },
+    "CPU, memory and battery as a small bar.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU, Speicher und Akku als kleiner Balken."
+          }
+        }
+      }
+    },
+    "Charge cycles": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ladezyklen"
+          }
+        }
+      }
+    },
+    "Charging with": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lädt mit"
+          }
+        }
+      }
+    },
     "Connection speed": {
       "extractionState": "manual",
       "localizations": {
@@ -82,12 +132,42 @@
         }
       }
     },
+    "Disk activity": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Festplattenaktivität"
+          }
+        }
+      }
+    },
     "Downloaded": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Empfangen"
+          }
+        }
+      }
+    },
+    "Drawing": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbraucht"
+          }
+        }
+      }
+    },
+    "Each value as its own item": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeden Wert als eigenes Symbol"
           }
         }
       }
@@ -128,6 +208,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "GPU"
+          }
+        }
+      }
+    },
+    "Health": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zustand"
           }
         }
       }
@@ -283,6 +373,26 @@
         }
       }
     },
+    "Read": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gelesen"
+          }
+        }
+      }
+    },
+    "Separate menu bar items you can rearrange with ⌘ and drag.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einzelne Menüleistensymbole, die du mit ⌘ und Ziehen umsortieren kannst."
+          }
+        }
+      }
+    },
     "Show values in the menu bar": {
       "localizations": {
         "de": {
@@ -333,6 +443,16 @@
         }
       }
     },
+    "USB devices": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USB-Geräte"
+          }
+        }
+      }
+    },
     "Uploaded": {
       "localizations": {
         "de": {
@@ -349,6 +469,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Auslastung"
+          }
+        }
+      }
+    },
+    "Written": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geschrieben"
           }
         }
       }
