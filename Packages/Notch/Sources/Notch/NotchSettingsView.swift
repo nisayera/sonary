@@ -15,6 +15,30 @@ struct NotchSettingsView: View {
                 )
             }
         }
+        if model.settings.widgets.count > 1 {
+            SettingsCard(Text("Order in the island", bundle: .module)) {
+                ForEach(Array(model.settings.widgets.enumerated()), id: \.element) { index, widget in
+                    SettingsRow(symbol: widget.symbol, title: Text(widgetTitle(widget), bundle: .module)) {
+                        Button { model.moveWidget(widget, forward: true) } label: { Image(systemName: "arrow.up") }
+                            .buttonStyle(.borderless)
+                            .disabled(index == 0)
+                            .accessibilityLabel(Text("Move up", bundle: .module))
+                        Button { model.moveWidget(widget, forward: false) } label: { Image(systemName: "arrow.down") }
+                            .buttonStyle(.borderless)
+                            .disabled(index == model.settings.widgets.count - 1)
+                            .accessibilityLabel(Text("Move down", bundle: .module))
+                    }
+                }
+            }
+        }
+        SettingsCard(Text("Batteries", bundle: .module)) {
+            SettingsToggleRow(
+                symbol: "battery.25percent",
+                title: Text("Warn when an accessory battery is low", bundle: .module),
+                caption: Text("A notice once a mouse, keyboard or headphones fall to 20 percent. Needs the batteries widget.", bundle: .module),
+                isOn: Binding(get: { model.settings.lowBatteryWarning }, set: { model.setLowBatteryWarning($0) })
+            )
+        }
         SettingsCard(Text("Display", bundle: .module)) {
             SettingsToggleRow(
                 symbol: "display",
@@ -40,6 +64,8 @@ struct NotchSettingsView: View {
         case .batteries: Text("Mouse, keyboard, trackpad and headphones.", bundle: .module)
         case .shelf: Text("Park files on the notch and drag them out again.", bundle: .module)
         case .camera: Text("A live picture from the front camera, for checking yourself before a call.", bundle: .module)
+        case .controls: Text("Volume and brightness sliders, while Sound and Display are on.", bundle: .module)
+        case .notes: Text("The scratchpad's current note, while Tools is on.", bundle: .module)
         }
     }
 }

@@ -1,12 +1,32 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ is low": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ist fast leer"
+          }
+        }
+      }
+    },
     "%lld min": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld Min."
+          }
+        }
+      }
+    },
+    "%lld percent left. Time to charge it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch %lld Prozent. Zeit zum Aufladen."
           }
         }
       }
@@ -18,6 +38,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ein Livebild der Frontkamera, um vor einem Anruf nach dir selbst zu sehen."
+          }
+        }
+      }
+    },
+    "A notice once a mouse, keyboard or headphones fall to 20 percent. Needs the batteries widget.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Mitteilung, sobald Maus, Tastatur oder Kopfhörer auf 20 Prozent fallen. Braucht das Akkus-Widget."
           }
         }
       }
@@ -53,12 +83,32 @@
         }
       }
     },
+    "Back to the month": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurück zum Monat"
+          }
+        }
+      }
+    },
     "Batteries": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Akkus"
+          }
+        }
+      }
+    },
+    "Brightness": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helligkeit"
           }
         }
       }
@@ -91,6 +141,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ablage leeren"
+          }
+        }
+      }
+    },
+    "Controls": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regler"
           }
         }
       }
@@ -136,6 +196,16 @@
         }
       }
     },
+    "Month": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monat"
+          }
+        }
+      }
+    },
     "Mouse, keyboard, trackpad and headphones.": {
       "localizations": {
         "de": {
@@ -146,12 +216,32 @@
         }
       }
     },
+    "Move down": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach unten"
+          }
+        }
+      }
+    },
     "Move the pointer onto the island to open it. Click it to keep it open, click anywhere else to close it.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Bewege den Zeiger auf die Insel, um sie zu öffnen. Klicke sie an, damit sie offen bleibt, und klicke woanders hin, um sie zu schließen."
+          }
+        }
+      }
+    },
+    "Move up": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach oben"
           }
         }
       }
@@ -172,6 +262,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Musik und Spotify, mit Abspielen, Pause und Überspringen."
+          }
+        }
+      }
+    },
+    "Next month": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächster Monat"
           }
         }
       }
@@ -226,12 +326,32 @@
         }
       }
     },
+    "Notes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notizen"
+          }
+        }
+      }
+    },
     "Nothing is playing": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Es läuft nichts"
+          }
+        }
+      }
+    },
+    "Nothing on that day": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An dem Tag steht nichts an"
           }
         }
       }
@@ -243,6 +363,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Öffnen"
+          }
+        }
+      }
+    },
+    "Order in the island": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reihenfolge in der Insel"
           }
         }
       }
@@ -274,6 +404,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abspielen"
+          }
+        }
+      }
+    },
+    "Previous month": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorheriger Monat"
           }
         }
       }
@@ -371,6 +511,16 @@
         }
       }
     },
+    "The scratchpad's current note, while Tools is on.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die aktuelle Notiz aus dem Notizblock, solange Werkzeuge an ist."
+          }
+        }
+      }
+    },
     "Timer": {
       "localizations": {
         "de": {
@@ -381,12 +531,42 @@
         }
       }
     },
+    "Today": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute"
+          }
+        }
+      }
+    },
     "Today's remaining events. Asks for calendar access.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Die restlichen Termine von heute. Fragt nach Kalenderzugriff."
+          }
+        }
+      }
+    },
+    "Turn on Sound or Display to control them here": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte Ton oder Anzeige ein, um sie hier zu steuern"
+          }
+        }
+      }
+    },
+    "Turn on Tools to keep notes here": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte Werkzeuge ein, um hier Notizen zu führen"
           }
         }
       }
@@ -407,6 +587,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bedienung"
+          }
+        }
+      }
+    },
+    "Volume": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lautstärke"
+          }
+        }
+      }
+    },
+    "Volume and brightness sliders, while Sound and Display are on.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regler für Lautstärke und Helligkeit, solange Ton und Anzeige an sind."
+          }
+        }
+      }
+    },
+    "Warn when an accessory battery is low": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warnen, wenn ein Zubehör-Akku fast leer ist"
           }
         }
       }

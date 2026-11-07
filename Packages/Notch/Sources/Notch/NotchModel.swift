@@ -1,5 +1,29 @@
 import AppKit
 import Observation
+import UserNotifications
+
+/// Ways into other parts of Sonary, given by the app. The island shows a control only when
+/// its way in is there, so it works whichever modules are on.
+public struct NotchControls {
+    public var volume: (@MainActor () -> Double?)?
+    public var setVolume: (@MainActor (Double) -> Void)?
+    public var brightness: (@MainActor () -> Double?)?
+    public var setBrightness: (@MainActor (Double) -> Void)?
+    /// The scratchpad's current note.
+    public var notes: (@MainActor () -> String)?
+    public var setNotes: (@MainActor (String) -> Void)?
+
+    public init(volume: (@MainActor () -> Double?)? = nil, setVolume: (@MainActor (Double) -> Void)? = nil,
+                brightness: (@MainActor () -> Double?)? = nil, setBrightness: (@MainActor (Double) -> Void)? = nil,
+                notes: (@MainActor () -> String)? = nil, setNotes: (@MainActor (String) -> Void)? = nil) {
+        self.volume = volume
+        self.setVolume = setVolume
+        self.brightness = brightness
+        self.setBrightness = setBrightness
+        self.notes = notes
+        self.setNotes = setNotes
+    }
+}
 
 /// Everything the island shows, plus its open/closed state.
 @MainActor
@@ -19,6 +43,9 @@ public final class NotchModel {
     public let downloads = DownloadsWatcher()
     public let shelf = FileShelf()
     public let camera = NotchCamera()
+    @ObservationIgnored public var controls = NotchControls()
+    /// Accessories already warned about, so a low battery warns once until it is charged.
+    @ObservationIgnored private var warnedBatteries: Set<String> = []
 
     /// Called when the island opens or closes, so the window can change size.
     @ObservationIgnored var presentationChanged: ((NotchPresentation) -> Void)?
@@ -75,6 +102,32 @@ public final class NotchModel {
         store.save(settings)
     }
 
+    public func moveWidget(_ widget: NotchWidget, forward: Bool) {
+        settings.move(widget, forward: forward)
+        store.save(settings)
+    }
+
+    public func setLowBatteryWarning(_ on: Bool) {
+        settings.lowBatteryWarning = on
+        store.save(settings)
+        if on { Task { _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) } }
+    }
+
+    /// A notice for each accessory that just fell to 20 %.
+    private func warnAboutLowBatteries() {
+        let result = lowBatteryAlerts(batteries, warned: warnedBatteries)
+        warnedBatteries = result.warned
+        guard settings.lowBatteryWarning else { return }
+        for battery in result.alerts {
+            let content = UNMutableNotificationContent()
+            content.title = String(localized: "\(battery.name) is low", bundle: .module)
+            content.body = String(localized: "\(battery.percent) percent left. Time to charge it.", bundle: .module)
+            content.sound = .default
+            let request = UNNotificationRequest(identifier: "sonary.battery.\(battery.name)", content: content, trigger: nil)
+            UNUserNotificationCenter.current().add(request)
+        }
+    }
+
     private func applyWidgets() {
         if settings.isOn(.music) { music.start() } else { music.stop() }
         if settings.isOn(.downloads) { downloads.start() } else { downloads.stop() }
@@ -85,6 +138,7 @@ public final class NotchModel {
                 while !Task.isCancelled {
                     let read = AccessoryBatteryReader.read()
                     self?.batteries = read
+                    self?.warnAboutLowBatteries()
                     try? await Task.sleep(for: .seconds(60))
                 }
             }

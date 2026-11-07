@@ -57,6 +57,8 @@ struct NotchView: View {
                     case .batteries: BatteriesWidget(batteries: model.batteries)
                     case .shelf: ShelfWidget(shelf: model.shelf)
                     case .camera: NotchCameraView(camera: model.camera)
+                    case .controls: ControlsWidget(controls: model.controls)
+                    case .notes: NotesWidget(controls: model.controls)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -74,6 +76,8 @@ func widgetTitle(_ widget: NotchWidget) -> LocalizedStringKey {
     case .batteries: "Batteries"
     case .shelf: "Shelf"
     case .camera: "Camera"
+    case .controls: "Controls"
+    case .notes: "Notes"
     }
 }
 
@@ -129,8 +133,111 @@ private struct MusicWidget: View {
 
 private struct CalendarWidget: View {
     let source: CalendarSource
+    @State private var showsMonth = false
+    @State private var month = Date()
+    @State private var day: Date?
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if source.hasAccess {
+                Picker(selection: $showsMonth) {
+                    Text("Today", bundle: .module).tag(false)
+                    Text("Month", bundle: .module).tag(true)
+                } label: { EmptyView() }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .controlSize(.mini)
+                    .frame(width: 140)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            if showsMonth, source.hasAccess {
+                if let day {
+                    dayView(day)
+                } else {
+                    monthView
+                }
+            } else {
+                today
+            }
+        }
+    }
+
+    private var monthView: some View {
+        let calendar = Calendar.current
+        let busy = source.eventDays(inMonthOf: month)
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
+        return VStack(spacing: 3) {
+            HStack {
+                Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
+                    .accessibilityLabel(Text("Previous month", bundle: .module))
+                Spacer()
+                Text(month, format: .dateTime.month(.wide).year()).font(.caption.weight(.semibold))
+                Spacer()
+                Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
+                    .accessibilityLabel(Text("Next month", bundle: .module))
+            }
+            .buttonStyle(.plain)
+            LazyVGrid(columns: columns, spacing: 1) {
+                ForEach(Array(weekdaySymbols().enumerated()), id: \.offset) { _, symbol in
+                    Text(verbatim: symbol).font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                }
+                ForEach(Array(monthGrid(for: month).enumerated()), id: \.offset) { _, date in
+                    if let date {
+                        let number = calendar.component(.day, from: date)
+                        Button { day = date } label: {
+                            VStack(spacing: 0) {
+                                Text(verbatim: "\(number)")
+                                    .font(.system(size: 10, weight: calendar.isDateInToday(date) ? .bold : .regular))
+                                    .foregroundStyle(calendar.isDateInToday(date) ? Color.sonaryAccent : .primary)
+                                Circle().fill(busy.contains(number) ? Color.sonaryAccent : .clear).frame(width: 3, height: 3)
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Color.clear.frame(height: 12)
+                    }
+                }
+            }
+        }
+    }
+
+    private func dayView(_ date: Date) -> some View {
+        let items = source.events(on: date)
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Button { day = nil } label: { Image(systemName: "chevron.left") }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("Back to the month", bundle: .module))
+                Text(date, format: .dateTime.weekday(.wide).day().month()).font(.caption.weight(.semibold))
+            }
+            if items.isEmpty {
+                Text("Nothing on that day", bundle: .module).font(.callout).foregroundStyle(.secondary)
+            }
+            ForEach(items.prefix(5)) { item in eventRow(item) }
+        }
+    }
+
+    private func shiftMonth(_ months: Int) {
+        month = Calendar.current.date(byAdding: .month, value: months, to: month) ?? month
+    }
+
+    private func eventRow(_ item: CalendarItem) -> some View {
+        HStack(spacing: 10) {
+            if item.isAllDay {
+                Text("All day", bundle: .module).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    .frame(width: 58, alignment: .leading)
+            } else {
+                Text(item.start, style: .time).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    .frame(width: 58, alignment: .leading)
+            }
+            Text(item.title).lineLimit(1)
+            Spacer(minLength: 0)
+        }
+    }
+
+    @ViewBuilder
+    private var today: some View {
         if !source.hasAccess {
             VStack(spacing: 8) {
                 Text("Sonary needs access to your calendars.", bundle: .module).font(.callout).foregroundStyle(.secondary)
@@ -141,19 +248,7 @@ private struct CalendarWidget: View {
             EmptyWidget(symbol: "calendar", text: "No more events today")
         } else {
             VStack(alignment: .leading, spacing: 6) {
-                ForEach(source.items) { item in
-                    HStack(spacing: 10) {
-                        if item.isAllDay {
-                            Text("All day", bundle: .module).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                                .frame(width: 58, alignment: .leading)
-                        } else {
-                            Text(item.start, style: .time).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                                .frame(width: 58, alignment: .leading)
-                        }
-                        Text(item.title).lineLimit(1)
-                        Spacer(minLength: 0)
-                    }
-                }
+                ForEach(source.items) { item in eventRow(item) }
             }
             .onAppear { source.refresh() }
         }
@@ -308,5 +403,59 @@ private struct ShelfWidget: View {
             return true
         } isTargeted: { isTargeted = $0 }
         .task { shelf.prune() }
+    }
+}
+
+/// Volume and brightness in the island, where the sound and display modules give a way in.
+private struct ControlsWidget: View {
+    let controls: NotchControls
+
+    var body: some View {
+        let volume = controls.volume?()
+        let brightness = controls.brightness?()
+        if volume == nil, brightness == nil {
+            EmptyWidget(symbol: "slider.horizontal.3", text: "Turn on Sound or Display to control them here")
+        } else {
+            VStack(spacing: 14) {
+                if let volume, let set = controls.setVolume {
+                    slider(value: volume, low: "speaker.fill", high: "speaker.wave.3.fill",
+                           label: Text("Volume", bundle: .module), set: set)
+                }
+                if let brightness, let set = controls.setBrightness {
+                    slider(value: brightness, low: "sun.min", high: "sun.max.fill",
+                           label: Text("Brightness", bundle: .module), set: set)
+                }
+            }
+            .frame(maxHeight: .infinity)
+        }
+    }
+
+    private func slider(value: Double, low: String, high: String, label: Text,
+                        set: @escaping @MainActor (Double) -> Void) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: low).foregroundStyle(.secondary).frame(width: 18)
+            Slider(value: Binding(get: { value }, set: { set($0) }), in: 0...1)
+                .tint(Color.sonaryAccent)
+            Image(systemName: high).foregroundStyle(.secondary).frame(width: 22)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(label)
+    }
+}
+
+/// The scratchpad's current note, to read and change without leaving the app in front.
+private struct NotesWidget: View {
+    let controls: NotchControls
+
+    var body: some View {
+        if let notes = controls.notes, let setNotes = controls.setNotes {
+            TextEditor(text: Binding(get: { notes() }, set: { setNotes($0) }))
+                .font(.callout)
+                .scrollContentBackground(.hidden)
+                .padding(6)
+                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        } else {
+            EmptyWidget(symbol: "note.text", text: "Turn on Tools to keep notes here")
+        }
     }
 }

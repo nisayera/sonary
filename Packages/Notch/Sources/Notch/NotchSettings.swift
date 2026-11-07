@@ -2,7 +2,7 @@ import Foundation
 import SonaryCore
 
 public enum NotchWidget: String, Codable, CaseIterable, Sendable {
-    case music, calendar, timer, downloads, batteries, shelf, camera
+    case music, calendar, timer, downloads, batteries, shelf, camera, controls, notes
 
     public var symbol: String {
         switch self {
@@ -13,6 +13,8 @@ public enum NotchWidget: String, Codable, CaseIterable, Sendable {
         case .batteries: "battery.75percent"
         case .shelf: "tray.full"
         case .camera: "video"
+        case .controls: "slider.horizontal.3"
+        case .notes: "note.text"
         }
     }
 }
@@ -21,14 +23,25 @@ public struct NotchSettings: Codable, Equatable, Sendable {
     /// Calendar starts off because it asks for access.
     public var widgets: [NotchWidget] = [.music, .timer, .downloads, .batteries]
     public var showOnScreensWithoutNotch = true
+    /// A notice once an accessory's battery falls to 20 %.
+    public var lowBatteryWarning = true
 
     public init() {}
 
     public func isOn(_ widget: NotchWidget) -> Bool { widgets.contains(widget) }
 
+    /// Turning a widget on puts it last, so the order the user chose stays.
     public mutating func set(_ widget: NotchWidget, on: Bool) {
         widgets.removeAll { $0 == widget }
-        if on { widgets = NotchWidget.allCases.filter { $0 == widget || widgets.contains($0) } }
+        if on { widgets.append(widget) }
+    }
+
+    /// Moves a widget one place towards the front, or the back.
+    public mutating func move(_ widget: NotchWidget, forward: Bool) {
+        guard let index = widgets.firstIndex(of: widget) else { return }
+        let target = forward ? index - 1 : index + 1
+        guard widgets.indices.contains(target) else { return }
+        widgets.swapAt(index, target)
     }
 }
 
