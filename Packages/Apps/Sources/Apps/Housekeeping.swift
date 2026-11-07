@@ -69,6 +69,21 @@ public struct AppsSettings: Codable, Equatable, Sendable {
     public var watchedFolders: [WatchedFolder] = []
     /// After installing from a disk image, the image file goes to the Trash too.
     public var trashDiskImageAfterInstall = false
+    /// Apps "Quit all" leaves running, by bundle ID.
+    public var keepRunningOnQuitAll: [String] = []
 
     public init() {}
+}
+
+/// The apps "Quit all" ends: every running app except the ones kept running, and the one in
+/// front when `keepFront` is set. Apps are given as process ID and bundle ID.
+public func appsToQuit(running: [(pid: Int32, bundleID: String?)], front: Int32?, keepFront: Bool,
+                       keepRunning: [String]) -> [Int32] {
+    running.compactMap { app in
+        if keepFront, app.pid == front { return nil }
+        if let id = app.bundleID, keepRunning.contains(where: { $0.caseInsensitiveCompare(id) == .orderedSame }) {
+            return nil
+        }
+        return app.pid
+    }
 }

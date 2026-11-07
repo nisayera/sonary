@@ -249,3 +249,19 @@ struct HousekeepingTests {
         #expect(!isTrashableDiskImage("/System/Library/Demo.dmg"))
     }
 }
+
+struct QuitAllTests {
+    private let running: [(pid: Int32, bundleID: String?)] = [
+        (1, "com.apple.Safari"), (2, "com.apple.Music"), (3, "com.example.Editor"), (4, nil),
+    ]
+
+    @Test func quitAllLeavesTheKeptAppsRunning() {
+        #expect(appsToQuit(running: running, front: 3, keepFront: false, keepRunning: ["com.apple.music"]) == [1, 3, 4])
+    }
+
+    @Test func allButTheFrontAppSparesIt() {
+        #expect(appsToQuit(running: running, front: 3, keepFront: true, keepRunning: []) == [1, 2, 4])
+        // Nothing known in front: every app goes.
+        #expect(appsToQuit(running: running, front: nil, keepFront: true, keepRunning: []) == [1, 2, 3, 4])
+    }
+}

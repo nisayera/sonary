@@ -253,6 +253,16 @@ public final class WindowsModel {
         switcher.show()
     }
 
+    /// Every open window, front to back, for the command bar.
+    public func openWindows() -> [WindowEntry] {
+        WindowSwitcherController.currentEntries()
+    }
+
+    /// Brings one of those windows to the front.
+    public func raise(_ entry: WindowEntry) {
+        WindowSwitcherController.raise(entry)
+    }
+
     /// Whether the app in front keeps its own layout and wants Sonary's hands off.
     private var frontAppKeepsItsLayout: Bool {
         isExcluded(bundleID: NSWorkspace.shared.frontmostApplication?.bundleIdentifier, in: settings.layoutExcludedApps)

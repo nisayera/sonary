@@ -1,5 +1,6 @@
 import AppKit
 import CoreGraphics
+import SonaryCore
 
 /// Marks the key events Sonary types itself, so its own snippet watcher does not read them
 /// back as typing ("SONT").
@@ -33,6 +34,23 @@ enum TypeText {
             up.setIntegerValueField(.eventSourceUserData, value: typedTextMarker)
             down.post(tap: .cghidEventTap)
             up.post(tap: .cghidEventTap)
+        }
+    }
+
+    /// Presses a key combination, such as one on a radial wedge.
+    static func press(_ combo: KeyCombo) {
+        guard !combo.isEmpty else { return }
+        var flags = CGEventFlags()
+        if combo.modifiers & KeyModifier.command != 0 { flags.insert(.maskCommand) }
+        if combo.modifiers & KeyModifier.option != 0 { flags.insert(.maskAlternate) }
+        if combo.modifiers & KeyModifier.control != 0 { flags.insert(.maskControl) }
+        if combo.modifiers & KeyModifier.shift != 0 { flags.insert(.maskShift) }
+        for down in [true, false] {
+            guard let event = CGEvent(keyboardEventSource: nil, virtualKey: CGKeyCode(combo.keyCode), keyDown: down)
+            else { continue }
+            event.flags = flags
+            event.setIntegerValueField(.eventSourceUserData, value: typedTextMarker)
+            event.post(tap: .cghidEventTap)
         }
     }
 

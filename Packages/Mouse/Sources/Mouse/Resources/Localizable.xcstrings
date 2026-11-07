@@ -193,6 +193,16 @@
         }
       }
     },
+    "Keyboard shortcut": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastenkurzbefehl"
+          }
+        }
+      }
+    },
     "Launchpad": {
       "localizations": {
         "de": {
@@ -273,6 +283,16 @@
         }
       }
     },
+    "Press keys…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasten drücken …"
+          }
+        }
+      }
+    },
     "Press the trackpad with three fingers down to middle-click, for opening links in a new tab.": {
       "extractionState": "manual",
       "localizations": {
@@ -335,6 +355,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nach oben schieben"
+          }
+        }
+      }
+    },
+    "Record": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufnehmen"
           }
         }
       }
