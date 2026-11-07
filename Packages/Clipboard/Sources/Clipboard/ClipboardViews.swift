@@ -20,6 +20,7 @@ struct ClipboardPopoverView: View {
     @State private var section: ClipboardSection = .history
     @State private var query = ""
     @State private var dropTargeted = false
+    @State private var linkToClean = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s) {
@@ -79,7 +80,39 @@ struct ClipboardPopoverView: View {
                 }
                 .buttonStyle(.borderless)
             }
+            cleanLinkRow
         }
+    }
+
+    /// Paste a link, get it back without its tracking parameters.
+    private var cleanLinkRow: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Image(systemName: "link").foregroundStyle(.secondary)
+                TextField(text: $linkToClean) { Text("Paste a link to clean", bundle: .module) }
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit { copyCleanLink() }
+                Button { copyCleanLink() } label: { Text("Copy clean", bundle: .module) }
+                    .disabled(linkToClean.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            let trimmed = linkToClean.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                let clean = model.cleanLink(trimmed)
+                Text(verbatim: clean)
+                    .font(.caption.monospaced()).foregroundStyle(.secondary)
+                    .lineLimit(2).truncationMode(.middle).textSelection(.enabled)
+                if clean == trimmed {
+                    Text("Nothing to remove from this one.", bundle: .module).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .font(.system(size: 12))
+    }
+
+    private func copyCleanLink() {
+        guard !linkToClean.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        model.copyCleanLink(linkToClean)
+        linkToClean = ""
     }
 
     /// A thumbnail for images, an icon for files, nothing for plain text.
@@ -225,6 +258,18 @@ struct ClipboardSettingsView: View {
             SettingsToggleRow(symbol: "lock", title: Text("Clear when the screen locks", bundle: .module),
                               isOn: Binding(get: { model.settings.clearOnLock },
                                             set: { value in model.update { $0.clearOnLock = value } }))
+        }
+        SettingsCard(Text("Quick panel", bundle: .module)) {
+            SettingsRow(symbol: "list.clipboard", title: Text("Clipboard history on ⌃⌥V", bundle: .module),
+                        caption: Text("Search everything you copied, see each entry in full, and pick one with Return or ⌘1 to ⌘9. Change the shortcut on the Shortcuts page.",
+                                      bundle: .module)) {
+                Button { model.showQuickPanel() } label: { Text("Open", bundle: .module) }
+            }
+            SettingsToggleRow(symbol: "doc.on.clipboard", title: Text("Paste the entry straight away", bundle: .module),
+                              caption: Text("Off, the entry only goes on the clipboard. Pasting needs the Accessibility permission.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.quickPanelPastes },
+                                            set: { value in model.update { $0.quickPanelPastes = value } }))
         }
         SettingsCard(Text("Copying and pasting", bundle: .module)) {
             SettingsToggleRow(symbol: "link", title: Text("Clean links", bundle: .module),

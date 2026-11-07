@@ -213,3 +213,25 @@ struct ClipboardAutoClearTests {
         #expect(!name.contains("/"))
     }
 }
+
+struct QuickPanelTests {
+    @Test func commandDigitsPickTheFirstNineEntries() {
+        #expect(quickPasteIndex("1") == 0)
+        #expect(quickPasteIndex("9") == 8)
+        #expect(quickPasteIndex("0") == nil)
+        #expect(quickPasteIndex("12") == nil)
+        #expect(quickPasteIndex("a") == nil)
+    }
+
+    @Test func codeGetsAFixedWidthFont() {
+        #expect(looksLikeCode("func run() {\n    print(1);\n}"))
+        #expect(!looksLikeCode("Hello there,\nsee you tomorrow."))
+        #expect(!looksLikeCode("one line {}"))
+    }
+
+    @Test func aHugeCopyIsShownInPart() {
+        let long = String(repeating: "a", count: 30)
+        #expect(previewText(long, limit: 10) == String(repeating: "a", count: 10) + "\n…")
+        #expect(previewText("short", limit: 10) == "short")
+    }
+}

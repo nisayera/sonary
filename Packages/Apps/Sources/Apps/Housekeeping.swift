@@ -67,6 +67,8 @@ public struct AppsSettings: Codable, Equatable, Sendable {
     public var lastCleaned: Date?
     /// Folders whose downloads are tidied up after a while, e.g. a messenger's download folder.
     public var watchedFolders: [WatchedFolder] = []
+    /// After installing from a disk image, the image file goes to the Trash too.
+    public var trashDiskImageAfterInstall = false
 
     public init() {}
 }

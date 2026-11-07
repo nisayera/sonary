@@ -19,7 +19,7 @@ public final class ClipboardModel {
     @ObservationIgnored private var autoClearTask: Task<Void, Never>?
     @ObservationIgnored private var sleepObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var lockObserver: (any NSObjectProtocol)?
-
+    @ObservationIgnored private let quickPanel = ClipboardQuickPanel()
 
     /// Where copied images are kept, next to the rest of Sonary's data.
     private var imageFolder: URL? {
@@ -51,6 +51,7 @@ public final class ClipboardModel {
     }
 
     func stop() {
+        quickPanel.close()
         pollTask?.cancel()
         pollTask = nil
         ShortcutStore.shared.unbindAll(prefix: "clipboard.")
@@ -222,6 +223,10 @@ public final class ClipboardModel {
                            group: String(localized: "Clipboard", bundle: .module),
                            defaultCombo: KeyCombo(keyCode: 9, modifiers: KeyModifier.command | KeyModifier.option
                                | KeyModifier.shift)),
+        ShortcutDefinition(id: "clipboard.quickPanel",
+                           title: String(localized: "Clipboard quick panel", bundle: .module),
+                           group: String(localized: "Clipboard", bundle: .module),
+                           defaultCombo: KeyCombo(keyCode: 9, modifiers: KeyModifier.control | KeyModifier.option)),
         ShortcutDefinition(id: "clipboard.imageToFinder",
                            title: String(localized: "Save clipboard image here as PNG", bundle: .module),
                            group: String(localized: "Clipboard", bundle: .module), defaultCombo: .none),
@@ -236,6 +241,45 @@ public final class ClipboardModel {
             shortcuts.bind("clipboard.plainPaste") { [weak self] in self?.pastePlainText() }
         }
         shortcuts.bind("clipboard.imageToFinder") { [weak self] in self?.saveClipboardImageToFinderFolder() }
+        shortcuts.bind("clipboard.quickPanel") { [weak self] in self?.showQuickPanel() }
+    }
+
+    /// Opens the clipboard history in a floating panel; the same shortcut closes it.
+    public func showQuickPanel() {
+        if settings.quickPanelPastes, !AXIsProcessTrusted() {
+            _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
+        }
+        quickPanel.toggle(model: self)
+    }
+
+    /// Presses ⌘V for the app in front. Needs Accessibility; without it nothing happens and
+    /// the entry simply waits on the clipboard.
+    static func pressCommandV() {
+        guard AXIsProcessTrusted() else { return }
+        for down in [true, false] {
+            let event = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: down)
+            event?.flags = .maskCommand
+            event?.post(tap: .cghidEventTap)
+        }
+    }
+
+    /// The link with its tracking parameters removed, or the text as it was when there is
+    /// nothing to remove. For cleaning a link by hand.
+    public func cleanLink(_ text: String) -> String {
+        cleanedURL(text) ?? text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Puts a link cleaned by hand on the clipboard.
+    public func copyCleanLink(_ text: String) {
+        let clean = cleanLink(text)
+        guard !clean.isEmpty else { return }
+        let board = NSPasteboard.general
+        board.clearContents()
+        board.setString(clean, forType: .string)
+        lastChangeCount = board.changeCount
+        history.add(clean, at: Date(), sourceApp: nil)
+        store.save(history)
+        lastMessage = String(localized: "Clean link copied.", bundle: .module)
     }
 
     /// Pastes the clipboard without its formatting and puts the original contents back afterwards.
@@ -247,11 +291,7 @@ public final class ClipboardModel {
         board.setString(text, forType: .string)
         lastChangeCount = board.changeCount
         guard AXIsProcessTrusted() else { return }
-        for down in [true, false] {
-            let event = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: down)
-            event?.flags = .maskCommand
-            event?.post(tap: .cghidEventTap)
-        }
+        Self.pressCommandV()
         Task { [weak self] in
             // Give the app a moment to read the pasteboard before it changes back.
             try? await Task.sleep(for: .milliseconds(350))

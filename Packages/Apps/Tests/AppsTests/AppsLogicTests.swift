@@ -227,4 +227,25 @@ struct HousekeepingTests {
         #expect(!isInstallerVolume(URL(fileURLWithPath: "/Volumes/Recovery", isDirectory: true)))
         #expect(!isInstallerVolume(URL(fileURLWithPath: "/Volumes/Macintosh HD", isDirectory: true)))
     }
+
+    @Test func findsTheImageFileBehindAVolume() throws {
+        let info: [String: Any] = ["images": [
+            ["image-path": "/Users/luka/Downloads/Other.dmg",
+             "system-entities": [["dev-entry": "/dev/disk5s1", "mount-point": "/Volumes/Other"]]],
+            ["image-path": "/Users/luka/Downloads/Demo.dmg",
+             "system-entities": [["dev-entry": "/dev/disk6"], ["dev-entry": "/dev/disk6s1", "mount-point": "/Volumes/Demo"]]],
+        ]]
+        let data = try PropertyListSerialization.data(fromPropertyList: info, format: .xml, options: 0)
+        #expect(diskImagePath(mountedAt: "/Volumes/Demo/", hdiutilInfo: data) == "/Users/luka/Downloads/Demo.dmg")
+        #expect(diskImagePath(mountedAt: "/Volumes/Missing", hdiutilInfo: data) == nil)
+        #expect(diskImagePath(mountedAt: "/Volumes/Demo", hdiutilInfo: Data("nonsense".utf8)) == nil)
+    }
+
+    @Test func trashesOnlyImageFilesOnTheMac() {
+        #expect(isTrashableDiskImage("/Users/luka/Downloads/Demo.dmg"))
+        #expect(isTrashableDiskImage("/Users/luka/Downloads/Demo.DMG"))
+        #expect(!isTrashableDiskImage("/Users/luka/Downloads/Demo.zip"))
+        #expect(!isTrashableDiskImage("/Volumes/Stick/Demo.dmg"))
+        #expect(!isTrashableDiskImage("/System/Library/Demo.dmg"))
+    }
 }

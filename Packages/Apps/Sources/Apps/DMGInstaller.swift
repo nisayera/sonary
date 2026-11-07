@@ -41,3 +41,27 @@ public func isInstallerVolume(_ volume: URL) -> Bool {
                    "/Volumes/Update", "/Volumes/xarts", "/Volumes/iSCPreboot", "/Volumes/Data"]
     return !skipped.contains { path == $0 || path.hasPrefix($0 + "/") }
 }
+
+/// The disk image file a volume was mounted from, read from what `hdiutil info -plist` prints.
+public func diskImagePath(mountedAt volume: String, hdiutilInfo data: Data) -> String? {
+    guard let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+          let images = plist["images"] as? [[String: Any]] else { return nil }
+    let wanted = (volume as NSString).standardizingPath
+    for image in images {
+        let entities = image["system-entities"] as? [[String: Any]] ?? []
+        let mounted = entities.contains { entity in
+            guard let point = entity["mount-point"] as? String else { return false }
+            return (point as NSString).standardizingPath == wanted
+        }
+        if mounted, let path = image["image-path"] as? String { return path }
+    }
+    return nil
+}
+
+/// Whether Sonary may move an image file to the Trash: a disk image on a real disk, not
+/// something on another mounted volume or in a system folder.
+public func isTrashableDiskImage(_ path: String) -> Bool {
+    let ext = (path as NSString).pathExtension.lowercased()
+    guard ["dmg", "sparseimage", "sparsebundle"].contains(ext) else { return false }
+    return !path.hasPrefix("/Volumes/") && !path.hasPrefix("/System/") && !path.hasPrefix("/Library/")
+}
