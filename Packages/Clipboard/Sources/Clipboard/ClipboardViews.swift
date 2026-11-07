@@ -141,38 +141,24 @@ struct ClipboardPopoverView: View {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [5]))
                     .foregroundStyle(dropTargeted ? Color.sonaryAccent : Color.secondary.opacity(0.5))
-                Text("Drop files here to keep them handy", bundle: .module)
+                Text("Drop files, text or links here to keep them handy", bundle: .module)
                     .font(.callout).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 8)
             }
             .frame(height: 70)
-            .onDrop(of: [.fileURL], isTargeted: $dropTargeted) { providers in
-                for provider in providers {
-                    _ = provider.loadObject(ofClass: URL.self) { url, _ in
-                        guard let url else { return }
-                        Task { @MainActor in model.addToShelf([url]) }
-                    }
-                }
+            .onDrop(of: shelfDropTypes, isTargeted: $dropTargeted) { providers in
+                loadShelfItems(from: providers) { model.addToShelf($0) }
                 return true
             }
             if !model.shelf.isEmpty {
                 PanelGroup {
-                    ForEach(model.shelf, id: \.self) { url in
-                        HStack(spacing: 8) {
-                            Image(nsImage: NSWorkspace.shared.icon(forFile: url.path)).resizable().frame(width: 22, height: 22)
-                            Text(url.lastPathComponent).lineLimit(1).truncationMode(.middle)
-                            Spacer()
-                            Button { model.removeFromShelf(url) } label: { Image(systemName: "xmark") }
-                                .buttonStyle(.borderless)
-                                .accessibilityLabel(Text("Remove", bundle: .module))
-                        }
-                        .font(.system(size: 12))
-                        .panelRowInsets()
-                        .onDrag { NSItemProvider(contentsOf: url) ?? NSItemProvider() }
+                    ForEach(model.shelf) { item in
+                        ShelfItemRow(item: item) { model.removeFromShelf(item) }
+                            .panelRowInsets()
                     }
                 }
-            }
-            if !model.shelf.isEmpty {
-                Text("Drag files out of the shelf to move or copy them.", bundle: .module)
+                Text("Drag things out of the shelf to move or copy them, or share them.", bundle: .module)
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -283,10 +269,29 @@ struct ClipboardSettingsView: View {
                               isOn: Binding(get: { model.settings.plainTextPasteShortcut },
                                             set: { value in model.update { $0.plainTextPasteShortcut = value } }))
         }
-        SettingsCard(Text("Shelf and Finder", bundle: .module)) {
-            Text("Open the menu panel's clipboard tab to use the file shelf and the Finder helpers. The Finder helpers ask once for permission to control Finder.",
-                 bundle: .module)
-                .font(.callout).foregroundStyle(.secondary)
+        SettingsCard(Text("Shelf", bundle: .module)) {
+            SettingsToggleRow(symbol: "tray.and.arrow.down", title: Text("Show a shelf next to the pointer while dragging", bundle: .module),
+                              caption: Text("Drop files on it to park them on the way, and drag them out again later. It stays while it holds something.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.floatingShelf },
+                                            set: { value in model.update { $0.floatingShelf = value } }))
+        }
+        SettingsCard(Text("Finder", bundle: .module)) {
+            SettingsToggleRow(symbol: "scissors", title: Text("Cut and paste files with ⌘X and ⌘V", bundle: .module),
+                              caption: Text("⌘X marks the selection, ⌘V moves it to the folder in front. Text fields keep their own cut and paste.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.finderCutAndPaste },
+                                            set: { value in model.update { $0.finderCutAndPaste = value } }))
+            SettingsToggleRow(symbol: "character.cursor.ibeam", title: Text("Rename with F2", bundle: .module),
+                              caption: Text("Starts renaming the selected item, as Return does.", bundle: .module),
+                              isOn: Binding(get: { model.settings.finderRenameWithF2 },
+                                            set: { value in model.update { $0.finderRenameWithF2 = value } }))
+            if model.finderKeysNeedAccessibility {
+                SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.",
+                                     bundle: .module))
+            }
+            Text("The buttons in the menu panel's clipboard tab ask once for permission to control Finder.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 }

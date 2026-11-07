@@ -15,6 +15,12 @@ public struct ClipboardSettings: Codable, Equatable, Sendable {
     public var clearOnLock = false
     /// The quick panel pastes the entry you pick; off, it only puts it on the clipboard.
     public var quickPanelPastes = true
+    /// A small shelf appears next to the pointer while files are dragged.
+    public var floatingShelf = false
+    /// ⌘X and ⌘V move files in Finder.
+    public var finderCutAndPaste = false
+    /// F2 renames the selected item in Finder.
+    public var finderRenameWithF2 = false
 
     public init() {}
 }

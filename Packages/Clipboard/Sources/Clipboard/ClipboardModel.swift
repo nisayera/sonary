@@ -2,13 +2,13 @@ import AppKit
 import Observation
 import SonaryCore
 
-/// Records text copies (polling the pasteboard), cleans links, keeps a file shelf and offers Finder helpers.
+/// Records text copies (polling the pasteboard), cleans links, keeps a shelf and offers Finder helpers.
 @MainActor
 @Observable
 public final class ClipboardModel {
     public private(set) var history: ClipboardHistory
     public private(set) var settings: ClipboardSettings
-    public private(set) var shelf: [URL] = []
+    public private(set) var shelf: [ShelfItem] = []
     public private(set) var lastMessage: String?
     /// Files waiting to be moved by a paste, since Finder has no cut of its own.
     public private(set) var cutFiles: [URL] = []
@@ -20,6 +20,10 @@ public final class ClipboardModel {
     @ObservationIgnored private var sleepObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var lockObserver: (any NSObjectProtocol)?
     @ObservationIgnored private let quickPanel = ClipboardQuickPanel()
+    @ObservationIgnored private let floatingShelf = FloatingShelf()
+    @ObservationIgnored private let finderKeys = FinderKeysTap()
+    /// Set when the Finder keys could not start, which means Accessibility is missing.
+    public private(set) var finderKeysNeedAccessibility = false
 
     /// Where copied images are kept, next to the rest of Sonary's data.
     private var imageFolder: URL? {
@@ -48,12 +52,28 @@ public final class ClipboardModel {
         applyShortcut()
         startAutoClear()
         observeSleepAndLock()
+        applyShelfAndFinder()
+    }
+
+    /// Starts or stops the floating shelf and the Finder keys to match the settings.
+    private func applyShelfAndFinder() {
+        let running = pollTask != nil
+        if running, settings.floatingShelf { floatingShelf.start(model: self) } else { floatingShelf.stop() }
+        if running, settings.finderCutAndPaste || settings.finderRenameWithF2 {
+            finderKeys.cutAndPaste = settings.finderCutAndPaste
+            finderKeys.renameWithF2 = settings.finderRenameWithF2
+            finderKeysNeedAccessibility = !finderKeys.start()
+        } else {
+            finderKeys.stop()
+            finderKeysNeedAccessibility = false
+        }
     }
 
     func stop() {
         quickPanel.close()
         pollTask?.cancel()
         pollTask = nil
+        applyShelfAndFinder()
         ShortcutStore.shared.unbindAll(prefix: "clipboard.")
         autoClearTask?.cancel()
         autoClearTask = nil
@@ -208,6 +228,10 @@ public final class ClipboardModel {
             history.setLimit(settings.historyLimit)
             store.save(history)
         }
+        if settings.floatingShelf != before.floatingShelf || settings.finderCutAndPaste != before.finderCutAndPaste
+            || settings.finderRenameWithF2 != before.finderRenameWithF2 {
+            applyShelfAndFinder()
+        }
         if settings.plainTextPasteShortcut != before.plainTextPasteShortcut {
             applyShortcut()
             if settings.plainTextPasteShortcut, !AXIsProcessTrusted() {
@@ -324,10 +348,14 @@ public final class ClipboardModel {
     // MARK: Shelf
 
     public func addToShelf(_ urls: [URL]) {
-        for url in urls where !shelf.contains(url) { shelf.append(url) }
+        addToShelf(urls.compactMap(shelfItem(fromURL:)))
     }
 
-    public func removeFromShelf(_ url: URL) { shelf.removeAll { $0 == url } }
+    public func addToShelf(_ items: [ShelfItem]) {
+        for item in items where !shelf.contains(item) { shelf.append(item) }
+    }
+
+    public func removeFromShelf(_ item: ShelfItem) { shelf.removeAll { $0 == item } }
     public func clearShelf() { shelf.removeAll() }
 
     // MARK: Finder
