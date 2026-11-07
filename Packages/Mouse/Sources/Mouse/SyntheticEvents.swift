@@ -13,6 +13,7 @@ enum SyntheticEvents {
         case .showDesktop: key(103, [])            // F11
         case .launchpad: key(160, [])              // Launchpad key
         case let .keyboardShortcut(keyCode, modifiers):
+            guard keyCode != unrecordedKeyCode else { break }
             key(keyCode, CGEventFlags(rawValue: modifiers))
         }
     }

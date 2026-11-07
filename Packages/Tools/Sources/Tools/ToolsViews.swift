@@ -20,7 +20,6 @@ private enum ToolsSection: String, CaseIterable, Identifiable {
 struct ToolsPopoverView: View {
     let model: ToolsModel
     @State private var section: ToolsSection = .tools
-    @State private var previewingMarkdown = false
     @State private var convertingImages = false
 
     var body: some View {
@@ -82,57 +81,7 @@ struct ToolsPopoverView: View {
     }
 
     private var scratchpadView: some View {
-        let current = model.currentTab
-        return VStack(alignment: .leading, spacing: 6) {
-            ScrollView(.horizontal) {
-                HStack(spacing: 4) {
-                    ForEach(model.tabs) { tab in
-                        Button { model.selectTab(tab.id) } label: {
-                            Text(tab.title).lineLimit(1)
-                                .padding(.horizontal, 8).padding(.vertical, 4)
-                                .background(tab.id == current.id ? Color.sonaryAccent.opacity(0.2) : .clear,
-                                            in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    Button { model.addTab() } label: { Image(systemName: "plus") }
-                        .buttonStyle(.borderless)
-                        .accessibilityLabel(Text("New note", bundle: .module))
-                }
-            }
-            .scrollIndicators(.hidden)
-            Group {
-                if previewingMarkdown {
-                    ScrollView {
-                        Text(markdown: current.text)
-                            .textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(8)
-                    }
-                } else {
-                    TextEditor(text: Binding(get: { current.text }, set: { model.setText($0, for: current.id) }))
-                        .font(.body)
-                        .scrollContentBackground(.hidden)
-                        .padding(6)
-                }
-            }
-            .frame(height: 260)
-            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-            HStack {
-                Toggle(isOn: $previewingMarkdown) {
-                    Label { Text("Preview", bundle: .module) } icon: { Image(systemName: "doc.richtext") }
-                }
-                .toggleStyle(.button)
-                Button { model.exportTab(current) } label: {
-                    Label { Text("Save as Markdown", bundle: .module) } icon: { Image(systemName: "square.and.arrow.down") }
-                }
-                Spacer()
-                Button(role: .destructive) { model.removeTab(current.id) } label: {
-                    Text("Delete note", bundle: .module)
-                }
-            }
-            .buttonStyle(.borderless)
-        }
+        ScratchpadEditor(model: model, editorHeight: 260)
     }
 
     private func pickVideos(gif: Bool) {
@@ -221,6 +170,18 @@ struct ToolsSettingsView: View {
                     .labelsHidden().frame(width: 220)
             }
         }
+        SettingsCard(Text("Cleaning mode", bundle: .module)) {
+            SettingsToggleRow(symbol: "keyboard.badge.ellipsis", title: Text("Also block the system keys", bundle: .module),
+                              caption: Text("Brightness, volume, media and Mission Control keys do nothing while you wipe. Needs Accessibility.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.cleaningBlocksSystemKeys },
+                                            set: { value in model.update { $0.cleaningBlocksSystemKeys = value } }))
+            SettingsToggleRow(symbol: "sparkles.rectangle.stack", title: Text("Show a small badge instead of a black screen", bundle: .module),
+                              caption: Text("The screen stays visible and clicks are swallowed too, so the trackpad can be wiped. Escape ends it.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.cleaningIndicatorOnly },
+                                            set: { value in model.update { $0.cleaningIndicatorOnly = value } }))
+        }
         SettingsCard(Text("Radial menu", bundle: .module)) {
             Text("⌃⌥R opens a ring of actions around the pointer. Pick which ones it holds, up to eight.",
                  bundle: .module)
@@ -239,6 +200,12 @@ struct ToolsSettingsView: View {
                                               }
                                           }
                                       }))
+            }
+            Divider()
+            Text("Apps, files and keyboard shortcuts get wedges after the actions.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            RadialLaunchEditor(launches: model.settings.radialLaunches) { launches in
+                model.update { $0.radialLaunches = launches }
             }
         }
         SettingsCard(Text("Scripts", bundle: .module)) {
@@ -284,6 +251,9 @@ struct ToolsSettingsView: View {
                                 .accessibilityLabel(Text(quickActionTitle(action), bundle: .module))
                             }
                         }
+                    }
+                    RadialLaunchEditor(launches: profile.launches ?? []) { launches in
+                        model.setRadialProfileLaunches(profile.id, launches)
                     }
                 }
                 .padding(8)
@@ -433,5 +403,142 @@ struct ImageConversionSheet: View {
         guard panel.runModal() == .OK else { return }
         model.convertImages(panel.urls, to: format, longestEdge: max(0, longestEdge), watermark: watermark)
         dismiss()
+    }
+}
+
+/// The apps, files and shortcuts of a ring: each with its icon and a remove button, and ways
+/// to add more.
+struct RadialLaunchEditor: View {
+    let launches: [RadialLaunch]
+    let change: ([RadialLaunch]) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(launches) { launch in
+                HStack(spacing: 8) {
+                    RadialLaunchIcon(launch: launch)
+                    Text(verbatim: launch.title).lineLimit(1).truncationMode(.middle)
+                    Spacer()
+                    Button(role: .destructive) { change(launches.filter { $0 != launch }) } label: {
+                        Image(systemName: "minus.circle")
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel(Text("Remove", bundle: .module))
+                }
+                .font(.system(size: 12))
+            }
+            HStack(spacing: 8) {
+                Button { choose(apps: true) } label: { Text("Add an app…", bundle: .module) }
+                Button { choose(apps: false) } label: { Text("Add a file…", bundle: .module) }
+                KeyPressRecorderButton(current: "", recordTitle: Text("Add a shortcut", bundle: .module),
+                                       recordingTitle: Text("Press keys…", bundle: .module)) { keyCode, flags in
+                    var modifiers = 0
+                    if flags.contains(.command) { modifiers |= KeyModifier.command }
+                    if flags.contains(.option) { modifiers |= KeyModifier.option }
+                    if flags.contains(.control) { modifiers |= KeyModifier.control }
+                    if flags.contains(.shift) { modifiers |= KeyModifier.shift }
+                    add([.shortcut(KeyCombo(keyCode: Int(keyCode), modifiers: modifiers))])
+                }
+            }
+            .controlSize(.small)
+        }
+    }
+
+    private func add(_ new: [RadialLaunch]) {
+        change(launches + new.filter { !launches.contains($0) })
+    }
+
+    private func choose(apps: Bool) {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        if apps {
+            panel.allowedContentTypes = [.application]
+            panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        } else {
+            panel.canChooseDirectories = true
+        }
+        guard panel.runModal() == .OK else { return }
+        add(panel.urls.map { apps ? .app(path: $0.path) : .file(path: $0.path) })
+    }
+}
+
+private struct RadialLaunchIcon: View {
+    let launch: RadialLaunch
+
+    var body: some View {
+        switch launch {
+        case .app(let path), .file(let path):
+            Image(nsImage: NSWorkspace.shared.icon(forFile: path)).resizable().frame(width: 18, height: 18)
+        case .shortcut:
+            Image(systemName: "command").frame(width: 18, height: 18).foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// The notes with their tabs, Markdown preview and export: in the menu panel, and in a
+/// window of their own that stays in front.
+struct ScratchpadEditor: View {
+    let model: ToolsModel
+    /// A fixed height in the panel; nil fills the window.
+    let editorHeight: CGFloat?
+    @State private var previewingMarkdown = false
+
+    var body: some View {
+        let current = model.currentTab
+        return VStack(alignment: .leading, spacing: 6) {
+            ScrollView(.horizontal) {
+                HStack(spacing: 4) {
+                    ForEach(model.tabs) { tab in
+                        Button { model.selectTab(tab.id) } label: {
+                            Text(tab.title).lineLimit(1)
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .background(tab.id == current.id ? Color.sonaryAccent.opacity(0.2) : .clear,
+                                            in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Button { model.addTab() } label: { Image(systemName: "plus") }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel(Text("New note", bundle: .module))
+                }
+            }
+            .scrollIndicators(.hidden)
+            Group {
+                if previewingMarkdown {
+                    ScrollView {
+                        Text(markdown: current.text)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(8)
+                    }
+                } else {
+                    TextEditor(text: Binding(get: { current.text }, set: { model.setText($0, for: current.id) }))
+                        .font(.body)
+                        .scrollContentBackground(.hidden)
+                        .padding(6)
+                }
+            }
+            .frame(minHeight: editorHeight ?? 160, maxHeight: editorHeight ?? .infinity)
+            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            HStack {
+                Toggle(isOn: $previewingMarkdown) {
+                    Label { Text("Preview", bundle: .module) } icon: { Image(systemName: "doc.richtext") }
+                }
+                .toggleStyle(.button)
+                Button { model.exportTab(current) } label: {
+                    Label { Text("Save as Markdown", bundle: .module) } icon: { Image(systemName: "square.and.arrow.down") }
+                }
+                if editorHeight != nil {
+                    Button { model.showScratchpadWindow() } label: { Image(systemName: "macwindow.badge.plus") }
+                        .help(Text("Open in a window", bundle: .module))
+                        .accessibilityLabel(Text("Open in a window", bundle: .module))
+                }
+                Spacer()
+                Button(role: .destructive) { model.removeTab(current.id) } label: {
+                    Text("Delete note", bundle: .module)
+                }
+            }
+            .buttonStyle(.borderless)
+        }
     }
 }

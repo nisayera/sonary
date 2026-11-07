@@ -64,15 +64,24 @@ final class AppModel {
         self.keyboard = keyboard
         // The Super Key's tap action can open the command bar, which the tools module owns.
         keyboard.model.commandBarAction = { [weak tools] in tools?.model.showCommandBar() }
-        // The command bar can also paste from the clipboard history.
-        tools.model.externalCommands = { [weak clipboard] in
-            guard let clipboard else { return [] }
-            return clipboard.model.history.entries.prefix(20).compactMap { entry in
-                guard let text = entry.text, !text.isEmpty else { return nil }
-                return ExternalCommand(id: entry.id.uuidString, title: text, symbol: "doc.on.clipboard") {
-                    clipboard.model.copy(entry)
+        // The command bar can also paste from the clipboard history and raise open windows.
+        tools.model.externalCommands = { [weak clipboard, weak windows] in
+            let pasted: [ExternalCommand] = clipboard.map { clipboard in
+                clipboard.model.history.entries.prefix(20).compactMap { entry in
+                    guard let text = entry.text, !text.isEmpty else { return nil }
+                    return ExternalCommand(id: entry.id.uuidString, title: text, symbol: "doc.on.clipboard") {
+                        clipboard.model.copy(entry)
+                    }
                 }
-            }
+            } ?? []
+            let open: [ExternalCommand] = windows.map { windows in
+                windows.model.openWindows().map { entry in
+                    ExternalCommand(id: "window-\(entry.id)", title: entry.label, symbol: "macwindow") {
+                        windows.model.raise(entry)
+                    }
+                }
+            } ?? []
+            return open + pasted
         }
         let display = DisplayModule(defaults: defaults)
         self.display = display

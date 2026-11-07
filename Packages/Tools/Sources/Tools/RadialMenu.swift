@@ -8,7 +8,7 @@ final class RadialMenuController {
     private var panel: NSPanel?
     private let size = 320.0
 
-    func show(items: [RadialItem], run: @escaping (QuickAction) -> Void,
+    func show(items: [RadialItem], run: @escaping (QuickAction) -> Void, launch: @escaping (RadialLaunch) -> Void,
               open: @escaping (RadialProfile) -> Void, back: @escaping () -> Void) {
         guard !items.isEmpty else { return }
         close()
@@ -28,6 +28,9 @@ final class RadialMenuController {
                 case .action(let action):
                     self?.close()
                     run(action)
+                case .launch(let target):
+                    self?.close()
+                    launch(target)
                 case .profile(let profile):
                     open(profile)
                 case .back:
@@ -65,9 +68,7 @@ struct RadialMenuView: View {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 let offset = radialItemOffset(index: index, count: items.count, radius: 108)
                 let isHovered = hovered == index
-                Image(systemName: item.symbol)
-                    .font(.system(size: 19, weight: .semibold))
-                    .foregroundStyle(.white)
+                RadialWedgeIcon(item: item)
                     .frame(width: 52, height: 52)
                     .background(isHovered ? Color.sonaryAccent : Color.black.opacity(0.45), in: Circle())
                     .scaleEffect(isHovered ? 1.12 : 1)
@@ -93,9 +94,28 @@ struct RadialMenuView: View {
     }
 }
 
+/// A wedge's picture: the app's or file's own icon where there is one, a symbol otherwise.
+struct RadialWedgeIcon: View {
+    let item: RadialItem
+
+    var body: some View {
+        switch item {
+        case .launch(.app(let path)), .launch(.file(let path)):
+            Image(nsImage: NSWorkspace.shared.icon(forFile: path))
+                .resizable()
+                .frame(width: 32, height: 32)
+        default:
+            Image(systemName: item.symbol)
+                .font(.system(size: 19, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+    }
+}
+
 func radialLabel(_ item: RadialItem) -> Text {
     switch item {
     case .action(let action): Text(quickActionTitle(action), bundle: .module)
+    case .launch(let launch): Text(verbatim: launch.title)
     case .profile(let profile): Text(verbatim: profile.name)
     case .back: Text("Back", bundle: .module)
     }

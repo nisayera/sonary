@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Add a file…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datei hinzufügen …"
+          }
+        }
+      }
+    },
     "Add a ring": {
       "extractionState": "manual",
       "localizations": {
@@ -8,6 +18,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ring hinzufügen"
+          }
+        }
+      }
+    },
+    "Add a shortcut": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurzbefehl hinzufügen"
+          }
+        }
+      }
+    },
+    "Add an app…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App hinzufügen …"
           }
         }
       }
@@ -33,6 +63,26 @@
         }
       }
     },
+    "Also block the system keys": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auch die Systemtasten sperren"
+          }
+        }
+      }
+    },
+    "Apps, files and keyboard shortcuts get wedges after the actions.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps, Dateien und Tastenkurzbefehle bekommen Segmente nach den Aktionen."
+          }
+        }
+      }
+    },
     "Arrow": {
       "extractionState": "manual",
       "localizations": {
@@ -51,6 +101,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zurück"
+          }
+        }
+      }
+    },
+    "Brightness, volume, media and Mission Control keys do nothing while you wipe. Needs Accessibility.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helligkeits-, Lautstärke-, Medien- und Mission-Control-Tasten tun beim Wischen nichts. Braucht Bedienungshilfen."
           }
         }
       }
@@ -104,6 +164,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Putzmodus"
+          }
+        }
+      }
+    },
+    "Cleaning: keys and clicks are off. Press Escape to stop.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Putzmodus: Tasten und Klicks sind aus. Zum Beenden Escape drücken."
           }
         }
       }
@@ -614,6 +684,16 @@
         }
       }
     },
+    "Open in a window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In einem Fenster öffnen"
+          }
+        }
+      }
+    },
     "Open the editor after a screenshot": {
       "extractionState": "manual",
       "localizations": {
@@ -697,6 +777,16 @@
         }
       }
     },
+    "Press keys…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasten drücken …"
+          }
+        }
+      }
+    },
     "Preview": {
       "localizations": {
         "de": {
@@ -772,6 +862,16 @@
         }
       }
     },
+    "Remove": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen"
+          }
+        }
+      }
+    },
     "Remove snippet": {
       "localizations": {
         "de": {
@@ -829,6 +929,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Notizblock"
+          }
+        }
+      }
+    },
+    "Scratchpad in a window": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notizblock im Fenster"
           }
         }
       }
@@ -938,6 +1048,16 @@
         }
       }
     },
+    "Show a small badge instead of a black screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleines Abzeichen statt schwarzem Bildschirm"
+          }
+        }
+      }
+    },
     "Snippet copied. Press ⌘V to paste it.": {
       "localizations": {
         "de": {
@@ -1028,6 +1148,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die umgewandelten Kopien landen neben den Originalen."
+          }
+        }
+      }
+    },
+    "The screen stays visible and clicks are swallowed too, so the trackpad can be wiped. Escape ends it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Bildschirm bleibt sichtbar und auch Klicks werden geschluckt, damit sich das Trackpad wischen lässt. Escape beendet es."
           }
         }
       }

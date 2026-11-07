@@ -3,7 +3,7 @@ import SonaryUI
 import SwiftUI
 
 private enum ActionChoice: String, CaseIterable, Identifiable {
-    case system, none, back, forward, missionControl, appExpose, showDesktop, launchpad
+    case system, none, back, forward, missionControl, appExpose, showDesktop, launchpad, shortcut
     var id: String { rawValue }
 
     var action: ButtonAction? {
@@ -16,6 +16,7 @@ private enum ActionChoice: String, CaseIterable, Identifiable {
         case .appExpose: .appExpose
         case .showDesktop: .showDesktop
         case .launchpad: .launchpad
+        case .shortcut: .keyboardShortcut(keyCode: unrecordedKeyCode, modifiers: 0)
         }
     }
 
@@ -29,7 +30,7 @@ private enum ActionChoice: String, CaseIterable, Identifiable {
         case .some(.appExpose): self = .appExpose
         case .some(.showDesktop): self = .showDesktop
         case .some(.launchpad): self = .launchpad
-        case .some(.keyboardShortcut): self = .system
+        case .some(.keyboardShortcut): self = .shortcut
         }
     }
 
@@ -43,6 +44,7 @@ private enum ActionChoice: String, CaseIterable, Identifiable {
         case .appExpose: "App Exposé"
         case .showDesktop: "Show Desktop"
         case .launchpad: "Launchpad"
+        case .shortcut: "Keyboard shortcut"
         }
     }
 }
@@ -111,15 +113,7 @@ struct MouseSettingsView: View {
         SettingsCard(Text("Extra buttons", bundle: .module)) {
             ForEach([3, 4, 5], id: \.self) { button in
                 SettingsRow(symbol: "computermouse", title: Text("Button \(button + 1)", bundle: .module)) {
-                    Picker(selection: mappingBinding(for: button)) {
-                        ForEach(ActionChoice.allCases) { choice in
-                            Text(choice.label, bundle: .module).tag(choice)
-                        }
-                    } label: {
-                        EmptyView()
-                    }
-                    .labelsHidden()
-                    .frame(width: 180)
+                    actionPicker(mappingBinding(for: button))
                 }
             }
         }
@@ -206,33 +200,52 @@ struct MouseSettingsView: View {
         )
     }
 
-    private func actionPicker(_ selection: Binding<ActionChoice>) -> some View {
-        Picker(selection: selection) {
-            ForEach(ActionChoice.allCases) { choice in
-                Text(choice.label, bundle: .module).tag(choice)
+    /// A picker of actions; with "Keyboard shortcut" a recorder sits next to it.
+    private func actionPicker(_ selection: Binding<ButtonAction?>) -> some View {
+        HStack(spacing: 6) {
+            Picker(selection: Binding(
+                get: { ActionChoice(selection.wrappedValue) },
+                set: { choice in
+                    // Picking "Keyboard shortcut" again keeps the one already recorded.
+                    if choice == .shortcut, case .keyboardShortcut = selection.wrappedValue { return }
+                    selection.wrappedValue = choice.action
+                }
+            )) {
+                ForEach(ActionChoice.allCases) { choice in
+                    Text(choice.label, bundle: .module).tag(choice)
+                }
+            } label: { EmptyView() }
+                .labelsHidden()
+                .frame(width: 180)
+            if case let .keyboardShortcut(keyCode, modifiers) = selection.wrappedValue {
+                KeyPressRecorderButton(current: shortcutLabel(keyCode: keyCode, modifiers: modifiers),
+                                       recordTitle: Text("Record", bundle: .module),
+                                       recordingTitle: Text("Press keys…", bundle: .module)) { key, flags in
+                    selection.wrappedValue = .keyboardShortcut(
+                        keyCode: key,
+                        modifiers: shortcutModifiers(command: flags.contains(.command), option: flags.contains(.option),
+                                                     control: flags.contains(.control), shift: flags.contains(.shift)))
+                }
             }
-        } label: { EmptyView() }
-            .labelsHidden()
-            .frame(width: 180)
+        }
     }
 
-    private func sideWheelBinding(_ keyPath: WritableKeyPath<MouseSettings, ButtonAction>) -> Binding<ActionChoice> {
+    private func sideWheelBinding(_ keyPath: WritableKeyPath<MouseSettings, ButtonAction>) -> Binding<ButtonAction?> {
         Binding(
-            get: { ActionChoice(module.settings[keyPath: keyPath]) },
-            set: { choice in
-                module.update { $0[keyPath: keyPath] = choice.action ?? ButtonAction.none }
+            get: { module.settings[keyPath: keyPath] },
+            set: { action in
+                module.update { $0[keyPath: keyPath] = action ?? ButtonAction.none }
             }
         )
     }
 
-    private func gestureBinding(button: Int, direction: GestureDirection) -> Binding<ActionChoice> {
+    private func gestureBinding(button: Int, direction: GestureDirection) -> Binding<ButtonAction?> {
         Binding(
-            get: { ActionChoice(action(forGesture: button, direction: direction,
-                                       in: module.settings.gestureMappings)) },
-            set: { choice in
+            get: { action(forGesture: button, direction: direction, in: module.settings.gestureMappings) },
+            set: { action in
                 module.update { settings in
                     settings.gestureMappings.removeAll { $0.button == button && $0.direction == direction }
-                    if let action = choice.action, action != ButtonAction.none {
+                    if let action, action != ButtonAction.none {
                         settings.gestureMappings.append(
                             GestureMapping(button: button, direction: direction, action: action))
                     }
@@ -259,13 +272,13 @@ struct MouseSettingsView: View {
         }
     }
 
-    private func mappingBinding(for button: Int) -> Binding<ActionChoice> {
+    private func mappingBinding(for button: Int) -> Binding<ButtonAction?> {
         Binding(
-            get: { ActionChoice(action(forButton: button, in: module.settings.buttonMappings)) },
-            set: { choice in
+            get: { action(forButton: button, in: module.settings.buttonMappings) },
+            set: { action in
                 module.update { settings in
                     settings.buttonMappings.removeAll { $0.button == button }
-                    if let action = choice.action {
+                    if let action {
                         settings.buttonMappings.append(ButtonMapping(button: button, action: action))
                     }
                 }

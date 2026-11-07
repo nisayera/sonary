@@ -57,6 +57,9 @@ public final class AppsModel {
     @ObservationIgnored private var scheduleTask: Task<Void, Never>?
     @ObservationIgnored private var mountObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var unmountObserver: (any NSObjectProtocol)?
+    @ObservationIgnored private var activationObserver: (any NSObjectProtocol)?
+    /// The last app in front other than Sonary: the "front app" while Sonary's panel is open.
+    @ObservationIgnored private var lastFrontApp: Int32?
 
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -73,6 +76,7 @@ public final class AppsModel {
     func start() {
         guard scheduleTask == nil else { return }
         observeMounts()
+        observeActivation()
         scheduleTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.runScheduledWork()
@@ -87,8 +91,10 @@ public final class AppsModel {
         let center = NSWorkspace.shared.notificationCenter
         if let mountObserver { center.removeObserver(mountObserver) }
         if let unmountObserver { center.removeObserver(unmountObserver) }
+        if let activationObserver { center.removeObserver(activationObserver) }
         mountObserver = nil
         unmountObserver = nil
+        activationObserver = nil
         installer = nil
     }
 
@@ -353,6 +359,37 @@ public final class AppsModel {
 
     public func quit(_ app: NSRunningApplication, force: Bool) {
         _ = force ? app.forceTerminate() : app.terminate()
+    }
+
+    /// Asks every running app to quit, or all but the one in front, leaving the apps that are
+    /// kept running alone. Apps with unsaved work still ask about it themselves.
+    public func quitAll(keepFront: Bool) {
+        let running = runningApps
+        let pids = appsToQuit(running: running.map { ($0.processIdentifier, $0.bundleIdentifier) },
+                              front: frontApp, keepFront: keepFront, keepRunning: settings.keepRunningOnQuitAll)
+        for app in running where pids.contains(app.processIdentifier) { app.terminate() }
+    }
+
+    /// The app that was in front before Sonary's panel opened.
+    private var frontApp: Int32? {
+        let front = NSWorkspace.shared.frontmostApplication
+        if let front, front.bundleIdentifier != Bundle.main.bundleIdentifier { return front.processIdentifier }
+        return lastFrontApp
+    }
+
+    private func observeActivation() {
+        guard activationObserver == nil else { return }
+        lastFrontApp = NSWorkspace.shared.frontmostApplication.flatMap {
+            $0.bundleIdentifier == Bundle.main.bundleIdentifier ? nil : $0.processIdentifier
+        }
+        activationObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
+        ) { [weak self] note in
+            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            guard let app, app.bundleIdentifier != Bundle.main.bundleIdentifier else { return }
+            let pid = app.processIdentifier
+            MainActor.assumeIsolated { self?.lastFrontApp = pid }
+        }
     }
 
     // MARK: Homebrew

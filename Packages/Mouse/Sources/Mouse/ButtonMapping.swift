@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import SonaryCore
 
 public enum ButtonAction: Codable, Equatable, Sendable {
     case none
@@ -10,6 +11,31 @@ public enum ButtonAction: Codable, Equatable, Sendable {
     case showDesktop
     case launchpad
     case keyboardShortcut(keyCode: UInt16, modifiers: UInt64)
+}
+
+/// The key of a shortcut action that has been chosen but not recorded yet: it does nothing.
+public let unrecordedKeyCode = UInt16.max
+
+/// What the settings show for a shortcut action, such as "⌃⌘F". Empty when not recorded.
+public func shortcutLabel(keyCode: UInt16, modifiers: UInt64) -> String {
+    guard keyCode != unrecordedKeyCode else { return "" }
+    let flags = CGEventFlags(rawValue: modifiers)
+    var text = ""
+    if flags.contains(.maskControl) { text += "⌃" }
+    if flags.contains(.maskAlternate) { text += "⌥" }
+    if flags.contains(.maskShift) { text += "⇧" }
+    if flags.contains(.maskCommand) { text += "⌘" }
+    return text + keyName(Int(keyCode))
+}
+
+/// The modifier keys of a recorded shortcut as the event flags it is sent with.
+public func shortcutModifiers(command: Bool, option: Bool, control: Bool, shift: Bool) -> UInt64 {
+    var flags = CGEventFlags()
+    if command { flags.insert(.maskCommand) }
+    if option { flags.insert(.maskAlternate) }
+    if control { flags.insert(.maskControl) }
+    if shift { flags.insert(.maskShift) }
+    return flags.rawValue
 }
 
 public struct ButtonMapping: Codable, Equatable, Sendable {

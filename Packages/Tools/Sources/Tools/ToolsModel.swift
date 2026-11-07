@@ -12,6 +12,8 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var radialActions: [QuickAction] = QuickAction.allCases
     /// Extra rings, each a wedge in the first one.
     public var radialProfiles: [RadialProfile] = []
+    /// Apps, files and shortcuts on wedges of the first ring, after its actions.
+    public var radialLaunches: [RadialLaunch] = []
     public var colorFormat: ColorFormat = .hex
     public var scratchpadTabs: [ScratchpadTab] = []
     /// Use Sonary's own region selector, with a magnifier, instead of the system one.
@@ -22,6 +24,10 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var annotateAfterCapture = false
     /// Typing a snippet's trigger anywhere replaces it with the snippet.
     public var snippetTriggers = false
+    /// Cleaning mode also swallows brightness, volume, media and Mission Control keys.
+    public var cleaningBlocksSystemKeys = true
+    /// Cleaning mode leaves the screen visible and shows a small badge instead of black.
+    public var cleaningIndicatorOnly = false
     public var activeTab: UUID?
     public init() {}
 }
@@ -66,6 +72,7 @@ public final class ToolsModel {
     @ObservationIgnored public var externalCommands: @MainActor () -> [ExternalCommand] = { [] }
     @ObservationIgnored private var running = false
     @ObservationIgnored private let triggerTap = SnippetTriggerTap()
+    @ObservationIgnored private let scratchpadWindow = ScratchpadWindowController()
     /// Set when the trigger watcher could not start, which means Accessibility is missing.
     public private(set) var snippetTriggersNeedAccessibility = false
 
@@ -94,6 +101,12 @@ public final class ToolsModel {
         if isRecording { Task { await stopRecording() } }
         selector.close()
         editor.close()
+        scratchpadWindow.close()
+    }
+
+    /// Opens the notes in a floating window of their own.
+    public func showScratchpadWindow() {
+        scratchpadWindow.show(model: self)
     }
 
     /// The notes, with the old single scratchpad carried over the first time.
@@ -213,6 +226,9 @@ public final class ToolsModel {
         ShortcutDefinition(id: "tools.screenRecording", title: String(localized: "Record the screen", bundle: .module),
                            group: String(localized: "Tools", bundle: .module),
                            defaultCombo: .none),
+        ShortcutDefinition(id: "tools.scratchpad", title: String(localized: "Scratchpad in a window", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: .none),
     ] }
 
     private func applyShortcuts() {
@@ -226,6 +242,7 @@ public final class ToolsModel {
         shortcuts.bind("tools.screenshot") { [weak self] in self?.screenshotToClipboard() }
         shortcuts.bind("tools.radialMenu") { [weak self] in self?.showRadialMenu() }
         shortcuts.bind("tools.screenRecording") { [weak self] in self?.toggleRecording() }
+        shortcuts.bind("tools.scratchpad") { [weak self] in self?.showScratchpadWindow() }
     }
 
     // MARK: Tools
@@ -492,7 +509,10 @@ public final class ToolsModel {
         case .emptyTrash: SystemActions.emptyTrash()
         case .ejectDisks: SystemActions.ejectDisks()
         case .lockScreen: SystemActions.lockScreen()
-        case .cleaningMode: cleaning.start()
+        case .cleaningMode:
+            cleaning.blocksSystemKeys = settings.cleaningBlocksSystemKeys
+            cleaning.indicatorOnly = settings.cleaningIndicatorOnly
+            cleaning.start()
         case .pinScreenshot: pinScreenshot()
         case .cameraPreview: camera.toggle()
         case .screenRecording: toggleRecording()
@@ -505,17 +525,43 @@ public final class ToolsModel {
     }
 
     public func showRadialMenu() {
-        showRadialRing(radialRootItems(actions: settings.radialActions, profiles: settings.radialProfiles))
+        showRadialRing(radialRootItems(actions: settings.radialActions, launches: settings.radialLaunches,
+                                       profiles: settings.radialProfiles))
     }
 
     private func showRadialRing(_ items: [RadialItem]) {
         radial.show(items: items, run: { [weak self] action in
             self?.run(action)
+        }, launch: { [weak self] launch in
+            self?.run(launch)
         }, open: { [weak self] profile in
             self?.showRadialRing(radialProfileItems(profile))
         }, back: { [weak self] in
             self?.showRadialMenu()
         })
+    }
+
+    /// Opens the app or file, or presses the shortcut in the app in front.
+    public func run(_ launch: RadialLaunch) {
+        switch launch {
+        case .app(let path):
+            NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path), configuration: NSWorkspace.OpenConfiguration())
+        case .file(let path):
+            NSWorkspace.shared.open(URL(fileURLWithPath: path))
+        case .shortcut(let combo):
+            Task { @MainActor in
+                // Let the ring go first, so the keys reach the app behind it.
+                try? await Task.sleep(for: .milliseconds(60))
+                TypeText.press(combo)
+            }
+        }
+    }
+
+    public func setRadialProfileLaunches(_ id: UUID, _ launches: [RadialLaunch]) {
+        update { settings in
+            guard let index = settings.radialProfiles.firstIndex(where: { $0.id == id }) else { return }
+            settings.radialProfiles[index].launches = launches
+        }
     }
 
     public func addRadialProfile() {

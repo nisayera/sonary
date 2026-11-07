@@ -18,3 +18,15 @@ struct ButtonMappingTests {
         #expect(action(forButton: 3, in: mappings) == .back)
     }
 }
+
+struct ShortcutActionTests {
+    @Test func aRecordedShortcutReadsLikeTheKeys() {
+        let modifiers = shortcutModifiers(command: true, option: false, control: true, shift: false)
+        #expect(shortcutLabel(keyCode: 3, modifiers: modifiers) == "⌃⌘F")
+        #expect(shortcutLabel(keyCode: 49, modifiers: 0) == "Space")
+    }
+
+    @Test func anUnrecordedShortcutShowsNothing() {
+        #expect(shortcutLabel(keyCode: unrecordedKeyCode, modifiers: 0).isEmpty)
+    }
+}

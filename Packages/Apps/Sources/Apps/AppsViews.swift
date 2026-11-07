@@ -85,15 +85,27 @@ struct AppsPopoverView: View {
     }
 
     private var appsView: some View {
-        PanelGroup {
-            ForEach(model.runningApps, id: \.processIdentifier) { app in
-                row {
-                    if let icon = app.icon { Image(nsImage: icon).resizable().frame(width: 20, height: 20) }
-                    Text(app.localizedName ?? "?").lineLimit(1)
-                    Spacer()
-                    Button { model.quit(app, force: false) } label: { Text("Quit", bundle: .module) }
-                    Button(role: .destructive) { model.quit(app, force: true) } label: { Text("Force Quit", bundle: .module) }
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Button { model.quitAll(keepFront: true) } label: { Text("Quit all but the front app", bundle: .module) }
+                Button(role: .destructive) { model.quitAll(keepFront: false) } label: { Text("Quit all", bundle: .module) }
+                Spacer()
+            }
+            .controlSize(.small)
+            PanelGroup {
+                ForEach(model.runningApps, id: \.processIdentifier) { app in
+                    row {
+                        if let icon = app.icon { Image(nsImage: icon).resizable().frame(width: 20, height: 20) }
+                        Text(app.localizedName ?? "?").lineLimit(1)
+                        Spacer()
+                        Button { model.quit(app, force: false) } label: { Text("Quit", bundle: .module) }
+                        Button(role: .destructive) { model.quit(app, force: true) } label: { Text("Force Quit", bundle: .module) }
+                    }
                 }
+            }
+            if !model.settings.keepRunningOnQuitAll.isEmpty {
+                Text("Apps you keep running are left alone by Quit all.", bundle: .module)
+                    .font(.caption).foregroundStyle(.secondary)
             }
         }
     }
@@ -188,6 +200,13 @@ struct AppsSettingsView: View {
     let model: AppsModel
 
     var body: some View {
+        SettingsCard(Text("Quit all", bundle: .module)) {
+            Text("“Quit all” in the menu panel's Apps tab leaves these running.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+            AppListEditor(bundleIDs: Binding(get: { model.settings.keepRunningOnQuitAll },
+                                             set: { value in model.update { $0.keepRunningOnQuitAll = value } }),
+                          addTitle: Text("Add app…", bundle: .module), removeLabel: Text("Remove", bundle: .module))
+        }
         SettingsCard(Text("Uninstaller", bundle: .module)) {
             SettingsRow(symbol: "trash", title: Text("Remove an app completely", bundle: .module),
                         caption: Text("Moves the app and its settings, caches and data from your Library to the Trash.",

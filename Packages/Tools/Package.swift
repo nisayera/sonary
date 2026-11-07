@@ -13,6 +13,6 @@ let package = Package(
             .product(name: "SonaryUI", package: "SonaryUI"),
         ],
         resources: [.process("Resources")]),
-        .testTarget(name: "ToolsTests", dependencies: ["Tools"]),
+        .testTarget(name: "ToolsTests", dependencies: ["Tools", .product(name: "SonaryCore", package: "SonaryCore")]),
     ]
 )

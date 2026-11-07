@@ -53,6 +53,16 @@
         }
       }
     },
+    "Add app…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App hinzufügen …"
+          }
+        }
+      }
+    },
     "Add folder…": {
       "localizations": {
         "de": {
@@ -79,6 +89,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apps"
+          }
+        }
+      }
+    },
+    "Apps you keep running are left alone by Quit all.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps, die weiterlaufen sollen, lässt „Alle beenden“ in Ruhe."
           }
         }
       }
@@ -408,12 +428,42 @@
         }
       }
     },
+    "Quit all": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle beenden"
+          }
+        }
+      }
+    },
+    "Quit all but the front app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle außer der vorderen App beenden"
+          }
+        }
+      }
+    },
     "Refresh": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Aktualisieren"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernen"
           }
         }
       }
@@ -554,6 +604,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Xcode-Build-Daten"
+          }
+        }
+      }
+    },
+    "“Quit all” in the menu panel's Apps tab leaves these running.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„Alle beenden“ im Apps-Tab des Menüs lässt diese weiterlaufen."
           }
         }
       }
