@@ -39,6 +39,10 @@ public struct WindowsSettings: Codable, Equatable, Sendable {
     public var greenButtonMaximizes = false
     /// Apps whose green button keeps the macOS behaviour: games, players, emulators.
     public var greenButtonExceptions: [String] = []
+    /// A searchable list of windows, or one large icon per app.
+    public var switcherStyle: SwitcherStyle = .list
+    /// ⌘Tab opens Sonary's switcher; the macOS one is off meanwhile and comes back afterwards.
+    public var switcherTakesCommandTab = false
 
     public init() {}
 }
@@ -117,16 +121,30 @@ public final class WindowsModel {
     @ObservationIgnored private var modifierDragStart: (window: AXUIElement, frame: CGRect, pointer: CGPoint)?
     @ObservationIgnored private var hud: NSPanel?
     @ObservationIgnored private let switcher = WindowSwitcherController()
+    @ObservationIgnored private let commandTab = CommandTabTap()
+    @ObservationIgnored private let nativeSwitcher: NativeSwitcherGuard
+    @ObservationIgnored private var terminateObserver: (any NSObjectProtocol)?
+    /// Set when ⌘Tab could not be taken over because Accessibility is missing.
+    public private(set) var commandTabNeedsAccessibility = false
+    /// Set when macOS would not switch its own ⌘Tab off, so both switchers would open.
+    public private(set) var commandTabKeepsSystemSwitcher = false
     @ObservationIgnored private var running = false
 
-    public init(defaults: UserDefaults) {
+    public init(defaults: UserDefaults, hotKeys: any SystemHotKeyControlling = WindowServerHotKeys()) {
         self.defaults = defaults
         settings = StoredSettings.load(WindowsSettings.self, key: "windows.settings", from: defaults,
                                        fallback: WindowsSettings())
+        nativeSwitcher = NativeSwitcherGuard(control: hotKeys, defaults: defaults)
+        // Quitting never leaves the Mac without its own ⌘Tab.
+        terminateObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.willTerminateNotification, object: nil, queue: .main
+        ) { [nativeSwitcher] _ in nativeSwitcher.restore() }
     }
 
     func start() {
         running = true
+        // A crash while ⌘Tab was taken over left the system switcher off: put it back first.
+        nativeSwitcher.recoverIfNeeded()
         apply()
     }
 
@@ -189,7 +207,45 @@ public final class WindowsModel {
         if running, settings.modifierDrag != .off { startModifierDrag() } else { stopModifierDrag() }
         if running, settings.greenButtonMaximizes { installGreenButtonTap() } else { removeGreenButtonTap() }
         switcher.showsPreviews = settings.switcherPreviews
+        switcher.style = settings.switcherStyle
         if !running || !settings.windowSwitcher { switcher.close() }
+        if running, settings.windowSwitcher, settings.switcherTakesCommandTab { startCommandTab() } else { stopCommandTab() }
+    }
+
+    // MARK: ⌘Tab
+
+    private func startCommandTab() {
+        switcher.onClose = { [weak self] in self?.commandTab.closed() }
+        commandTab.onStep = { [weak self] step in self?.commandTabStep(step) }
+        guard commandTab.isRunning || commandTab.start() else {
+            commandTabNeedsAccessibility = true
+            return
+        }
+        commandTabNeedsAccessibility = false
+        commandTabKeepsSystemSwitcher = !nativeSwitcher.takeOver()
+    }
+
+    private func stopCommandTab() {
+        commandTab.stop()
+        nativeSwitcher.restore()
+        commandTabNeedsAccessibility = false
+        commandTabKeepsSystemSwitcher = false
+    }
+
+    private func commandTabStep(_ step: CommandTabStep) {
+        switch step {
+        case let .open(forward):
+            switcher.showsPreviews = settings.switcherPreviews && !frontAppPausesPreviews
+            switcher.showHeld(forward: forward)
+        case let .move(forward):
+            switcher.move(forward: forward)
+        case .choose:
+            switcher.chooseSelected()
+        case .cancel:
+            switcher.close()
+        case .pass, .swallow:
+            break
+        }
     }
 
     public func showSwitcher() {

@@ -159,6 +159,26 @@ struct WindowsSettingsView: View {
                               isOn: Binding(get: { model.settings.windowSwitcher },
                                             set: { value in model.update { $0.windowSwitcher = value } }))
             if model.settings.windowSwitcher {
+                SettingsRow(symbol: "square.grid.2x2", title: Text("Look", bundle: .module),
+                            caption: Text("The list finds a window by its title; the icons show one app each, like the macOS switcher.",
+                                          bundle: .module)) {
+                    Picker(selection: Binding(get: { model.settings.switcherStyle },
+                                              set: { value in model.update { $0.switcherStyle = value } })) {
+                        Text("Window list", bundle: .module).tag(SwitcherStyle.list)
+                        Text("App icons", bundle: .module).tag(SwitcherStyle.icons)
+                    } label: { EmptyView() }
+                        .labelsHidden().frame(width: 180)
+                }
+                SettingsToggleRow(symbol: "command", title: Text("Open it with ⌘Tab", bundle: .module),
+                                  caption: Text("Takes ⌘Tab over from macOS: hold ⌘, press Tab to move on, ⇧Tab to go back, and let go to switch. The macOS switcher comes back when this is off or Sonary quits.",
+                                                bundle: .module),
+                                  isOn: Binding(get: { model.settings.switcherTakesCommandTab },
+                                                set: { value in model.update { $0.switcherTakesCommandTab = value } }))
+                if model.commandTabNeedsAccessibility {
+                    SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.", bundle: .module))
+                } else if model.commandTabKeepsSystemSwitcher {
+                    SettingsWarning(Text("macOS kept its own switcher on, so ⌘Tab may open both.", bundle: .module))
+                }
                 SettingsToggleRow(symbol: "photo.on.rectangle", title: Text("Show a picture of each window", bundle: .module),
                                   caption: Text("Asks for the Screen Recording permission the first time.", bundle: .module),
                                   isOn: Binding(get: { model.settings.switcherPreviews },
