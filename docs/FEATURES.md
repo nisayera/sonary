@@ -62,8 +62,8 @@ At a glance, 113 entries: 95 done, 8 partly done, 4 open, 6 not planned.
 - [x] Keep Music.app from launching on the media keys
 
 ## Energy and display
-- [x] Keep awake — for 15 minutes, 1 or 2 hours, until a time you pick or until turned off, while an app runs, while plugged in, while a display is attached, with the lid closed; an optional pointer nudge for apps that watch for idle, and a cup in the menu bar while active
-- [~] Per-display brightness — the system's control, software dimming where there is none, shortcuts in 16, 32 or 64 steps, dimming below a display's minimum; missing: DDC for external monitors (needs a monitor to test the private I²C calls against)
+- [x] Keep awake (its own module and panel tab) — for 15 minutes, 1 or 2 hours, until a time you pick or until turned off, while an app runs, while plugged in, while a display is attached, with the lid closed; an optional pointer nudge for apps that watch for idle, and a cup in the menu bar while active
+- [x] Per-display brightness — the system's control, DDC/CI for regular external monitors (from Vorssaint, private I²C calls via CoreDisplay), software dimming where neither reaches, shortcuts in 16, 32 or 64 steps, dimming below a display's minimum
 - [~] XDR extra brightness — asks panels with headroom above white to open it; needs trying on a real XDR display
 - [x] Bluetooth off during sleep, switched back on at wake only if Sonary switched it off
 - [x] Wallpaper — a gallery of the system's pictures and your own folders, set on every display or one

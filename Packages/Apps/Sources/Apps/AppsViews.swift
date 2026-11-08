@@ -2,20 +2,6 @@ import AppKit
 import SonaryUI
 import SwiftUI
 
-private enum AppsSection: String, CaseIterable, Identifiable {
-    case clean, apps, processes, ports, updates
-    var id: String { rawValue }
-    var title: LocalizedStringKey {
-        switch self {
-        case .clean: "Clean"
-        case .apps: "Apps"
-        case .processes: "Processes"
-        case .ports: "Ports"
-        case .updates: "Updates"
-        }
-    }
-}
-
 func cleanTargetSymbol(_ id: String) -> String {
     switch id {
     case "caches": "shippingbox"
@@ -36,25 +22,23 @@ func cleanTargetTitle(_ id: String) -> LocalizedStringKey {
 
 struct AppsPopoverView: View {
     let model: AppsModel
-    @State private var section: AppsSection = .clean
+    /// The section that is open; one at a time, so the panel stays short and never scrolls.
+    @AppStorage("panel.apps.open") private var open = "clean"
     @State private var processQuery = ""
+    @State private var allApps = false
+    @State private var allProcesses = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.s) {
-            Picker(selection: $section) {
-                ForEach(AppsSection.allCases) { Text($0.title, bundle: .module).tag($0) }
-            } label: { EmptyView() }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+        VStack(alignment: .leading, spacing: 6) {
             if let installer = model.installer {
                 row {
                     Image(systemName: "externaldrive.badge.plus").foregroundStyle(Color.sonaryAccent)
                     VStack(alignment: .leading, spacing: 0) {
-                        Text(installer.name)
+                        Text(installer.name).lineLimit(1)
                         Text("Found on a mounted disk image", bundle: .module)
                             .font(.caption).foregroundStyle(.secondary)
                     }
-                    Spacer()
+                    Spacer(minLength: 4)
                     Button { Task { await model.install(installer) } } label: {
                         Text("Install", bundle: .module)
                     }
@@ -64,25 +48,73 @@ struct AppsPopoverView: View {
             }
             if let message = model.message {
                 Text(message).font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 2)
             }
-            switch section {
-            case .clean: cleanView.task { await model.scan() }
-            case .apps: appsView
-            case .processes: processesView.task {
-                // Refreshed while the tab is open, and not otherwise.
-                while !Task.isCancelled {
-                    await model.refreshProcesses()
-                    try? await Task.sleep(for: .seconds(3))
+            PanelDisclosure(symbol: "sparkles", title: Text("Clean", bundle: .module),
+                            isExpanded: $open.opens("clean")) {
+                let total = model.cleanTargets.compactMap(\.size).reduce(0, +)
+                if total > 0 { Text(verbatim: formatBytes(total)) }
+            } content: {
+                cleanView.task { await model.scan() }
+            }
+            PanelDisclosure(symbol: "app.badge", title: Text("Apps", bundle: .module),
+                            isExpanded: $open.opens("apps")) {
+                Text(verbatim: "\(model.runningApps.count)")
+            } content: {
+                appsView
+            }
+            PanelDisclosure(symbol: "cpu", title: Text("Processes", bundle: .module),
+                            isExpanded: $open.opens("processes")) {
+                processesView.task {
+                    // Refreshed while the section is open, and not otherwise.
+                    while !Task.isCancelled {
+                        await model.refreshProcesses()
+                        try? await Task.sleep(for: .seconds(3))
+                    }
                 }
             }
-            case .ports: portsView.task { await model.refreshPorts() }
-            case .updates: updatesView.task {
-                await model.refreshOutdated()
-                await model.refreshAppStore()
-                await model.checkAppUpdates()
+            PanelDisclosure(symbol: "network", title: Text("Ports", bundle: .module),
+                            isExpanded: $open.opens("ports")) {
+                if !model.ports.isEmpty { Text(verbatim: "\(model.ports.count)") }
+            } content: {
+                portsView.task { await model.refreshPorts() }
             }
+            PanelDisclosure(symbol: "arrow.down.app", title: Text("Updates", bundle: .module),
+                            isExpanded: $open.opens("updates")) {
+                let count = model.outdated.count + model.appStoreUpdates.count + model.appUpdates.count
+                if count > 0 {
+                    Text(verbatim: "\(count)").foregroundStyle(Color.sonaryAccent)
+                }
+            } content: {
+                updatesView.task {
+                    await model.refreshOutdated()
+                    await model.refreshAppStore()
+                    await model.checkAppUpdates()
+                }
             }
         }
+    }
+
+    /// Show all / show less under a list cut to its first rows.
+    private func more(_ count: Int, _ showsAll: Binding<Bool>) -> some View {
+        PanelMoreButton(showsAll: showsAll, more: Text("Show all (\(count))", bundle: .module),
+                        less: Text("Show less", bundle: .module))
+    }
+
+    /// A small icon button for a row, so a row's actions never push its name off the panel.
+    private func iconButton(_ symbol: String, _ label: Text, destructive: Bool = false,
+                            action: @escaping () -> Void) -> some View {
+        Button(role: destructive ? .destructive : nil, action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 13))
+                .foregroundStyle(destructive ? AnyShapeStyle(Color.red.opacity(0.85)) : AnyShapeStyle(.secondary))
+                .frame(width: 20, height: 20)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(label)
+        .accessibilityLabel(label)
     }
 
     private var cleanView: some View {
@@ -91,8 +123,8 @@ struct AppsPopoverView: View {
                 ForEach(model.cleanTargets) { target in
                     row {
                         IconBadge(symbol: cleanTargetSymbol(target.id), size: PanelMetrics.rowIconWidth)
-                        Text(cleanTargetTitle(target.id), bundle: .module)
-                        Spacer()
+                        Text(cleanTargetTitle(target.id), bundle: .module).lineLimit(1)
+                        Spacer(minLength: 4)
                         Text(target.size.map(formatBytes) ?? "…").foregroundStyle(.secondary).monospacedDigit()
                         Button { Task { await model.clean(target) } } label: { Text("Clean", bundle: .module) }
                             .disabled(model.isScanning || (target.size ?? 0) == 0)
@@ -100,32 +132,43 @@ struct AppsPopoverView: View {
                 }
             }
             Text("Cleaning moves the files to the Trash. Apps rebuild their caches when needed.", bundle: .module)
-                .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 2)
         }
     }
 
     private var appsView: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                Button { model.quitAll(keepFront: true) } label: { Text("Quit all but the front app", bundle: .module) }
-                Button(role: .destructive) { model.quitAll(keepFront: false) } label: { Text("Quit all", bundle: .module) }
-                Spacer()
+            HStack(spacing: 6) {
+                Button { model.quitAll(keepFront: true) } label: {
+                    Text("Quit all but the front app", bundle: .module).lineLimit(1).minimumScaleFactor(0.8)
+                }
+                Button(role: .destructive) { model.quitAll(keepFront: false) } label: {
+                    Text("Quit all", bundle: .module).lineLimit(1)
+                }
             }
             .controlSize(.small)
+            let apps = model.runningApps
             PanelGroup {
-                ForEach(model.runningApps, id: \.processIdentifier) { app in
+                ForEach(PanelListLimit.visible(apps, showsAll: allApps), id: \.processIdentifier) { app in
                     row {
                         if let icon = app.icon { Image(nsImage: icon).resizable().frame(width: 20, height: 20) }
-                        Text(app.localizedName ?? "?").lineLimit(1)
-                        Spacer()
-                        Button { model.quit(app, force: false) } label: { Text("Quit", bundle: .module) }
-                        Button(role: .destructive) { model.quit(app, force: true) } label: { Text("Force Quit", bundle: .module) }
+                        Text(app.localizedName ?? "?").lineLimit(1).truncationMode(.tail)
+                        Spacer(minLength: 4)
+                        iconButton("xmark.circle", Text("Quit", bundle: .module)) { model.quit(app, force: false) }
+                        iconButton("xmark.octagon", Text("Force Quit", bundle: .module), destructive: true) {
+                            model.quit(app, force: true)
+                        }
                     }
                 }
             }
+            if PanelListLimit.isLong(apps.count) { more(apps.count, $allApps) }
             if !model.settings.keepRunningOnQuitAll.isEmpty {
                 Text("Apps you keep running are left alone by Quit all.", bundle: .module)
                     .font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 2)
             }
         }
     }
@@ -138,12 +181,14 @@ struct AppsPopoverView: View {
                 PanelGroup {
                     ForEach(model.ports) { port in
                         row {
-                            Text(verbatim: ":\(port.port)").monospacedDigit().frame(width: 56, alignment: .leading)
-                            Text(port.command).lineLimit(1)
-                            Text(verbatim: "PID \(port.pid)").font(.caption).foregroundStyle(.secondary)
-                            Spacer()
-                            Button(role: .destructive) { Task { await model.stopProcess(pid: port.pid) } } label: {
-                                Text("Stop", bundle: .module)
+                            Text(verbatim: ":\(port.port)").monospacedDigit().frame(width: 52, alignment: .leading)
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(port.command).lineLimit(1)
+                                Text(verbatim: "PID \(port.pid)").font(.caption2).foregroundStyle(.secondary)
+                            }
+                            Spacer(minLength: 4)
+                            iconButton("stop.circle", Text("Stop", bundle: .module), destructive: true) {
+                                Task { await model.stopProcess(pid: port.pid) }
                             }
                         }
                     }
@@ -159,28 +204,31 @@ struct AppsPopoverView: View {
             TextField(text: $processQuery) { Text("Find a process", bundle: .module) }
                 .textFieldStyle(.roundedBorder)
                 .controlSize(.small)
+            let processes = filteredProcesses(model.processes, query: processQuery, limit: 40)
             PanelGroup {
-                ForEach(filteredProcesses(model.processes, query: processQuery, limit: 40)) { process in
+                ForEach(PanelListLimit.visible(processes, showsAll: allProcesses)) { process in
                     row {
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(verbatim: process.name).lineLimit(1)
-                            Text(verbatim: "\(process.pid) · \(process.user)").font(.caption2).foregroundStyle(.secondary)
+                            Text(verbatim: process.name).lineLimit(1).truncationMode(.tail)
+                            Text(verbatim: "\(String(format: "%.0f %%", process.cpu)) · \(formatBytes(process.memory))")
+                                .font(.caption2).monospacedDigit().foregroundStyle(.secondary).lineLimit(1)
                         }
-                        Spacer()
-                        Text(verbatim: String(format: "%.0f %%", process.cpu))
-                            .monospacedDigit().foregroundStyle(.secondary).frame(width: 44, alignment: .trailing)
-                        Text(verbatim: formatBytes(process.memory))
-                            .monospacedDigit().foregroundStyle(.secondary).frame(width: 64, alignment: .trailing)
-                        Button { Task { await model.end(process, force: false) } } label: { Text("Quit", bundle: .module) }
-                        Button(role: .destructive) { Task { await model.end(process, force: true) } } label: {
-                            Text("Force Quit", bundle: .module)
+                        Spacer(minLength: 4)
+                        iconButton("xmark.circle", Text("Quit", bundle: .module)) {
+                            Task { await model.end(process, force: false) }
+                        }
+                        iconButton("xmark.octagon", Text("Force Quit", bundle: .module), destructive: true) {
+                            Task { await model.end(process, force: true) }
                         }
                     }
                 }
             }
+            if PanelListLimit.isLong(processes.count) { more(processes.count, $allProcesses) }
             Text("Sorted by CPU. Quit asks a process to end; Force Quit ends it at once and loses unsaved work.",
                  bundle: .module)
-                .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 2)
         }
     }
 

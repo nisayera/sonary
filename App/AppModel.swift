@@ -108,7 +108,13 @@ final class AppModel {
                 tools.model.setText(text, for: tools.model.currentTab.id)
             }
         )
-        self.registry = ModuleRegistry(modules: [monitor, mouse, keyboard, notch, clipboard, apps, windows, display, sound, tools],
+        // Keep awake used to be part of sound; whoever had sound on keeps keep awake on.
+        let awake = KeepAwakeModule(model: sound.model)
+        if defaults.object(forKey: "module.awake.enabled") == nil, defaults.bool(forKey: "module.sound.enabled") {
+            defaults.set(true, forKey: "module.awake.enabled")
+        }
+        self.registry = ModuleRegistry(modules: [monitor, mouse, keyboard, notch, clipboard, apps, windows, display, sound,
+                                                 awake, tools],
                                        defaults: defaults, permissions: broker,
                                        missingPermissionText: { missingPermissionText($0) })
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")

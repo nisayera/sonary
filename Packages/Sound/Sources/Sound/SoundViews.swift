@@ -1,19 +1,8 @@
 import SonaryUI
 import SwiftUI
 
-func keepAwakeTitle(_ duration: KeepAwakeDuration) -> LocalizedStringKey {
-    switch duration {
-    case .fifteenMinutes: "15 min"
-    case .oneHour: "1 h"
-    case .twoHours: "2 h"
-    case .indefinitely: "Until I turn it off"
-    }
-}
-
 struct SoundPopoverView: View {
     let model: SoundModel
-    /// The time picked for "awake until", an hour from when the panel opened.
-    @State private var awakeUntil = Date().addingTimeInterval(3600)
 
     var body: some View {
         SettingsCard(Text("Output", bundle: .module)) {
@@ -84,53 +73,6 @@ struct SoundPopoverView: View {
                 try? await Task.sleep(for: .seconds(2))
             }
         }
-        SettingsCard(Text("Keep awake", bundle: .module)) {
-            if model.keepAwakeActive {
-                HStack {
-                    if let ends = model.keepAwakeEndsAt {
-                        Text("Awake until \(ends.formatted(date: .omitted, time: .shortened))", bundle: .module)
-                    } else {
-                        Text("Awake until you turn it off", bundle: .module)
-                    }
-                    Spacer()
-                    Button { model.setKeepAwake(nil, on: false) } label: { Text("Stop", bundle: .module) }
-                }
-            } else {
-                HStack(spacing: 6) {
-                    ForEach(KeepAwakeDuration.allCases, id: \.self) { duration in
-                        Button { model.setKeepAwake(duration, on: true) } label: {
-                            Text(keepAwakeTitle(duration), bundle: .module).lineLimit(1)
-                        }
-                    }
-                }
-                .controlSize(.small)
-                HStack(spacing: 6) {
-                    Text("Until", bundle: .module).font(.callout)
-                    DatePicker(selection: $awakeUntil, displayedComponents: .hourAndMinute) { EmptyView() }
-                        .labelsHidden()
-                    Button { model.keepAwake(until: awakeUntil) } label: { Text("Start", bundle: .module) }
-                    Spacer()
-                }
-                .controlSize(.small)
-                HStack(spacing: 6) {
-                    if !model.settings.keepAwakeApp.isEmpty {
-                        Button { model.keepAwakeWhileAppRuns(model.settings.keepAwakeApp) } label: {
-                            Text("While \(model.appName(for: model.settings.keepAwakeApp)) runs", bundle: .module)
-                                .lineLimit(1)
-                        }
-                    }
-                    Button { model.keepAwakeWhilePowered() } label: {
-                        Text("While plugged in", bundle: .module).lineLimit(1)
-                    }
-                    if model.hasExternalDisplay {
-                        Button { model.keepAwakeWhileDisplayConnected() } label: {
-                            Text("While a display is attached", bundle: .module).lineLimit(1)
-                        }
-                    }
-                }
-                .controlSize(.small)
-            }
-        }
     }
 
     private func devicePicker(_ list: [AudioDevice], selected: UInt32?, choose: @escaping (UInt32) -> Void) -> some View {
@@ -187,34 +129,8 @@ struct SoundSettingsView: View {
                 SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.", bundle: .module))
             }
         }
-        SettingsCard(Text("Keep awake", bundle: .module)) {
-            SettingsToggleRow(symbol: "laptopcomputer", title: Text("Stay awake with the lid closed", bundle: .module),
-                              caption: Text("Holds the stronger assertion, so an external display keeps working.", bundle: .module),
-                              isOn: Binding(get: { model.settings.keepAwakeWithClosedLid },
-                                            set: { value in model.update { $0.keepAwakeWithClosedLid = value } }))
-            SettingsToggleRow(symbol: "cup.and.saucer", title: Text("Show a cup in the menu bar while awake", bundle: .module),
-                              caption: Text("Its menu says until when, and stops keep awake.", bundle: .module),
-                              isOn: Binding(get: { model.settings.keepAwakeMenuBarIcon },
-                                            set: { value in model.update { $0.keepAwakeMenuBarIcon = value } }))
-            SettingsToggleRow(symbol: "cursorarrow.motionlines", title: Text("Nudge the pointer now and then", bundle: .module),
-                              caption: Text("Moves it by one pixel and back every minute or so, for apps that mark you away when there is no input. Needs Accessibility.",
-                                            bundle: .module),
-                              isOn: Binding(get: { model.settings.keepAwakeNudgesPointer },
-                                            set: { value in model.update { $0.keepAwakeNudgesPointer = value } }))
-            HStack {
-                Text("Keep awake while this app runs", bundle: .module)
-                Spacer()
-                Picker(selection: Binding(get: { model.settings.keepAwakeApp },
-                                          set: { value in model.update { $0.keepAwakeApp = value } })) {
-                    Text("None", bundle: .module).tag("")
-                    ForEach(model.runningApps) { Text($0.name).tag($0.id) }
-                } label: { EmptyView() }
-                    .labelsHidden()
-                    .frame(maxWidth: 180)
-            }
-        }
         SettingsCard(Text("In the menu panel", bundle: .module)) {
-            Text("Switch speakers and microphones, change the volume, mute the microphone and keep your Mac awake from the menu panel's sound tab.",
+            Text("Switch speakers and microphones, change the volume and mute the microphone from the menu panel's sound tab.",
                  bundle: .module)
                 .font(.callout).foregroundStyle(.secondary)
         }

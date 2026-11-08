@@ -9,6 +9,8 @@ struct PopoverView: View {
     let model: AppModel
     @State private var tab: PanelTab
     @State private var contentHeight: CGFloat = 320
+    /// The overview's open category; the others stay folded so the panel stays short.
+    @AppStorage("panel.overview.open") private var openCategory = "system"
     @Environment(\.openSettings) private var openSettings
 
     init(model: AppModel, initialTab: PanelTab = .overview) {
@@ -44,8 +46,12 @@ struct PopoverView: View {
                     contentHeight = height
                 }
             }
+            // Sections fold instead of scrolling. This only guards a screen too small for even one
+            // open section, and never shows a scroller: a visible one took width from the content
+            // and pushed it sideways when a mouse was attached.
+            .scrollIndicators(.never)
             .scrollBounceBehavior(.basedOnSize)
-            .frame(height: min(max(contentHeight, 40), PanelMetrics.maxContentHeight))
+            .frame(height: min(max(contentHeight, 40), maxContentHeight))
             footer(for: current)
         }
         .padding(PanelMetrics.padding)
@@ -54,6 +60,11 @@ struct PopoverView: View {
         .environment(\.sonarySurface, .panel)
         .environment(\.sonaryAppearance, model.appearance)
         .tint(Color.sonaryAccent)
+    }
+
+    /// As tall as the screen allows below the menu bar, less the header, tabs and footer.
+    private var maxContentHeight: CGFloat {
+        max(PanelMetrics.maxContentHeight, (NSScreen.main?.visibleFrame.height ?? 900) - 230)
     }
 
     private func currentTab(in panelModules: [any SonaryModule]) -> PanelTab {
@@ -72,12 +83,12 @@ struct PopoverView: View {
     /// a glance even before a tab is picked.
     private var header: some View {
         HStack(spacing: 10) {
-            SonaryMark()
-                .foregroundStyle(.white)
-                .padding(6)
-                .frame(width: 32, height: 32)
-                .background(Color.sonaryAccent.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                .shadow(color: Color.sonaryAccent.opacity(0.35), radius: 6, y: 2)
+            // The app's own icon, not the menu bar mark.
+            Image(nsImage: NSApplication.shared.applicationIconImage)
+                .resizable()
+                .interpolation(.high)
+                .frame(width: 34, height: 34)
+                .accessibilityHidden(true)
             if model.panelOptions.showsClock {
                 TimelineView(.periodic(from: Calendar.current.dateInterval(of: .minute, for: .now)?.start ?? .now,
                                        by: model.panelOptions.clockSeconds ? 1 : 60)) { context in
@@ -176,11 +187,10 @@ struct PopoverView: View {
             ForEach(ModuleCategory.allCases, id: \.self) { category in
                 let members = modules(in: category)
                 if !members.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        PanelSectionTitle(Text(category.title)) {
-                            count(members.filter { model.registry.isEnabled($0.id) }.count, of: members.count)
-                        }
-                        .padding(.horizontal, 2)
+                    PanelDisclosure(symbol: category.symbol, title: Text(category.title),
+                                    isExpanded: $openCategory.opens(category.storageID)) {
+                        count(members.filter { model.registry.isEnabled($0.id) }.count, of: members.count)
+                    } content: {
                         PanelGroup {
                             ForEach(members, id: \.id) { module in
                                 moduleRow(module)

@@ -11,19 +11,15 @@ struct PowerSection: View {
     let fahrenheit: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            PanelSectionTitle(Text("Power", bundle: .module))
-                .padding(.horizontal, 2)
-            VStack(alignment: .leading, spacing: 10) {
-                if let battery = latest.battery {
-                    batteryHeader(battery)
-                }
-                flow
-                drawChart
-                details
+        VStack(alignment: .leading, spacing: 10) {
+            if let battery = latest.battery {
+                batteryHeader(battery)
             }
-            .panelCard()
+            flow
+            drawChart
+            details
         }
+        .panelCard()
     }
 
     // MARK: Battery

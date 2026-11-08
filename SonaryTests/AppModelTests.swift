@@ -49,7 +49,7 @@ struct AppDataTests {
     }
 
     @Test func everythingTurnsOnEveryModule() {
-        #expect(Set(StarterBundle.everything.moduleIDs).count == 10)
+        #expect(Set(StarterBundle.everything.moduleIDs).count == 11)
         #expect(movedUp(["a", "b", "c"], at: 1) == ["b", "a", "c"])
     }
 }

@@ -4,64 +4,71 @@ import SonaryUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-private enum ToolsSection: String, CaseIterable, Identifiable {
-    case tools, toggles, scratchpad, snippets
-    var id: String { rawValue }
-    var title: LocalizedStringKey {
-        switch self {
-        case .tools: "Tools"
-        case .toggles: "Toggles"
-        case .scratchpad: "Scratchpad"
-        case .snippets: "Snippets"
-        }
-    }
-}
-
+/// The tools panel as one list, as in Vorssaint: a row per group that opens in place, one
+/// group open at a time, so nothing needs a scroller or runs past the panel's edge.
 struct ToolsPopoverView: View {
     let model: ToolsModel
-    @State private var section: ToolsSection = .tools
+    @AppStorage("panel.tools.open") private var open = "capture"
     @State private var convertingImages = false
     @State private var trimmingVideo = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.s) {
-            Picker(selection: $section) {
-                ForEach(ToolsSection.allCases) { Text($0.title, bundle: .module).tag($0) }
-            } label: { EmptyView() }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-            switch section {
-            case .tools: toolsView
-            case .toggles: togglesView
-            case .scratchpad: scratchpadView
-            case .snippets: snippetsView
+        VStack(alignment: .leading, spacing: 6) {
+            PanelDisclosure(symbol: "camera.viewfinder", title: Text("Capture", bundle: .module),
+                            isExpanded: $open.opens("capture")) {
+                PanelGroup {
+                    tool("camera.viewfinder", "Screenshot to clipboard", shortcut: "tools.screenshot") { model.screenshotToClipboard() }
+                    tool("text.viewfinder", "Copy text from screen", shortcut: "tools.textFromScreen") { model.recognizeText() }
+                    tool("eyedropper", "Pick a color", shortcut: "tools.colorPicker") { model.pickColor() }
+                    tool(model.isRecording ? "stop.circle" : "record.circle",
+                         model.isRecording ? "Stop recording" : "Record the screen",
+                         shortcut: "tools.screenRecording") { model.toggleRecording() }
+                    tool("arrow.down.doc", "Scrolling screenshot") { model.scrollingScreenshot() }
+                    tool("pin", "Pin a screenshot") { model.pinScreenshot() }
+                }
+            }
+            PanelDisclosure(symbol: "bolt", title: Text("Quick access", bundle: .module),
+                            isExpanded: $open.opens("launch")) {
+                PanelGroup {
+                    tool("magnifyingglass", "Command bar", shortcut: "tools.commandBar") { model.showCommandBar() }
+                    tool("circle.grid.cross", "Radial menu", shortcut: "tools.radialMenu") { model.showRadialMenu() }
+                    tool("square.grid.3x3", "Quick panel", shortcut: "tools.quickPanel") { model.toggleQuickPanel() }
+                    tool("web.camera", "Camera mirror") { model.toggleCamera() }
+                }
+            }
+            PanelDisclosure(symbol: "photo.on.rectangle.angled", title: Text("Media", bundle: .module),
+                            isExpanded: $open.opens("media")) {
+                PanelGroup {
+                    tool("photo.on.rectangle.angled", "Convert images…") { convertingImages = true }
+                    tool("film", "Make a video smaller…") { pickVideos(gif: false) }
+                    tool("photo.stack", "Turn a video into a GIF…") { pickVideos(gif: true) }
+                    tool("scissors", "Trim a video…") { trimmingVideo = true }
+                    tool("doc.text.viewfinder", "Copy text from image files…") { pickImagesForText() }
+                }
+            }
+            PanelDisclosure(symbol: "switch.2", title: Text("Toggles", bundle: .module),
+                            isExpanded: $open.opens("toggles")) {
+                togglesView
+            }
+            PanelDisclosure(symbol: "note.text", title: Text("Scratchpad", bundle: .module),
+                            isExpanded: $open.opens("scratchpad")) {
+                Text(verbatim: "\(model.tabs.count)")
+            } content: {
+                scratchpadView
+            }
+            PanelDisclosure(symbol: "text.quote", title: Text("Snippets", bundle: .module),
+                            isExpanded: $open.opens("snippets")) {
+                Text(verbatim: "\(model.settings.snippets.count)")
+            } content: {
+                snippetsView
             }
             if let result = model.lastResult {
-                Text(result).font(.caption).foregroundStyle(.secondary)
+                Text(result)
+                    .font(.caption).foregroundStyle(.secondary)
+                    .lineLimit(2).truncationMode(.middle)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 2)
             }
-        }
-    }
-
-    /// The tools as tiles, three to a row, each with its shortcut under it.
-    private var toolsView: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 7), count: 3), spacing: 7) {
-            tool("magnifyingglass", "Command bar", shortcut: "tools.commandBar") { model.showCommandBar() }
-            tool("text.viewfinder", "Copy text from screen", shortcut: "tools.textFromScreen") { model.recognizeText() }
-            tool("eyedropper", "Pick a color", shortcut: "tools.colorPicker") { model.pickColor() }
-            tool("camera.viewfinder", "Screenshot to clipboard", shortcut: "tools.screenshot") { model.screenshotToClipboard() }
-            tool("circle.grid.cross", "Radial menu", shortcut: "tools.radialMenu") { model.showRadialMenu() }
-            tool("square.grid.3x3", "Quick panel", shortcut: "tools.quickPanel") { model.toggleQuickPanel() }
-            tool("pin", "Pin a screenshot") { model.pinScreenshot() }
-            tool("web.camera", "Camera mirror") { model.toggleCamera() }
-            tool(model.isRecording ? "stop.circle" : "record.circle",
-                 model.isRecording ? "Stop recording" : "Record the screen",
-                 shortcut: "tools.screenRecording") { model.toggleRecording() }
-            tool("arrow.down.doc", "Scrolling screenshot") { model.scrollingScreenshot() }
-            tool("photo.on.rectangle.angled", "Convert images…") { convertingImages = true }
-            tool("film", "Make a video smaller…") { pickVideos(gif: false) }
-            tool("photo.stack", "Turn a video into a GIF…") { pickVideos(gif: true) }
-            tool("doc.text.viewfinder", "Copy text from image files…") { pickImagesForText() }
-            tool("scissors", "Trim a video…") { trimmingVideo = true }
         }
         .sheet(isPresented: $convertingImages) { ImageConversionSheet(model: model) }
         .sheet(isPresented: $trimmingVideo) { VideoTrimSheet(model: model) }
@@ -72,22 +79,20 @@ struct ToolsPopoverView: View {
             PanelGroup {
                 ForEach(quickToggleActions) { action in
                     Button { model.run(action) } label: {
-                        SettingsRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module)) {
-                            EmptyView()
-                        }
-                        .contentShape(Rectangle())
+                        PanelRow(symbol: action.symbol, title: Text(quickActionTitle(action), bundle: .module))
                     }
                     .buttonStyle(.plain)
-                    .panelRowInsets()
                 }
             }
             Text("Dark mode and the Trash ask once for permission to control the system.", bundle: .module)
-                .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 2)
         }
     }
 
     private var scratchpadView: some View {
-        ScratchpadEditor(model: model, editorHeight: 260)
+        ScratchpadEditor(model: model, editorHeight: 180)
     }
 
     private func pickImagesForText() {
@@ -107,32 +112,24 @@ struct ToolsPopoverView: View {
         if gif { model.makeGIFs(panel.urls) } else { model.compressVideos(panel.urls) }
     }
 
-    /// A tool with the shortcut it has right now: the user may have changed it on the
-    /// Shortcuts page, and it shows only while the tools' shortcuts are on.
+    /// A tool as a row, with the shortcut it has right now on the right: the user may have changed
+    /// it on the Shortcuts page, and it shows only while the tools' shortcuts are on.
     private func tool(_ symbol: String, _ title: LocalizedStringKey, shortcut id: String? = nil,
                       action: @escaping () -> Void) -> some View {
         let combo = id.map { ShortcutStore.shared.combo(for: $0) } ?? KeyCombo.none
         let shortcut = model.settings.shortcuts ? shortcutDisplay(combo) : ""
         return Button(action: action) {
-            VStack(spacing: 5) {
-                IconBadge(symbol: symbol, size: 28)
-                Text(title, bundle: .module)
-                    .font(.system(size: 10.5, weight: .medium))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(verbatim: shortcut.isEmpty ? " " : shortcut)
-                    .font(.system(size: 9, weight: .medium).monospaced())
-                    .foregroundStyle(.secondary)
+            PanelRow(symbol: symbol, title: Text(title, bundle: .module)) {
+                if !shortcut.isEmpty {
+                    Text(verbatim: shortcut)
+                        .font(.system(size: 10, weight: .medium).monospaced())
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
             }
-            .padding(.horizontal, 4)
-            .padding(.vertical, 8)
-            .frame(maxWidth: .infinity, minHeight: 92, alignment: .top)
-            .panelCard(padded: false)
-            .contentShape(RoundedRectangle(cornerRadius: PanelMetrics.cardRadius, style: .continuous))
         }
         .buttonStyle(.plain)
-        .help(Text(title, bundle: .module))
     }
 
     private var snippetsView: some View {
@@ -141,16 +138,16 @@ struct ToolsPopoverView: View {
                 PanelGroup {
                     ForEach(model.settings.snippets) { snippet in
                         Button { model.insert(snippet) } label: {
-                            SettingsRow(symbol: "text.quote", title: Text(snippet.title),
-                                        caption: Text(snippet.text)) { EmptyView() }
-                                .contentShape(Rectangle())
+                            PanelRow(symbol: "text.quote", title: Text(snippet.title),
+                                     caption: Text(snippet.text.replacingOccurrences(of: "\n", with: " ")))
                         }
                         .buttonStyle(.plain)
-                        .panelRowInsets()
                     }
                 }
             }
-            Text("Edit snippets in Sonary's settings.", bundle: .module).font(.caption).foregroundStyle(.secondary)
+            Text("Edit snippets in Sonary's settings.", bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
+                .padding(.horizontal, 2)
         }
     }
 }

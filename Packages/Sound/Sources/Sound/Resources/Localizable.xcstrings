@@ -52,6 +52,26 @@
         }
       }
     },
+    "As long as": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solange"
+          }
+        }
+      }
+    },
+    "Awake": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wach"
+          }
+        }
+      }
+    },
     "Awake until %@": {
       "localizations": {
         "de": {
@@ -68,6 +88,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wach, bis du es ausschaltest"
+          }
+        }
+      }
+    },
+    "Duration": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dauer"
           }
         }
       }
@@ -441,6 +471,16 @@
         }
       }
     },
+    "Start keep awake for a while, until a time, or as long as an app runs, the Mac is plugged in or a display is attached, from the menu panel's keep awake tab.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wach halten für eine Weile, bis zu einer Uhrzeit oder solange eine App läuft, der Mac am Strom hängt oder ein Bildschirm angeschlossen ist – im Wachhalten-Reiter des Menüs."
+          }
+        }
+      }
+    },
     "Stay awake with the lid closed": {
       "extractionState": "manual",
       "localizations": {
@@ -483,12 +523,12 @@
         }
       }
     },
-    "Switch speakers and microphones, change the volume, mute the microphone and keep your Mac awake from the menu panel's sound tab.": {
+    "Switch speakers and microphones, change the volume and mute the microphone from the menu panel's sound tab.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Im Ton-Tab des Menüs wechselst du Lautsprecher und Mikrofone, änderst die Lautstärke, schaltest das Mikrofon stumm und hältst deinen Mac wach."
+            "value": "Lautsprecher und Mikrofone wechseln, die Lautstärke ändern und das Mikrofon stummschalten – im Ton-Reiter des Menüs."
           }
         }
       }
