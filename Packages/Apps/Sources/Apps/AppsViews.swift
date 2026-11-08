@@ -22,7 +22,7 @@ func cleanTargetTitle(_ id: String) -> LocalizedStringKey {
 
 struct AppsPopoverView: View {
     let model: AppsModel
-    /// The section that is open; one at a time, so the panel stays short and never scrolls.
+    /// The sections that are open, as a comma-separated list; each opens and closes on its own.
     @AppStorage("panel.apps.open") private var open = "clean"
     @State private var processQuery = ""
     @State private var allApps = false

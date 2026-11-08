@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// A section of the menu panel that opens in place: a row with an icon, a title, a short summary
-/// on the right and a chevron. The panel does not scroll, so anything long folds away behind one
-/// of these instead of running past the bottom of the screen.
+/// on the right and a chevron. Anything long folds away behind one of these instead of running
+/// past the bottom of the screen.
 public struct PanelDisclosure<Summary: View, Content: View>: View {
     private let symbol: String
     private let title: Text
@@ -65,14 +65,26 @@ public extension PanelDisclosure where Summary == EmptyView {
 }
 
 public extension Binding where Value == String {
-    /// For a set of `PanelDisclosure`s that behave as one accordion: true while `id` is the open
-    /// section, and opening one closes the one that was open, so the panel never grows past one
-    /// section's worth of content.
+    /// For a group of `PanelDisclosure`s whose open sections are kept in one stored string, as
+    /// a comma-separated list of ids. Each section opens and closes on its own; opening one
+    /// leaves the others as they are.
     func opens(_ id: String) -> Binding<Bool> {
         let source = self
-        return Binding<Bool>(get: { source.wrappedValue == id },
-                             set: { source.wrappedValue = $0 ? id : "" })
+        return Binding<Bool>(get: { panelOpenSections(source.wrappedValue).contains(id) },
+                             set: { source.wrappedValue = panelTogglingSection(id, open: $0, in: source.wrappedValue) })
     }
+}
+
+/// The ids in a stored list of open sections.
+public func panelOpenSections(_ stored: String) -> [String] {
+    stored.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+}
+
+/// The stored list with one section opened or closed, the others kept as they were.
+public func panelTogglingSection(_ id: String, open: Bool, in stored: String) -> String {
+    var sections = panelOpenSections(stored).filter { $0 != id }
+    if open { sections.append(id) }
+    return sections.joined(separator: ",")
 }
 
 /// How many rows of a long list the panel shows before "Show all" (`PanelMoreButton`).

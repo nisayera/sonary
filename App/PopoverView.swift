@@ -9,7 +9,7 @@ struct PopoverView: View {
     let model: AppModel
     @State private var tab: PanelTab
     @State private var contentHeight: CGFloat = 320
-    /// The overview's open category; the others stay folded so the panel stays short.
+    /// The overview's open categories, as a comma-separated list; each opens on its own.
     @AppStorage("panel.overview.open") private var openCategory = "system"
     @Environment(\.openSettings) private var openSettings
 

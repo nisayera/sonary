@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 
 struct ClipboardPopoverView: View {
     let model: ClipboardModel
-    /// The section that is open; one at a time, so the panel stays short and never scrolls.
+    /// The sections that are open, as a comma-separated list; each opens and closes on its own.
     @AppStorage("panel.clipboard.open") private var open = "history"
     @State private var query = ""
     @State private var dropTargeted = false
