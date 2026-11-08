@@ -83,12 +83,12 @@ struct PopoverView: View {
     /// a glance even before a tab is picked.
     private var header: some View {
         HStack(spacing: 10) {
-            SonaryMark()
-                .foregroundStyle(.white)
-                .padding(6)
-                .frame(width: 32, height: 32)
-                .background(Color.sonaryAccent.gradient, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                .shadow(color: Color.sonaryAccent.opacity(0.35), radius: 6, y: 2)
+            // The app's own icon, not the menu bar mark.
+            Image(nsImage: NSApplication.shared.applicationIconImage)
+                .resizable()
+                .interpolation(.high)
+                .frame(width: 34, height: 34)
+                .accessibilityHidden(true)
             if model.panelOptions.showsClock {
                 TimelineView(.periodic(from: Calendar.current.dateInterval(of: .minute, for: .now)?.start ?? .now,
                                        by: model.panelOptions.clockSeconds ? 1 : 60)) { context in

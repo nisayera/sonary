@@ -412,7 +412,7 @@ final class DDCController: @unchecked Sendable {
             defer { IOObjectRelease(entry) }
             var nameBuffer = [CChar](repeating: 0, count: 128)
             guard IORegistryEntryGetName(entry, &nameBuffer) == KERN_SUCCESS else { continue }
-            let name = String(cString: nameBuffer)
+            let name = Self.string(nameBuffer)
 
             if name.contains("AppleCLCD2") || name.contains("IOMobileFramebufferShim") {
                 ordinal += 1
@@ -423,7 +423,7 @@ final class DDCController: @unchecked Sendable {
                 }
                 var path = [CChar](repeating: 0, count: 512)
                 if IORegistryEntryGetPath(entry, kIOServicePlane, &path) == KERN_SUCCESS {
-                    pending.ioDisplayLocation = String(cString: path)
+                    pending.ioDisplayLocation = Self.string(path)
                 }
                 if let attributes = property(entry, "DisplayAttributes") as? NSDictionary,
                    let product = attributes["ProductAttributes"] as? NSDictionary {
@@ -438,6 +438,11 @@ final class DDCController: @unchecked Sendable {
             }
         }
         return results
+    }
+
+    /// A NUL-terminated C buffer as a string.
+    private static func string(_ buffer: [CChar]) -> String {
+        String(decoding: buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self)
     }
 
     private static func property(_ entry: io_service_t, _ key: String) -> AnyObject? {
