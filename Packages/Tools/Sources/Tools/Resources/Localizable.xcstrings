@@ -687,6 +687,16 @@
         }
       }
     },
+    "Media": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medien"
+          }
+        }
+      }
+    },
     "New note": {
       "localizations": {
         "de": {
@@ -934,6 +944,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "In die Zwischenablage legen"
+          }
+        }
+      }
+    },
+    "Quick access": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellzugriff"
           }
         }
       }

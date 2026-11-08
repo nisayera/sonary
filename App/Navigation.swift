@@ -34,9 +34,29 @@ enum ModuleCategory: CaseIterable, Hashable {
         }
     }
 
+    /// The badge of the category's foldable section in the panel's overview.
+    var symbol: String {
+        switch self {
+        case .system: "cpu"
+        case .input: "computermouse"
+        case .windows: "macwindow"
+        case .files: "folder"
+        }
+    }
+
+    /// The key the panel remembers the open section by.
+    var storageID: String {
+        switch self {
+        case .system: "system"
+        case .input: "input"
+        case .windows: "windows"
+        case .files: "files"
+        }
+    }
+
     var moduleIDs: [String] {
         switch self {
-        case .system: ["monitor", "display", "sound"]
+        case .system: ["monitor", "display", "sound", "awake"]
         case .input: ["mouse", "keyboard"]
         case .windows: ["windows", "notch"]
         case .files: ["clipboard", "apps", "tools"]

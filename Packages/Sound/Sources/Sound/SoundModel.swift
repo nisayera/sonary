@@ -138,7 +138,7 @@ public final class SoundModel {
         refreshTask?.cancel()
         refreshTask = nil
         applyShortcut(running: false)
-        setKeepAwake(nil, on: false)
+        // Keep awake belongs to its own module now and ends when that one stops.
     }
 
     public func refresh() {

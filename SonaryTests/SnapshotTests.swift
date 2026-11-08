@@ -19,7 +19,7 @@ struct SnapshotTests {
         let model = AppModel(defaults: defaults, startUpdater: false)
         // Modules that need no permission and no audio or display hardware can run on CI (a CI
         // machine has no microphone, and Core Audio and display services can stall there).
-        let running = ["monitor", "clipboard", "apps", "tools"]
+        let running = ["monitor", "clipboard", "apps", "tools", "awake"]
         for id in running {
             print("SNAPSHOT starting \(id)")
             await model.registry.setEnabled(id, true)

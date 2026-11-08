@@ -35,11 +35,6 @@ public final class SoundModule: SonaryModule {
             items.append(ModuleStatus(id: "mic", symbol: "mic.slash.fill", title: String(localized: "Microphone", bundle: .module),
                                       value: String(localized: "Muted", bundle: .module), level: .warning))
         }
-        if model.keepAwakeActive {
-            items.append(ModuleStatus(id: "awake", symbol: "cup.and.saucer.fill",
-                                      title: String(localized: "Keep awake", bundle: .module),
-                                      value: model.keepAwakeEndsAt.map { $0.formatted(date: .omitted, time: .shortened) } ?? "∞"))
-        }
         return items
     }
     public func makePopoverView() -> AnyView? { AnyView(SoundPopoverView(model: model)) }

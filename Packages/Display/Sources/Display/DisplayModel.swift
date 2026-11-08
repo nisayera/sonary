@@ -17,6 +17,8 @@ public struct DisplaySettings: Codable, Equatable, Sendable {
     public var dimBelowMinimum = false
     /// The user's own folders of desktop pictures, besides the system's.
     public var wallpaperFolders: [String] = []
+    /// The last brightness sent over DDC per display, for monitors that cannot be read back.
+    public var ddcBrightness: [String: Double] = [:]
 
     public init() {}
 }
@@ -41,6 +43,14 @@ public final class DisplayModel {
     /// How far below its minimum each hardware display is dimmed, 0 to 1. Not kept across
     /// restarts: a display should never wake up darker than its own minimum.
     public private(set) var belowMinimum: [CGDirectDisplayID: Double] = [:]
+    /// Regular external monitors, which macOS's own brightness control does not reach, are
+    /// driven over DDC/CI as their own buttons are.
+    @ObservationIgnored private let ddc = DDCController()
+    /// Displays already asked over DDC. Cleared when the set of screens changes, so a monitor is
+    /// not probed every time the panel opens.
+    @ObservationIgnored private var ddcProbed: Set<CGDirectDisplayID> = []
+    /// The last level sent over DDC, for monitors that accept writes but never answer a read.
+    @ObservationIgnored private var ddcLevels: [CGDirectDisplayID: Double] = [:]
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
@@ -55,7 +65,10 @@ public final class DisplayModel {
             screenObserver = NotificationCenter.default.addObserver(
                 forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
             ) { [weak self] _ in
-                MainActor.assumeIsolated { self?.refresh() }
+                MainActor.assumeIsolated {
+                    self?.ddcProbed.removeAll()
+                    self?.refresh()
+                }
             }
         }
         applyShortcuts()
@@ -108,13 +121,31 @@ public final class DisplayModel {
     }
 
     public func refresh() {
+        var unprobed: [CGDirectDisplayID] = []
         displays = NSScreen.screens.compactMap { screen in
             guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { return nil }
             let id = CGDirectDisplayID(number.uint32Value)
+            let isBuiltIn = CGDisplayIsBuiltin(id) != 0
             let hardware = DisplayServicesBridge.brightness(of: id)
             let software = settings.softwareBrightness[String(id)] ?? 1
-            return DisplayInfo(id: id, name: screen.localizedName, isBuiltIn: CGDisplayIsBuiltin(id) != 0,
+            // The system answers for the built-in panel and Apple displays; every other external
+            // monitor is asked over DDC, once per arrangement of screens.
+            if hardware == nil, !isBuiltIn {
+                if ddc.hasRoute(id) {
+                    return DisplayInfo(id: id, name: screen.localizedName, isBuiltIn: false,
+                                       hasHardwareControl: true, brightness: ddcLevels[id] ?? 1)
+                }
+                if !ddcProbed.contains(id) { unprobed.append(id) }
+            }
+            return DisplayInfo(id: id, name: screen.localizedName, isBuiltIn: isBuiltIn,
                                hasHardwareControl: hardware != nil, brightness: hardware ?? software)
+        }
+        ddc.keepOnly(Set(displays.map(\.id)))
+        if running, !unprobed.isEmpty {
+            ddcProbed.formUnion(unprobed)
+            ddc.discover(unprobed) { [weak self] found in
+                Task { @MainActor in self?.adoptDDC(found) }
+            }
         }
         for display in displays {
             if !display.hasHardwareControl {
@@ -124,6 +155,21 @@ public final class DisplayModel {
             }
         }
         applyExtraBrightness()
+    }
+
+    /// Moves the monitors DDC reaches off the dimming overlay and onto their own backlight.
+    private func adoptDDC(_ found: [CGDirectDisplayID: DDCController.Probe]) {
+        guard running, !found.isEmpty else { return }
+        for (id, probe) in found {
+            switch probe {
+            case let .readable(level):
+                ddcLevels[id] = level
+            case .writeOnly:
+                // Never answers a read: start from the level last sent, or the middle.
+                ddcLevels[id] = ddcLevels[id] ?? settings.ddcBrightness[String(id)] ?? 0.5
+            }
+        }
+        refresh()
     }
 
     // MARK: Extra brightness
@@ -163,6 +209,16 @@ public final class DisplayModel {
 
     public func setBrightness(_ value: Double, for id: CGDirectDisplayID) {
         let brightness = clampedBrightness(value)
+        if ddc.hasRoute(id) {
+            ddc.setBrightness(brightness, for: id)
+            ddcLevels[id] = brightness
+            update(id: id, brightness: brightness)
+            if belowMinimum[id] != nil, brightness > 0 { setBelowMinimum(0, for: id) }
+            var settings = settings
+            settings.ddcBrightness[String(id)] = brightness
+            save(settings)
+            return
+        }
         if DisplayServicesBridge.setBrightness(brightness, of: id) {
             update(id: id, brightness: brightness)
             if belowMinimum[id] != nil, brightness > 0 { setBelowMinimum(0, for: id) }

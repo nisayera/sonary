@@ -9,6 +9,8 @@ public struct MonitorView: View {
     let module: MonitorModule
     /// The usage row opened to its longer graph, by title.
     @State private var expanded: String?
+    /// The detail section that is open; the others fold so the panel never needs to scroll.
+    @AppStorage("panel.monitor.open") private var open = "usage"
 
     public init(module: MonitorModule) {
         self.module = module
@@ -19,17 +21,52 @@ public struct MonitorView: View {
             let history = module.history
             VStack(alignment: .leading, spacing: PanelMetrics.spacing) {
                 if module.shows(.rings) { tiles(latest) }
-                if module.shows(.power), latest.power != nil || latest.battery != nil {
-                    PowerSection(latest: latest, history: history, batteryTime: module.batteryTime,
-                                 fahrenheit: module.fahrenheit)
-                }
-                if module.shows(.usage) { usage(latest, history: history) }
-                if module.shows(.network) { network(latest, history: history) }
-                if module.shows(.processes), !module.topProcesses.isEmpty {
-                    busiest
-                }
-                if module.shows(.usb), !module.usbDevices.isEmpty {
-                    usb
+                VStack(alignment: .leading, spacing: 6) {
+                    if module.shows(.power), latest.power != nil || latest.battery != nil {
+                        PanelDisclosure(symbol: "bolt", title: Text("Power", bundle: .module),
+                                        isExpanded: $open.opens("power")) {
+                            if let watts = latest.power?.systemWatts {
+                                Text(verbatim: String(format: "%.1f W", watts))
+                            }
+                        } content: {
+                            PowerSection(latest: latest, history: history, batteryTime: module.batteryTime,
+                                         fahrenheit: module.fahrenheit)
+                        }
+                    }
+                    if module.shows(.usage) {
+                        PanelDisclosure(symbol: "chart.bar", title: Text("Usage", bundle: .module),
+                                        isExpanded: $open.opens("usage")) {
+                            Text(verbatim: "CPU \(percent(latest.cpu))")
+                        } content: {
+                            usage(latest, history: history)
+                        }
+                    }
+                    if module.shows(.network) {
+                        PanelDisclosure(symbol: "network", title: Text("Network", bundle: .module),
+                                        isExpanded: $open.opens("network")) {
+                            Text(verbatim: "↓ " + formatRate(latest.network.bytesInPerSec))
+                        } content: {
+                            network(latest, history: history)
+                        }
+                    }
+                    if module.shows(.processes), !module.topProcesses.isEmpty {
+                        PanelDisclosure(symbol: "list.number", title: Text("Busiest apps", bundle: .module),
+                                        isExpanded: $open.opens("processes")) {
+                            if let top = module.topProcesses.first {
+                                Text(verbatim: top.name)
+                            }
+                        } content: {
+                            busiest
+                        }
+                    }
+                    if module.shows(.usb), !module.usbDevices.isEmpty {
+                        PanelDisclosure(symbol: "cable.connector", title: Text("USB devices", bundle: .module),
+                                        isExpanded: $open.opens("usb")) {
+                            Text(verbatim: "\(module.usbDevices.count)")
+                        } content: {
+                            usb
+                        }
+                    }
                 }
             }
         } else {
@@ -93,8 +130,6 @@ public struct MonitorView: View {
 
     private func usage(_ latest: MetricsSnapshot, history: [MetricsSnapshot]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            PanelSectionTitle(Text("Usage", bundle: .module))
-                .padding(.horizontal, 2)
             VStack(alignment: .leading, spacing: 10) {
                 usageRow("CPU", fraction: latest.cpu, color: .sonaryAccent, series: history.map(\.cpu))
                 if !latest.cores.isEmpty {
@@ -123,8 +158,6 @@ public struct MonitorView: View {
     private func network(_ latest: MetricsSnapshot, history: [MetricsSnapshot]) -> some View {
         let incoming = history.map(\.network.bytesInPerSec)
         return VStack(alignment: .leading, spacing: 6) {
-            PanelSectionTitle(Text("Network", bundle: .module))
-                .padding(.horizontal, 2)
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Label { Text(verbatim: formatRate(latest.network.bytesInPerSec)) } icon: {
@@ -183,8 +216,6 @@ public struct MonitorView: View {
 
     private var usb: some View {
         VStack(alignment: .leading, spacing: 6) {
-            PanelSectionTitle(Text("USB devices", bundle: .module))
-                .padding(.horizontal, 2)
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(module.usbDevices) { device in
                     HStack {
@@ -203,8 +234,6 @@ public struct MonitorView: View {
 
     private var busiest: some View {
         VStack(alignment: .leading, spacing: 6) {
-            PanelSectionTitle(Text("Busiest apps", bundle: .module))
-                .padding(.horizontal, 2)
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(module.topProcesses) { process in
                     HStack {

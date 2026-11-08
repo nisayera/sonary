@@ -3,36 +3,32 @@ import SonaryUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-private enum ClipboardSection: String, CaseIterable, Identifiable {
-    case history, shelf, finder
-    var id: String { rawValue }
-    var title: LocalizedStringKey {
-        switch self {
-        case .history: "History"
-        case .shelf: "Shelf"
-        case .finder: "Finder"
-        }
-    }
-}
-
 struct ClipboardPopoverView: View {
     let model: ClipboardModel
-    @State private var section: ClipboardSection = .history
+    /// The section that is open; one at a time, so the panel stays short and never scrolls.
+    @AppStorage("panel.clipboard.open") private var open = "history"
     @State private var query = ""
     @State private var dropTargeted = false
     @State private var linkToClean = ""
+    @State private var showsAllHistory = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.s) {
-            Picker(selection: $section) {
-                ForEach(ClipboardSection.allCases) { Text($0.title, bundle: .module).tag($0) }
-            } label: { EmptyView() }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-            switch section {
-            case .history: historyView
-            case .shelf: shelfView
-            case .finder: finderView
+        VStack(alignment: .leading, spacing: 6) {
+            PanelDisclosure(symbol: "doc.on.clipboard", title: Text("History", bundle: .module),
+                            isExpanded: $open.opens("history")) {
+                Text(verbatim: "\(model.history.entries.count)")
+            } content: {
+                historyView
+            }
+            PanelDisclosure(symbol: "tray", title: Text("Shelf", bundle: .module),
+                            isExpanded: $open.opens("shelf")) {
+                if !model.shelf.isEmpty { Text(verbatim: "\(model.shelf.count)") }
+            } content: {
+                shelfView
+            }
+            PanelDisclosure(symbol: "folder", title: Text("Finder", bundle: .module),
+                            isExpanded: $open.opens("finder")) {
+                finderView
             }
         }
     }
@@ -47,7 +43,7 @@ struct ClipboardPopoverView: View {
             }
             if !entries.isEmpty {
                 PanelGroup {
-                    ForEach(entries) { entry in
+                    ForEach(PanelListLimit.visible(entries, showsAll: showsAllHistory)) { entry in
                         HStack(spacing: 8) {
                             Button { model.copy(entry) } label: {
                                 HStack(spacing: 8) {
@@ -72,6 +68,10 @@ struct ClipboardPopoverView: View {
                         .panelRowInsets()
                     }
                 }
+            }
+            if PanelListLimit.isLong(entries.count) {
+                PanelMoreButton(showsAll: $showsAllHistory, more: Text("Show all (\(entries.count))", bundle: .module),
+                                less: Text("Show less", bundle: .module))
             }
             if !model.history.entries.isEmpty {
                 Button(role: .destructive) { model.clearHistory() } label: {

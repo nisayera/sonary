@@ -505,6 +505,16 @@
         }
       }
     },
+    "Keeps the Mac awake for a while, until a time, or while an app runs or it is plugged in.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hält den Mac wach – für eine Weile, bis zu einer Uhrzeit oder solange eine App läuft oder er am Strom hängt."
+          }
+        }
+      }
+    },
     "Keyboard & mouse": {
       "localizations": {
         "de": {
@@ -1127,12 +1137,12 @@
         }
       }
     },
-    "Switch speakers and microphones, volume, microphone mute on ⌃⌥M and keep awake.": {
+    "Switch speakers and microphones, volume and microphone mute on ⌃⌥M.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lautsprecher und Mikrofone wechseln, Lautstärke, Mikrofon stumm per ⌃⌥M und Wachhalten."
+            "value": "Lautsprecher und Mikrofone wechseln, Lautstärke und Mikrofon-Stummschaltung auf ⌃⌥M."
           }
         }
       }
