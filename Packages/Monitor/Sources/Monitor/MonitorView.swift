@@ -9,7 +9,7 @@ public struct MonitorView: View {
     let module: MonitorModule
     /// The usage row opened to its longer graph, by title.
     @State private var expanded: String?
-    /// The detail section that is open; the others fold so the panel never needs to scroll.
+    /// The detail sections that are open, as a comma-separated list; each opens on its own.
     @AppStorage("panel.monitor.open") private var open = "usage"
 
     public init(module: MonitorModule) {

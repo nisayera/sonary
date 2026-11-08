@@ -4,8 +4,8 @@ import SonaryUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The tools panel as one list, as in Vorssaint: a row per group that opens in place, one
-/// group open at a time, so nothing needs a scroller or runs past the panel's edge.
+/// The tools panel as one list, as in Vorssaint: a row per group that opens in place, each on its
+/// own, so nothing runs past the panel's edge.
 struct ToolsPopoverView: View {
     let model: ToolsModel
     @AppStorage("panel.tools.open") private var open = "capture"
