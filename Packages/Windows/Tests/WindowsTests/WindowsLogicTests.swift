@@ -691,3 +691,27 @@ struct NativeSwitcherGuardTests {
         #expect(keys.table == [1: true, 2: true])
     }
 }
+
+struct DragDetectionTests {
+    private let start = CGRect(x: 100, y: 100, width: 800, height: 600)
+
+    @Test func aWindowThatMovedIsBeingDragged() {
+        #expect(isWindowMove(from: start, to: CGRect(x: 140, y: 90, width: 800, height: 600)))
+    }
+
+    @Test func aDragThatLeavesTheWindowAloneDoesNotSnap() {
+        // Selecting text or dragging a file to the edge of the screen.
+        #expect(!isWindowMove(from: start, to: start))
+    }
+
+    @Test func resizingIsNotMoving() {
+        #expect(!isWindowMove(from: start, to: CGRect(x: 60, y: 100, width: 840, height: 600)))
+    }
+
+    @Test func theDockIsOnlyAskedNearAScreenEdge() {
+        let screens = [CGRect(x: 0, y: 0, width: 2000, height: 1200)]
+        #expect(!pointerIsNearScreenEdge(CGPoint(x: 1000, y: 600), screens: screens))
+        #expect(pointerIsNearScreenEdge(CGPoint(x: 1000, y: 40), screens: screens))
+        #expect(pointerIsNearScreenEdge(CGPoint(x: 20, y: 600), screens: screens))
+    }
+}

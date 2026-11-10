@@ -1,42 +1,50 @@
 import SonaryUI
 import SwiftUI
 
+/// The display tab of the menu panel: one brightness slider per display, in a section that
+/// opens in place, like every other tab.
 struct DisplayPopoverView: View {
     let model: DisplayModel
+    /// The sections that are open, as a comma-separated list; each opens and closes on its own.
+    @AppStorage("panel.display.open") private var open = "brightness"
 
     var body: some View {
-        SettingsCard(Text("Brightness", bundle: .module)) {
-            if model.displays.isEmpty {
-                Text("No display found.", bundle: .module).font(.callout).foregroundStyle(.secondary)
-            }
-            ForEach(model.displays) { display in
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack {
-                        Text(display.name).lineLimit(1)
-                        Spacer()
-                        if !display.hasHardwareControl {
-                            Text("dimmed by Sonary", bundle: .module).font(.caption2).foregroundStyle(.secondary)
-                        } else if let dim = model.belowMinimum[display.id] {
-                            Text("\(dim.formatted(.percent.precision(.fractionLength(0)))) below its minimum", bundle: .module)
-                                .font(.caption2).foregroundStyle(.secondary)
-                            Button { model.setBelowMinimum(0, for: display.id) } label: {
-                                Text("Lift", bundle: .module).font(.caption2)
+        VStack(alignment: .leading, spacing: 6) {
+            PanelDisclosure(symbol: "sun.max", title: Text("Brightness", bundle: .module),
+                            isExpanded: $open.opens("brightness")) {
+                if let first = model.displays.first { Text(verbatim: percentLabel(first.brightness)) }
+            } content: {
+                if model.displays.isEmpty {
+                    PanelEmptyState(symbol: "display", text: Text("No display found.", bundle: .module))
+                } else {
+                    PanelGroup {
+                        ForEach(model.displays) { display in
+                            PanelSliderRow(symbol: display.isBuiltIn ? "laptopcomputer" : "display",
+                                           title: Text(display.name),
+                                           remark: display.hasHardwareControl ? nil : Text("dimmed by Sonary", bundle: .module),
+                                           value: Binding(get: { display.brightness },
+                                                          set: { model.setBrightness($0, for: display.id) }),
+                                           valueText: percentLabel(display.brightness))
+                            if let dim = model.belowMinimum[display.id] {
+                                PanelRow(symbol: "moon",
+                                         title: Text("\(dim.formatted(.percent.precision(.fractionLength(0)))) below its minimum",
+                                                     bundle: .module)) {
+                                    Button { model.setBelowMinimum(0, for: display.id) } label: {
+                                        Text("Lift", bundle: .module)
+                                    }
+                                    .controlSize(.small)
+                                }
                             }
-                            .buttonStyle(.borderless)
                         }
                     }
-                    HStack {
-                        Image(systemName: "sun.min").foregroundStyle(.secondary)
-                        Slider(value: Binding(get: { display.brightness },
-                                              set: { model.setBrightness($0, for: display.id) }), in: 0...1)
-                        Image(systemName: "sun.max.fill").foregroundStyle(.secondary)
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel(Text(display.name))
                 }
             }
         }
         .task { model.refresh() }
+    }
+
+    private func percentLabel(_ value: Double) -> String {
+        "\(Int((min(max(value, 0), 1) * 100).rounded())) %"
     }
 }
 
@@ -57,8 +65,7 @@ struct DisplaySettingsView: View {
                     Text("32 steps", bundle: .module).tag(BrightnessStepSize.fine)
                     Text("64 steps", bundle: .module).tag(BrightnessStepSize.finest)
                 } label: { EmptyView() }
-                    .labelsHidden()
-                    .fixedSize()
+                    .settingsControl()
             }
             SettingsToggleRow(symbol: "moon", title: Text("Go darker than the display's minimum", bundle: .module),
                               caption: Text("Stepping down past the lowest brightness keeps going with an overlay. Sonary lifts it again on restart.",
@@ -76,7 +83,7 @@ struct DisplaySettingsView: View {
                                 caption: Text("Brighter than white, which uses more power.", bundle: .module)) {
                         Slider(value: Binding(get: { model.extraBrightness(for: display.id) },
                                               set: { model.setExtraBrightness($0, for: display.id) }), in: 0...1)
-                            .frame(width: 160)
+                            .frame(width: SettingsMetrics.controlWidth)
                     }
                 }
             }
@@ -104,7 +111,7 @@ struct DisplaySettingsView: View {
                 }
             }
             if model.displays.isEmpty {
-                Text("No display found.", bundle: .module).font(.callout).foregroundStyle(.secondary)
+                Text("No display found.", bundle: .module).font(.caption).foregroundStyle(.secondary)
             }
         }
         .task { model.refresh() }

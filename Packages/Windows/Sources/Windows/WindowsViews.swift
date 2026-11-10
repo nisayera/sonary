@@ -60,7 +60,7 @@ struct WindowsSettingsView: View {
                     Text("Resize", bundle: .module).tag(ModifierDragMode.resize)
                     Text("Move and resize", bundle: .module).tag(ModifierDragMode.moveAndResize)
                 } label: { EmptyView() }
-                    .labelsHidden().frame(width: 180)
+                    .settingsControl()
             }
         }
         SettingsCard(Text("Dock", bundle: .module)) {
@@ -71,7 +71,7 @@ struct WindowsSettingsView: View {
                                           set: { value in model.update { $0.dockClickAction = value } })) {
                     ForEach(DockClickAction.allCases) { Text(dockActionTitle($0), bundle: .module).tag($0) }
                 } label: { EmptyView() }
-                    .labelsHidden().frame(width: 200)
+                    .settingsControl()
             }
             SettingsToggleRow(symbol: "rectangle.on.rectangle",
                               title: Text("Window previews when the pointer rests on an icon", bundle: .module),
@@ -80,7 +80,6 @@ struct WindowsSettingsView: View {
                               isOn: Binding(get: { model.settings.dockPreviews },
                                             set: { value in model.update { $0.dockPreviews = value } }))
             if model.settings.dockPreviews || model.settings.switcherPreviews {
-                Divider()
                 Text("No window pictures while one of these apps is in front, such as games or video players.",
                      bundle: .module)
                     .font(.caption).foregroundStyle(.secondary)
@@ -97,7 +96,6 @@ struct WindowsSettingsView: View {
                               isOn: Binding(get: { model.settings.greenButtonMaximizes },
                                             set: { value in model.update { $0.greenButtonMaximizes = value } }))
             if model.settings.greenButtonMaximizes {
-                Divider()
                 Text("These apps still go full screen, such as games, emulators and video players.", bundle: .module)
                     .font(.caption).foregroundStyle(.secondary)
                 AppListEditor(bundleIDs: Binding(get: { model.settings.greenButtonExceptions },
@@ -119,7 +117,6 @@ struct WindowsSettingsView: View {
                               isOn: Binding(get: { model.settings.layoutShortcuts },
                                             set: { value in model.update { $0.layoutShortcuts = value } }))
             if model.settings.layoutShortcuts {
-                Divider()
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 6) {
                     ForEach(LayoutAction.allCases, id: \.self) { action in
                         HStack {
@@ -144,7 +141,6 @@ struct WindowsSettingsView: View {
                      bundle: .module)
                     .font(.caption).foregroundStyle(.secondary)
             }
-            Divider()
             Text("These apps keep their own layout: shortcuts, screen edges and holding keys to drag leave them alone.",
                  bundle: .module)
                 .font(.caption).foregroundStyle(.secondary)
@@ -167,7 +163,7 @@ struct WindowsSettingsView: View {
                         Text("Window list", bundle: .module).tag(SwitcherStyle.list)
                         Text("App icons", bundle: .module).tag(SwitcherStyle.icons)
                     } label: { EmptyView() }
-                        .labelsHidden().frame(width: 180)
+                        .settingsControl()
                 }
                 SettingsToggleRow(symbol: "command", title: Text("Open it with ⌘Tab", bundle: .module),
                                   caption: Text("Takes ⌘Tab over from macOS: hold ⌘, press Tab to move on, ⇧Tab to go back, and let go to switch. The macOS switcher comes back when this is off or Sonary quits.",
@@ -223,9 +219,8 @@ struct WindowsSettingsView: View {
                         Text("Holding the keys", bundle: .module).tag(QuitConfirmation.hold)
                         Text("Adding ⌥ (⌥⌘Q)", bundle: .module).tag(QuitConfirmation.extraModifier)
                     } label: { EmptyView() }
-                        .labelsHidden().frame(width: 180)
+                        .settingsControl()
                 }
-                Divider()
                 Group {
                     if model.settings.protectedApps.isEmpty {
                         Text("Every app is protected. Add apps to protect only those.", bundle: .module)

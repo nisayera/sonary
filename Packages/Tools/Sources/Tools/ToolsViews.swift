@@ -84,10 +84,7 @@ struct ToolsPopoverView: View {
                     .buttonStyle(.plain)
                 }
             }
-            Text("Dark mode and the Trash ask once for permission to control the system.", bundle: .module)
-                .font(.caption).foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 2)
+            PanelNote(Text("Dark mode and the Trash ask once for permission to control the system.", bundle: .module))
         }
     }
 
@@ -145,9 +142,7 @@ struct ToolsPopoverView: View {
                     }
                 }
             }
-            Text("Edit snippets in Sonary's settings.", bundle: .module)
-                .font(.caption).foregroundStyle(.secondary)
-                .padding(.horizontal, 2)
+            PanelNote(Text("Edit snippets in Sonary's settings.", bundle: .module))
         }
     }
 }
@@ -192,7 +187,7 @@ struct ToolsSettingsView: View {
                         Text(verbatim: colorFormatExample(format)).tag(format)
                     }
                 } label: { EmptyView() }
-                    .labelsHidden().frame(width: 220)
+                    .settingsControl()
             }
         }
         SettingsCard(Text("Quick panel", bundle: .module)) {
@@ -254,7 +249,6 @@ struct ToolsSettingsView: View {
                                           }
                                       }))
             }
-            Divider()
             Text("Apps, files and keyboard shortcuts get wedges after the actions.", bundle: .module)
                 .font(.caption).foregroundStyle(.secondary)
             RadialLaunchEditor(launches: model.settings.radialLaunches) { launches in
@@ -331,7 +325,7 @@ struct ToolsSettingsView: View {
                     Text("Typing it", bundle: .module).tag(SnippetDelivery.type)
                     Text("Putting it on the clipboard", bundle: .module).tag(SnippetDelivery.clipboard)
                 } label: { EmptyView() }
-                    .labelsHidden().frame(width: 220)
+                    .settingsControl()
             }
             Text("Placeholders: {date}, {time}, {clipboard}, and {date:yyyy-MM-dd} for a date in a format of your own.",
                  bundle: .module)
@@ -358,7 +352,7 @@ struct ToolsSettingsView: View {
         }
         SettingsCard(Text("Permissions", bundle: .module)) {
             Text("Screenshots and text from screen ask once for the Screen Recording permission.", bundle: .module)
-                .font(.callout).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 
@@ -433,7 +427,7 @@ struct ImageConversionSheet: View {
             HStack {
                 Text("Watermark", bundle: .module)
                 Spacer()
-                TextField(text: $watermark) { EmptyView() }.labelsHidden().frame(width: 180)
+                TextField(text: $watermark) { EmptyView() }.settingsControl()
             }
             Text("The converted copies land next to the originals.", bundle: .module)
                 .font(.caption).foregroundStyle(.secondary)

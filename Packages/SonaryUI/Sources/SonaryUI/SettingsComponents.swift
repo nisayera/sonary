@@ -21,7 +21,7 @@ public struct SettingsPageHeader<Accessory: View>: View {
             VStack(alignment: .leading, spacing: 2) {
                 title.font(.title2.weight(.semibold))
                 if let subtitle {
-                    subtitle.font(.callout).foregroundStyle(.secondary)
+                    subtitle.font(.caption).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -34,6 +34,23 @@ public struct SettingsPageHeader<Accessory: View>: View {
 public extension SettingsPageHeader where Accessory == EmptyView {
     init(symbol: String, title: Text, subtitle: Text? = nil) {
         self.init(symbol: symbol, title: title, subtitle: subtitle) { EmptyView() }
+    }
+}
+
+/// The sizes every settings page shares.
+public enum SettingsMetrics {
+    public static let cardRadius: CGFloat = 12
+    public static let rowHorizontalInset: CGFloat = 14
+    public static let rowVerticalInset: CGFloat = 10
+    /// How wide a picker, slider or text field on the right of a row is, so the controls of a
+    /// page line up in one column.
+    public static let controlWidth: CGFloat = 190
+}
+
+public extension View {
+    /// A picker or field on the right of a settings row: no label of its own, the standard width.
+    func settingsControl() -> some View {
+        labelsHidden().frame(width: SettingsMetrics.controlWidth)
     }
 }
 
@@ -52,16 +69,36 @@ public struct SettingsCard<Content: View>: View {
     public var body: some View {
         switch surface {
         case .settings:
-            VStack(alignment: .leading, spacing: 12) {
+            // The heading stands above the card and the card is one list: every child is a
+            // row with the same insets, and hairlines come between rows by themselves. No
+            // page lays out its own card, which is what keeps them all alike.
+            let shape = RoundedRectangle(cornerRadius: SettingsMetrics.cardRadius, style: .continuous)
+            VStack(alignment: .leading, spacing: 7) {
                 if let title {
-                    title.font(.headline)
+                    title
+                        .font(.system(size: 13, weight: .semibold))
+                        .padding(.horizontal, 4)
+                        .accessibilityAddTraits(.isHeader)
                 }
-                content
+                VStack(alignment: .leading, spacing: 0) {
+                    Group(subviews: content) { subviews in
+                        ForEach(Array(subviews.enumerated()), id: \.element.id) { index, subview in
+                            if index > 0 {
+                                Divider()
+                                    .padding(.horizontal, SettingsMetrics.rowHorizontalInset)
+                                    .accessibilityHidden(true)
+                            }
+                            subview
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, SettingsMetrics.rowHorizontalInset)
+                                .padding(.vertical, SettingsMetrics.rowVerticalInset)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.quaternary.opacity(0.35), in: shape)
+                .overlay(shape.strokeBorder(Color.primary.opacity(0.07), lineWidth: 0.5))
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(Spacing.m)
-            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.primary.opacity(0.07), lineWidth: 0.5))
         case .panel:
             VStack(alignment: .leading, spacing: 6) {
                 if let title {
@@ -168,7 +205,7 @@ public struct SettingsPage<Header: View, Content: View>: View {
 
     public var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.m) {
+            VStack(alignment: .leading, spacing: 20) {
                 header.padding(.bottom, Spacing.xs)
                 content
             }

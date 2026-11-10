@@ -90,7 +90,7 @@ struct ClipboardQuickView: View {
             Divider()
             if entries.isEmpty {
                 Text("Nothing copied yet, or nothing matches.", bundle: .module)
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 HStack(alignment: .top, spacing: 12) {

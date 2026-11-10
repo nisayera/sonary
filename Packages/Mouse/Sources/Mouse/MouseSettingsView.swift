@@ -65,22 +65,19 @@ struct MouseSettingsView: View {
                         .labelsHidden()
                 }
             }
-            Divider()
             SettingsToggleRow(symbol: "water.waves", title: Text("Smooth scrolling", bundle: .module),
                               isOn: binding(\.smoothScroll))
             if module.settings.smoothScroll {
                 SettingsRow(symbol: "slider.horizontal.3", title: Text("Smoothness", bundle: .module)) {
-                    Slider(value: binding(\.smoothness), in: 0...1).frame(width: 160)
+                    Slider(value: binding(\.smoothness), in: 0...1).frame(width: SettingsMetrics.controlWidth)
                 }
             }
-            Divider()
             SettingsToggleRow(symbol: "arrow.up.arrow.down", title: Text("Reverse mouse wheel direction", bundle: .module),
                               caption: Text("Trackpads and Magic Mouse are not changed.", bundle: .module),
                               isOn: binding(\.reverseScroll))
             SettingsToggleRow(symbol: "arrow.left.arrow.right", title: Text("Reverse sideways scrolling", bundle: .module),
                               caption: Text("For a tilting wheel or a thumb wheel, on its own.", bundle: .module),
                               isOn: binding(\.reverseHorizontalScroll))
-            Divider()
             SettingsRow(symbol: "plus.magnifyingglass",
                         title: Text("Zoom with the wheel while holding", bundle: .module),
                         caption: Text("Sends ⌘= and ⌘−, which browsers, Preview and most apps zoom with.", bundle: .module)) {
@@ -89,9 +86,8 @@ struct MouseSettingsView: View {
                         Text(modifierTitle(modifier), bundle: .module).tag(modifier)
                     }
                 } label: { EmptyView() }
-                    .labelsHidden().frame(width: 150)
+                    .settingsControl()
             }
-            Divider()
             SettingsRow(symbol: "arrow.left.and.right",
                         title: Text("Scroll sideways while holding", bundle: .module)) {
                 Picker(selection: binding(\.horizontalScrollModifier)) {
@@ -99,7 +95,7 @@ struct MouseSettingsView: View {
                         Text(modifierTitle(modifier), bundle: .module).tag(modifier)
                     }
                 } label: { EmptyView() }
-                    .labelsHidden().frame(width: 150)
+                    .settingsControl()
             }
         }
 
@@ -215,8 +211,7 @@ struct MouseSettingsView: View {
                     Text(choice.label, bundle: .module).tag(choice)
                 }
             } label: { EmptyView() }
-                .labelsHidden()
-                .frame(width: 180)
+                .settingsControl()
             if case let .keyboardShortcut(keyCode, modifiers) = selection.wrappedValue {
                 KeyPressRecorderButton(current: shortcutLabel(keyCode: keyCode, modifiers: modifiers),
                                        recordTitle: Text("Record", bundle: .module),

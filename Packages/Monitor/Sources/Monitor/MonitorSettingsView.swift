@@ -25,7 +25,6 @@ struct MonitorSettingsView: View {
                     caption: Text("Separate menu bar items you can rearrange with ⌘ and drag.", bundle: .module),
                     isOn: Binding(get: { module.separateMenuBarItems }, set: { module.setSeparateMenuBarItems($0) })
                 )
-                Divider()
                 ForEach(ReadoutMetric.allCases, id: \.self) { metric in
                     SettingsToggleRow(
                         symbol: symbol(for: metric),
@@ -52,7 +51,7 @@ struct MonitorSettingsView: View {
                     Text(verbatim: "2 s").tag(2)
                     Text(verbatim: "5 s").tag(5)
                 } label: { EmptyView() }
-                    .pickerStyle(.segmented).labelsHidden().frame(width: 150)
+                    .pickerStyle(.segmented).settingsControl()
             }
             SettingsToggleRow(symbol: "thermometer.medium", title: Text("Temperatures in Fahrenheit", bundle: .module),
                               isOn: Binding(get: { module.fahrenheit }, set: { module.setFahrenheit($0) }))

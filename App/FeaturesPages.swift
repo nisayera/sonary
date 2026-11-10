@@ -51,8 +51,7 @@ struct FeaturesPage: View {
                 }
                 if !members.isEmpty {
                     SettingsCard(Text(category.title)) {
-                        ForEach(Array(members.enumerated()), id: \.element.id) { index, module in
-                            if index > 0 { Divider() }
+                        ForEach(members, id: \.id) { module in
                             FeatureRow(model: model, module: module)
                         }
                     }
@@ -69,15 +68,11 @@ private struct FeatureRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 12) {
-                Image(systemName: module.symbol)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 30, height: 30)
-                    .background(Color(white: 0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    .accessibilityHidden(true)
+                // The same badge as every other settings row: accent while the module is on.
+                IconBadge(symbol: module.symbol, isActive: model.registry.isEnabled(module.id), size: 26)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text(module.title).fontWeight(.medium)
+                        Text(module.title)
                         ForEach(module.requiredPermissions, id: \.self) { permission in
                             Badge(text: permissionTitle(permission))
                         }
@@ -103,10 +98,11 @@ private struct FeatureRow: View {
                 )) { Text(module.title) }
                     .labelsHidden()
                     .toggleStyle(.switch)
+                    .controlSize(.small)
             }
             if let failure = model.registry.failures[module.id] {
                 SettingsWarning(Text(failure))
-                    .padding(.leading, 42)
+                    .padding(.leading, 38)
             }
         }
     }
@@ -238,8 +234,7 @@ struct PermissionsPage: View {
                                subtitle: Text("What each permission does and what in Sonary uses it. Sonary asks only when you turn on something that needs it."))
         } content: {
             SettingsCard {
-                ForEach(Array(PermissionKind.allCases.enumerated()), id: \.element) { index, kind in
-                    if index > 0 { Divider() }
+                ForEach(PermissionKind.allCases, id: \.self) { kind in
                     PermissionRow(kind: kind, granted: granted[kind])
                 }
             }
@@ -264,37 +259,34 @@ private struct PermissionRow: View {
     let granted: Bool?
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: kind.symbol)
-                .font(.system(size: 15, weight: .regular))
-                .foregroundStyle(.secondary)
-                .frame(width: 26)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 4) {
+        // Laid out like every settings row: badge, title and explanation, the control on the right.
+        HStack(alignment: .center, spacing: 12) {
+            IconBadge(symbol: kind.symbol, isActive: granted != false, size: 26)
+            VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 8) {
-                    Text(verbatim: kind.title).font(.headline)
+                    Text(verbatim: kind.title)
                     status
                 }
                 Text(verbatim: kind.purpose)
-                    .font(.callout)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text("Used by \(kind.usedBy)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                if let url = kind.settingsURL {
-                    Button {
-                        NSWorkspace.shared.open(url)
-                    } label: {
-                        Text("Open System Settings")
-                    }
-                    .controlSize(.small)
-                    .padding(.top, 2)
-                }
+                Text("Used by \(kind.usedBy)")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Spacer(minLength: 0)
+            Spacer(minLength: 12)
+            if let url = kind.settingsURL {
+                Button {
+                    NSWorkspace.shared.open(url)
+                } label: {
+                    Text("Open System Settings")
+                }
+                .controlSize(.small)
+            }
         }
-        .padding(.vertical, 2)
+        .accessibilityElement(children: .contain)
     }
 
     @ViewBuilder

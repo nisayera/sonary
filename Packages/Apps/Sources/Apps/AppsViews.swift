@@ -47,9 +47,7 @@ struct AppsPopoverView: View {
                 .panelCard(padded: false)
             }
             if let message = model.message {
-                Text(message).font(.caption).foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 2)
+                PanelNote(Text(message))
             }
             PanelDisclosure(symbol: "sparkles", title: Text("Clean", bundle: .module),
                             isExpanded: $open.opens("clean")) {
@@ -131,10 +129,7 @@ struct AppsPopoverView: View {
                     }
                 }
             }
-            Text("Cleaning moves the files to the Trash. Apps rebuild their caches when needed.", bundle: .module)
-                .font(.caption).foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 2)
+            PanelNote(Text("Cleaning moves the files to the Trash. Apps rebuild their caches when needed.", bundle: .module))
         }
     }
 
@@ -165,10 +160,7 @@ struct AppsPopoverView: View {
             }
             if PanelListLimit.isLong(apps.count) { more(apps.count, $allApps) }
             if !model.settings.keepRunningOnQuitAll.isEmpty {
-                Text("Apps you keep running are left alone by Quit all.", bundle: .module)
-                    .font(.caption).foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 2)
+                PanelNote(Text("Apps you keep running are left alone by Quit all.", bundle: .module))
             }
         }
     }
@@ -224,11 +216,8 @@ struct AppsPopoverView: View {
                 }
             }
             if PanelListLimit.isLong(processes.count) { more(processes.count, $allProcesses) }
-            Text("Sorted by CPU. Quit asks a process to end; Force Quit ends it at once and loses unsaved work.",
-                 bundle: .module)
-                .font(.caption).foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 2)
+            PanelNote(Text("Sorted by CPU. Quit asks a process to end; Force Quit ends it at once and loses unsaved work.",
+                 bundle: .module))
         }
     }
 
@@ -244,7 +233,7 @@ struct AppsPopoverView: View {
             }
             if !model.brewAvailable {
                 Text("Install Homebrew (brew.sh) to see and install updates for your apps and tools.", bundle: .module)
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(.secondary)
             } else if model.isBrewBusy && model.outdated.isEmpty {
                 ProgressView().controlSize(.small)
             } else if model.outdated.isEmpty {
@@ -347,7 +336,6 @@ struct AppsSettingsView: View {
                 Button { model.chooseAppToUninstall() } label: { Text("Choose app…", bundle: .module) }
             }
             if let plan = model.uninstallPlan {
-                Divider()
                 Text("\(plan.name): \(plan.leftovers.count) extra items, \(formatBytes(plan.totalSize)) in total", bundle: .module)
                     .font(.callout)
                 ForEach(plan.leftovers, id: \.self) { url in
@@ -378,7 +366,7 @@ struct AppsSettingsView: View {
                                           set: { value in model.setCleanSchedule(value) })) {
                     ForEach(CleanSchedule.allCases, id: \.self) { Text(scheduleTitle($0), bundle: .module).tag($0) }
                 } label: { EmptyView() }
-                    .labelsHidden().frame(width: 150)
+                    .settingsControl()
             }
             if let last = model.settings.lastCleaned {
                 Text("Last cleaned \(last.formatted(date: .abbreviated, time: .shortened))", bundle: .module)
@@ -448,7 +436,6 @@ struct AppsSettingsView: View {
                     brewRow(package, installed: model.brewInstalled.contains(package))
                 }
                 if !model.brewInstalled.isEmpty {
-                    Divider()
                     Text("Installed", bundle: .module).font(.callout.weight(.medium))
                     ScrollView {
                         VStack(spacing: 2) {
@@ -463,7 +450,7 @@ struct AppsSettingsView: View {
         SettingsCard(Text("In the menu panel", bundle: .module)) {
             Text("Clean caches and logs, quit or force quit apps and processes, stop processes that block a port and update Homebrew and App Store apps from the menu panel's apps tab.",
                  bundle: .module)
-                .font(.callout).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 

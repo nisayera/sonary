@@ -140,6 +140,15 @@ public final class ClipboardModel {
         let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
         guard shouldRecord(types: types), !settings.ignoredApps.contains(frontmost ?? "") else { return }
 
+        // Files first: Finder also puts the file names on the pasteboard as text, and that text
+        // used to be recorded in place of the files.
+        if settings.captureFiles,
+           let urls = board.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL],
+           !urls.isEmpty {
+            history.add(.files(urls.map(\.path)), at: Date(), sourceApp: frontmost)
+            store.save(history)
+            return
+        }
         if let text = board.string(forType: .string) {
             var recorded = text
             if settings.cleanLinks, let clean = cleanedURL(text) {
@@ -149,13 +158,6 @@ public final class ClipboardModel {
                 recorded = clean
             }
             history.add(recorded, at: Date(), sourceApp: frontmost)
-            store.save(history)
-            return
-        }
-        if settings.captureFiles,
-           let urls = board.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL],
-           !urls.isEmpty {
-            history.add(.files(urls.map(\.path)), at: Date(), sourceApp: frontmost)
             store.save(history)
             return
         }

@@ -294,3 +294,19 @@ func statusLine(_ module: any SonaryModule) -> Text? {
     guard !values.isEmpty else { return nil }
     return Text(verbatim: values.map { "\($0.title) \($0.value)" }.joined(separator: " · "))
 }
+
+/// A module's panel tab without the panel around it, on the panel's surface and at its width.
+/// The snapshot test draws the tabs of modules that cannot run on CI with it.
+struct PanelTabPreview: View {
+    let content: AnyView
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PanelMetrics.spacing) { content }
+            .controlSize(.small)
+            .frame(width: PanelMetrics.contentWidth, alignment: .leading)
+            .padding(PanelMetrics.padding)
+            .background(PanelSurfaceBackground())
+            .environment(\.sonarySurface, .panel)
+            .tint(Color.sonaryAccent)
+    }
+}

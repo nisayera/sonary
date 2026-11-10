@@ -123,7 +123,7 @@ struct CleaningModeView: View {
                 Text("Keyboard and screen are locked for cleaning", bundle: .module)
                     .font(.title3.weight(.semibold))
                 Text("Press Escape or click to stop", bundle: .module)
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(.secondary)
             }
             .opacity(visible ? 1 : 0.25)
             .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: visible)

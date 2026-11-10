@@ -39,7 +39,7 @@ struct NotchView: View {
         let widgets = model.settings.widgets
         if widgets.isEmpty {
             Text("Turn on widgets in Sonary's settings.", bundle: .module)
-                .font(.callout).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             VStack(spacing: 10) {
@@ -107,7 +107,7 @@ private struct MusicWidget: View {
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(track.title).font(.headline).lineLimit(1)
-                    Text(track.artist).font(.callout).foregroundStyle(.secondary).lineLimit(1)
+                    Text(track.artist).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer(minLength: 8)
                 HStack(spacing: 14) {
@@ -212,7 +212,7 @@ private struct CalendarWidget: View {
                 Text(date, format: .dateTime.weekday(.wide).day().month()).font(.caption.weight(.semibold))
             }
             if items.isEmpty {
-                Text("Nothing on that day", bundle: .module).font(.callout).foregroundStyle(.secondary)
+                Text("Nothing on that day", bundle: .module).font(.caption).foregroundStyle(.secondary)
             }
             ForEach(items.prefix(5)) { item in eventRow(item) }
         }
@@ -240,7 +240,7 @@ private struct CalendarWidget: View {
     private var today: some View {
         if !source.hasAccess {
             VStack(spacing: 8) {
-                Text("Sonary needs access to your calendars.", bundle: .module).font(.callout).foregroundStyle(.secondary)
+                Text("Sonary needs access to your calendars.", bundle: .module).font(.caption).foregroundStyle(.secondary)
                 Button { Task { await source.requestAccess() } } label: { Text("Allow access", bundle: .module) }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -229,6 +229,14 @@ final class DDCController: @unchecked Sendable {
         lock.withLock { routes[id] != nil }
     }
 
+    /// Drops every route, for when the screens changed and the services may be stale.
+    func forgetRoutes() {
+        lock.withLock {
+            routes.removeAll()
+            pending.removeAll()
+        }
+    }
+
     /// Forgets displays that are gone.
     func keepOnly(_ ids: Set<CGDirectDisplayID>) {
         lock.withLock {

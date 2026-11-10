@@ -36,20 +36,19 @@ struct KeyboardSettingsView: View {
                               isOn: Binding(get: { model.settings.superKeyEnabled },
                                             set: { value in model.update { $0.superKeyEnabled = value } }))
             if model.settings.superKeyEnabled {
-                Divider()
                 SettingsRow(symbol: "keyboard", title: Text("Key", bundle: .module)) {
                     Picker(selection: Binding(get: { model.settings.source },
                                               set: { value in model.update { $0.source = value } })) {
                         ForEach(SuperKeySource.allCases, id: \.self) { Text(sourceTitle($0), bundle: .module).tag($0) }
                     } label: { EmptyView() }
-                        .labelsHidden().frame(width: 170)
+                        .settingsControl()
                 }
                 SettingsRow(symbol: "hand.tap", title: Text("When tapped on its own", bundle: .module)) {
                     Picker(selection: Binding(get: { model.settings.tapAction },
                                               set: { value in model.update { $0.tapAction = value } })) {
                         ForEach(SuperKeyTapAction.allCases, id: \.self) { Text(tapActionTitle($0), bundle: .module).tag($0) }
                     } label: { EmptyView() }
-                        .labelsHidden().frame(width: 190)
+                        .settingsControl()
                 }
                 HStack(spacing: 8) {
                     Circle().fill(model.isHolding ? Color.green : Color.secondary.opacity(0.3)).frame(width: 9, height: 9)

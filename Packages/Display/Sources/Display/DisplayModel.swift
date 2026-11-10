@@ -65,10 +65,7 @@ public final class DisplayModel {
             screenObserver = NotificationCenter.default.addObserver(
                 forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
             ) { [weak self] _ in
-                MainActor.assumeIsolated {
-                    self?.ddcProbed.removeAll()
-                    self?.refresh()
-                }
+                MainActor.assumeIsolated { self?.rediscoverDDC() }
             }
         }
         applyShortcuts()
@@ -85,8 +82,21 @@ public final class DisplayModel {
         }
         wakeObserver = center.addObserver(forName: NSWorkspace.didWakeNotification,
                                           object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.bluetoothForWake() }
+            MainActor.assumeIsolated {
+                self?.bluetoothForWake()
+                self?.rediscoverDDC()
+            }
         }
+    }
+
+    /// A monitor that was unplugged, switched to another input or slept answers on a new I²C
+    /// service afterwards; the old one takes writes and does nothing. So every change of the
+    /// screens, and every wake, asks again. Until the answer is in, the display keeps the level
+    /// it showed.
+    private func rediscoverDDC() {
+        ddc.forgetRoutes()
+        ddcProbed.removeAll()
+        refresh()
     }
 
     private func bluetoothForSleep() {
@@ -131,11 +141,13 @@ public final class DisplayModel {
             // The system answers for the built-in panel and Apple displays; every other external
             // monitor is asked over DDC, once per arrangement of screens.
             if hardware == nil, !isBuiltIn {
-                if ddc.hasRoute(id) {
+                if !ddcProbed.contains(id), !ddc.hasRoute(id) { unprobed.append(id) }
+                // A monitor DDC reached before stays on its backlight while it is asked again,
+                // instead of flashing to the dimming overlay in between.
+                if ddc.hasRoute(id) || ddcLevels[id] != nil {
                     return DisplayInfo(id: id, name: screen.localizedName, isBuiltIn: false,
                                        hasHardwareControl: true, brightness: ddcLevels[id] ?? 1)
                 }
-                if !ddcProbed.contains(id) { unprobed.append(id) }
             }
             return DisplayInfo(id: id, name: screen.localizedName, isBuiltIn: isBuiltIn,
                                hasHardwareControl: hardware != nil, brightness: hardware ?? software)
@@ -147,6 +159,8 @@ public final class DisplayModel {
                 Task { @MainActor in self?.adoptDDC(found) }
             }
         }
+        // The settings page reads the displays while the module is off; nothing is dimmed then.
+        guard running else { return }
         for display in displays {
             if !display.hasHardwareControl {
                 applyOverlay(to: display.id, brightness: display.brightness)
@@ -159,8 +173,14 @@ public final class DisplayModel {
 
     /// Moves the monitors DDC reaches off the dimming overlay and onto their own backlight.
     private func adoptDDC(_ found: [CGDirectDisplayID: DDCController.Probe]) {
-        guard running, !found.isEmpty else { return }
+        guard running else { return }
+        // A display that was on DDC and no longer answers falls back to the overlay.
+        for id in ddcLevels.keys where found[id] == nil && !ddc.hasRoute(id) { ddcLevels[id] = nil }
+        guard !found.isEmpty else { return refresh() }
+        var cleaned = settings
         for (id, probe) in found {
+            // The overlay level from before DDC reached this monitor is not wanted back.
+            cleaned.softwareBrightness[String(id)] = nil
             switch probe {
             case let .readable(level):
                 ddcLevels[id] = level
@@ -169,6 +189,7 @@ public final class DisplayModel {
                 ddcLevels[id] = ddcLevels[id] ?? settings.ddcBrightness[String(id)] ?? 0.5
             }
         }
+        if cleaned != settings { save(cleaned) }
         refresh()
     }
 

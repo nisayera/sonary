@@ -31,7 +31,7 @@ struct ShortcutsPage: View {
             if store.definitions.isEmpty {
                 SettingsCard(Text("Shortcuts")) {
                     Text("Turn a module on to see the shortcuts it offers.")
-                        .font(.callout).foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
         }

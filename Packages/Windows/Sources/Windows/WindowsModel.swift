@@ -102,6 +102,15 @@ public final class WindowsModel {
     @ObservationIgnored private var moveMonitor: Any?
     @ObservationIgnored private var snapPreview: NSPanel?
     @ObservationIgnored private var pendingSnap: LayoutAction?
+    /// The front window as it was when the current drag began, to tell a window being moved
+    /// from any other drag. Nil when there was none to read.
+    @ObservationIgnored private var dragStart: (window: AXUIElement, frame: CGRect)?
+    @ObservationIgnored private var dragTracked = false
+    @ObservationIgnored private var dragIsWindowMove = false
+    /// When the pointer handlers last looked, so a fast mouse does not ask the Dock and the
+    /// window server hundreds of times a second.
+    @ObservationIgnored private var lastFocusSample = 0.0
+    @ObservationIgnored private var lastDockSample = 0.0
     @ObservationIgnored private var focusState = FocusFollowState()
     @ObservationIgnored private var dockHoverMonitor: Any?
     @ObservationIgnored private var dockClickMonitor: Any?
@@ -370,6 +379,13 @@ public final class WindowsModel {
         upMonitor = nil
         hideSnapPreview()
         pendingSnap = nil
+        endDragTracking()
+    }
+
+    private func endDragTracking() {
+        dragStart = nil
+        dragTracked = false
+        dragIsWindowMove = false
     }
 
     private func dragged() {
@@ -378,9 +394,18 @@ public final class WindowsModel {
             hideSnapPreview()
             return
         }
+        // Any drag reaches the edges: a text selection, a file, a scroll bar. Only a window that
+        // is itself moving may snap, so its frame is noted when the drag begins.
+        if !dragTracked {
+            dragTracked = true
+            if let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
+               let window = frontWindow(of: pid), let frame = frame(of: window) {
+                dragStart = (window: window, frame: frame)
+            }
+        }
         let point = NSEvent.mouseLocation
         guard let screen = NSScreen.screens.first(where: { $0.frame.contains(point) }) ?? NSScreen.main else { return }
-        guard let action = edgeLayout(for: point, in: screen.visibleFrame) else {
+        guard let action = edgeLayout(for: point, in: screen.visibleFrame), draggingAWindow() else {
             pendingSnap = nil
             hideSnapPreview()
             return
@@ -389,10 +414,20 @@ public final class WindowsModel {
         showSnapPreview(layoutFrame(action, visible: screen.visibleFrame, current: .zero))
     }
 
+    /// Whether the drag in progress is moving the front window. Asked only once the pointer is
+    /// at an edge, and remembered for the rest of the drag once it is true.
+    private func draggingAWindow() -> Bool {
+        if dragIsWindowMove { return true }
+        guard let start = dragStart, let now = frame(of: start.window) else { return false }
+        dragIsWindowMove = isWindowMove(from: start.frame, to: now)
+        return dragIsWindowMove
+    }
+
     private func dropped() {
         defer {
             pendingSnap = nil
             hideSnapPreview()
+            endDragTracking()
         }
         guard let action = pendingSnap else { return }
         perform(action)
@@ -459,12 +494,15 @@ public final class WindowsModel {
     }
 
     private func pointerMovedOverDock() {
+        guard pointerSampleDue(&lastDockSample) else { return }
         guard !frontAppPausesPreviews else {
             dockPreview.close()
             return
         }
         let point = NSEvent.mouseLocation
-        let app = DockReader.app(at: point)
+        // The Dock lives at a screen edge; anywhere else there is no icon to ask it about.
+        let app = pointerIsNearScreenEdge(point, screens: NSScreen.screens.map(\.frame))
+            ? DockReader.app(at: point) : nil
         guard let pid = dockHover.pointer(over: app?.processIdentifier, at: Date().timeIntervalSinceReferenceDate) else {
             if app == nil { dockPreview.close() }
             return
@@ -586,7 +624,15 @@ public final class WindowsModel {
         focusState = FocusFollowState()
     }
 
+    private func pointerSampleDue(_ last: inout Double) -> Bool {
+        let now = ProcessInfo.processInfo.systemUptime
+        guard now - last >= 0.05 else { return false }
+        last = now
+        return true
+    }
+
     private func pointerMoved() {
+        guard pointerSampleDue(&lastFocusSample) else { return }
         let point = NSEvent.mouseLocation
         let windows = visibleWindows()
         let focused = NSWorkspace.shared.frontmostApplication?.processIdentifier
@@ -644,6 +690,8 @@ public final class WindowsModel {
         var counts: [Int32: Int] = [:]
         for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .regular {
             let element = AXUIElementCreateApplication(app.processIdentifier)
+            // An app that hangs must not hold up the main thread for the default six seconds.
+            AXUIElementSetMessagingTimeout(element, 0.25)
             var value: CFTypeRef?
             guard AXUIElementCopyAttributeValue(element, kAXWindowsAttribute as CFString, &value) == .success,
                   let windows = value as? [AXUIElement] else { continue }
