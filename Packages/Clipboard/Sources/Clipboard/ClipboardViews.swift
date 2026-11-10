@@ -141,7 +141,7 @@ struct ClipboardPopoverView: View {
                     .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [5]))
                     .foregroundStyle(dropTargeted ? Color.sonaryAccent : Color.secondary.opacity(0.5))
                 Text("Drop files, text or links here to keep them handy", bundle: .module)
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
             }

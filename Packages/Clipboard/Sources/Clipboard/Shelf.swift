@@ -246,7 +246,7 @@ struct FloatingShelfView: View {
             }
             if model.shelf.isEmpty {
                 Text("Drop here to keep it for later", bundle: .module)
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {

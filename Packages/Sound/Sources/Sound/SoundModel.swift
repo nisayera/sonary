@@ -110,7 +110,6 @@ public final class SoundModel {
     }
 
     func start() {
-        refresh()
         if !listening {
             listening = true
             for selector in [kAudioHardwarePropertyDevices, kAudioHardwarePropertyDefaultOutputDevice,
@@ -129,6 +128,9 @@ public final class SoundModel {
                 self?.refreshLevels()
             }
         }
+        // After the task exists: `refresh` only acts on devices while the module runs, and this
+        // first pass is what later device changes are compared with.
+        refresh()
         applyShortcut(running: true)
         if settings.mediaKeyGuard { installMediaTap() } else { removeMediaTap() }
     }
@@ -137,6 +139,7 @@ public final class SoundModel {
         removeMediaTap()
         refreshTask?.cancel()
         refreshTask = nil
+        stopLevelAndIndicator()
         applyShortcut(running: false)
         // Keep awake belongs to its own module now and ends when that one stops.
     }
@@ -151,6 +154,9 @@ public final class SoundModel {
         let currentName = outputs.first { $0.id == defaultOutput }?.name
         lastOutputName = currentName
         refreshLevels()
+        // The device listeners outlive a stop; a module that is off must not switch devices
+        // or touch the volume.
+        guard refreshTask != nil else { return }
         applyDevicePriority()
         // Headphones gone and the speakers took over: turn the volume down before it startles anyone.
         if settings.volumeAfterUnplug > 0, let previousName, isHeadphoneLike(previousName),
@@ -489,7 +495,12 @@ public final class SoundModel {
 
     /// How many displays beyond the built-in one are attached.
     static func externalDisplays() -> Int {
-        NSScreen.screens.count - 1
+        // Counted one by one: a Mac mini or Studio has no built-in display to subtract.
+        NSScreen.screens.filter { screen in
+            guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+            else { return false }
+            return CGDisplayIsBuiltin(CGDirectDisplayID(number.uint32Value)) == 0
+        }.count
     }
 
     public var hasExternalDisplay: Bool { Self.externalDisplays() > 0 }
@@ -497,7 +508,12 @@ public final class SoundModel {
     /// The apps the user can pick from, with their bundle identifiers.
     public var runningApps: [RunningApp] {
         var seen = Set<String>()
-        return NSWorkspace.shared.runningApplications
+        // The chosen app stays in the list while it is closed, or the picker would show nothing.
+        let chosen = settings.keepAwakeApp
+        let closed: [RunningApp] = chosen.isEmpty
+            || !NSRunningApplication.runningApplications(withBundleIdentifier: chosen).isEmpty
+            ? [] : [RunningApp(id: chosen, name: appName(for: chosen))]
+        return closed + NSWorkspace.shared.runningApplications
             .filter { $0.activationPolicy == .regular }
             .compactMap { app -> RunningApp? in
                 guard let id = app.bundleIdentifier, id != Bundle.main.bundleIdentifier,
@@ -509,8 +525,18 @@ public final class SoundModel {
 
     /// The display name for a bundle identifier, falling back to the identifier itself.
     public func appName(for bundleID: String) -> String {
-        NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
-            .compactMap(\.localizedName).first ?? bundleID
+        if let name = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+            .compactMap(\.localizedName).first { return name }
+        // Not running: the name of the installed app, before falling back to the identifier.
+        if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+            return FileManager.default.displayName(atPath: url.path).replacingOccurrences(of: ".app", with: "")
+        }
+        return bundleID
+    }
+
+    /// The microphone shortcut as the user has it now, for the panel; empty when it is off.
+    public var micMuteShortcutText: String {
+        settings.micMuteShortcut ? shortcutDisplay(ShortcutStore.shared.combo(for: "sound.micMute")) : ""
     }
 
     private static func runningBundleIDs() -> [String] {

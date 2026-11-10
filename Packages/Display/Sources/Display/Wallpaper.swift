@@ -83,15 +83,14 @@ struct WallpaperCard: View {
                             Text(verbatim: screen.localizedName).tag(index)
                         }
                     } label: { EmptyView() }
-                        .labelsHidden()
-                        .frame(width: 200)
+                        .settingsControl()
                 }
                 Spacer()
                 Button { addFolder() } label: { Text("Add folder…", bundle: .module) }
             }
             if gallery.pictures.isEmpty {
                 Text("No pictures found. Add a folder with your own.", bundle: .module)
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(.secondary)
             } else {
                 ScrollView {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {

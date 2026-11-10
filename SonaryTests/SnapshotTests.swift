@@ -9,7 +9,7 @@ import Testing
 /// sets it); otherwise the test does nothing.
 @MainActor
 struct SnapshotTests {
-    @Test(.timeLimit(.minutes(3)))
+    @Test(.timeLimit(.minutes(5)))
     func panelAndSettings() async throws {
         guard let path = ProcessInfo.processInfo.environment["SONARY_SNAPSHOT_DIR"], !path.isEmpty else { return }
         let folder = URL(fileURLWithPath: path, isDirectory: true)
@@ -36,10 +36,21 @@ struct SnapshotTests {
             }
         }
 
+        // Tabs of modules that cannot run on CI are drawn on their own, on the panel's surface.
+        // Only the ones whose view touches no hardware when it appears.
+        for scheme in [ColorScheme.dark, .light] {
+            let suffix = scheme == .dark ? "dark" : "light"
+            if let view = model.mouse.makePopoverView() {
+                await render(PanelTabPreview(content: view), name: "panel-mouse-\(suffix)", scheme: scheme, in: folder)
+            }
+        }
+
         let pages: [(SettingsDestination, String)] = [
             (.general, "general"), (.features, "features"), (.permissions, "permissions"),
             (.shortcuts, "shortcuts"), (.module("mouse"), "mouse"), (.module("windows"), "windows"),
             (.module("monitor"), "monitor"), (.module("tools"), "tools"), (.module("clipboard"), "clipboard"),
+            (.module("sound"), "sound"), (.module("awake"), "awake"), (.module("keyboard"), "keyboard"),
+            (.module("notch"), "notch"), (.module("apps"), "apps"), (.about, "about"),
         ]
         // The settings window's materials are not drawn off screen, so the page gets the window's
         // own colour behind it, or its text would stand on nothing.

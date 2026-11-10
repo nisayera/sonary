@@ -1,70 +1,92 @@
+import AppKit
 import SonaryUI
 import SwiftUI
 
+/// The sound tab of the menu panel: output, microphone and what is playing, each a section
+/// that opens in place, like every other tab.
 struct SoundPopoverView: View {
     let model: SoundModel
+    /// The sections that are open, as a comma-separated list; each opens and closes on its own.
+    @AppStorage("panel.sound.open") private var open = "output,microphone"
 
     var body: some View {
-        SettingsCard(Text("Output", bundle: .module)) {
-            devicePicker(model.outputs, selected: model.defaultOutput) { model.selectOutput($0) }
-            if let volume = model.outputVolume {
-                HStack {
-                    Image(systemName: "speaker.fill").foregroundStyle(.secondary)
-                    Slider(value: Binding(get: { volume }, set: { model.setOutputVolume($0) }), in: 0...1)
-                    Image(systemName: "speaker.wave.3.fill").foregroundStyle(.secondary)
-                }
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(Text("Volume", bundle: .module))
-            }
-        }
-        SettingsCard(Text("Microphone", bundle: .module)) {
-            devicePicker(model.inputs, selected: model.defaultInput) { model.selectInput($0) }
-            HStack(spacing: 8) {
-                Image(systemName: "waveform").foregroundStyle(.secondary)
-                ProgressView(value: model.micMuted ? 0 : model.inputLevel)
-                    .progressViewStyle(.linear)
-                    .tint(model.inputLevel > 0.85 ? .orange : Color.sonaryAccent)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel(Text("Microphone level", bundle: .module))
-            .task {
-                model.startWatchingInputLevel()
-                // The meter stops when the panel closes, so nothing holds the microphone.
-                try? await Task.sleep(for: .seconds(3600))
-            }
-            .onDisappear { model.stopWatchingInputLevel() }
-            if let volume = model.inputVolume {
-                HStack {
-                    Image(systemName: "mic").foregroundStyle(.secondary)
-                    Slider(value: Binding(get: { volume }, set: { model.setInputVolume($0) }), in: 0...1)
-                    Image(systemName: "mic.fill").foregroundStyle(.secondary)
-                }
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(Text("Input level", bundle: .module))
-            }
-            SettingsToggleRow(symbol: model.micMuted ? "mic.slash.fill" : "mic.fill",
-                              title: Text("Mute microphone", bundle: .module),
-                              caption: model.settings.micMuteShortcut ? Text(verbatim: "⌃⌥M") : nil,
-                              isOn: Binding(get: { model.micMuted }, set: { _ in model.toggleMicMute() }))
-        }
-        SettingsCard(Text("Playing now", bundle: .module)) {
-            if model.playingApps.isEmpty {
-                Text("Nothing is playing.", bundle: .module).font(.callout).foregroundStyle(.secondary)
-            }
-            ForEach(model.playingApps) { process in
-                HStack(spacing: 8) {
-                    if let icon = NSRunningApplication(processIdentifier: process.pid)?.icon {
-                        Image(nsImage: icon).resizable().frame(width: 18, height: 18)
+        VStack(alignment: .leading, spacing: 6) {
+            PanelDisclosure(symbol: "speaker.wave.2", title: Text("Output", bundle: .module),
+                            isExpanded: $open.opens("output")) {
+                if let volume = model.outputVolume { Text(verbatim: percentLabel(volume)) }
+            } content: {
+                PanelGroup {
+                    PanelRow(symbol: "hifispeaker", title: Text("Device", bundle: .module)) {
+                        devicePicker(model.outputs, selected: model.defaultOutput) { model.selectOutput($0) }
                     }
-                    Text(verbatim: model.appName(for: process)).lineLimit(1)
-                    Spacer()
-                    Button { model.reveal(process) } label: { Text("Show", bundle: .module) }
-                        .controlSize(.small)
+                    if let volume = model.outputVolume {
+                        PanelSliderRow(symbol: volume == 0 ? "speaker.slash" : "speaker.wave.2",
+                                       title: Text("Volume", bundle: .module),
+                                       value: Binding(get: { volume }, set: { model.setOutputVolume($0) }),
+                                       valueText: percentLabel(volume))
+                    }
                 }
             }
-            Text("Sonary can see which apps are playing. Setting each one's volume needs to take over the audio path, which Sonary does not do.",
-                 bundle: .module)
-                .font(.caption).foregroundStyle(.secondary)
+            PanelDisclosure(symbol: "mic", title: Text("Microphone", bundle: .module),
+                            isExpanded: $open.opens("microphone")) {
+                if model.micMuted { Text("Muted", bundle: .module).foregroundStyle(.orange) }
+            } content: {
+                PanelGroup {
+                    PanelRow(symbol: "mic", title: Text("Device", bundle: .module)) {
+                        devicePicker(model.inputs, selected: model.defaultInput) { model.selectInput($0) }
+                    }
+                    PanelRow(symbol: "waveform", title: Text("Microphone level", bundle: .module)) {
+                        ProgressView(value: model.micMuted ? 0 : model.inputLevel)
+                            .progressViewStyle(.linear)
+                            .tint(model.inputLevel > 0.85 ? .orange : Color.sonaryAccent)
+                            .frame(width: 110)
+                    }
+                    .task {
+                        model.startWatchingInputLevel()
+                        // The meter stops when the section closes, so nothing holds the microphone.
+                        try? await Task.sleep(for: .seconds(3600))
+                    }
+                    .onDisappear { model.stopWatchingInputLevel() }
+                    if let volume = model.inputVolume {
+                        PanelSliderRow(symbol: "dial.medium", title: Text("Input level", bundle: .module),
+                                       value: Binding(get: { volume }, set: { model.setInputVolume($0) }),
+                                       valueText: percentLabel(volume))
+                    }
+                    PanelToggleRow(symbol: model.micMuted ? "mic.slash" : "mic",
+                                   title: Text("Mute microphone", bundle: .module),
+                                   caption: model.micMuteShortcutText.isEmpty
+                                       ? nil : Text(verbatim: model.micMuteShortcutText),
+                                   isOn: Binding(get: { model.micMuted }, set: { _ in model.toggleMicMute() }))
+                }
+            }
+            PanelDisclosure(symbol: "music.note.list", title: Text("Playing now", bundle: .module),
+                            isExpanded: $open.opens("playing")) {
+                if !model.playingApps.isEmpty { Text(verbatim: "\(model.playingApps.count)") }
+            } content: {
+                if model.playingApps.isEmpty {
+                    PanelEmptyState(symbol: "music.note", text: Text("Nothing is playing.", bundle: .module))
+                } else {
+                    PanelGroup {
+                        ForEach(model.playingApps) { process in
+                            HStack(spacing: PanelMetrics.rowIconSpacing) {
+                                if let icon = NSRunningApplication(processIdentifier: process.pid)?.icon {
+                                    Image(nsImage: icon).resizable()
+                                        .frame(width: PanelMetrics.rowIconWidth, height: PanelMetrics.rowIconWidth)
+                                }
+                                Text(verbatim: model.appName(for: process))
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .lineLimit(1)
+                                Spacer(minLength: 4)
+                                Button { model.reveal(process) } label: { Text("Show", bundle: .module) }
+                                    .controlSize(.small)
+                            }
+                            .panelRowInsets()
+                        }
+                    }
+                }
+                PanelNote(Text("Sonary can see which apps are playing. Setting each one's volume needs to take over the audio path, which Sonary does not do.",
+                               bundle: .module))
+            }
         }
         .task {
             // Refreshed while the panel is open, and not otherwise.
@@ -75,11 +97,17 @@ struct SoundPopoverView: View {
         }
     }
 
+    private func percentLabel(_ value: Double) -> String {
+        "\(Int((min(max(value, 0), 1) * 100).rounded())) %"
+    }
+
     private func devicePicker(_ list: [AudioDevice], selected: UInt32?, choose: @escaping (UInt32) -> Void) -> some View {
         Picker(selection: Binding(get: { selected ?? 0 }, set: { choose($0) })) {
             ForEach(list) { Text($0.name).tag($0.id) }
         } label: { EmptyView() }
             .labelsHidden()
+            .controlSize(.small)
+            .frame(maxWidth: 170)
     }
 }
 
@@ -132,7 +160,7 @@ struct SoundSettingsView: View {
         SettingsCard(Text("In the menu panel", bundle: .module)) {
             Text("Switch speakers and microphones, change the volume and mute the microphone from the menu panel's sound tab.",
                  bundle: .module)
-                .font(.callout).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 }

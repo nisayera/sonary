@@ -23,8 +23,8 @@ Sonary is a native, open-source menu bar app for macOS 26: a toolbox of Mac util
 App/            @main, MenuBarExtra panel, settings window, onboarding, Sparkle updates
 Packages/
   SonaryCore/   SonaryModule, ModuleRegistry, PermissionBroker, ShortcutStore, HotKey, LaunchAtLogin
-  SonaryUI/     tokens, appearance, GlassCard, settings components, icon tab bar, motion
-  Monitor/ Mouse/ Keyboard/ Notch/ Clipboard/ Apps/ Windows/ Display/ Sound/ Tools/
+  SonaryUI/     tokens, appearance, the panel's sections and rows, settings cards and rows, icon tab bar, motion
+  Monitor/ Mouse/ Keyboard/ Notch/ Clipboard/ Apps/ Windows/ Display/ Sound/ (with keep awake) Tools/
 SonaryTests/    tests for the app target
 ```
 

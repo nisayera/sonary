@@ -24,12 +24,13 @@
   <img src="https://img.shields.io/badge/Apple%20Silicon-only-555" alt="Apple Silicon">
   <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue" alt="License"></a>
-  <img src="https://img.shields.io/badge/status-early%20development-orange" alt="Status">
+  <img src="https://img.shields.io/badge/status-beta-orange" alt="Status">
 </p>
 
 > [!NOTE]
-> **Sonary is in early development.** All ten modules below are released and usable, but expect rough edges.
-> What is done and what is still missing is tracked in the [feature checklist](docs/FEATURES.md).
+> **Sonary is in beta.** All eleven modules below are released and usable. Some of it has only been
+> built against CI and still needs trying on real hardware (brightness of external monitors, XDR
+> extra brightness). What is done and what is missing is tracked in the [feature checklist](docs/FEATURES.md).
 
 ---
 
@@ -38,6 +39,7 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 ## Why Sonary
 
 - **Modular.** One app, many tools. Enable just the ones you use.
+- **One look.** Every tab of the menu panel and every settings page is built from the same few parts, so nothing sits somewhere else from one page to the next.
 - **Native.** Swift 6 and SwiftUI, designed for Liquid Glass on macOS 26.
 - **Private.** Everything runs locally. Sonary reaches the network only for its own update check and, when you ask for them, the app update checker, Homebrew and the speed test.
 - **Free.** GPL-3.0-or-later. No subscription, no "Pro" tier.
@@ -54,11 +56,21 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 | 📋 **Clipboard** | Clipboard history with text, images and files, auto-clear, plain-text paste, clean links, a file shelf and Finder helpers |
 | 🧹 **Apps** | Cleaner, uninstaller with leftovers, quit and force quit, port manager, Homebrew and app updates, disk image installer |
 | 🪟 **Windows** | Layouts on shortcuts and screen edges, window switcher, Dock previews and click actions, ⌘Q/⌘W protection, fixed Space order |
-| ☀️ **Display** | Per-display brightness with shortcuts, dimming where macOS offers no control, extra brightness on XDR panels, Bluetooth off during sleep |
-| 🔊 **Sound** | Output and input switcher, volume, microphone mute and level meter, apps that are playing, keep awake |
+| ☀️ **Display** | Per-display brightness with shortcuts, external monitors over DDC/CI, dimming where neither reaches, extra brightness on XDR panels, wallpaper, Bluetooth off during sleep |
+| 🔊 **Sound** | Output and input switcher, device priority, volume, microphone mute and level meter, apps that are playing |
+| ☕️ **Keep awake** | For a while, until a time, or while an app runs, the Mac is plugged in or a display is attached; also with the lid closed |
 | 🧰 **Tools** | Command bar, screenshots with editor and scrolling capture, screen recording, text from screen, color picker, radial menu, scratchpad, snippets |
 
 The full list, including what is only partly done, is in [docs/FEATURES.md](docs/FEATURES.md). Which permission each module asks for is in [docs/PERMISSIONS.md](docs/PERMISSIONS.md).
+
+## How it looks
+
+The menu bar icon opens a panel with one tab per running module. Every tab is a list of sections
+that open in place; nothing scrolls sideways and nothing is cut off. The settings window has a
+sidebar with search, and one page per module: a header with the switch, then cards of rows.
+
+Accent colour, how see-through the surfaces are, which tabs the panel shows and in what order are
+all yours to set under **Settings → General**.
 
 ## Install
 
@@ -104,13 +116,17 @@ Every merge to `main` with a new version number is released automatically (see [
 - **0.20** — screenshot editor: arrows, boxes, highlights, text, redaction and backgrounds
 - **0.21** — scrolling screenshots, stitched automatically
 - **0.22** — the sound panel shows which apps are playing
+- **0.23 – 0.43** — the rest of the checklist: Dock previews across Spaces, ⌘Tab takeover, wallpaper, device priority, messenger downloads, Homebrew search and install, App Store updates, process list, quick panel, snippet triggers, annotation export, menu bar readouts as separate items, settings search, export and import, accent colours
+- **0.44** — the menu panel folds instead of scrolling, keep awake as its own module, brightness for external monitors over DDC/CI
+- **0.80** — one interface: every panel tab and every settings page built from the same parts; a round of fixes (edge snapping no longer fires on any drag, key debounce no longer eats key repeat, the cleaner leaves Sonary's own data alone, long Homebrew upgrades no longer hang)
 
-### Next
+### Before 1.0
 
+- The Vorssaint island, taken over as it is and then made Sonary's own
 - Per-app volume and output routing (needs an audio process tap)
-- Brightness for external monitors over DDC
+- Trying the hardware paths on real devices: DDC brightness, XDR extra brightness
 - Notarized builds and a Homebrew cask
-- **1.0** once the [feature checklist](docs/FEATURES.md) is done
+- The options still missing compared with Vorssaint, listed [option by option](docs/FEATURES.md#option-by-option)
 
 ## Privacy
 

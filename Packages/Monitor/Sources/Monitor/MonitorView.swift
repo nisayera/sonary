@@ -214,39 +214,39 @@ public struct MonitorView: View {
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
+    // Lists are grouped rows with hairlines, as in every other tab.
     private var usb: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(module.usbDevices) { device in
-                    HStack {
-                        Text(verbatim: device.name).lineLimit(1)
-                        Spacer()
-                        if let vendor = device.vendor {
-                            Text(verbatim: vendor).foregroundStyle(.secondary).lineLimit(1)
-                        }
+        PanelGroup {
+            ForEach(module.usbDevices) { device in
+                HStack(spacing: 8) {
+                    Text(verbatim: device.name)
+                        .font(.system(size: 12, weight: .semibold))
+                        .lineLimit(1)
+                    Spacer(minLength: 4)
+                    if let vendor = device.vendor {
+                        Text(verbatim: vendor)
+                            .font(.system(size: 10.5, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     }
-                    .font(.system(size: 11))
                 }
+                .panelRowInsets()
             }
-            .panelCard()
         }
     }
 
     private var busiest: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(module.topProcesses) { process in
-                    HStack {
-                        Text(process.name).lineLimit(1)
-                        Spacer()
-                        Text(verbatim: "\(Int(process.cpu.rounded())) %")
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    }
-                    .font(.system(size: 11))
+        PanelGroup {
+            ForEach(module.topProcesses) { process in
+                HStack(spacing: 8) {
+                    Text(process.name)
+                        .font(.system(size: 12, weight: .semibold))
+                        .lineLimit(1)
+                    Spacer(minLength: 4)
+                    PanelValue("\(Int(process.cpu.rounded())) %")
                 }
+                .panelRowInsets()
             }
-            .panelCard()
         }
     }
 

@@ -54,6 +54,24 @@ The app tests include snapshot tests that render the panel and the settings page
 - Every new permission goes into [docs/PERMISSIONS.md](docs/PERMISSIONS.md), every new feature into [docs/FEATURES.md](docs/FEATURES.md).
 - Keep pull requests small and focused, describe what and why, and add screenshots for UI changes.
 
+## Interface
+
+Every part of the interface is built from the components in `SonaryUI`, so no tab and no page lays
+out its own cards:
+
+- **A tab of the menu panel** is a list of `PanelDisclosure` sections. A section holds a `PanelGroup`
+  of rows (`PanelRow`, `PanelToggleRow`, `PanelSliderRow`, `PanelButtonRow`) and, where something
+  needs saying, a `PanelNote` under it. Long lists show six rows and a `PanelMoreButton`. The panel
+  never shows a scroll bar.
+- **A settings page** is a `SettingsPage` with a `SettingsPageHeader` and `SettingsCard`s. A card's
+  children are its rows (`SettingsRow`, `SettingsToggleRow`); the card adds the insets and the
+  hairlines between them, so do not add `Divider()` or padding of your own. Pickers, sliders and
+  fields on the right of a row take `.settingsControl()` so they line up.
+- **Icons** are `IconBadge`s everywhere: accent while the thing is on, grey while it is off.
+
+The CI run renders the panel and the settings in both appearances and pushes the pictures to the
+`ci-snapshots` branch; look at them before merging a change to the interface.
+
 ## Adding a module
 
 1. Create `Packages/<Name>` with a library target, a test target and `Resources/Localizable.xcstrings`.

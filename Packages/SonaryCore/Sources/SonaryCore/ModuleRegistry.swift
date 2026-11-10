@@ -40,7 +40,7 @@ public final class ModuleRegistry {
 
     public func startEnabled() async {
         for module in modules where enabled.contains(module.id) {
-            await serialized(module.id) { [self] in await activate(module) }
+            await serialized(module.id) { [self] in await activate(module, atLaunch: true) }
         }
     }
 
@@ -57,11 +57,14 @@ public final class ModuleRegistry {
         await task.value
     }
 
-    private func activate(_ module: any SonaryModule) async {
+    /// `atLaunch` is the start of a module the user had on. A permission that is missing then
+    /// (it was revoked, or macOS has not caught up yet) shows as a failure, but the choice stays
+    /// stored, so the module comes back by itself once the permission does.
+    private func activate(_ module: any SonaryModule, atLaunch: Bool = false) async {
         let id = module.id
         guard !running.contains(id) else { return }
         guard await permissions.ensure(module.requiredPermissions) else {
-            fail(id, missingPermissionText(module.requiredPermissions))
+            fail(id, missingPermissionText(module.requiredPermissions), keepsChoice: atLaunch)
             return
         }
         do {
@@ -87,10 +90,10 @@ public final class ModuleRegistry {
         defaults.set(false, forKey: Self.key(id))
     }
 
-    private func fail(_ id: String, _ message: String) {
+    private func fail(_ id: String, _ message: String, keepsChoice: Bool = false) {
         enabled.remove(id)
         failures[id] = message
-        defaults.set(false, forKey: Self.key(id))
+        if !keepsChoice { defaults.set(false, forKey: Self.key(id)) }
     }
 
     private static func key(_ id: String) -> String { "module.\(id).enabled" }

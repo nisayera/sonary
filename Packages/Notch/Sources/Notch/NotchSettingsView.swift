@@ -45,7 +45,7 @@ struct NotchSettingsView: View {
                         Text(verbatim: "0.5 s").tag(0.5)
                         Text(verbatim: "1 s").tag(1.0)
                     } label: { EmptyView() }
-                        .labelsHidden().frame(width: 120)
+                        .settingsControl()
                 }
             }
         }
@@ -59,8 +59,7 @@ struct NotchSettingsView: View {
                         if !minutes.isEmpty { model.updateSettings { $0.timerPresets = minutes } }
                     }
                 )) { EmptyView() }
-                    .labelsHidden()
-                    .frame(width: 140)
+                    .settingsControl()
             }
         }
         SettingsCard(Text("Batteries", bundle: .module)) {
@@ -83,7 +82,7 @@ struct NotchSettingsView: View {
         SettingsCard(Text("Usage", bundle: .module)) {
             Text("Move the pointer onto the island to open it. Click it to keep it open, click anywhere else to close it.",
                  bundle: .module)
-                .font(.callout).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 

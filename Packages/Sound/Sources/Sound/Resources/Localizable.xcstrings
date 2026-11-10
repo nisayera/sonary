@@ -92,6 +92,16 @@
         }
       }
     },
+    "Device": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerät"
+          }
+        }
+      }
+    },
     "Duration": {
       "localizations": {
         "de": {

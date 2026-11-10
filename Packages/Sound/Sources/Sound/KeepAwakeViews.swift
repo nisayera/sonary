@@ -26,54 +26,48 @@ struct KeepAwakePopoverView: View {
     let model: SoundModel
     /// The time picked for "awake until", an hour from when the panel opened.
     @State private var awakeUntil = Date().addingTimeInterval(3600)
+    /// The sections that are open, as a comma-separated list; each opens and closes on its own.
+    @AppStorage("panel.awake.open") private var open = "duration,conditions"
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PanelMetrics.spacing) {
+        VStack(alignment: .leading, spacing: 6) {
             if model.keepAwakeActive {
                 running
-            } else {
-                VStack(alignment: .leading, spacing: 6) {
-                    PanelSectionTitle(Text("Duration", bundle: .module))
-                        .padding(.horizontal, 2)
-                    PanelGroup {
-                        ForEach(KeepAwakeDuration.allCases, id: \.self) { duration in
-                            startRow(keepAwakeSymbol(duration), Text(keepAwakeTitle(duration), bundle: .module)) {
-                                model.setKeepAwake(duration, on: true)
-                            }
+            }
+            PanelDisclosure(symbol: "timer", title: Text("Duration", bundle: .module),
+                            isExpanded: $open.opens("duration")) {
+                PanelGroup {
+                    ForEach(KeepAwakeDuration.allCases, id: \.self) { duration in
+                        startRow(keepAwakeSymbol(duration), Text(keepAwakeTitle(duration), bundle: .module)) {
+                            model.setKeepAwake(duration, on: true)
                         }
-                        HStack(spacing: PanelMetrics.rowIconSpacing) {
-                            IconBadge(symbol: "alarm", size: PanelMetrics.rowIconWidth)
-                            Text("Until", bundle: .module)
-                                .font(.system(size: 12, weight: .semibold))
-                            DatePicker(selection: $awakeUntil, displayedComponents: .hourAndMinute) { EmptyView() }
-                                .labelsHidden()
-                                .controlSize(.small)
-                            Spacer(minLength: 4)
-                            Button { model.keepAwake(until: awakeUntil) } label: {
-                                Text("Start", bundle: .module)
-                            }
+                    }
+                    PanelRow(symbol: "alarm", title: Text("Until", bundle: .module)) {
+                        DatePicker(selection: $awakeUntil, displayedComponents: .hourAndMinute) { EmptyView() }
+                            .labelsHidden()
                             .controlSize(.small)
+                        Button { model.keepAwake(until: awakeUntil) } label: {
+                            Text("Start", bundle: .module)
                         }
-                        .panelRowInsets()
+                        .controlSize(.small)
                     }
                 }
-                VStack(alignment: .leading, spacing: 6) {
-                    PanelSectionTitle(Text("As long as", bundle: .module))
-                        .padding(.horizontal, 2)
-                    PanelGroup {
-                        if !model.settings.keepAwakeApp.isEmpty {
-                            startRow("app.badge.checkmark",
-                                     Text("While \(model.appName(for: model.settings.keepAwakeApp)) runs", bundle: .module)) {
-                                model.keepAwakeWhileAppRuns(model.settings.keepAwakeApp)
-                            }
+            }
+            PanelDisclosure(symbol: "bolt.badge.clock", title: Text("As long as", bundle: .module),
+                            isExpanded: $open.opens("conditions")) {
+                PanelGroup {
+                    if !model.settings.keepAwakeApp.isEmpty {
+                        startRow("app.badge.checkmark",
+                                 Text("While \(model.appName(for: model.settings.keepAwakeApp)) runs", bundle: .module)) {
+                            model.keepAwakeWhileAppRuns(model.settings.keepAwakeApp)
                         }
-                        startRow("powerplug", Text("While plugged in", bundle: .module)) {
-                            model.keepAwakeWhilePowered()
-                        }
-                        if model.hasExternalDisplay {
-                            startRow("display", Text("While a display is attached", bundle: .module)) {
-                                model.keepAwakeWhileDisplayConnected()
-                            }
+                    }
+                    startRow("powerplug", Text("While plugged in", bundle: .module)) {
+                        model.keepAwakeWhilePowered()
+                    }
+                    if model.hasExternalDisplay {
+                        startRow("display", Text("While a display is attached", bundle: .module)) {
+                            model.keepAwakeWhileDisplayConnected()
                         }
                     }
                 }
@@ -109,15 +103,12 @@ struct KeepAwakePopoverView: View {
 
     /// One way to start keep awake, as a whole row that can be clicked.
     private func startRow(_ symbol: String, _ title: Text, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            PanelRow(symbol: symbol, title: title) {
-                Image(systemName: "play.fill")
-                    .font(.system(size: 9))
-                    .foregroundStyle(.tertiary)
-                    .accessibilityHidden(true)
-            }
+        PanelButtonRow(symbol: symbol, title: title, action: action) {
+            Image(systemName: "play.fill")
+                .font(.system(size: 9))
+                .foregroundStyle(.tertiary)
+                .accessibilityHidden(true)
         }
-        .buttonStyle(.plain)
     }
 }
 
@@ -139,22 +130,19 @@ struct KeepAwakeSettingsView: View {
                                             bundle: .module),
                               isOn: Binding(get: { model.settings.keepAwakeNudgesPointer },
                                             set: { value in model.update { $0.keepAwakeNudgesPointer = value } }))
-            HStack {
-                Text("Keep awake while this app runs", bundle: .module)
-                Spacer()
+            SettingsRow(symbol: "app.badge.checkmark", title: Text("Keep awake while this app runs", bundle: .module)) {
                 Picker(selection: Binding(get: { model.settings.keepAwakeApp },
                                           set: { value in model.update { $0.keepAwakeApp = value } })) {
                     Text("None", bundle: .module).tag("")
                     ForEach(model.runningApps) { Text($0.name).tag($0.id) }
                 } label: { EmptyView() }
-                    .labelsHidden()
-                    .frame(maxWidth: 180)
+                    .settingsControl()
             }
         }
         SettingsCard(Text("In the menu panel", bundle: .module)) {
             Text("Start keep awake for a while, until a time, or as long as an app runs, the Mac is plugged in or a display is attached, from the menu panel's keep awake tab.",
                  bundle: .module)
-                .font(.callout).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 }

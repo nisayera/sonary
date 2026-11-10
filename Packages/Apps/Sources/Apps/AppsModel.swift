@@ -27,7 +27,9 @@ func runProcess(_ path: String, _ arguments: [String]) async -> ProcessResult {
         process.arguments = arguments
         let pipe = Pipe()
         process.standardOutput = pipe
-        process.standardError = Pipe()
+        // Nobody reads the errors. A pipe here fills up after 64 KB (a long `brew upgrade` writes
+        // more than that) and the process then waits for ever.
+        process.standardError = FileHandle.nullDevice
         do { try process.run() } catch { return ProcessResult(status: -1, output: Data()) }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
@@ -323,7 +325,8 @@ public final class AppsModel {
     public func clean(_ target: CleanTarget) async {
         let folder = target.folder
         let failed = await Task.detached { () -> Int in
-            let items = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+            let all = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+            let items = cleanableItems(all, ownBundleID: Bundle.main.bundleIdentifier)
             var failed = 0
             for item in items {
                 do { try FileManager.default.trashItem(at: item, resultingItemURL: nil) } catch { failed += 1 }

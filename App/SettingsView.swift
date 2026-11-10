@@ -261,7 +261,7 @@ private struct GeneralPage: View {
                     Picker(selection: Binding(get: { model.appearance }, set: { model.setAppearance($0) })) {
                         ForEach(SonaryAppearance.allCases, id: \.self) { Text(appearanceTitle($0)).tag($0) }
                     } label: { EmptyView() }
-                        .labelsHidden().frame(width: 150)
+                        .settingsControl()
                 }
             }
             SettingsCard(Text("Panel header and overview")) {
@@ -352,7 +352,6 @@ private struct UpdatesPage: View {
                 SettingsToggleRow(symbol: "clock.arrow.circlepath", title: Text("Check for updates automatically"),
                                   isOn: Binding(get: { model.updates.automaticallyChecks },
                                                 set: { model.updates.setAutomaticallyChecks($0) }))
-                Divider()
                 SettingsRow(symbol: "arrow.down.circle", title: Text("Version"),
                             caption: Text(UpdateModel.versionString)) {
                     Button("Check for Updates…") { model.updates.checkForUpdates() }
@@ -373,14 +372,12 @@ private struct AboutPage: View {
                 SettingsRow(symbol: "number", title: Text("Version"), caption: Text(UpdateModel.versionString)) {
                     EmptyView()
                 }
-                Divider()
                 SettingsRow(symbol: "chevron.left.forwardslash.chevron.right", title: Text("Source code"),
                             caption: Text(verbatim: "github.com/nisayera/sonary")) {
                     if let url = URL(string: "https://github.com/nisayera/sonary") {
                         Link("Open", destination: url)
                     }
                 }
-                Divider()
                 SettingsRow(symbol: "doc.text", title: Text("License"),
                             caption: Text(verbatim: "GNU GPL v3.0 or later")) {
                     EmptyView()

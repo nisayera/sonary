@@ -38,6 +38,13 @@ public func allocatedSize(of url: URL) -> Int64 {
     return total
 }
 
+/// What the cleaner may move to the Trash: everything in the folder except Sonary's own
+/// folders, which hold the clipboard history's images and the pending update.
+public func cleanableItems(_ items: [URL], ownBundleID: String?) -> [URL] {
+    guard let ownBundleID, !ownBundleID.isEmpty else { return items }
+    return items.filter { !$0.lastPathComponent.hasPrefix(ownBundleID) }
+}
+
 // MARK: - Ports
 
 public struct ListeningPort: Equatable, Sendable, Identifiable {

@@ -19,8 +19,10 @@ enum DisplayServicesBridge {
 
     static func brightness(of display: CGDirectDisplayID) -> Double? {
         guard let get = symbol("DisplayServicesGetBrightness", as: GetBrightness.self) else { return nil }
-        var value: Float = 0
-        guard get(display, &value) == 0, value.isFinite else { return nil }
+        // Only a reading inside the range counts: a display the system pipeline does not drive
+        // can report success with a value that means nothing.
+        var value: Float = -1
+        guard get(display, &value) == 0, value.isFinite, value >= 0, value <= 1 else { return nil }
         return clampedBrightness(Double(value))
     }
 

@@ -11,7 +11,10 @@ private func keyboardTapCallback(
     // Only Sendable values cross to the main actor; CGEvent stays on the tap thread.
     let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
     let flags = event.flags
-    let outcome = MainActor.assumeIsolated { model.decide(type: type, keyCode: keyCode, flags: flags) }
+    let isRepeat = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
+    let outcome = MainActor.assumeIsolated {
+        model.decide(type: type, keyCode: keyCode, flags: flags, isRepeat: isRepeat)
+    }
     switch outcome {
     case .pass:
         return Unmanaged.passUnretained(event)
@@ -99,7 +102,7 @@ public final class KeyboardModel {
         needsAccessibility = false
     }
 
-    func decide(type: CGEventType, keyCode: Int64, flags: CGEventFlags) -> SuperKeyOutcome {
+    func decide(type: CGEventType, keyCode: Int64, flags: CGEventFlags, isRepeat: Bool = false) -> SuperKeyOutcome {
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
             engine.reset()
@@ -107,7 +110,9 @@ public final class KeyboardModel {
             return .pass
         }
         let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        if type == .keyDown, settings.debounceMilliseconds > 0,
+        // A held key repeats faster than any debounce window; that is the system repeating it, not
+        // a switch chattering, and it must get through.
+        if type == .keyDown, !isRepeat, settings.debounceMilliseconds > 0,
            debouncer.shouldDrop(keyCode: keyCode, timestampNanoseconds: UInt64(max(0, ProcessInfo.processInfo.systemUptime) * 1_000_000_000)) {
             return .swallow
         }

@@ -333,3 +333,14 @@ struct DownloadSortingTests {
         #expect(uniqueFileName("b.pdf") { taken.contains($0) } == "b.pdf")
     }
 }
+
+struct CleanerScopeTests {
+    @Test func sonarysOwnFoldersAreNotCleaned() {
+        let caches = URL(fileURLWithPath: "/Users/test/Library/Caches")
+        let items = ["com.apple.Safari", "app.sonary.Sonary", "app.sonary.Sonary.ShipIt", "Homebrew"]
+            .map { caches.appendingPathComponent($0) }
+        let kept = cleanableItems(items, ownBundleID: "app.sonary.Sonary").map(\.lastPathComponent)
+        #expect(kept == ["com.apple.Safari", "Homebrew"])
+        #expect(cleanableItems(items, ownBundleID: nil).count == 4)
+    }
+}

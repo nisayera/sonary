@@ -90,6 +90,18 @@ struct ModuleRegistryTests {
         #expect(defaults.bool(forKey: "module.a.enabled") == false)
     }
 
+    @Test func aPermissionMissingAtLaunchKeepsTheChoice() async {
+        let module = FakeModule(id: "a", permissions: [.accessibility])
+        let defaults = makeDefaults()
+        defaults.set(true, forKey: "module.a.enabled")
+        let registry = ModuleRegistry(modules: [module], defaults: defaults, permissions: FakeGate(result: false))
+        await registry.startEnabled()
+        #expect(!registry.isEnabled("a"))
+        #expect(registry.failures["a"] != nil)
+        // Still wanted: the next launch tries again instead of leaving the module off for good.
+        #expect(defaults.bool(forKey: "module.a.enabled"))
+    }
+
     @Test func missingPermissionUsesTheAppsText() async {
         let module = FakeModule(id: "a", permissions: [.accessibility, .screenRecording])
         let registry = ModuleRegistry(modules: [module], defaults: makeDefaults(), permissions: FakeGate(result: false),

@@ -688,6 +688,8 @@ func recognizedText(inImageAt url: URL) -> String {
     let request = VNRecognizeTextRequest()
     request.recognitionLevel = .accurate
     request.usesLanguageCorrection = true
+    // Without this only English is read, and umlauts and accents come out wrong.
+    request.automaticallyDetectsLanguage = true
     try? handler.perform([request])
     let lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
     return joinRecognizedLines(lines)

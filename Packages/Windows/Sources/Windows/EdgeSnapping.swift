@@ -67,3 +67,19 @@ public struct FocusFollowState: Sendable {
         return pid
     }
 }
+
+/// Whether a window went from `start` to `current` by being moved: its place changed and its
+/// size did not. A drag that leaves the front window where it is (a text selection, a file, a
+/// scroll bar) or resizes it is not one, and must not snap anything.
+public func isWindowMove(from start: CGRect, to current: CGRect) -> Bool {
+    let moved = abs(start.minX - current.minX) >= 1 || abs(start.minY - current.minY) >= 1
+    let sameSize = abs(start.width - current.width) < 1 && abs(start.height - current.height) < 1
+    return moved && sameSize
+}
+
+/// Whether the pointer is close enough to an edge of its screen for a Dock icon to be under it,
+/// even with a large, magnified Dock.
+public func pointerIsNearScreenEdge(_ point: CGPoint, screens: [CGRect], margin: CGFloat = 300) -> Bool {
+    guard let screen = screens.first(where: { $0.contains(point) }) else { return true }
+    return !screen.insetBy(dx: margin, dy: margin).contains(point)
+}
