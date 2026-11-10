@@ -24,7 +24,9 @@ App/            @main, MenuBarExtra panel, settings window, onboarding, Sparkle 
 Packages/
   SonaryCore/   SonaryModule, ModuleRegistry, PermissionBroker, ShortcutStore, HotKey, LaunchAtLogin
   SonaryUI/     tokens, appearance, the panel's sections and rows, settings cards and rows, icon tab bar, motion
-  Monitor/ Mouse/ Keyboard/ Notch/ Clipboard/ Apps/ Windows/ Display/ Sound/ (with keep awake) Tools/
+  Monitor/ Mouse/ Keyboard/ Clipboard/ Apps/ Windows/ Display/ Sound/ (with keep awake) Tools/
+Vendor/
+  Vorssaint/    Vorssaint's sources as a library; Sonary runs its Dynamic Island (App/IslandModule.swift)
 SonaryTests/    tests for the app target
 ```
 
@@ -56,7 +58,7 @@ Each module keeps its settings as one `Codable` struct in UserDefaults and reads
 
 ### Modules talking to each other
 
-Packages never import each other. Where one feature needs another module, the app hands it a closure: the command bar gets clipboard entries and open windows through `ToolsModel.externalCommands`, the Super Key opens the command bar through `commandBarAction`, and the island gets volume, brightness and the scratchpad note through `NotchControls`. A feature whose way in is missing simply does not show.
+Packages never import each other. Where one feature needs another module, the app hands it a closure: the command bar gets clipboard entries and open windows through `ToolsModel.externalCommands`, the Super Key opens the command bar through `commandBarAction`. A feature whose way in is missing simply does not show.
 
 ### Permissions
 
@@ -85,7 +87,7 @@ Packages never import each other. Where one feature needs another module, the ap
 | Monitor | `MetricsSampler` actor samples once a second into a ring buffer (~5 min); sources behind `MetricsSources`; SMC for temperatures and fans; alerts through UserNotifications |
 | Mouse | `CGEventTap` on its own thread; scroll math, smoothing, button mapping and click filter as pure functions; pointer acceleration restored on stop and after a crash |
 | Keyboard | Event tap for the Super Key and key debounce; `SuperKeyEngine` decides |
-| Notch | Borderless `NSPanel` at the top of the screen; notch size from `safeAreaInsets`, simulated without a notch; music through distributed notifications and AppleScript (no MediaRemote) |
+| Notch | Vorssaint's Dynamic Island, unchanged, from `Vendor/Vorssaint`; started and stopped through `SonaryIsland` in `SonaryBridge.swift`. Every other Vorssaint feature is marked as not installed, so nothing else of it runs |
 | Clipboard | Polls the pasteboard, skips password entries, stores history and image files; Finder helpers through AppleScript |
 | Apps | Cleaner, uninstaller and folder tidying move files to the Trash; ports through `lsof`; Homebrew and Sparkle feeds for updates |
 | Windows | Accessibility API for moving windows, ScreenCaptureKit for previews, an event tap for ⌘Q/⌘W protection |

@@ -6,7 +6,6 @@ import Apps
 import Clipboard
 import Display
 import Mouse
-import Notch
 import SonaryCore
 import SonaryUI
 import Sound
@@ -21,7 +20,7 @@ final class AppModel {
     let launchAtLogin = LaunchAtLoginModel()
     let monitor: MonitorModule
     let mouse: MouseModule
-    let notch: NotchModule
+    let notch: IslandModule
     let clipboard: ClipboardModule
     let apps: AppsModule
     let windows: WindowsModule
@@ -55,7 +54,7 @@ final class AppModel {
         self.monitor = monitor
         let mouse = MouseModule(defaults: defaults)
         self.mouse = mouse
-        let notch = NotchModule(defaults: defaults)
+        let notch = IslandModule()
         self.notch = notch
         ShortcutStore.shared.configure(defaults: defaults)
         let clipboard = ClipboardModule(defaults: defaults)
@@ -93,21 +92,6 @@ final class AppModel {
         }
         let display = DisplayModule(defaults: defaults)
         self.display = display
-        // The island's controls and notes reach into the modules that own them.
-        notch.model.controls = NotchControls(
-            volume: { [weak sound] in sound?.model.outputVolume },
-            setVolume: { [weak sound] value in sound?.model.setOutputVolume(value) },
-            brightness: { [weak display] in display?.model.displays.first?.brightness },
-            setBrightness: { [weak display] value in
-                guard let display, let first = display.model.displays.first else { return }
-                display.model.setBrightness(value, for: first.id)
-            },
-            notes: { [weak tools] in tools?.model.currentTab.text ?? "" },
-            setNotes: { [weak tools] text in
-                guard let tools else { return }
-                tools.model.setText(text, for: tools.model.currentTab.id)
-            }
-        )
         // Keep awake used to be part of sound; whoever had sound on keeps keep awake on.
         let awake = KeepAwakeModule(model: sound.model)
         if defaults.object(forKey: "module.awake.enabled") == nil, defaults.bool(forKey: "module.sound.enabled") {

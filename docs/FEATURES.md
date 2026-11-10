@@ -5,7 +5,7 @@ its own app: Vorssaint's name, icon and branding stay out of it (see its `TRADEM
 GPL code keeps its headers and is listed in `NOTICE`.
 
 The list follows Vorssaint's feature catalog (84 features in eight groups), as of vorssaint-utils
-commit `63b2fee` (2026-11-10). Status checked on 2026-11-10 against Sonary 0.80.0.
+commit `181d0d5` (2026-11-10). Status checked on 2026-11-11 against Sonary 0.81.0.
 
 The first part goes feature by feature. The second part, [Option by option](#option-by-option), goes
 through every preference Vorssaint stores and lists the ones Sonary has no counterpart for, down to
@@ -13,8 +13,8 @@ single switches inside a feature that is otherwise done.
 
 Legend: `[x]` done · `[~]` partly done, the gap is named · `[ ]` open · `[-]` not planned, with the reason.
 
-At a glance, 113 entries: 96 done, 7 partly done, 4 open, 6 not planned.
-Below that, 120 groups of single options Vorssaint has and Sonary does not.
+At a glance, 114 entries: 100 done, 8 partly done, 1 open, 5 not planned.
+Below that, 109 groups of single options Vorssaint has and Sonary does not.
 
 ## Windows and Dock
 - [x] Window switcher — every window, word-by-word search, a filter per app and per display, live previews (optional, so it works without Screen Recording), a large-icon mode with one icon per app, raise on ⌃⌥Tab or by taking over ⌘Tab
@@ -103,23 +103,28 @@ Below that, 120 groups of single options Vorssaint has and Sonary does not.
 - [x] Kill process — Quit and Force Quit for apps, and a list of all processes by CPU with search
 
 ## Dynamic Island (notch)
+
+Since 0.81 the island is Vorssaint's own, taken over whole from `Vendor/Vorssaint` and not yet
+tried on a real Mac. Its settings page is Vorssaint's too.
+
 - [x] Island at the notch, simulated on displays without one
-- [x] Music — title, artist, play, pause, skip for Music and Spotify
-- [x] Calendar — today's events, and a month to browse with the events of any day
-- [x] Timer
-- [x] Downloads from a folder you choose
-- [x] Accessory batteries, with a notice once one falls to 20 %
+- [x] Music — title, artist, cover, play, pause, skip; other players and browsers
+- [x] Calendar — events, countdown, time left, calendars to leave out
+- [x] Timer, stopwatch and pomodoro
+- [x] Downloads
+- [x] Accessory batteries
 - [x] File shelf in the island
 - [x] Camera in the island
-- [x] Scroll gestures to open, close and change tracks
-- [x] Choosing what the island shows — widgets on and off and in your order, volume and brightness controls, the scratchpad's note
-- [-] Notifications from other apps — macOS offers no public way to read them
-- [-] Lyrics — needs a licensed lyrics service
-- [-] Up next — neither Music nor Spotify shares its queue with other apps
-- [ ] Live equalizer — needs the same audio tap as the mixer
-- [-] AI agent activity (Claude, Codex, Copilot: limits, tokens, live work) — Vorssaint reads each tool's local logs and signs in to their accounts; out of scope for now, see ARCHITECTURE.md
-- [ ] Watch — turn part of a window into a live activity that alerts when it changes
-- [ ] Companion — a small animated character in the island
+- [x] Gestures
+- [x] Choosing what the island shows, its size, shape and display
+- [x] Up next
+- [x] Live equalizer
+- [x] Watch — turn part of a window into a live activity that alerts when it changes
+- [x] Companion — a small animated character in the island
+- [~] Volume, brightness and the scratchpad's note in the island — these came from Sonary's own modules; Vorssaint's island expects Vorssaint's, which Sonary does not run. To be wired to Sonary's modules
+- [-] Notifications from other apps — in the code, switched off: Sonary does not read other apps
+- [-] Lyrics — in the code, switched off: they are fetched from the network
+- [-] AI agent activity (Claude, Codex, Copilot: limits, tokens, live work) — in the code, switched off: it reads each tool's local logs and signs in to their accounts
 
 ## System monitor
 - [x] CPU, GPU, memory and history graphs
@@ -284,18 +289,7 @@ Nothing in this part is counted in the totals at the top.
 - [ ] App updates: checked daily or weekly with a notice, an online catalog for apps without a feed, rules per app
 
 ### Dynamic Island
-- [ ] Size and shape: preset sizes, custom width and height, the silhouette, an outline, a translucent background, haptics
-- [ ] Which display it lives on, a shortcut that opens it
-- [ ] Full screen: hidden, or shown on hover; hidden until hover everywhere
-- [ ] Close delay, returning to a home tab, which tab is home
-- [ ] Replacing the system's overlays for volume, brightness, keyboard light, input source, microphone, battery and track changes
-- [ ] Music: other players and browsers, covers from the browser, volume in the island, a preferred player
-- [ ] Timer: stopwatch and pomodoro with their lengths, a sound, hiding the countdown
-- [ ] Calendar: countdown to the next event, time left in the current one, week numbers, calendars to leave out
-- [ ] Low battery: thresholds, an early warning, tinting the island
-- [ ] Clipboard, capture controls, the quick panel and the command bar inside the island; keep awake as an activity
-- [ ] Over the lock screen, with lock sounds
-- [ ] Shown or hidden in screenshots and recordings
+- [ ] Inside the island, from features Sonary runs itself and has not yet wired in: replacing the system's overlays for volume, brightness, keyboard light and microphone; the clipboard; capture controls; the quick panel and the command bar; keep awake as an activity
 
 ### System monitor
 - [ ] Menu bar: GPU, single temperatures, accessory batteries and connected devices as readouts; the order of readouts; bar colours and their thresholds; compact or classic labels; memory and disk shown in other ways; upload first

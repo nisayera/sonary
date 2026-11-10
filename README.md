@@ -52,7 +52,7 @@ Sonary is a native menu bar app for macOS 26. Every feature is a **module** you 
 | 📊 **Monitor** | CPU, GPU, memory, network, disk, battery, temperatures and fans in the menu bar, with history, the busiest apps, alerts and a speed test |
 | 🖱 **Mouse** | Linear or smooth scrolling, acceleration off, button and gesture mapping, double-click filter, three-finger middle click, per-app exceptions |
 | ⌨️ **Keyboard** | Super Key: hold one key for ⌃⌥⇧⌘, tap it for an action; key debounce; per-app exceptions |
-| 🏝 **Notch** | An island at the notch with music, calendar, timer, downloads, accessory batteries, a file shelf and the camera (simulated on displays without a notch) |
+| 🏝 **Notch** | Vorssaint's Dynamic Island, taken over whole: music with queue and live equalizer, calendar, timer, downloads, accessory batteries, file shelf, gestures, sizes and shapes (also on displays without a notch) |
 | 📋 **Clipboard** | Clipboard history with text, images and files, auto-clear, plain-text paste, clean links, a file shelf and Finder helpers |
 | 🧹 **Apps** | Cleaner, uninstaller with leftovers, quit and force quit, port manager, Homebrew and app updates, disk image installer |
 | 🪟 **Windows** | Layouts on shortcuts and screen edges, window switcher, Dock previews and click actions, ⌘Q/⌘W protection, fixed Space order |
@@ -120,9 +120,11 @@ Every merge to `main` with a new version number is released automatically (see [
 - **0.44** — the menu panel folds instead of scrolling, keep awake as its own module, brightness for external monitors over DDC/CI
 - **0.80** — one interface: every panel tab and every settings page built from the same parts; a round of fixes (edge snapping no longer fires on any drag, key debounce no longer eats key repeat, the cleaner leaves Sonary's own data alone, long Homebrew upgrades no longer hang)
 
+- **0.81** — the Dynamic Island is now Vorssaint's, taken over as it is
+
 ### Before 1.0
 
-- The Vorssaint island, taken over as it is and then made Sonary's own
+- Making the island Sonary's own: its settings in Sonary's layout, its strings in Sonary's catalogs
 - Per-app volume and output routing (needs an audio process tap)
 - Trying the hardware paths on real devices: DDC brightness, XDR extra brightness
 - Notarized builds and a Homebrew cask

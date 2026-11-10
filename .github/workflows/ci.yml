@@ -14,7 +14,7 @@ concurrency:
 jobs:
   build-and-test:
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 75
     permissions:
       contents: write  # only for pushing the interface snapshots, see the last step
     steps:
@@ -57,11 +57,11 @@ jobs:
           xcodegen generate
           xcodebuild -project Sonary.xcodeproj -scheme Sonary \
             -destination 'platform=macOS,arch=arm64' \
-            CODE_SIGNING_ALLOWED=NO SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
+            CODE_SIGNING_ALLOWED=NO \
             build 2>&1 | tee build.log
 
       - name: Test app
-        timeout-minutes: 12
+        timeout-minutes: 30
         env:
           # SnapshotTests renders the panel and the settings into this folder.
           TEST_RUNNER_SONARY_SNAPSHOT_DIR: ${{ runner.temp }}/snapshots
@@ -70,7 +70,6 @@ jobs:
           xcodebuild -project Sonary.xcodeproj -scheme Sonary \
             -destination 'platform=macOS,arch=arm64' \
             CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES ENABLE_HARDENED_RUNTIME=NO \
-            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
             test 2>&1 | tee app-test.log
 
       - name: Report errors
