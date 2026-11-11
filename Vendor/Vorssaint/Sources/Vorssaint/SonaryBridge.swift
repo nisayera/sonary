@@ -271,9 +271,42 @@ public enum SonaryEngine {
 
     /// One tab of Sonary's panel: the sections that belong to an area, whichever module they
     /// come from. Sections of features that are not running leave themselves out.
-    public static func panelView(tab: String, group: String? = nil) -> AnyView? {
+    public static func panelView(tab: String, group: String? = nil, starred: [String] = []) -> AnyView? {
         guard let area = SonaryPanelArea(rawValue: tab) else { return nil }
-        return AnyView(SonaryAreaPanel(area: area, utilityGroup: group).sonaryLook())
+        let items = Set(starred.flatMap { quickItems(pane: $0) })
+        return AnyView(SonaryAreaPanel(area: area, utilityGroup: group, starredItems: items).sonaryLook())
+    }
+
+    /// The panel rows a settings pane stands for: what its star puts under Quick actions.
+    /// Empty for a pane that has no row in the panel.
+    public static func quickItems(pane: String) -> [String] {
+        switch pane {
+        case "mouse": ["mouseScroll", "smoothScroll", "linearScroll", "focusFollowsMouse", "mouseAcceleration",
+                       "mouseNavigation", "middleClick", "mouseButtonShortcuts", "mouseClickDebounce"]
+        case "superKey": ["superKey"]
+        case "keyDebounce": ["keyDebounce"]
+        case "textSnippets": ["textSnippets"]
+        case "notch": ["notch"]
+        case "clipboard": ["clipboard"]
+        case "cutPaste": ["cutPaste"]
+        case "shelf": ["shelf"]
+        case "urlCleaner": ["cleanURL"]
+        case "cleaner": ["cleaner"]
+        case "uninstaller": ["uninstaller"]
+        case "homebrew": ["homebrew"]
+        case "appUpdates": ["appUpdates"]
+        case "autoQuit": ["autoQuit"]
+        case "portManager": ["portManager"]
+        case "windowLayout": ["windowLayout", "windowMaximize", "spacesOrder"]
+        case "switcher": ["switcher"]
+        case "dock": ["dockPreview", "dockClick", "dockClickHide", "dockClickCycle"]
+        case "quickTools": ["quickLauncher", "scratchpad", "colorPicker", "cameraPreview", "cleaning"]
+        case "screenshot": ["screenshot", "screenRecorder", "screenOCR"]
+        case "commandBar": ["commandBar"]
+        case "radialMenu": ["radialMenu"]
+        case "media": ["media"]
+        default: []
+        }
     }
 
     private static func sections(for area: String) -> AnyView? {
@@ -392,6 +425,7 @@ enum SonaryPanelArea: String {
 private struct SonaryAreaPanel: View {
     let area: SonaryPanelArea
     var utilityGroup: String?
+    var starredItems: Set<String> = []
     @ObservedObject private var features = FeatureRuntime.shared
     @State private var showsDevices = false
     @State private var showsPorts = false
@@ -463,9 +497,25 @@ private struct SonaryAreaPanel: View {
         case .control:
             QuickControlsSection(collapsible: false)
         case .quick:
+            if !starredItems.isDisjoint(with: Self.utilityNames) {
+                UtilitiesSection(collapsible: false, only: starredItems, startCleaning: {
+                    SonaryHost.closePanel()
+                    CleaningModeManager.shared.activate()
+                })
+            }
+            if !starredItems.subtracting(Self.utilityNames).isEmpty {
+                QuickControlsSection(collapsible: false, only: starredItems)
+            }
             QuickTogglesSection(collapsible: false)
         }
     }
+
+    /// The rows that live in the utilities section; every other starred row is a control.
+    private static let utilityNames: Set<String> = [
+        "screenshot", "quickLauncher", "appUpdates", "cleaner", "homebrew", "media", "clipboard", "windowLayout",
+        "uninstaller", "cleanURL", "cleaning", "screenOCR", "colorPicker", "cameraPreview", "scratchpad",
+        "commandBar", "screenRecorder", "portManager",
+    ]
 
     private var utilityItems: Set<String>? {
         switch utilityGroup {

@@ -71,6 +71,16 @@
         }
       }
     },
+    "Add to Quick actions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu Schnellaktionen hinzufügen"
+          }
+        }
+      }
+    },
     "Add ⌃, ⌥, ⇧ or ⌘ — a plain key would be caught everywhere.": {
       "extractionState": "manual",
       "localizations": {
@@ -731,6 +741,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Importieren …"
+          }
+        }
+      }
+    },
+    "In Quick actions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In den Schnellaktionen"
           }
         }
       }
@@ -1633,6 +1653,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quellcode"
+          }
+        }
+      }
+    },
+    "Star a function in its settings to put it here.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Markiere eine Funktion in ihren Einstellungen mit dem Stern, dann erscheint sie hier."
           }
         }
       }

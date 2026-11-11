@@ -9,6 +9,7 @@ import Vorssaint
 struct EnginePage: View {
     let model: AppModel
     let module: EngineModule
+    @AppStorage(QuickStars.key) private var starred = ""
 
     var body: some View {
         // Read here, so the page is drawn again with the new colour when the accent changes.
@@ -68,6 +69,21 @@ struct EnginePage: View {
                         }
                     }
                     .scrollIndicators(.never)
+                }
+                if module.isLive, !SonaryEngine.quickItems(pane: current).isEmpty {
+                    let isStarred = QuickStars.panes(starred).contains(current)
+                    Button {
+                        starred = QuickStars.toggled(current, in: starred)
+                    } label: {
+                        Label {
+                            Text(isStarred ? "In Quick actions" : "Add to Quick actions")
+                        } icon: {
+                            Image(systemName: isStarred ? "star.fill" : "star")
+                                .foregroundStyle(isStarred ? Color.yellow : Color.secondary)
+                        }
+                        .font(.system(size: 12))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 20)

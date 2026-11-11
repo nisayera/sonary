@@ -1250,6 +1250,8 @@ struct QuickControlsSection: View {
     @AppStorage(DefaultsKey.panelControlOrder) private var controlOrderRaw = ""
     @State private var draggingItem: ControlPanelItem?
     var collapsible = true
+    /// Sonary's quick actions show the starred controls only: their raw values.
+    var only: Set<String>?
 
     var body: some View {
         PanelSection(.controls, title: l10n.s.quickControlsSection, collapsible: collapsible,
@@ -1420,7 +1422,9 @@ struct QuickControlsSection: View {
     }
 
     private func items(editing: Bool) -> [ControlPanelItem] {
-        orderedItems.filter { $0.feature.isAvailable && (editing || isVisible($0)) }
+        orderedItems.filter { item in
+            item.feature.isAvailable && (editing || isVisible(item)) && (only?.contains(item.rawValue) ?? true)
+        }
     }
 
     private func isVisible(_ item: ControlPanelItem) -> Bool {

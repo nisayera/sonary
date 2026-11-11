@@ -14,6 +14,8 @@ struct PopoverView: View {
     @AppStorage("panel.overview.open") private var openCategory = "system"
     /// The group of utilities on screen.
     @AppStorage("panel.utilities.group") private var utilityGroup = "capture"
+    /// The settings panes starred for the Quick actions tab, comma-separated.
+    @AppStorage(QuickStars.key) private var starred = ""
     @Environment(\.openSettings) private var openSettings
 
     init(model: AppModel, initialTab: PanelTab = .overview) {
@@ -220,7 +222,14 @@ struct PopoverView: View {
                 utilityGroupButton("tools", Text("Tools"))
             }
         }
-        if let view = SonaryEngine.panelView(tab: area.id, group: area == .utilities ? utilityGroup : nil) {
+        if area == .quick, QuickStars.panes(starred).isEmpty {
+            Text("Star a function in its settings to put it here.")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 2)
+        }
+        if let view = SonaryEngine.panelView(tab: area.id, group: area == .utilities ? utilityGroup : nil,
+                                             starred: QuickStars.panes(starred)) {
             view.tint(Color.sonaryAccent)
         }
         if area == .network {
@@ -353,5 +362,20 @@ struct PanelTabPreview: View {
             .background(PanelSurfaceBackground())
             .environment(\.sonarySurface, .panel)
             .tint(Color.sonaryAccent)
+    }
+}
+
+/// The settings panes whose functions the Quick actions tab shows, kept as one string.
+enum QuickStars {
+    static let key = "panel.quick.panes"
+
+    static func panes(_ raw: String) -> [String] {
+        raw.split(separator: ",").map(String.init)
+    }
+
+    static func toggled(_ pane: String, in raw: String) -> String {
+        var list = panes(raw)
+        if let index = list.firstIndex(of: pane) { list.remove(at: index) } else { list.append(pane) }
+        return list.joined(separator: ",")
     }
 }

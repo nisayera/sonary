@@ -17,6 +17,7 @@ The menu bar panel is sorted by what things are about, not by module: Home, Syst
 
 ### Added
 - Settings › General: a colour well next to the accent swatches, for any accent colour of your own.
+- A star in a function's settings puts its panel rows under Quick actions, above the quick toggles.
 
 ### Fixed
 - The island no longer announces Vorssaint's updates. Sonary only looks for its own.
