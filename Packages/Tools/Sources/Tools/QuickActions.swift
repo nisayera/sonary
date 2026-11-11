@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import SonaryCore
 
 public enum QuickAction: String, CaseIterable, Codable, Sendable, Identifiable {
     case darkMode, desktopIcons, emptyTrash, ejectDisks, lockScreen, cleaningMode
@@ -32,11 +33,9 @@ public let quickToggleActions: [QuickAction] = [.darkMode, .desktopIcons, .empty
                                                .cleaningMode]
 
 enum SystemActions {
-    @discardableResult
-    static func runAppleScript(_ source: String) -> Bool {
-        var error: NSDictionary?
-        NSAppleScript(source: source)?.executeAndReturnError(&error)
-        return error == nil
+    /// Off the main thread and with a time limit, so a busy Finder cannot freeze the panel.
+    static func runAppleScript(_ source: String) {
+        AppleScriptRunner.launch(source)
     }
 
     static func toggleDarkMode() {

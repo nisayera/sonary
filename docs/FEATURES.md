@@ -5,9 +5,9 @@ its own app: Vorssaint's name, icon and branding stay out of it (see its `TRADEM
 GPL code keeps its headers and is listed in `NOTICE`.
 
 The list follows Vorssaint's feature catalog (84 features in eight groups), as of vorssaint-utils
-commit `181d0d5` (2026-11-10). Status checked on 2026-11-11 against Sonary 0.81.0.
+commit `181d0d5` (2026-11-10). Status checked on 2026-11-11 against Sonary 0.83.6.
 
-> **From 0.82.0** every group but the system monitor runs on Vorssaint's own code, taken over as it
+> **From 0.83.6** every group but the system monitor runs on Vorssaint's own code, taken over as it
 > is (`Vendor/Vorssaint`, switched on per Sonary module through `SonaryBridge.swift`). The gaps
 > named below for those groups are therefore closed in function; the lists stay as the measure for
 > Sonary's own modules in `Packages/`, which are to take over again one at a time. Still open with
@@ -112,7 +112,7 @@ Below that, 109 groups of single options Vorssaint has and Sonary does not.
 
 ## Dynamic Island (notch)
 
-Since 0.81 the island is Vorssaint's own, taken over whole from `Vendor/Vorssaint` and not yet
+Since 0.83.6 the island is Vorssaint's own, taken over whole from `Vendor/Vorssaint` and not yet
 tried on a real Mac. Its settings page is Vorssaint's too.
 
 - [x] Island at the notch, simulated on displays without one

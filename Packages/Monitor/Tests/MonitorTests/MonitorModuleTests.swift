@@ -41,6 +41,33 @@ struct MonitorModuleTests {
         #expect(counter.value == 1)
         await module.stop()
     }
+
+    @Test func detailsAreOnlyReadWhileTheMonitorIsOnScreen() async throws {
+        let ticks = CPUTicks(user: 1, system: 1, idle: 1, nice: 0)
+        let module = MonitorModule(
+            defaults: UserDefaults(suiteName: "sonary.monitortests.\(UUID().uuidString)")!,
+            sources: { FakeSources(ticks: [ticks], counters: [NetworkCounters(bytesIn: 0, bytesOut: 0)]) },
+            fans: NoFans()
+        )
+        try await module.start()
+        #expect(!module.readsDetails)
+        module.beginDetailedReadings()
+        #expect(module.readsDetails)
+        module.beginDetailedReadings()
+        module.endDetailedReadings()
+        #expect(module.readsDetails)
+        module.endDetailedReadings()
+        #expect(!module.readsDetails)
+        await module.stop()
+
+        // A view that is already on screen when the module starts gets its readings too.
+        module.beginDetailedReadings()
+        #expect(!module.readsDetails)
+        try await module.start()
+        #expect(module.readsDetails)
+        module.endDetailedReadings()
+        await module.stop()
+    }
 }
 
 struct MonitorLocalizationTests {

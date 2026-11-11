@@ -51,50 +51,22 @@ public struct WindowsSettings: Codable, Equatable, Sendable {
 /// that one through ("SONY").
 let quitTapSyntheticMarker: Int64 = 0x534F_4E59
 
-private func quitTapCallback(
-    proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, userInfo: UnsafeMutableRawPointer?
-) -> Unmanaged<CGEvent>? {
-    guard let userInfo else { return Unmanaged.passUnretained(event) }
-    let model = Unmanaged<WindowsModel>.fromOpaque(userInfo).takeUnretainedValue()
-    // Read the event on the tap thread; only Sendable values cross into the main actor.
-    let flags = event.flags
-    let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-    let isRepeat = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
-    let isOurs = event.getIntegerValueField(.eventSourceUserData) == quitTapSyntheticMarker
-    let pass = MainActor.assumeIsolated {
-        model.shouldPass(type: type, flags: flags, keyCode: keyCode, isRepeat: isRepeat, isSynthetic: isOurs)
-    }
-    return pass ? Unmanaged.passUnretained(event) : nil
-}
-
-private func greenButtonTapCallback(
-    proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, userInfo: UnsafeMutableRawPointer?
-) -> Unmanaged<CGEvent>? {
-    guard let userInfo else { return Unmanaged.passUnretained(event) }
-    let model = Unmanaged<WindowsModel>.fromOpaque(userInfo).takeUnretainedValue()
-    let location = event.location
-    let option = event.flags.contains(.maskAlternate)
-    let pass = MainActor.assumeIsolated {
-        model.greenButtonShouldPass(type: type, location: location, option: option)
-    }
-    return pass ? Unmanaged.passUnretained(event) : nil
-}
-
 /// Window layouts on ⌃⌥ shortcuts and the "press ⌘Q twice" quit protection.
 @MainActor
 @Observable
 public final class WindowsModel {
     public private(set) var settings: WindowsSettings
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private var quitTap: CFMachPort?
-    @ObservationIgnored private var quitSource: CFRunLoopSource?
-    @ObservationIgnored private var quitGuard = QuitGuard()
-    @ObservationIgnored private var holdGuard = HoldGuard()
+    // Internal rather than private: quit protection and the green button live in
+    // WindowsModel+Protection.swift.
+    @ObservationIgnored var quitTap: EventTap?
+    @ObservationIgnored var quitGuard = QuitGuard()
+    @ObservationIgnored var holdGuard = HoldGuard()
     /// Set when the ⌘Q/⌘W tap could not be created, which means Accessibility is missing.
-    public private(set) var quitProtectionNeedsAccessibility = false
-    @ObservationIgnored private var hudProgress: Double = 0
+    public internal(set) var quitProtectionNeedsAccessibility = false
+    @ObservationIgnored var hudProgress: Double = 0
     /// The frame a window had before the last layout, so it can be put back.
-    @ObservationIgnored private var previousFrames: [pid_t: CGRect] = [:]
+    @ObservationIgnored var previousFrames: [pid_t: CGRect] = [:]
     @ObservationIgnored private var quitWatch = QuitWatchState()
     @ObservationIgnored private var watchTask: Task<Void, Never>?
     @ObservationIgnored private var dragMonitor: Any?
@@ -121,14 +93,13 @@ public final class WindowsModel {
     @ObservationIgnored private var dockDownMonitor: Any?
     /// The app in front when the last click began, so a Dock click acts only on that one.
     @ObservationIgnored private var frontmostAtMouseDown: Int32?
-    @ObservationIgnored private var greenButtonTap: CFMachPort?
-    @ObservationIgnored private var greenButtonSource: CFRunLoopSource?
+    @ObservationIgnored var greenButtonTap: EventTap?
     /// The window whose green button went down; its button-up is swallowed too.
-    @ObservationIgnored private var pendingGreenButtonWindow: AXUIElement?
+    @ObservationIgnored var pendingGreenButtonWindow: AXUIElement?
     @ObservationIgnored private var modifierDragMonitor: Any?
     /// The window a modifier-drag grabbed, where it was, and where the pointer began.
     @ObservationIgnored private var modifierDragStart: (window: AXUIElement, frame: CGRect, pointer: CGPoint)?
-    @ObservationIgnored private var hud: NSPanel?
+    @ObservationIgnored var hud: NSPanel?
     @ObservationIgnored private let switcher = WindowSwitcherController()
     @ObservationIgnored private let commandTab = CommandTabTap()
     @ObservationIgnored private let nativeSwitcher: NativeSwitcherGuard
@@ -786,7 +757,7 @@ public final class WindowsModel {
         return unsafeDowncast(focused, to: AXUIElement.self)
     }
 
-    private func frame(of window: AXUIElement) -> CGRect? {
+    func frame(of window: AXUIElement) -> CGRect? {
         var positionRef: CFTypeRef?
         var sizeRef: CFTypeRef?
         guard AXUIElementCopyAttributeValue(window, kAXPositionAttribute as CFString, &positionRef) == .success,
@@ -800,7 +771,7 @@ public final class WindowsModel {
         return CGRect(origin: point, size: size)
     }
 
-    private func setFrame(_ rect: CGRect, of window: AXUIElement) {
+    func setFrame(_ rect: CGRect, of window: AXUIElement) {
         var origin = rect.origin
         var size = rect.size
         guard let position = AXValueCreate(.cgPoint, &origin), let sizeValue = AXValueCreate(.cgSize, &size) else { return }
@@ -808,261 +779,5 @@ public final class WindowsModel {
         AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, position)
         AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, sizeValue)
         AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, position)
-    }
-
-    // MARK: Quit protection
-
-    private func installQuitTap() {
-        guard quitTap == nil else { return }
-        // Key-ups and modifier changes too: holding has to notice when the keys are let go,
-        // or the next press would count the old hold and quit at once.
-        let mask = (CGEventMask(1) << CGEventType.keyDown.rawValue)
-            | (CGEventMask(1) << CGEventType.keyUp.rawValue)
-            | (CGEventMask(1) << CGEventType.flagsChanged.rawValue)
-        guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
-                                          eventsOfInterest: mask, callback: quitTapCallback,
-                                          userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
-            quitProtectionNeedsAccessibility = true
-            _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
-            return
-        }
-        let source = CFMachPortCreateRunLoopSource(nil, tap, 0)
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-        CGEvent.tapEnable(tap: tap, enable: true)
-        quitTap = tap
-        quitSource = source
-        quitProtectionNeedsAccessibility = false
-    }
-
-    private func removeQuitTap() {
-        if let quitTap { CGEvent.tapEnable(tap: quitTap, enable: false) }
-        if let quitSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), quitSource, .commonModes) }
-        quitTap = nil
-        quitSource = nil
-        holdGuard.up()
-        quitProtectionNeedsAccessibility = false
-    }
-
-    /// False swallows the key press.
-    func shouldPass(type: CGEventType, flags: CGEventFlags, keyCode: Int64, isRepeat: Bool,
-                    isSynthetic: Bool = false) -> Bool {
-        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            if let quitTap { CGEvent.tapEnable(tap: quitTap, enable: true) }
-            return true
-        }
-        // The plain ⌘Q Sonary sends after ⌥ confirmed it.
-        if isSynthetic { return true }
-        let confirmation = modifierConfirmation(command: flags.contains(.maskCommand),
-                                                option: flags.contains(.maskAlternate),
-                                                shift: flags.contains(.maskShift),
-                                                control: flags.contains(.maskControl))
-        // With ⌥ as the confirmation, ⌥⌘Q is the protected combination too; otherwise only ⌘Q.
-        let combinationMatches = settings.quitConfirmation == .extraModifier
-            ? confirmation != .pass
-            : confirmation == .holdBack
-        let key: ProtectedKey? = switch keyCode {
-        case 12 where settings.quitProtection: .quit
-        case 13 where settings.closeProtection: .close
-        default: nil
-        }
-        guard type == .keyDown, combinationMatches, let key,
-              let app = NSWorkspace.shared.frontmostApplication,
-              let bundleID = app.bundleIdentifier, bundleID != "com.apple.finder",
-              isProtected(bundleID: bundleID, onlyApps: settings.protectedApps) else {
-            // Anything but the protected keys still going down ends a hold: a key let go,
-            // ⌘ released, another key pressed.
-            if settings.quitConfirmation == .hold, holdGuard.isHolding {
-                holdGuard.up()
-                hideHUD()
-            }
-            return true
-        }
-        // Holding needs the repeats, which is how it knows the keys are still down. For the
-        // other ways a repeat is held back like the first press: a held ⌘Q must not slip
-        // through as its own repeats.
-        if isRepeat && settings.quitConfirmation != .hold { return false }
-        let now = ProcessInfo.processInfo.systemUptime
-        switch settings.quitConfirmation {
-        case .extraModifier:
-            if confirmation == .sendPlain {
-                sendPlainCommand(keyCode: keyCode)
-                hideHUD()
-            } else {
-                showHUD(appName: app.localizedName ?? bundleID, key: key, withOption: true)
-            }
-        case .pressTwice:
-            if quitGuard.shouldQuit(app: bundleID, key: key, at: now) { return true }
-            showHUD(appName: app.localizedName ?? bundleID, key: key)
-        case .hold:
-            if holdGuard.down(app: bundleID, key: key, at: now) {
-                holdGuard.up()
-                hideHUD()
-                return true
-            }
-            showHUD(appName: app.localizedName ?? bundleID, key: key,
-                    progress: holdGuard.progress(app: bundleID, key: key, at: now))
-        }
-        return false
-    }
-
-    /// The hint while a protected shortcut waits. With a progress value it shows a bar
-    /// filling up, so holding has something to look at.
-    private func showHUD(appName: String, key: ProtectedKey, progress: Double? = nil, withOption: Bool = false) {
-        let text = withOption ? optionHintText(appName: appName, key: key)
-            : hudText(appName: appName, key: key, holding: progress != nil)
-        // While holding, the panel is only rebuilt once; after that the bar is updated.
-        if let progress, let existing = hud, existing.identifier?.rawValue == text {
-            hudProgress = progress
-            return
-        }
-        hud?.orderOut(nil)
-        hudProgress = progress ?? 0
-        let view = QuitHintView(text: text, progress: progress == nil ? nil : { [weak self] in self?.hudProgress ?? 0 })
-        let host = NSHostingView(rootView: view)
-        let size = host.fittingSize
-        let panel = NSPanel(contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless, .nonactivatingPanel],
-                            backing: .buffered, defer: false)
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.level = .statusBar
-        panel.ignoresMouseEvents = true
-        panel.identifier = NSUserInterfaceItemIdentifier(text)
-        panel.contentView = host
-        if let screen = NSScreen.main {
-            panel.setFrameOrigin(CGPoint(x: screen.frame.midX - size.width / 2,
-                                         y: screen.frame.minY + screen.frame.height * 0.2))
-        }
-        panel.orderFrontRegardless()
-        hud = panel
-        guard progress == nil else { return }  // holding takes it away on key-up
-        Task { [weak self, weak panel] in
-            try? await Task.sleep(for: .seconds(1.6))
-            panel?.orderOut(nil)
-            if self?.hud === panel { self?.hud = nil }
-        }
-    }
-
-    private func hideHUD() {
-        hud?.orderOut(nil)
-        hud = nil
-    }
-
-    private func optionHintText(appName: String, key: ProtectedKey) -> String {
-        switch key {
-        case .quit: String(localized: "Press ⌥⌘Q to quit \(appName)", bundle: .module)
-        case .close: String(localized: "Press ⌥⌘W to close this window", bundle: .module)
-        }
-    }
-
-    /// Sends ⌘Q or ⌘W on its own, marked so the tap lets it through, after ⌥ confirmed it.
-    private func sendPlainCommand(keyCode: Int64) {
-        Task { @MainActor in
-            let source = CGEventSource(stateID: .hidSystemState)
-            for down in [true, false] {
-                guard let event = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(keyCode), keyDown: down)
-                else { continue }
-                event.flags = .maskCommand
-                event.setIntegerValueField(.eventSourceUserData, value: quitTapSyntheticMarker)
-                event.post(tap: .cgSessionEventTap)
-            }
-        }
-    }
-
-    // MARK: Green button
-
-    private func installGreenButtonTap() {
-        guard greenButtonTap == nil else { return }
-        let mask = (CGEventMask(1) << CGEventType.leftMouseDown.rawValue)
-            | (CGEventMask(1) << CGEventType.leftMouseUp.rawValue)
-        guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
-                                          eventsOfInterest: mask, callback: greenButtonTapCallback,
-                                          userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
-            _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
-            return
-        }
-        let source = CFMachPortCreateRunLoopSource(nil, tap, 0)
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-        CGEvent.tapEnable(tap: tap, enable: true)
-        greenButtonTap = tap
-        greenButtonSource = source
-    }
-
-    private func removeGreenButtonTap() {
-        if let greenButtonTap { CGEvent.tapEnable(tap: greenButtonTap, enable: false) }
-        if let greenButtonSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), greenButtonSource, .commonModes) }
-        greenButtonTap = nil
-        greenButtonSource = nil
-        pendingGreenButtonWindow = nil
-    }
-
-    /// False swallows the click. A click on a window's green full-screen button becomes a
-    /// maximize (or, on a window already filling the screen, a step back); ⌥-click and the
-    /// apps on the exception list keep what macOS does.
-    func greenButtonShouldPass(type: CGEventType, location: CGPoint, option: Bool) -> Bool {
-        switch type {
-        case .tapDisabledByTimeout, .tapDisabledByUserInput:
-            if let greenButtonTap { CGEvent.tapEnable(tap: greenButtonTap, enable: true) }
-            pendingGreenButtonWindow = nil
-            return true
-        case .leftMouseDown:
-            guard !option, let window = fullScreenButtonWindow(at: location) else { return true }
-            pendingGreenButtonWindow = window
-            return false
-        case .leftMouseUp:
-            guard let window = pendingGreenButtonWindow else { return true }
-            pendingGreenButtonWindow = nil
-            toggleMaximize(window)
-            return false
-        default:
-            return true
-        }
-    }
-
-    /// The window whose green full-screen button is at this point, if it is one and its
-    /// app is not on the exception list.
-    private func fullScreenButtonWindow(at location: CGPoint) -> AXUIElement? {
-        var hit: AXUIElement?
-        guard AXUIElementCopyElementAtPosition(AXUIElementCreateSystemWide(), Float(location.x), Float(location.y),
-                                               &hit) == .success, let hit else { return nil }
-        var subrole: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(hit, kAXSubroleAttribute as CFString, &subrole) == .success,
-              (subrole as? String) == kAXFullScreenButtonSubrole else { return nil }
-        var pid: pid_t = 0
-        AXUIElementGetPid(hit, &pid)
-        guard !isExcluded(bundleID: NSRunningApplication(processIdentifier: pid)?.bundleIdentifier,
-                          in: settings.greenButtonExceptions) else { return nil }
-        var windowRef: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(hit, kAXWindowAttribute as CFString, &windowRef) == .success,
-              let windowRef, CFGetTypeID(windowRef) == AXUIElementGetTypeID() else { return nil }
-        return unsafeDowncast(windowRef, to: AXUIElement.self)
-    }
-
-    /// Fills the window's screen, or puts it back when it already fills it.
-    private func toggleMaximize(_ window: AXUIElement) {
-        guard let primary = NSScreen.screens.first, let currentAX = frame(of: window) else { return }
-        let height = primary.frame.height
-        let current = cocoaRect(fromAX: currentAX, primaryScreenHeight: height)
-        let middle = CGPoint(x: current.midX, y: current.midY)
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(middle) }) ?? NSScreen.main else { return }
-        let target = axRect(fromCocoa: layoutFrame(.maximize, visible: screen.visibleFrame, current: current),
-                            primaryScreenHeight: height)
-        var pid: pid_t = 0
-        AXUIElementGetPid(window, &pid)
-        if framesMatch(currentAX, target), let saved = previousFrames[pid] {
-            setFrame(saved, of: window)
-            previousFrames[pid] = nil
-        } else {
-            previousFrames[pid] = currentAX
-            setFrame(target, of: window)
-        }
-    }
-
-    private func hudText(appName: String, key: ProtectedKey, holding: Bool) -> String {
-        switch (key, holding) {
-        case (.quit, false): String(localized: "Press ⌘Q again to quit \(appName)", bundle: .module)
-        case (.close, false): String(localized: "Press ⌘W again to close this window", bundle: .module)
-        case (.quit, true): String(localized: "Hold ⌘Q to quit \(appName)", bundle: .module)
-        case (.close, true): String(localized: "Hold ⌘W to close this window", bundle: .module)
-        }
     }
 }

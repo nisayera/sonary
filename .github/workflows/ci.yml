@@ -9,14 +9,20 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # A newer push replaces the run of a pull request. Runs on main are never cancelled: the release
+  # of a merge waits for its CI run, and a second merge must not take the first one's release away.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Read-only by default; only the job that publishes the interface snapshots may write.
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
     runs-on: macos-26
     timeout-minutes: 75
     permissions:
-      contents: write  # only for pushing the interface snapshots, see the last step
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -30,8 +36,13 @@ jobs:
         run: |
           set -eo pipefail
           python3 -m venv .venv
-          .venv/bin/pip install cryptography
+          .venv/bin/pip install -r scripts/requirements.txt
           .venv/bin/python scripts/test_release_tools.py
+          # The version in project.yml has the right build number and a CHANGELOG.md entry, so
+          # the release after the merge has its notes.
+          .venv/bin/python scripts/release_tools.py check-project
+          .venv/bin/python scripts/release_tools.py notes --tag "$(.venv/bin/python scripts/release_tools.py project-version | cut -d' ' -f1)" --out "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
 
       - name: Test packages
         run: |
@@ -59,6 +70,18 @@ jobs:
             -destination 'platform=macOS,arch=arm64' \
             CODE_SIGNING_ALLOWED=NO \
             build 2>&1 | tee build.log
+
+      - name: Check the signing script
+        # The release signs nested code inside out with scripts/sign_app.sh. Here it signs a copy
+        # of this build ad hoc, so a broken script shows up before a release depends on it.
+        run: |
+          set -eo pipefail
+          BUILT=$(xcodebuild -project Sonary.xcodeproj -scheme Sonary -destination 'platform=macOS,arch=arm64' \
+            -showBuildSettings 2>/dev/null | awk -F' = ' '/ BUILT_PRODUCTS_DIR = / { print $2; exit }')
+          test -d "$BUILT/Sonary.app"
+          rm -rf "$RUNNER_TEMP/signcheck" && mkdir -p "$RUNNER_TEMP/signcheck"
+          ditto "$BUILT/Sonary.app" "$RUNNER_TEMP/signcheck/Sonary.app"
+          scripts/sign_app.sh "$RUNNER_TEMP/signcheck/Sonary.app" - 2>&1 | tee sign-check.log
 
       - name: Test app
         timeout-minutes: 30
@@ -98,21 +121,43 @@ jobs:
           path: "*.log"
           if-no-files-found: ignore
 
-      - name: Publish snapshots
-        # Pictures of the panel and the settings window, for reviewing interface changes. They go
-        # to the ci-snapshots branch, replaced on every run. Pull requests from forks cannot write.
+      - name: Keep snapshots
         if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots
+          path: ${{ runner.temp }}/snapshots
+          if-no-files-found: ignore
+
+  snapshots:
+    # Pictures of the panel and the settings window, for reviewing interface changes. They go
+    # to the ci-snapshots branch, replaced on every run. Pull requests from forks cannot write.
+    # This is the only job with write access, and it runs no code from the pull request.
+    needs: build-and-test
+    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download snapshots
+        id: download
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: snapshots
+          path: snapshots
+
+      - name: Publish snapshots
         env:
           GH_TOKEN: ${{ github.token }}
-          SNAPSHOTS: ${{ runner.temp }}/snapshots
           PR: ${{ github.event.pull_request.number }}
           SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          if [ ! -d "$SNAPSHOTS" ] || [ -z "$(ls -A "$SNAPSHOTS")" ]; then
+          if [ ! -d snapshots ] || [ -z "$(ls -A snapshots)" ]; then
             echo "No snapshots were written."
             exit 0
           fi
-          cd "$SNAPSHOTS"
+          cd snapshots
           git init -q -b ci-snapshots
           git add -A
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \

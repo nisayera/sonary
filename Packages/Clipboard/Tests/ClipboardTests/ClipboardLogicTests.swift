@@ -113,6 +113,50 @@ struct ClipboardStoreTests {
         #expect(store.loadHistory(limit: 80).entries.map(\.searchText) == ["x"])
     }
 
+    private func temporaryFile() -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent("sonary-clipboard-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("history.json")
+    }
+
+    @Test func historyLivesInItsOwnFile() throws {
+        let defaults = UserDefaults(suiteName: "sonary.clipboardtests.\(UUID().uuidString)")!
+        let file = temporaryFile()
+        defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+        let store = ClipboardStore(defaults: defaults, historyFile: file)
+        var history = ClipboardHistory(limit: 50)
+        history.add("secret", at: Date(timeIntervalSince1970: 0))
+        store.save(history)
+        store.flush()
+        #expect(defaults.data(forKey: "clipboard.history") == nil)
+        #expect(FileManager.default.fileExists(atPath: file.path))
+        let attributes = try FileManager.default.attributesOfItem(atPath: file.path)
+        #expect((attributes[.posixPermissions] as? NSNumber)?.intValue == 0o600)
+        let reopened = ClipboardStore(defaults: defaults, historyFile: file)
+        #expect(reopened.loadHistory(limit: 50).entries.map(\.searchText) == ["secret"])
+    }
+
+    @Test func historyInUserDefaultsMovesToTheFile() throws {
+        let defaults = UserDefaults(suiteName: "sonary.clipboardtests.\(UUID().uuidString)")!
+        let file = temporaryFile()
+        defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
+        var old = ClipboardHistory(limit: 50)
+        old.add("from 0.80", at: Date(timeIntervalSince1970: 0))
+        defaults.set(try JSONEncoder().encode(old), forKey: "clipboard.history")
+
+        let store = ClipboardStore(defaults: defaults, historyFile: file)
+        #expect(store.loadHistory(limit: 50).entries.map(\.searchText) == ["from 0.80"])
+        #expect(defaults.data(forKey: "clipboard.history") == nil)
+        #expect(FileManager.default.fileExists(atPath: file.path))
+        #expect(store.loadHistory(limit: 50).entries.map(\.searchText) == ["from 0.80"])
+    }
+
+    @Test func otherPreferencesGetNoHistoryFile() {
+        let defaults = UserDefaults(suiteName: "sonary.clipboardtests.\(UUID().uuidString)")!
+        #expect(ClipboardStore.defaultHistoryFile(for: defaults) == nil)
+        #expect(ClipboardStore.defaultHistoryFile(for: .standard)?.lastPathComponent == "history.json")
+    }
+
     @Test func defaultsAreSensible() {
         let settings = ClipboardSettings()
         #expect(settings.cleanLinks)

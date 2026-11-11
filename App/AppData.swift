@@ -25,9 +25,12 @@ enum StarterBundle: CaseIterable, Identifiable {
     }
 }
 
-/// Settings keys that belong to the updater or to AppKit, not to Sonary's own choices.
+/// Settings keys that belong to the updater or to AppKit, not to Sonary's own choices. The
+/// clipboard history (kept in UserDefaults before 0.83.5) is data, not a setting, and stays out
+/// of exported settings files.
 func isTransferableSettingsKey(_ key: String) -> Bool {
     !key.hasPrefix("SU") && !key.hasPrefix("NS") && !key.hasPrefix("com.apple.") && key != "app.lastVersion"
+        && key != "clipboard.history"
 }
 
 extension AppModel {

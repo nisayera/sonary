@@ -76,6 +76,7 @@ private struct ShortcutRow: View {
                     }
                     .buttonStyle(.borderless)
                     .help(Text("Back to the shortcut Sonary ships with"))
+                    .accessibilityLabel(Text("Back to the shortcut Sonary ships with"))
                 }
             }
         }

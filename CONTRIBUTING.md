@@ -24,7 +24,7 @@ Packages/
   SonaryUI/           design system: tokens, cards, settings rows, icon tabs, appearance
   Monitor/ Mouse/ …   one Swift package per module, each with its own tests and string catalog
 SonaryTests/          tests for the app target
-scripts/              release helpers (version numbers, Sparkle appcast)
+scripts/              release helpers (version numbers, release notes, Sparkle appcast, signing)
 docs/                 architecture, feature checklist, permissions, releasing
 assets/               README images and design sources
 ```

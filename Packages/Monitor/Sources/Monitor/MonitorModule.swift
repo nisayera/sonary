@@ -43,6 +43,9 @@ public final class MonitorModule: SonaryModule {
     @ObservationIgnored private var sampler: MetricsSampler?
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private var processTask: Task<Void, Never>?
+    /// How many monitor views are on screen. The process list, fans and USB devices (`ps`
+    /// every five seconds) are only read while at least one is, not while the panel is closed.
+    @ObservationIgnored private var detailViewers = 0
     @ObservationIgnored private var batterySamples: [(level: Double, at: Date)] = []
 
     @ObservationIgnored private let fanSource: any FanSource
@@ -76,19 +79,7 @@ public final class MonitorModule: SonaryModule {
         let stream = await sampler.snapshots()
         guard self.sampler === sampler else { return }
         localAddress = preferredLocalAddress(systemLocalAddresses())
-        processTask = Task { [weak self] in
-            while !Task.isCancelled {
-                let source = self?.fanSource ?? NoFans()
-                let readings = await Task.detached {
-                    (processes: systemTopProcesses(limit: 5), fans: source.fans(), usb: systemUSBDevices())
-                }.value
-                guard let self else { return }
-                self.topProcesses = readings.processes
-                self.fans = readings.fans
-                self.usbDevices = readings.usb
-                try? await Task.sleep(for: .seconds(5))
-            }
-        }
+        if detailViewers > 0 { startDetailedReadings() }
         task = Task { [weak self] in
             var evaluator = AlertEvaluator()
             let notifier = AlertNotifier()
@@ -105,6 +96,40 @@ public final class MonitorModule: SonaryModule {
                 if self.alertsEnabled {
                     for kind in fired { await notifier.send(kind) }
                 }
+            }
+        }
+    }
+
+    /// Called when a monitor view appears; reading starts at once, so it is never stale.
+    public func beginDetailedReadings() {
+        detailViewers += 1
+        if detailViewers == 1 { startDetailedReadings() }
+    }
+
+    /// Called when a monitor view goes away; the last one stops the reading.
+    public func endDetailedReadings() {
+        detailViewers = max(0, detailViewers - 1)
+        guard detailViewers == 0 else { return }
+        processTask?.cancel()
+        processTask = nil
+    }
+
+    /// Whether the process list, fans and USB devices are being read right now.
+    public var readsDetails: Bool { processTask != nil }
+
+    private func startDetailedReadings() {
+        guard sampler != nil, processTask == nil else { return }
+        processTask = Task { [weak self] in
+            while !Task.isCancelled {
+                let source = self?.fanSource ?? NoFans()
+                let readings = await Task.detached {
+                    (processes: systemTopProcesses(limit: 5), fans: source.fans(), usb: systemUSBDevices())
+                }.value
+                guard let self, !Task.isCancelled else { return }
+                self.topProcesses = readings.processes
+                self.fans = readings.fans
+                self.usbDevices = readings.usb
+                try? await Task.sleep(for: .seconds(5))
             }
         }
     }
