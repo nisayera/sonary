@@ -24,6 +24,7 @@ Vorssaint's features now look like Sonary, and the system monitor joins them. Th
 - Special editors (fan curve, radial menu, window layout editor, mascot) keep Vorssaint's layout for now and take only Sonary's colours.
 
 ### Fixed
+- **0.83.6 started copies of itself without end** as soon as the mouse or keyboard module was on: Vorssaint's code runs its own program again to put the pointer acceleration and the Super Key mapping back, and Sonary came up as a whole new app each time instead of doing that clean-up. These runs now clean up and exit, and Sonary refuses to start next to a running copy.
 - The 0.83.6 release could not be built: the optimizer did not finish on Vorssaint's code. That code is now compiled without optimization, and every pull request builds the release configuration.
 
 ## [0.83.6] - 2026-11-11
