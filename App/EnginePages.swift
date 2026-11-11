@@ -45,10 +45,14 @@ struct EnginePage: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             Divider()
             if module.isLive {
-                SonaryEngine.settingsView(pane: current)
-                    .id(current)
-                    .tint(Color.sonaryAccent)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                // A pane asked for its ideal size answers with its whole content and would push
+                // the header out of the window; the reader hands it the space there really is.
+                GeometryReader { geometry in
+                    SonaryEngine.settingsView(pane: current)
+                        .id(current)
+                        .tint(Color.sonaryAccent)
+                        .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+                }
             } else {
                 VStack(spacing: 10) {
                     IconBadge(symbol: module.symbol, isActive: false, size: 40)
@@ -81,9 +85,11 @@ struct AllShortcutsPage: View {
             if showsOwn {
                 ShortcutsPage()
             } else {
-                SonaryEngine.shortcutsView()
-                    .tint(Color.sonaryAccent)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                GeometryReader { geometry in
+                    SonaryEngine.shortcutsView()
+                        .tint(Color.sonaryAccent)
+                        .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+                }
             }
         }
     }
