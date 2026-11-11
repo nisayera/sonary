@@ -247,7 +247,7 @@ private struct WhatsNewFeaturePage: View {
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(title)
-                            .font(.title2.bold())
+                            .font(SonaryHost.paneTitleFont)
                         if let feature = row.feature {
                             Text(feature.hubDescription(hub))
                                 .foregroundStyle(.secondary)

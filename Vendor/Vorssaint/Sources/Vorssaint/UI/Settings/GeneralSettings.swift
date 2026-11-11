@@ -25,7 +25,7 @@ struct GeneralSettings: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text(l10n.s.tabGeneral).font(.title2.bold())
+                Text(l10n.s.tabGeneral).font(SonaryHost.paneTitleFont)
                 basicsCard
                 appearanceCard
                 if AppFeature.keepAwake.isAvailable {
@@ -309,22 +309,11 @@ private struct DiagonalHalf: Shape {
 
 /// The idle menu bar glyph, tinted white for dark surfaces.
 struct MenuBarGlyph: View {
-    /// Observed so the previews follow a newly chosen symbol right away.
-    @AppStorage(DefaultsKey.menuBarIconSymbol) private var symbolName = ""
-
+    // Sonary: the app around this code is Sonary, so its menu bar icon stands here.
     var body: some View {
-        Group {
-            if let image = BlackHoleGlyph.mark(symbolName: Defaults.sanitizedMenuBarIconSymbol(symbolName)) {
-                Image(nsImage: image)
-                    .renderingMode(.template)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-            } else {
-                Image(systemName: "circle.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-            }
-        }
-        .foregroundStyle(.white)
+        Image("MenuBarIcon")
+            .renderingMode(.template)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
     }
 }

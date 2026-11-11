@@ -150,12 +150,16 @@ struct NotchSettings: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(text.title).font(.title2.bold())
+                    Text(text.title).font(SonaryHost.paneTitleFont)
                     Text(text.description).font(.callout).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 12)
                 Toggle(text.enable, isOn: $enabled).labelsHidden().toggleStyle(.switch)
                     .disabled(!AppFeature.notch.isAvailable).accessibilityLabel(text.enable)
+                    // Sonary: the module's switch above this page is the island's switch.
+                    .opacity(SonaryHost.ownsMenuBarIcon ? 0 : 1)
+                    .allowsHitTesting(!SonaryHost.ownsMenuBarIcon)
+                    .accessibilityHidden(SonaryHost.ownsMenuBarIcon)
             }
             if enabled, AppFeature.notch.isAvailable, !(hover && hideUntilHover && !hiddenShowsActivity), !notch.geometry.isNotched, !permissions.accessibility {
                 VStack(alignment: .leading, spacing: 8) {

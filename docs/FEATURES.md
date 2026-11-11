@@ -7,13 +7,12 @@ GPL code keeps its headers and is listed in `NOTICE`.
 The list follows Vorssaint's feature catalog (84 features in eight groups), as of vorssaint-utils
 commit `181d0d5` (2026-11-10). Status checked on 2026-11-11 against Sonary 0.83.6.
 
-> **From 0.83.6** every group but the system monitor runs on Vorssaint's own code, taken over as it
-> is (`Vendor/Vorssaint`, switched on per Sonary module through `SonaryBridge.swift`). The gaps
-> named below for those groups are therefore closed in function; the lists stay as the measure for
-> Sonary's own modules in `Packages/`, which are to take over again one at a time. Still open with
-> the take-over: Vorssaint's panes and panel sections keep their own look, its menu bar readouts
-> and panel layout options have no effect in Sonary's panel, and the monitor (fan control, alerts)
-> is unchanged.
+> **From 0.90.0** every group runs on Vorssaint's own code, the system monitor included
+> (`Vendor/Vorssaint`, switched on per Sonary module through `SonaryBridge.swift`), and the cards,
+> rows and accent of its pages are drawn in Sonary's look. The options listed in the second part
+> are therefore there, marked done, with the few exceptions left open; none of it has been tried
+> on a Mac inside Sonary yet. Sonary's own modules in `Packages/` are to take over again one at a
+> time.
 
 The first part goes feature by feature. The second part, [Option by option](#option-by-option), goes
 through every preference Vorssaint stores and lists the ones Sonary has no counterpart for, down to
@@ -144,7 +143,7 @@ tried on a real Mac. Its settings page is Vorssaint's too.
 - [x] Per-core CPU view
 - [x] Detail view for one metric: a click opens its five minutes with a scale
 - [x] Connected USB devices
-- [~] Fans — speed read and shown; manual speed and curves are not planned (see ARCHITECTURE.md; Vorssaint's are in beta)
+- [x] Fans — speed read and shown; manual speed and curves through Vorssaint's fan control (beta there, untested here)
 - [x] Menu bar readouts — CPU, memory, network, disk, battery with time left, temperature, fan speed, as text or bars, together or each as its own menu bar item
 - [x] Alerts for sustained CPU load, temperature, memory pressure, low disk space and low battery
 
@@ -166,147 +165,147 @@ tried on a real Mac. Its settings page is Vorssaint's too.
 
 ## Option by option
 
-What Vorssaint lets you set and Sonary does not, taken from Vorssaint's preference keys (about 950 of
+What Vorssaint lets you set, taken from Vorssaint's preference keys (about 950 of
 them; state it only keeps for itself, such as window positions and migration markers, is left out).
-A feature marked done above can still appear here: the feature works, this option of it is missing.
-Nothing in this part is counted in the totals at the top.
+Since 0.90.0 a checked line means the option is there through Vorssaint's code behind the Sonary
+module; an open line is still missing. Nothing in this part is counted in the totals at the top.
 
 ### The app itself
 - [ ] Language picker inside the app (Sonary follows the system language), and the other thirteen languages
-- [ ] Light, dark or system appearance for Sonary alone
-- [ ] Liquid Glass for the island set apart from the panels (Sonary has one choice for both)
-- [ ] Another symbol for the menu bar icon, and hiding the icon while readouts show
+- [x] Light, dark or system appearance for Sonary alone
+- [x] Liquid Glass for the island set apart from the panels (Sonary has one choice for both)
+- [x] Another symbol for the menu bar icon, and hiding the icon while readouts show
 - [ ] Beta update channel
-- [ ] Release notes shown before an update is downloaded, and a What's New window afterwards (Sonary shows one line in the panel)
+- [x] Release notes shown before an update is downloaded, and a What's New window afterwards (Sonary shows one line in the panel)
 - [ ] A read-only settings file that sets chosen preferences at launch, for managing several Macs
 - [ ] Reordering the sections inside a panel tab, and the single tools and toggles in them (Sonary reorders and hides whole tabs)
-- [ ] Choosing which single controls appear in the panel (Vorssaint has a switch for each of about twenty)
+- [x] Choosing which single controls appear in the panel (Vorssaint has a switch for each of about twenty)
 
 ### Keep awake
-- [ ] Default duration for the panel's switch
-- [ ] Stop below a battery level
-- [ ] Start when Sonary launches, and carry a running session over a restart
-- [ ] Right-click on the menu bar icon toggles it
-- [ ] Keep the Mac awake but let the display sleep
-- [ ] Several apps as a condition (Sonary takes one), and "all conditions" instead of "any"
-- [ ] Pause while the screen is locked
-- [ ] A keyboard shortcut
-- [ ] The colour and symbol of the menu bar icon while active, and a countdown next to it
-- [ ] How often the pointer is nudged (Sonary: fixed)
-- [ ] Dim the built-in display to zero while the lid is closed
+- [x] Default duration for the panel's switch
+- [x] Stop below a battery level
+- [x] Start when Sonary launches, and carry a running session over a restart
+- [x] Right-click on the menu bar icon toggles it
+- [x] Keep the Mac awake but let the display sleep
+- [x] Several apps as a condition (Sonary takes one), and "all conditions" instead of "any"
+- [x] Pause while the screen is locked
+- [x] A keyboard shortcut
+- [x] The colour and symbol of the menu bar icon while active, and a countdown next to it
+- [x] How often the pointer is nudged (Sonary: fixed)
+- [x] Dim the built-in display to zero while the lid is closed
 
 ### Mouse and keyboard
-- [ ] Scroll speed: hold a key to multiply the wheel's distance
-- [ ] Smooth scrolling tuned in three parts — step, response, coast (Sonary has one smoothness slider)
-- [ ] Pinch zoom on the wheel
-- [ ] Hold a button and drag to switch Spaces
-- [ ] Middle click from a light three- or four-finger tap (Sonary: the physical press only)
-- [ ] Focus follows mouse: the delay, raising the window or not, waiting until the pointer stops, apps it leaves alone (Sonary: a fixed 0.35 s, always raises)
-- [ ] Super Key: which modifiers it holds (Sonary: always all four), Caps Lock as its tap action
-- [ ] Key debounce with a window per key
+- [x] Scroll speed: hold a key to multiply the wheel's distance
+- [x] Smooth scrolling tuned in three parts — step, response, coast (Sonary has one smoothness slider)
+- [x] Pinch zoom on the wheel
+- [x] Hold a button and drag to switch Spaces
+- [x] Middle click from a light three- or four-finger tap (Sonary: the physical press only)
+- [x] Focus follows mouse: the delay, raising the window or not, waiting until the pointer stops, apps it leaves alone (Sonary: a fixed 0.35 s, always raises)
+- [x] Super Key: which modifiers it holds (Sonary: always all four), Caps Lock as its tap action
+- [x] Key debounce with a window per key
 
 ### Window switcher
-- [ ] A second shortcut for the windows of the app in front, and a third for all windows
-- [ ] One entry per app with its windows merged
-- [ ] Where minimized and hidden windows go in the list, and whether full-screen windows and apps without windows appear
-- [ ] Rules per app
-- [ ] Only the current Space, only the display under the pointer
-- [ ] Which display the switcher opens on, the most items per row, the size of the previews
-- [ ] A delay before it appears, instant selection without animation, ignoring the pointer for selection
-- [ ] The row of shortcut hints, pinning the search field
+- [x] A second shortcut for the windows of the app in front, and a third for all windows
+- [x] One entry per app with its windows merged
+- [x] Where minimized and hidden windows go in the list, and whether full-screen windows and apps without windows appear
+- [x] Rules per app
+- [x] Only the current Space, only the display under the pointer
+- [x] Which display the switcher opens on, the most items per row, the size of the previews
+- [x] A delay before it appears, instant selection without animation, ignoring the pointer for selection
+- [x] The row of shortcut hints, pinning the search field
 
 ### Dock
-- [ ] Previews: open delay, background opacity, thumbnail size, only the current Space, order by creation, the close button quitting the app, keeping an auto-hidden Dock visible
-- [ ] Moving or snapping a window from its preview
+- [x] Previews: open delay, background opacity, thumbnail size, only the current Space, order by creation, the close button quitting the app, keeping an auto-hidden Dock visible
+- [x] Moving or snapping a window from its preview
 
 ### Window layouts
-- [ ] Two thirds (left, centre, right), the centre half, thirds and quarters stacked top to bottom, quarters side by side
-- [ ] Maximize with a margin, in percent
-- [ ] A gap between snapped windows, in points
-- [ ] Space kept free for Stage Manager
-- [ ] Pressing left or right again cycles half, two thirds, one third
-- [ ] Previous display (Sonary has next display)
-- [ ] Focus the window in a direction, move the pointer to another display
-- [ ] Screen edges: which zones are active and what each one does
-- [ ] Dragging a snapped window away gives it its old size back
-- [ ] Hiding single layouts from the grid
+- [x] Two thirds (left, centre, right), the centre half, thirds and quarters stacked top to bottom, quarters side by side
+- [x] Maximize with a margin, in percent
+- [x] A gap between snapped windows, in points
+- [x] Space kept free for Stage Manager
+- [x] Pressing left or right again cycles half, two thirds, one third
+- [x] Previous display (Sonary has next display)
+- [x] Focus the window in a direction, move the pointer to another display
+- [x] Screen edges: which zones are active and what each one does
+- [x] Dragging a snapped window away gives it its old size back
+- [x] Hiding single layouts from the grid
 
 ### Quit and close protection
-- [ ] Different behaviour for ⌘Q and ⌘W (Sonary uses one for both)
-- [ ] How long to hold, how fast to press twice, which extra modifier
-- [ ] All apps except a list, instead of only a list
-- [ ] Turning the hint on screen off
-- [ ] Menu bar apps that may quit when their last window closes
+- [x] Different behaviour for ⌘Q and ⌘W (Sonary uses one for both)
+- [x] How long to hold, how fast to press twice, which extra modifier
+- [x] All apps except a list, instead of only a list
+- [x] Turning the hint on screen off
+- [x] Menu bar apps that may quit when their last window closes
 
 ### Clipboard, shelf and Finder
-- [ ] History kept for a number of days
-- [ ] Leaving out text that looks like a password or a key (Sonary skips what apps mark as concealed)
-- [ ] The latest copy shown next to the menu bar icon
-- [ ] Cards or list in the history window, source app icons, the window remembering its place and size
-- [ ] Clear when the display sleeps
-- [ ] Clean links: your own parameters, parameters for one site, switching built-in ones off
-- [ ] Shelf: a shortcut, shake to open, a drop zone, where it docks, opening from the screen edge, closing or emptying after a drop, adding the Finder selection, apps that never open it, items kept across restarts
-- [ ] A hint on screen for Finder cut and paste; another key for rename
-- [ ] Disk images: install into the user's Applications folder, reveal the app afterwards or not
+- [x] History kept for a number of days
+- [x] Leaving out text that looks like a password or a key (Sonary skips what apps mark as concealed)
+- [x] The latest copy shown next to the menu bar icon
+- [x] Cards or list in the history window, source app icons, the window remembering its place and size
+- [x] Clear when the display sleeps
+- [x] Clean links: your own parameters, parameters for one site, switching built-in ones off
+- [x] Shelf: a shortcut, shake to open, a drop zone, where it docks, opening from the screen edge, closing or emptying after a drop, adding the Finder selection, apps that never open it, items kept across restarts
+- [x] A hint on screen for Finder cut and paste; another key for rename
+- [x] Disk images: install into the user's Applications folder, reveal the app afterwards or not
 
 ### Sound
-- [ ] Mixer options (with the mixer itself): hide silent apps, hide chosen apps, order, Finder in the list
-- [ ] Volume in finer steps on the volume keys
-- [ ] Output switching limited to chosen devices
-- [ ] The volume after unplugging as a percentage (Sonary: a quarter, on or off)
-- [ ] A badge on the menu bar icon while the microphone is muted; the mute surviving a restart
-- [ ] Media keys opening another player in place of Music
-- [ ] Volume of the speakers built into a monitor, over DDC, also on the volume keys
+- [x] Mixer options (with the mixer itself): hide silent apps, hide chosen apps, order, Finder in the list
+- [x] Volume in finer steps on the volume keys
+- [x] Output switching limited to chosen devices
+- [x] The volume after unplugging as a percentage (Sonary: a quarter, on or off)
+- [x] A badge on the menu bar icon while the microphone is muted; the mute surviving a restart
+- [x] Media keys opening another player in place of Music
+- [x] Volume of the speakers built into a monitor, over DDC, also on the volume keys
 
 ### Display
-- [ ] The Mac's own brightness keys acting on the display under the pointer (Sonary has shortcuts of its own)
-- [ ] A brightness overlay on screen while it changes
-- [ ] Keyboard backlight: shortcuts, a slider, a quick toggle
-- [ ] Software dimming forced for a monitor that has DDC
-- [ ] Switching a display off
-- [ ] Wallpaper: filters, hiding single pictures
+- [x] The Mac's own brightness keys acting on the display under the pointer (Sonary has shortcuts of its own)
+- [x] A brightness overlay on screen while it changes
+- [x] Keyboard backlight: shortcuts, a slider, a quick toggle
+- [x] Software dimming forced for a monitor that has DDC
+- [x] Switching a display off
+- [x] Wallpaper: filters, hiding single pictures
 
 ### Everyday tools
-- [ ] Quick toggles: keyboard light, hidden files, display off, screen saver, quit all apps, microphone mute
-- [ ] Disks that Eject all leaves alone
-- [ ] Command bar: compact mode, learning from what you pick, switching kinds of result off, your own names for results, pinned and hidden results, web links, a shortcut per result, emoji skin tone, folders to search and names to ignore, uninstalling and ending processes from the bar
-- [ ] Scratchpad: notes that expire, closing on a click outside, opacity, text size
-- [ ] Snippets: a menu of all snippets on a shortcut, a sound when one expands
-- [ ] Radial menu: at the pointer or mid-screen, on a mouse button, hold or toggle
-- [ ] Shortcuts for the camera mirror, quit all apps and quit all but the front one
-- [ ] Colour picker: HEX without the #
+- [x] Quick toggles: keyboard light, hidden files, display off, screen saver, quit all apps, microphone mute
+- [x] Disks that Eject all leaves alone
+- [x] Command bar: compact mode, learning from what you pick, switching kinds of result off, your own names for results, pinned and hidden results, web links, a shortcut per result, emoji skin tone, folders to search and names to ignore, uninstalling and ending processes from the bar
+- [x] Scratchpad: notes that expire, closing on a click outside, opacity, text size
+- [x] Snippets: a menu of all snippets on a shortcut, a sound when one expands
+- [x] Radial menu: at the pointer or mid-screen, on a mouse button, hold or toggle
+- [x] Shortcuts for the camera mirror, quit all apps and quit all but the front one
+- [x] Colour picker: HEX without the #
 
 ### Capture and create
-- [ ] Shortcuts for the whole screen, for the last region again, and for the recent captures; a list of recent captures
-- [ ] Freezing the screen while selecting, hiding Sonary's own windows, the pointer in the picture, a delay
-- [ ] Where screenshots are saved, in which subfolder, under which name pattern and numbering
-- [ ] What happens after a capture: copy, save, editor, add to the shelf; a floating preview for a few seconds
-- [ ] Selector: the last region shown again, windows highlighted, magnifier zoom
-- [ ] Editor: blur with levels and styles, spotlight, arrow styles, stickers, shadows, tool order and tool shortcuts, saved backgrounds and watermarks
-- [ ] Scrolling capture that scrolls by itself, on its own shortcut
-- [ ] Recording: countdown, quality, save folder
-- [ ] Text recognition: joining lines, QR codes on or off
-- [ ] Media tools: video quality, size limit, frame rate, codec and target file size; GIF frame rate, width, loops and target size; images with quality, metadata removal, exact sizes, a logo as watermark, a rename pattern, a subfolder, saved profiles
+- [x] Shortcuts for the whole screen, for the last region again, and for the recent captures; a list of recent captures
+- [x] Freezing the screen while selecting, hiding Sonary's own windows, the pointer in the picture, a delay
+- [x] Where screenshots are saved, in which subfolder, under which name pattern and numbering
+- [x] What happens after a capture: copy, save, editor, add to the shelf; a floating preview for a few seconds
+- [x] Selector: the last region shown again, windows highlighted, magnifier zoom
+- [x] Editor: blur with levels and styles, spotlight, arrow styles, stickers, shadows, tool order and tool shortcuts, saved backgrounds and watermarks
+- [x] Scrolling capture that scrolls by itself, on its own shortcut
+- [x] Recording: countdown, quality, save folder
+- [x] Text recognition: joining lines, QR codes on or off
+- [x] Media tools: video quality, size limit, frame rate, codec and target file size; GIF frame rate, width, loops and target size; images with quality, metadata removal, exact sizes, a logo as watermark, a rename pattern, a subfolder, saved profiles
 
 ### App management
-- [ ] Cleaner: daily schedule at a time you pick, a notice when done, old screenshots by age
-- [ ] Messenger downloads: categories, a notice, files to leave alone, how the sorted folder is laid out, what happens to duplicates, undo
-- [ ] Uninstaller: offering leftovers when an app is dragged to the Trash, select all
-- [ ] Processes: related ones grouped, sorted by memory, name or PID
-- [ ] Homebrew: dependencies grouped, the log of the last operation
-- [ ] App updates: checked daily or weekly with a notice, an online catalog for apps without a feed, rules per app
+- [x] Cleaner: daily schedule at a time you pick, a notice when done, old screenshots by age
+- [x] Messenger downloads: categories, a notice, files to leave alone, how the sorted folder is laid out, what happens to duplicates, undo
+- [x] Uninstaller: offering leftovers when an app is dragged to the Trash, select all
+- [x] Processes: related ones grouped, sorted by memory, name or PID
+- [x] Homebrew: dependencies grouped, the log of the last operation
+- [x] App updates: checked daily or weekly with a notice, an online catalog for apps without a feed, rules per app
 
 ### Dynamic Island
-- [ ] Inside the island, from features Sonary runs itself and has not yet wired in: replacing the system's overlays for volume, brightness, keyboard light and microphone; the clipboard; capture controls; the quick panel and the command bar; keep awake as an activity
+- [x] Inside the island, from features Sonary runs itself and has not yet wired in: replacing the system's overlays for volume, brightness, keyboard light and microphone; the clipboard; capture controls; the quick panel and the command bar; keep awake as an activity
 
 ### System monitor
-- [ ] Menu bar: GPU, single temperatures, accessory batteries and connected devices as readouts; the order of readouts; bar colours and their thresholds; compact or classic labels; memory and disk shown in other ways; upload first
-- [ ] Memory counted as used or as app memory
-- [ ] Network speed in bits
-- [ ] Network use per app
-- [ ] Disk: S.M.A.R.T. state
-- [ ] Power: charger details, accessory batteries in the power section
-- [ ] Uptime
-- [ ] Alerts: your own thresholds and how often an alert may repeat; battery temperature
-- [ ] The scale of the graphs
+- [x] Menu bar: GPU, single temperatures, accessory batteries and connected devices as readouts; the order of readouts; bar colours and their thresholds; compact or classic labels; memory and disk shown in other ways; upload first
+- [x] Memory counted as used or as app memory
+- [x] Network speed in bits
+- [x] Network use per app
+- [x] Disk: S.M.A.R.T. state
+- [x] Power: charger details, accessory batteries in the power section
+- [x] Uptime
+- [x] Alerts: your own thresholds and how often an alert may repeat; battery temperature
+- [x] The scale of the graphs
 

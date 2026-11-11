@@ -15,16 +15,42 @@ struct SettingsCard<Content: View>: View {
         self.content = content()
     }
 
+    // Sonary: drawn the way Sonary's own settings cards are (SonaryUI.SettingsCard), so the pages
+    // taken over from Vorssaint read as part of the same window: the heading above the card, the
+    // card one list of rows with hairlines between them.
     var body: some View {
-        VStack(alignment: .leading, spacing: 13) {
+        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        VStack(alignment: .leading, spacing: 7) {
             if let title {
-                Text(title).font(.headline)
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold))
+                    .padding(.horizontal, 4)
+                    .accessibilityAddTraits(.isHeader)
             }
-            content
+            VStack(alignment: .leading, spacing: 0) { rows }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.quaternary.opacity(0.35), in: shape)
+                .overlay(shape.strokeBorder(Color.primary.opacity(0.07), lineWidth: 0.5))
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    @ViewBuilder
+    private var rows: some View {
+        if #available(macOS 15.0, *) {
+            Group(subviews: content) { subviews in
+                ForEach(Array(subviews.enumerated()), id: \.element.id) { index, subview in
+                    if index > 0 {
+                        Divider().padding(.horizontal, 14).accessibilityHidden(true)
+                    }
+                    subview
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                }
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 13) { content }.padding(16)
+        }
     }
 }
 
@@ -77,24 +103,24 @@ struct SettingsRow<Accessory: View>: View {
         }
     }
 
+    // Sonary: the icon badge of Sonary's rows (SonaryUI.IconBadge): white symbol on the accent.
+    // A nil symbol shows Sonary's menu bar icon.
     @ViewBuilder
     private var iconTile: some View {
-        if let symbol {
-            Image(systemName: symbol)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Color.accentColor)
-                .frame(width: 26, height: 26)
-                .background(Color.accentColor.opacity(0.12),
-                            in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-        } else {
-            // The menu bar draws the glyph white on a dark bar; the badge keeps
-            // that pairing so it reads as the same icon in both appearances.
-            MenuBarGlyph()
-                .frame(width: 17, height: 13)
-                .frame(width: 26, height: 26)
-                .background(Color.black.opacity(0.82),
-                            in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+        let shape = RoundedRectangle(cornerRadius: 7, style: .continuous)
+        Group {
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.system(size: 13.5, weight: .semibold))
+            } else {
+                MenuBarGlyph().frame(width: 15, height: 15)
+            }
         }
+        .foregroundStyle(Color.white)
+        .frame(width: 26, height: 26)
+        .background(shape.fill(Color.accentColor.gradient))
+        .overlay(shape.strokeBorder(Color.white.opacity(0.18), lineWidth: 0.5))
+        .accessibilityHidden(true)
     }
 }
 

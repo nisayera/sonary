@@ -11,6 +11,8 @@ struct EnginePage: View {
     let module: EngineModule
 
     var body: some View {
+        // Read here, so the page is drawn again with the new colour when the accent changes.
+        let _ = SonaryEngine.setAccent(Color.sonaryAccent)
         let panes = module.panes
         let chosen = model.enginePanes[module.id]
         let current = chosen.flatMap { panes.contains($0) ? $0 : nil } ?? panes.first ?? ""

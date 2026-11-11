@@ -15,8 +15,10 @@ public enum SonaryEngine {
 
     /// Vorssaint's features by the Sonary module that switches them on. Notifications, online
     /// lyrics and the agent readouts of the island stay out: they read other apps or reach the
-    /// network, which Sonary promises not to do unasked. The system monitor stays Sonary's own.
+    /// network, which Sonary promises not to do unasked.
     private static let features: [String: [AppFeature]] = [
+        "monitor": [.monitorCPU, .monitorGPU, .monitorMemory, .monitorNetwork, .monitorDisk,
+                    .monitorPower, .connectedDevices, .fanControl],
         "mouse": [.scrollInverter, .scrollHorizontal, .scrollZoom, .focusFollowsMouse, .smoothScroll,
                   .linearScroll, .scrollSpeed, .mouseAcceleration, .mouseNavigation,
                   .mouseButtonShortcuts, .middleClick, .mouseClickDebounce],
@@ -46,15 +48,47 @@ public enum SonaryEngine {
     private static var showPane: ((String, String) -> Void)?
     private static var openSettings: ((String?, String?) -> Void)?
     private static var closePanelHandler: (() -> Void)?
+    private static var openPanelHandler: (() -> Void)?
 
     /// `showPane` selects a module's pane in Sonary's settings, `openSettings` also brings the
-    /// settings window up, `closePanel` closes Sonary's menu panel.
+    /// settings window up, `openPanel` opens Sonary's menu panel (a click on a readout in the
+    /// menu bar), `closePanel` closes it.
     public static func setHandlers(showPane: @escaping (String, String) -> Void,
                                    openSettings: @escaping (String?, String?) -> Void,
+                                   openPanel: @escaping () -> Void,
                                    closePanel: @escaping () -> Void) {
         self.showPane = showPane
         self.openSettings = openSettings
+        openPanelHandler = openPanel
         closePanelHandler = closePanel
+    }
+
+    // MARK: - Menu bar readouts
+
+    /// Vorssaint's status item, kept for the monitor's readouts, the keep awake countdown and the
+    /// clipboard preview. It shows no icon of its own (`SonaryHost.ownsMenuBarIcon`); a click on
+    /// it opens Sonary's panel.
+    private static var statusItems: StatusItemController?
+
+    private static func installStatusItems() {
+        guard statusItems == nil else { return }
+        let controller = StatusItemController()
+        controller.onLeftClick = { openPanelHandler?() }
+        controller.onRightClick = { _ in openPanelHandler?() }
+        controller.onMetricClick = { _, _ in openPanelHandler?() }
+        controller.onClipboardPreviewClick = { ClipboardHistoryService.shared.toggleHistoryWindow() }
+        statusItems = controller
+    }
+
+    private static func removeStatusItems() {
+        statusItems?.sonaryRemoveMainItem()
+        statusItems = nil
+        SystemMonitor.shared.setMenuBarActive(false)
+    }
+
+    /// Whether a status bar window belongs to the readouts, not to Sonary's own menu bar icon.
+    public static func ownsStatusWindow(_ window: NSWindow) -> Bool {
+        statusItems?.sonaryOwns(window) ?? false
     }
 
     public static func setAccent(_ color: Color?) {
@@ -180,6 +214,8 @@ public enum SonaryEngine {
         }
         FeatureRuntime.shared.setAvailable(group, true)
         switch area {
+        case "monitor":
+            installStatusItems()
         case "notch":
             // The module's switch is the island's switch.
             UserDefaults.standard.set(true, forKey: DefaultsKey.notchEnabled)
@@ -199,6 +235,7 @@ public enum SonaryEngine {
         if area == "notch" {
             UserDefaults.standard.set(false, forKey: DefaultsKey.notchEnabled)
         }
+        if area == "monitor" { removeStatusItems() }
         FeatureRuntime.shared.setAvailable(group, false, enablingFirstInstalls: false)
     }
 
@@ -218,18 +255,24 @@ public enum SonaryEngine {
     public static func settingsView(pane id: String) -> AnyView {
         register()
         guard let pane = SonaryPane(rawValue: id) else { return AnyView(EmptyView()) }
-        return AnyView(pane.view.formStyle(.grouped))
+        return AnyView(pane.view.formStyle(.grouped).sonaryLook())
     }
 
     /// Every shortcut of the features that are installed.
     public static func shortcutsView() -> AnyView {
         register()
-        return AnyView(ShortcutsSettings().formStyle(.grouped))
+        return AnyView(ShortcutsSettings().formStyle(.grouped).sonaryLook())
     }
 
     /// The module's part of Vorssaint's menu panel, or nil when it has none.
     public static func panelView(for area: String) -> AnyView? {
+        sections(for: area).map { AnyView($0.sonaryLook()) }
+    }
+
+    private static func sections(for area: String) -> AnyView? {
         switch area {
+        case "monitor":
+            return AnyView(SonaryMonitorPanel())
         case "sound":
             return AnyView(SonaryPanelStack {
                 if AppFeature.mixer.isAvailable {
@@ -271,6 +314,13 @@ public enum SonaryEngine {
 /// What Vorssaint's code asks of the app around it, now that the app is Sonary: its settings
 /// window and its menu panel. Vorssaint's own app delegate is not running.
 enum SonaryHost {
+    /// The icon in the menu bar is Sonary's; Vorssaint's status item shows readouts only.
+    static let ownsMenuBarIcon = true
+
+    /// The title a pane carries above its cards. Sonary's page header already names the module,
+    /// so the pane's own title is a sub-heading, not a second page title.
+    static let paneTitleFont = Font.system(size: 15, weight: .semibold)
+
     /// Opens Sonary's settings on the pane Vorssaint's router points at.
     static func openSettingsWindow() {
         SonaryEngine.requestSettings(SonaryPane.showing(SettingsRouter.shared.destination))
@@ -278,6 +328,61 @@ enum SonaryHost {
 
     static func closePanel() {
         SonaryEngine.requestPanelClose()
+    }
+}
+
+/// The monitor's tab: Vorssaint's system, network, disk, power and fan sections, each folding on
+/// its own. The monitor samples for them only while the tab is on screen.
+private struct SonaryMonitorPanel: View {
+    @ObservedObject private var features = FeatureRuntime.shared
+    @State private var showsDevices = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if showsDevices {
+                Button {
+                    showsDevices = false
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 12, weight: .semibold))
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                MetricDetailView(kind: .connectedDevices)
+            } else {
+                if features.isAvailable(.monitorCPU) || features.isAvailable(.monitorGPU)
+                    || features.isAvailable(.monitorMemory) {
+                    SystemSection(collapsible: true) { showsDevices = true }
+                }
+                if features.isAvailable(.monitorNetwork) { NetworkSection(collapsible: true) }
+                if features.isAvailable(.monitorDisk) { DiskSection(collapsible: true) }
+                if features.isAvailable(.monitorPower) { PowerSection(collapsible: true) }
+                if features.isAvailable(.fanControl) { FanControlSection(collapsible: true) }
+            }
+        }
+        .onAppear { sync(visible: true) }
+        .onDisappear { sync(visible: false) }
+        .onChange(of: showsDevices) { _ in sync(visible: true) }
+    }
+
+    private func sync(visible: Bool) {
+        guard visible else {
+            SystemMonitor.shared.setMenuPanelNeeds(.none)
+            return
+        }
+        SystemMonitor.shared.setMenuPanelNeeds(
+            SystemMonitorPanelNeeds(system: true, network: true, disk: true, power: true, powerCard: true,
+                                    connectedDevices: showsDevices))
+    }
+}
+
+/// Sonary's accent for everything drawn from this module: controls follow the tint, and
+/// `Color.accentColor`, which Vorssaint's views use throughout, follows the accent set here.
+private extension View {
+    func sonaryLook() -> some View {
+        let accent = SonaryIslandTint.accent ?? Color.accentColor
+        return tint(accent).accentColor(accent)
     }
 }
 
@@ -298,6 +403,7 @@ private struct SonaryPanelStack<Content: View>: View {
 
 /// Vorssaint's settings panes as Sonary lists them: each belongs to one Sonary module.
 private enum SonaryPane: String, CaseIterable {
+    case monitor
     case mouse
     case superKey, keyDebounce, textSnippets, quitProtection
     case notch, notchMascot
@@ -307,10 +413,11 @@ private enum SonaryPane: String, CaseIterable {
     case brightness, extraBrightness
     case mixer, soundOutput, audioPriority, musicBlocking
     case keepAwake, bluetoothSleep
-    case quickTools, screenshot, commandBar, radialMenu, media
+    case quickTools, screenshot, commandBar, radialMenu, media, panelControls
 
     var area: String {
         switch self {
+        case .monitor: return "monitor"
         case .mouse: return "mouse"
         case .superKey, .keyDebounce, .textSnippets, .quitProtection: return "keyboard"
         case .notch, .notchMascot: return "notch"
@@ -321,13 +428,15 @@ private enum SonaryPane: String, CaseIterable {
         case .brightness, .extraBrightness: return "display"
         case .mixer, .soundOutput, .audioPriority, .musicBlocking: return "sound"
         case .keepAwake, .bluetoothSleep: return "awake"
-        case .quickTools, .screenshot, .commandBar, .radialMenu, .media: return "tools"
+        case .quickTools, .screenshot, .commandBar, .radialMenu, .media, .panelControls: return "tools"
         }
     }
 
     /// Where the pane sits in Vorssaint's own settings window.
     var destination: FeatureSettingsDestination {
         switch self {
+        case .monitor: return FeatureSettingsDestination(.monitor)
+        case .panelControls: return FeatureSettingsDestination(.general, sectionAnchor: .panelConfiguration)
         case .mouse: return FeatureSettingsDestination(.mouse)
         case .superKey: return FeatureSettingsDestination(.superKey)
         case .keyDebounce: return FeatureSettingsDestination(.keyDebounce)
@@ -380,6 +489,8 @@ private enum SonaryPane: String, CaseIterable {
 
     @ViewBuilder var view: some View {
         switch self {
+        case .monitor: MonitorSettings()
+        case .panelControls: GeneralToolSettings(anchor: .panelConfiguration)
         case .mouse: MouseSettings()
         case .superKey: SuperKeySettings()
         case .keyDebounce: KeyboardDebounceSettings()

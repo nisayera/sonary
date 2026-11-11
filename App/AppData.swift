@@ -1,3 +1,4 @@
+import Vorssaint
 import AppKit
 import SonaryCore
 import UniformTypeIdentifiers
@@ -111,15 +112,26 @@ extension AppModel {
     /// Opens the menu bar panel, for the shortcut. The panel belongs to the status item
     /// SwiftUI made, which is found by its window.
     func openPanel() {
-        let statusWindow = NSApp.windows.first { $0.className.contains("NSStatusBarWindow") }
+        // The readouts in the menu bar are status items of their own; the panel hangs on Sonary's.
+        let statusWindow = NSApp.windows.first {
+            $0.className.contains("NSStatusBarWindow") && !SonaryEngine.ownsStatusWindow($0)
+        }
         let button = statusWindow?.contentView.flatMap(Self.statusButton(in:))
         button?.performClick(nil)
     }
 
+    private var panelIsOpen: Bool {
+        NSApp.windows.contains { $0.isVisible && $0.className.contains("MenuBarExtra") }
+    }
+
     /// Closes the menu bar panel if it is open, for actions that need the screen to themselves.
     func closePanelIfOpen() {
-        let isOpen = NSApp.windows.contains { $0.isVisible && $0.className.contains("MenuBarExtra") }
-        if isOpen { openPanel() }
+        if panelIsOpen { openPanel() }
+    }
+
+    /// Opens the menu bar panel unless it is open, for a click on a readout in the menu bar.
+    func openPanelIfClosed() {
+        if !panelIsOpen { openPanel() }
     }
 
     private static func statusButton(in view: NSView) -> NSStatusBarButton? {
@@ -177,3 +189,20 @@ struct PanelOptions: Codable, Equatable, Sendable {
 
 /// The key a live value is hidden under.
 func glanceKey(_ moduleID: String, _ statusID: String) -> String { moduleID + "." + statusID }
+
+/// Where the choice between light, dark and the system's appearance is kept.
+let colorSchemeKey = "app.colorScheme"
+
+/// Sets Sonary's windows to light or dark, or back to following the system.
+@MainActor
+func applyColorScheme(_ choice: String) {
+    switch choice {
+    case "light": NSApplication.shared.appearance = NSAppearance(named: .aqua)
+    case "dark": NSApplication.shared.appearance = NSAppearance(named: .darkAqua)
+    default: NSApplication.shared.appearance = nil
+    }
+}
+
+/// Symbols the menu bar icon can be swapped for; the empty name is Sonary's own icon.
+let menuBarSymbolKey = "app.menuBarSymbol"
+let menuBarSymbolChoices = ["", "circle.hexagongrid.fill", "sparkle", "command", "bolt.fill", "switch.2"]

@@ -21,20 +21,27 @@ final class EngineModule: SonaryModule {
     /// Vorssaint asks for a permission itself, in the pane of the feature that needs it.
     var requiredPermissions: [SonaryPermission] { [] }
 
-    init(id: String, title: LocalizedStringResource, symbol: String) {
+    /// False in tests: the module then only keeps its switch, and none of Vorssaint's services,
+    /// event taps or menu bar items is started.
+    private let drivesEngine: Bool
+
+    init(id: String, title: LocalizedStringResource, symbol: String, drivesEngine: Bool = true) {
         self.id = id
         self.title = title
         self.symbol = symbol
+        self.drivesEngine = drivesEngine
     }
 
     func start() async throws {
-        SonaryEngine.setAccent(Color.sonaryAccent)
-        SonaryEngine.start(id)
+        if drivesEngine {
+            SonaryEngine.setAccent(Color.sonaryAccent)
+            SonaryEngine.start(id)
+        }
         isLive = true
     }
 
     func stop() async {
-        SonaryEngine.stop(id)
+        if drivesEngine { SonaryEngine.stop(id) }
         isLive = false
     }
 
@@ -42,7 +49,8 @@ final class EngineModule: SonaryModule {
     func makeSettingsView() -> AnyView { AnyView(EmptyView()) }
 
     func makePopoverView() -> AnyView? {
-        SonaryEngine.panelView(for: id).map { AnyView($0.tint(Color.sonaryAccent)) }
+        SonaryEngine.setAccent(Color.sonaryAccent)
+        return SonaryEngine.panelView(for: id).map { AnyView($0.tint(Color.sonaryAccent)) }
     }
 
     /// The IDs of the module's settings panes, in order.
@@ -59,6 +67,8 @@ final class EngineModule: SonaryModule {
 enum EnginePaneInfo {
     static func title(_ id: String) -> LocalizedStringKey {
         switch id {
+        case "monitor": "Monitor"
+        case "panelControls": "Panel"
         case "mouse": "Mouse"
         case "superKey": "Super Key"
         case "keyDebounce": "Key filter"
