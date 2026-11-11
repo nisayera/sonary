@@ -61,6 +61,24 @@ public enum SonaryEngine {
         SonaryIslandTint.accent = color
     }
 
+    // MARK: - Helper runs
+
+    /// Vorssaint starts its own executable again with an argument to put the mouse acceleration
+    /// or the Super Key mapping back after the app is gone, and expects that run to do the
+    /// clean-up and exit before any app is created (its `main.swift`, which Sonary does not
+    /// use). Sonary calls this first thing at launch. Without it every such run came up as one
+    /// more full copy of the app, which started helpers of its own.
+    public static func runHelperIfRequestedAndExit() {
+        let arguments = CommandLine.arguments
+        guard arguments.contains(SuperKeyMappingGuard.cleanupArgument)
+            || arguments.contains(MouseAccelerationGuard.cleanupArgument) else { return }
+        Defaults.register()
+        SuperKeyMappingGuard.runIfRequestedAndExit()
+        MouseAccelerationGuard.runIfRequestedAndExit()
+        // Asked for a clean-up this build does not know: never fall through into the app.
+        exit(EXIT_FAILURE)
+    }
+
     // MARK: - Starting and stopping
 
     private static var registered = false
@@ -148,6 +166,9 @@ public enum SonaryEngine {
         let firstStart = recoveredOnce.insert(area).inserted
         if firstStart {
             switch area {
+            case "mouse":
+                // A change to the pointer acceleration left behind by a crash is put back.
+                MouseAccelerationService.recoverPendingAtLaunch()
             case "windows":
                 SystemShortcutTakeover.recoverIfNeeded(keeping: AppSwitcher.launchTakeoverIDs())
                 SpacesOrderHold.recoverIfNeeded()
