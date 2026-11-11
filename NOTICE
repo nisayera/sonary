@@ -27,6 +27,8 @@ them in that folder:
 - `Services/Notch/NotchWindowHost.swift`: the island takes Sonary's accent colour
 - `UI/Settings/SettingsCard.swift`: cards and rows drawn in the look of Sonary's own;
   `UI/Settings/GeneralSettings.swift`: `MenuBarGlyph` shows Sonary's menu bar icon
+- the page titles inside the panes are set as sub-headings (`SonaryHost.paneTitleFont`), and
+  the island page's own switch is hidden
 - `App/StatusItemController.swift`: shows readouts only, no icon of its own, and can tell its
   status bar windows from the host's
 - calls that opened Vorssaint's settings window or closed its menu panel

@@ -296,6 +296,10 @@ enum SonaryHost {
     /// The icon in the menu bar is Sonary's; Vorssaint's status item shows readouts only.
     static let ownsMenuBarIcon = true
 
+    /// The title a pane carries above its cards. Sonary's page header already names the module,
+    /// so the pane's own title is a sub-heading, not a second page title.
+    static let paneTitleFont = Font.system(size: 15, weight: .semibold)
+
     /// Opens Sonary's settings on the pane Vorssaint's router points at.
     static func openSettingsWindow() {
         SonaryEngine.requestSettings(SonaryPane.showing(SettingsRouter.shared.destination))
