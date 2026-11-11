@@ -76,7 +76,13 @@ all yours to set under **Settings → General**.
 
 Download the latest `Sonary-<version>.dmg` from [Releases](https://github.com/nisayera/sonary/releases) and drag Sonary into Applications.
 
-Sonary is **not notarized yet**, so macOS blocks the first launch: right-click Sonary, choose **Open**, then **Open** again (or run `xattr -dr com.apple.quarantine /Applications/Sonary.app`). After that, Sonary checks for new versions by itself and updates in one click via [Sparkle](https://sparkle-project.org).
+Sonary is **not notarized yet**, so macOS blocks the first launch. Since macOS 15, right-click → **Open** no longer gets past this; instead:
+
+1. Open Sonary. When macOS says it cannot verify the app, click **Done**.
+2. Open **System Settings → Privacy & Security** (Datenschutz & Sicherheit) and scroll down to the note about Sonary.
+3. Click **Open Anyway** (Trotzdem öffnen), confirm with your password or Touch ID, then click **Open Anyway** once more.
+
+From the Terminal, `xattr -dr com.apple.quarantine /Applications/Sonary.app` does the same. After that, Sonary checks for new versions by itself and updates in one click via [Sparkle](https://sparkle-project.org). What changed in each version is in [CHANGELOG.md](CHANGELOG.md) and on its [release page](https://github.com/nisayera/sonary/releases).
 
 A Homebrew cask is planned.
 
@@ -99,7 +105,7 @@ Requires Xcode 26. The Xcode project is generated from `project.yml` and is not 
 
 ## Release history
 
-Every merge to `main` with a new version number is released automatically (see [docs/RELEASING.md](docs/RELEASING.md)).
+Every merge to `main` with a new version number is released automatically once its tests pass (see [docs/RELEASING.md](docs/RELEASING.md)). What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
 
 - **0.2** — Foundation (app shell, menu bar extra, module system, settings, onboarding, launch at login, localization, in-app updates) and the System Monitor
 - **0.3** — Mouse
@@ -119,6 +125,7 @@ Every merge to `main` with a new version number is released automatically (see [
 - **0.23 – 0.43** — the rest of the checklist: Dock previews across Spaces, ⌘Tab takeover, wallpaper, device priority, messenger downloads, Homebrew search and install, App Store updates, process list, quick panel, snippet triggers, annotation export, menu bar readouts as separate items, settings search, export and import, accent colours
 - **0.44** — the menu panel folds instead of scrolling, keep awake as its own module, brightness for external monitors over DDC/CI
 - **0.80** — one interface: every panel tab and every settings page built from the same parts; a round of fixes (edge snapping no longer fires on any drag, key debounce no longer eats key repeat, the cleaner leaves Sonary's own data alone, long Homebrew upgrades no longer hang)
+- **0.83.5** — no more freezes when Music, Spotify or Finder hang, the clipboard history in its own private file, a more accurate app update checker, releases only after green tests and release pages that list the changes ([CHANGELOG.md](CHANGELOG.md))
 
 ### Before 1.0
 

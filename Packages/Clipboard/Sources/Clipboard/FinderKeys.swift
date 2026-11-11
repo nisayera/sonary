@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import SonaryCore
 
 /// What a key pressed in Finder turns into.
 public enum FinderKeyAction: Equatable, Sendable {
@@ -30,26 +31,19 @@ public func finderKeyAction(keyCode: Int64, command: Bool, option: Bool, shift: 
 /// Marks the keys Sonary presses for Finder, so its own tap lets them through ("SONF").
 let finderKeysMarker: Int64 = 0x534F_4E46
 
-private func finderKeysCallback(
-    proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, userInfo: UnsafeMutableRawPointer?
-) -> Unmanaged<CGEvent>? {
-    guard let userInfo else { return Unmanaged.passUnretained(event) }
-    let tap = Unmanaged<FinderKeysTap>.fromOpaque(userInfo).takeUnretainedValue()
-    let flags = event.flags
-    let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-    let isOurs = event.getIntegerValueField(.eventSourceUserData) == finderKeysMarker
-    let keep = MainActor.assumeIsolated {
-        tap.handle(type: type, keyCode: keyCode, flags: flags, isOurs: isOurs)
-    }
-    return keep ? Unmanaged.passUnretained(event) : nil
-}
-
 /// ⌘X and ⌘V that move files, and F2 that renames, while Finder is in front. Finder already
 /// moves copied files with ⌘⌥V; this only maps the keys people expect onto it.
 @MainActor
 final class FinderKeysTap {
-    private var port: CFMachPort?
-    private var source: CFRunLoopSource?
+    private lazy var tap = EventTap(mask: EventTap.mask([.keyDown])) { [weak self] type, event in
+        let flags = event.flags
+        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+        let isOurs = event.getIntegerValueField(.eventSourceUserData) == finderKeysMarker
+        let keep = MainActor.assumeIsolated {
+            self?.handle(type: type, keyCode: keyCode, flags: flags, isOurs: isOurs) ?? true
+        }
+        return keep ? .pass : .swallow
+    }
     var cutAndPaste = false
     var renameWithF2 = false
     /// The pasteboard's count right after a cut. While it still matches, ⌘V moves.
@@ -58,36 +52,16 @@ final class FinderKeysTap {
     /// False when the tap could not be created, which means Accessibility is missing.
     @discardableResult
     func start() -> Bool {
-        guard port == nil else { return true }
-        let mask = CGEventMask(1) << CGEventType.keyDown.rawValue
-        guard let port = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
-                                           eventsOfInterest: mask, callback: finderKeysCallback,
-                                           userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
-            _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
-            return false
-        }
-        let source = CFMachPortCreateRunLoopSource(nil, port, 0)
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-        CGEvent.tapEnable(tap: port, enable: true)
-        self.port = port
-        self.source = source
-        return true
+        tap.start()
     }
 
     func stop() {
-        if let port { CGEvent.tapEnable(tap: port, enable: false) }
-        if let source { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes) }
-        port = nil
-        source = nil
+        tap.stop()
         cutChangeCount = nil
     }
 
     /// True to let the key through.
     func handle(type: CGEventType, keyCode: Int64, flags: CGEventFlags, isOurs: Bool) -> Bool {
-        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            if let port { CGEvent.tapEnable(tap: port, enable: true) }
-            return true
-        }
         guard type == .keyDown, !isOurs,
               let finder = NSWorkspace.shared.frontmostApplication, finder.bundleIdentifier == "com.apple.finder"
         else { return true }

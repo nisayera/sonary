@@ -45,6 +45,7 @@ struct AppDataTests {
         #expect(!isTransferableSettingsKey("SUEnableAutomaticChecks"))
         #expect(!isTransferableSettingsKey("NSWindow Frame SonaryScratchpad"))
         #expect(!isTransferableSettingsKey("app.lastVersion"))
+        #expect(!isTransferableSettingsKey("clipboard.history"))
         #expect(isTransferableSettingsKey("mouse.settings"))
     }
 

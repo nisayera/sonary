@@ -54,6 +54,14 @@ The Xcode project is generated from `project.yml` with XcodeGen. Every module is
 
 Each module keeps its settings as one `Codable` struct in UserDefaults and reads it through `StoredSettings.load`, which decodes field by field: a field it cannot read falls back to its default instead of throwing the whole struct away. So a new field needs a default value. A new field inside a struct that sits in a list (a snippet, a watched folder, a radial ring) has to be Optional, because list elements are decoded by the synthesized decoder, and one missing key there drops the element.
 
+Data that is not a setting stays out of UserDefaults: the clipboard history lives in `~/Library/Application Support/Sonary/Clipboard/history.json` (folder 0700, file 0600, excluded from backups), written on a background queue by `ClipboardStore`.
+
+### Event taps and AppleScript
+
+`SonaryCore.EventTap` wraps one Quartz event tap: it creates the port on the main run loop, asks for Accessibility when it cannot, switches the tap back on after macOS disabled it and calls a handler that returns `.pass` or `.swallow`. The Finder keys, cleaning mode, snippet triggers, quit protection and the green button use it; the taps in Keyboard, Mouse, Sound and the ⌘Tab takeover still have their own copies of that code and move over one at a time.
+
+`SonaryCore.AppleScriptRunner` runs AppleScript one script at a time on a background queue, inside `with timeout`, and stops waiting after the same limit, so an app that does not answer never blocks the main thread.
+
 ### Modules talking to each other
 
 Packages never import each other. Where one feature needs another module, the app hands it a closure: the command bar gets clipboard entries and open windows through `ToolsModel.externalCommands`, the Super Key opens the command bar through `commandBarAction`, and the island gets volume, brightness and the scratchpad note through `NotchControls`. A feature whose way in is missing simply does not show.

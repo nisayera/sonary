@@ -205,9 +205,8 @@ public final class AppsModel {
                 group.addTask {
                     var request = URLRequest(url: app.feed)
                     request.timeoutInterval = 15
-                    guard let (data, _) = try? await URLSession.shared.data(for: request),
-                          let xml = String(data: data, encoding: .utf8) else { return nil }
-                    return appUpdate(for: app, latest: latestAppcastVersion(xml))
+                    guard let (data, _) = try? await URLSession.shared.data(for: request) else { return nil }
+                    return appUpdate(for: app, entries: appcastEntries(data))
                 }
             }
             for await update in group { if let update { found.append(update) } }

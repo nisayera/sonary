@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import SonaryCore
 
 /// Follows Music and Spotify through their distributed notifications and controls them with AppleScript.
 @MainActor
@@ -47,7 +48,7 @@ public final class NowPlayingCenter {
     private func send(_ command: String) {
         guard let player = nowPlaying?.player,
               !NSRunningApplication.runningApplications(withBundleIdentifier: player.bundleID).isEmpty else { return }
-        var error: NSDictionary?
-        NSAppleScript(source: "tell application \"\(player.scriptName)\" to \(command)")?.executeAndReturnError(&error)
+        // In the background with a time limit: a hanging player must not freeze the notch.
+        AppleScriptRunner.launch("tell application \"\(player.scriptName)\" to \(command)")
     }
 }

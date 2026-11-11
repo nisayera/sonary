@@ -281,6 +281,8 @@ struct ToolsSettingsView: View {
                             Image(systemName: "trash")
                         }
                         .buttonStyle(.borderless)
+                        .help(Text("Remove this ring", bundle: .module))
+                        .accessibilityLabel(Text("Remove this ring", bundle: .module))
                     }
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {

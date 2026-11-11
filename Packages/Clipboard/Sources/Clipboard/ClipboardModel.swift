@@ -34,7 +34,7 @@ public final class ClipboardModel {
     }
 
     public init(defaults: UserDefaults) {
-        store = ClipboardStore(defaults: defaults)
+        store = ClipboardStore(defaults: defaults, historyFile: ClipboardStore.defaultHistoryFile(for: defaults))
         let settings = store.loadSettings()
         self.settings = settings
         history = store.loadHistory(limit: settings.historyLimit)
@@ -81,6 +81,7 @@ public final class ClipboardModel {
         if let lockObserver { DistributedNotificationCenter.default().removeObserver(lockObserver) }
         sleepObserver = nil
         lockObserver = nil
+        store.flush()
     }
 
     private func startAutoClear() {
@@ -372,44 +373,54 @@ public final class ClipboardModel {
             return out
         end tell
         """
-        guard let paths = runFinderScript(script)?.trimmingCharacters(in: .whitespacesAndNewlines), !paths.isEmpty else {
-            lastMessage = String(localized: "Select files in Finder first.", bundle: .module)
-            return
+        Task {
+            guard let paths = await runFinderScript(script)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !paths.isEmpty else {
+                lastMessage = String(localized: "Select files in Finder first.", bundle: .module)
+                return
+            }
+            let board = NSPasteboard.general
+            board.clearContents()
+            board.setString(paths, forType: .string)
+            lastMessage = String(localized: "Path copied.", bundle: .module)
         }
-        let board = NSPasteboard.general
-        board.clearContents()
-        board.setString(paths, forType: .string)
-        lastMessage = String(localized: "Path copied.", bundle: .module)
     }
 
     public func openTerminalInFinderFolder() {
-        guard let folder = currentFinderFolder(),
-              let terminal = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Terminal") else { return }
-        NSWorkspace.shared.open([folder], withApplicationAt: terminal, configuration: NSWorkspace.OpenConfiguration())
+        Task {
+            guard let folder = await currentFinderFolder(),
+                  let terminal = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Terminal")
+            else { return }
+            NSWorkspace.shared.open([folder], withApplicationAt: terminal, configuration: NSWorkspace.OpenConfiguration())
+        }
     }
 
     public func newTextFileInFinderFolder() {
-        guard let folder = currentFinderFolder() else { return }
-        let base = String(localized: "Untitled", bundle: .module)
-        let name = uniqueFileName(base: base, extension: "txt") {
-            FileManager.default.fileExists(atPath: folder.appendingPathComponent($0).path)
-        }
-        let url = folder.appendingPathComponent(name)
-        if FileManager.default.createFile(atPath: url.path, contents: Data()) {
-            NSWorkspace.shared.activateFileViewerSelecting([url])
+        Task {
+            guard let folder = await currentFinderFolder() else { return }
+            let base = String(localized: "Untitled", bundle: .module)
+            let name = uniqueFileName(base: base, extension: "txt") {
+                FileManager.default.fileExists(atPath: folder.appendingPathComponent($0).path)
+            }
+            let url = folder.appendingPathComponent(name)
+            if FileManager.default.createFile(atPath: url.path, contents: Data()) {
+                NSWorkspace.shared.activateFileViewerSelecting([url])
+            }
         }
     }
 
     /// Remembers files for a move rather than a copy. Finder has no cut, so Sonary
     /// keeps the list and moves them when you paste.
     public func cutFinderSelection() {
-        guard let paths = finderSelectionPaths(), !paths.isEmpty else {
-            lastMessage = String(localized: "Select files in Finder first.", bundle: .module)
-            return
+        Task {
+            guard let paths = await finderSelectionPaths(), !paths.isEmpty else {
+                lastMessage = String(localized: "Select files in Finder first.", bundle: .module)
+                return
+            }
+            cutFiles = paths.map { URL(fileURLWithPath: $0) }
+            lastMessage = String(localized: "\(cutFiles.count) files ready to move. Paste them in another folder.",
+                                 bundle: .module)
         }
-        cutFiles = paths.map { URL(fileURLWithPath: $0) }
-        lastMessage = String(localized: "\(cutFiles.count) files ready to move. Paste them in another folder.",
-                             bundle: .module)
     }
 
     /// Moves what was cut into the front Finder window.
@@ -418,7 +429,11 @@ public final class ClipboardModel {
             lastMessage = String(localized: "Nothing was cut.", bundle: .module)
             return
         }
-        guard let folder = currentFinderFolder() else { return }
+        Task { await moveCutFiles() }
+    }
+
+    private func moveCutFiles() async {
+        guard let folder = await currentFinderFolder(), !cutFiles.isEmpty else { return }
         var moved = 0
         for file in cutFiles {
             let destination = folder.appendingPathComponent(file.lastPathComponent)
@@ -438,11 +453,11 @@ public final class ClipboardModel {
         tell application "Finder" to activate
         tell application "System Events" to tell process "Finder" to key code 36
         """
-        guard runFinderScript(script) != nil else { return }
+        Task { _ = await runFinderScript(script) }
     }
 
     /// The POSIX paths of what is selected in Finder.
-    private func finderSelectionPaths() -> [String]? {
+    private func finderSelectionPaths() async -> [String]? {
         let script = """
         tell application "Finder"
             set chosen to selection as alias list
@@ -453,13 +468,17 @@ public final class ClipboardModel {
             return output
         end tell
         """
-        guard let text = runFinderScript(script) else { return nil }
+        guard let text = await runFinderScript(script) else { return nil }
         return text.split(separator: "\n").map(String.init).filter { !$0.isEmpty }
     }
 
     /// Writes the image on the clipboard into the front Finder window as a PNG.
     public func saveClipboardImageToFinderFolder() {
-        guard let folder = currentFinderFolder() else { return }
+        Task { await saveClipboardImage() }
+    }
+
+    private func saveClipboardImage() async {
+        guard let folder = await currentFinderFolder() else { return }
         guard let image = NSImage(pasteboard: .general),
               let tiff = image.tiffRepresentation,
               let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else {
@@ -479,7 +498,7 @@ public final class ClipboardModel {
         }
     }
 
-    private func currentFinderFolder() -> URL? {
+    private func currentFinderFolder() async -> URL? {
         let script = """
         tell application "Finder"
             if (count of Finder windows) > 0 then
@@ -489,18 +508,22 @@ public final class ClipboardModel {
             end if
         end tell
         """
-        guard let path = runFinderScript(script), !path.isEmpty else { return nil }
+        guard let path = await runFinderScript(script), !path.isEmpty else { return nil }
         return URL(fileURLWithPath: path, isDirectory: true)
     }
 
-    private func runFinderScript(_ source: String) -> String? {
-        var error: NSDictionary?
-        let result = NSAppleScript(source: source)?.executeAndReturnError(&error)
-        if error != nil {
+    /// Runs in the background with a time limit, so a busy Finder cannot freeze the panel.
+    private func runFinderScript(_ source: String) async -> String? {
+        switch await AppleScriptRunner.run(source) {
+        case .success(let text):
+            return text
+        case .failed:
             lastMessage = String(localized: "Allow Sonary to control Finder in System Settings > Privacy & Security > Automation.",
                                  bundle: .module)
             return nil
+        case .timedOut:
+            lastMessage = String(localized: "Finder did not answer. Try again in a moment.", bundle: .module)
+            return nil
         }
-        return result?.stringValue
     }
 }
