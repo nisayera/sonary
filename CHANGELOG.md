@@ -5,6 +5,41 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.92.0] - 2026-11-11
+
+### Summary
+The menu bar panel is sorted by what things are about, not by module: Home, System, Network, Disks, Energy, Utilities, Control and Quick actions.
+
+### Changed
+- The panel's tabs are now Home (the overview), System (CPU, GPU, memory, connected devices, fans, brightness, sound and keep awake), Network (traffic, speed test, ports and a button to the network settings), Disks (storage and SMART), Energy (power and battery), Utilities, Control (mouse, keyboard and windows) and Quick actions. A tab shows while one of its modules is on.
+- Settings › General › Menu panel orders and hides these tabs.
+- Utilities are sorted into three groups: Capture, Apps & clean-up, and Tools.
+
+### Added
+- Settings › General: a colour well next to the accent swatches, for any accent colour of your own.
+- A star in a function's settings puts its panel rows under Quick actions, above the quick toggles.
+
+### Fixed
+- The island no longer announces Vorssaint's updates. Sonary only looks for its own.
+- A panel tab with a single section no longer shows its name twice.
+- A module's settings page no longer slides out of the window when it has many panes: the panes are picked from a row that scrolls sideways.
+
+## [0.91.0] - 2026-11-11
+
+### Summary
+Vorssaint's code is brought up to its 3.4.4 release. That carries the edge snapping option that came from this project, restoring a window's earlier size when you drag it away by its title bar, in its released form, along with Vorssaint's latest fixes.
+
+### Changed
+- The code taken over from Vorssaint is now that of Vorssaint 3.4.4.
+- Edge snapping: a snapped window goes back to its earlier size only once you really drag it; a click on the title bar leaves it snapped. The option is in Windows, under Layouts, and starts off.
+
+### Fixed
+- Super Key no longer crashes when it reapplies the keyboard mapping at startup.
+- Mic mute remembers each channel's level across updates and reconnects.
+- Switching a monitor to software dimming cancels brightness commands still on their way to it.
+- Volume keys for monitor speakers respect whether the feature is on.
+- Copy as GIF checks again for a cancel before it touches the clipboard.
+
 ## [0.90.0] - 2026-11-11
 
 ### Summary
@@ -72,6 +107,7 @@ The biggest change since Sonary began: everything but the system monitor now run
 - CI jobs only get write access where they need it.
 - A second merge no longer cancels the tests of the first, which would have skipped its release.
 
+[0.91.0]: https://github.com/nisayera/sonary/releases/tag/v0.91.0
 [0.90.0]: https://github.com/nisayera/sonary/releases/tag/v0.90.0
 [0.83.7]: https://github.com/nisayera/sonary/releases/tag/v0.83.7
 [0.83.6]: https://github.com/nisayera/sonary/releases/tag/v0.83.6

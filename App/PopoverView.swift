@@ -2,6 +2,7 @@ import AppKit
 import SonaryCore
 import SonaryUI
 import SwiftUI
+import Vorssaint
 
 /// The menu bar panel: the Sonary mark, icon tabs (the module overview plus one per running
 /// module), the section, and Settings and Quit at the bottom.
@@ -11,6 +12,10 @@ struct PopoverView: View {
     @State private var contentHeight: CGFloat = 320
     /// The overview's open categories, as a comma-separated list; each opens on its own.
     @AppStorage("panel.overview.open") private var openCategory = "system"
+    /// The group of utilities on screen.
+    @AppStorage("panel.utilities.group") private var utilityGroup = "capture"
+    /// The settings panes starred for the Quick actions tab, comma-separated.
+    @AppStorage(QuickStars.key) private var starred = ""
     @Environment(\.openSettings) private var openSettings
 
     init(model: AppModel, initialTab: PanelTab = .overview) {
@@ -19,12 +24,12 @@ struct PopoverView: View {
     }
 
     var body: some View {
-        let available = model.registry.modules.filter {
-            model.registry.isEnabled($0.id) && $0.makePopoverView() != nil
+        let available = PanelArea.allCases.filter { area in
+            area.moduleIDs.contains { model.registry.isEnabled($0) }
         }
         let order = orderedPanelTabs(available: available.map(\.id), order: model.panelTabOrder,
                                      hidden: model.hiddenPanelTabs)
-        let panelModules = order.compactMap { id in available.first { $0.id == id } }
+        let panelModules = order.compactMap { PanelArea(rawValue: $0) }
         let current = currentTab(in: panelModules)
         VStack(alignment: .leading, spacing: PanelMetrics.spacing) {
             header
@@ -68,13 +73,13 @@ struct PopoverView: View {
         max(PanelMetrics.maxContentHeight, (NSScreen.main?.visibleFrame.height ?? 900) - 230)
     }
 
-    private func currentTab(in panelModules: [any SonaryModule]) -> PanelTab {
+    private func currentTab(in panelModules: [PanelArea]) -> PanelTab {
         if case let .module(id) = tab, !panelModules.contains(where: { $0.id == id }) { return .overview }
         return tab
     }
 
-    private func tabs(for panelModules: [any SonaryModule]) -> [IconTab<PanelTab>] {
-        [IconTab(id: .overview, symbol: "square.grid.2x2", title: Text("Overview"))]
+    private func tabs(for panelModules: [PanelArea]) -> [IconTab<PanelTab>] {
+        [IconTab(id: .overview, symbol: "house.fill", title: Text("Home"))]
             + panelModules.map { IconTab(id: .module($0.id), symbol: $0.symbol, title: Text($0.title)) }
     }
 
@@ -117,7 +122,7 @@ struct PopoverView: View {
     }
 
     @ViewBuilder
-    private func sectionTitle(for tab: PanelTab, panelModules: [any SonaryModule]) -> some View {
+    private func sectionTitle(for tab: PanelTab, panelModules: [PanelArea]) -> some View {
         switch tab {
         case .overview:
             let running = model.registry.modules.filter { model.registry.isEnabled($0.id) }
@@ -127,9 +132,9 @@ struct PopoverView: View {
                 count(running.count, of: model.registry.modules.count)
             }
         case let .module(id):
-            if let module = panelModules.first(where: { $0.id == id }) {
-                PanelSectionTitle(Text(module.title)) {
-                    settingsButton(.module(id))
+            if let area = panelModules.first(where: { $0.id == id }) {
+                PanelSectionTitle(Text(area.title)) {
+                    settingsButton(.module(area.settingsModule))
                 }
             }
         }
@@ -181,7 +186,7 @@ struct PopoverView: View {
     // MARK: - Content
 
     @ViewBuilder
-    private func content(for tab: PanelTab, panelModules: [any SonaryModule]) -> some View {
+    private func content(for tab: PanelTab, panelModules: [PanelArea]) -> some View {
         switch tab {
         case .overview:
             glance
@@ -201,10 +206,58 @@ struct PopoverView: View {
                 }
             }
         case let .module(id):
-            if let module = panelModules.first(where: { $0.id == id }), let view = module.makePopoverView() {
-                view
+            if let area = panelModules.first(where: { $0.id == id }) {
+                areaContent(area)
             }
         }
+    }
+
+    /// The area's sections from the engine, and what Sonary adds below them.
+    @ViewBuilder
+    private func areaContent(_ area: PanelArea) -> some View {
+        if area == .utilities {
+            HStack(spacing: 6) {
+                utilityGroupButton("capture", Text("Capture"))
+                utilityGroupButton("cleanup", Text("Apps & clean-up"))
+                utilityGroupButton("tools", Text("Tools"))
+            }
+        }
+        if area == .quick, QuickStars.panes(starred).isEmpty {
+            Text("Star a function in its settings to put it here.")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 2)
+        }
+        if let view = SonaryEngine.panelView(tab: area.id, group: area == .utilities ? utilityGroup : nil,
+                                             starred: QuickStars.panes(starred)) {
+            view.tint(Color.sonaryAccent)
+        }
+        if area == .network {
+            Button {
+                if let url = URL(string: "x-apple.systempreferences:com.apple.Network-Settings.extension") {
+                    NSWorkspace.shared.open(url)
+                }
+            } label: {
+                Label { Text("Network settings…") } icon: { Image(systemName: "gearshape") }
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PanelFooterButtonStyle())
+        }
+    }
+
+    private func utilityGroupButton(_ id: String, _ title: Text) -> some View {
+        Button { utilityGroup = id } label: {
+            title
+                .font(.system(size: 11, weight: utilityGroup == id ? .semibold : .regular))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 5)
+                .foregroundStyle(utilityGroup == id ? Color.white : Color.primary)
+                .background(utilityGroup == id ? Color.sonaryAccent : Color.primary.opacity(0.08), in: Capsule())
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(utilityGroup == id ? .isSelected : [])
     }
 
     /// The live values of every running module, two to a row.
@@ -253,8 +306,8 @@ struct PopoverView: View {
     private func footer(for tab: PanelTab) -> some View {
         HStack(spacing: 8) {
             Button {
-                if case let .module(id) = tab {
-                    openSettingsPage(.module(id))
+                if case let .module(id) = tab, let area = PanelArea(rawValue: id) {
+                    openSettingsPage(.module(area.settingsModule))
                 } else {
                     openSettingsPage(model.settingsPage)
                 }
@@ -309,5 +362,20 @@ struct PanelTabPreview: View {
             .background(PanelSurfaceBackground())
             .environment(\.sonarySurface, .panel)
             .tint(Color.sonaryAccent)
+    }
+}
+
+/// The settings panes whose functions the Quick actions tab shows, kept as one string.
+enum QuickStars {
+    static let key = "panel.quick.panes"
+
+    static func panes(_ raw: String) -> [String] {
+        raw.split(separator: ",").map(String.init)
+    }
+
+    static func toggled(_ pane: String, in raw: String) -> String {
+        var list = panes(raw)
+        if let index = list.firstIndex(of: pane) { list.remove(at: index) } else { list.append(pane) }
+        return list.joined(separator: ",")
     }
 }

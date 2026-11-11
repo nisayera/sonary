@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 import SwiftUI
@@ -33,21 +34,38 @@ public final class SonaryTheme: @unchecked Sendable {
     public static let shared = SonaryTheme()
     public static let defaultsKey = "appearance.accent"
 
+    public static let customKey = "appearance.accent.custom"
+
     public private(set) var accent: SonaryAccent
+    /// A colour of the user's own, which then stands in for the swatch.
+    public private(set) var custom: Color?
 
     private init() {
         accent = UserDefaults.standard.string(forKey: Self.defaultsKey).flatMap(SonaryAccent.init(rawValue:)) ?? .coral
+        if let parts = UserDefaults.standard.array(forKey: Self.customKey) as? [Double], parts.count == 3 {
+            custom = Color(red: parts[0], green: parts[1], blue: parts[2])
+        }
     }
 
+    /// Picks a swatch, and drops a colour of the user's own.
     public func setAccent(_ accent: SonaryAccent, in defaults: UserDefaults = .standard) {
         self.accent = accent
+        custom = nil
         defaults.set(accent.rawValue, forKey: Self.defaultsKey)
+        defaults.removeObject(forKey: Self.customKey)
+    }
+
+    public func setCustom(_ color: Color, in defaults: UserDefaults = .standard) {
+        guard let rgb = NSColor(color).usingColorSpace(.sRGB) else { return }
+        let parts = [Double(rgb.redComponent), Double(rgb.greenComponent), Double(rgb.blueComponent)]
+        custom = Color(red: parts[0], green: parts[1], blue: parts[2])
+        defaults.set(parts, forKey: Self.customKey)
     }
 }
 
 public extension Color {
     /// Sonary's accent: coral from the app icon, or the colour the user picked.
-    static var sonaryAccent: Color { SonaryTheme.shared.accent.color }
+    static var sonaryAccent: Color { SonaryTheme.shared.custom ?? SonaryTheme.shared.accent.color }
 }
 
 /// A row of round swatches for picking the accent.

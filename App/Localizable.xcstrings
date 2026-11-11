@@ -71,6 +71,16 @@
         }
       }
     },
+    "Add to Quick actions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu Schnellaktionen hinzufügen"
+          }
+        }
+      }
+    },
     "Add ⌃, ⌥, ⇧ or ⌘ — a plain key would be caught everywhere.": {
       "extractionState": "manual",
       "localizations": {
@@ -149,6 +159,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apps"
+          }
+        }
+      }
+    },
+    "Apps & clean-up": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps & Aufräumen"
           }
         }
       }
@@ -294,6 +314,16 @@
         }
       }
     },
+    "Capture": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufnahme"
+          }
+        }
+      }
+    },
     "Check for Updates…": {
       "localizations": {
         "de": {
@@ -405,6 +435,26 @@
         }
       }
     },
+    "Control": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steuerung"
+          }
+        }
+      }
+    },
+    "Custom colour": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigene Farbe"
+          }
+        }
+      }
+    },
     "Dark": {
       "localizations": {
         "de": {
@@ -421,6 +471,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gerätepriorität"
+          }
+        }
+      }
+    },
+    "Disks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Festplatten"
           }
         }
       }
@@ -461,6 +521,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fertig"
+          }
+        }
+      }
+    },
+    "Energy": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energie"
           }
         }
       }
@@ -615,6 +685,16 @@
         }
       }
     },
+    "Home": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        }
+      }
+    },
     "Homebrew": {
       "localizations": {
         "de": {
@@ -665,6 +745,16 @@
         }
       }
     },
+    "In Quick actions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In den Schnellaktionen"
+          }
+        }
+      }
+    },
     "Input Monitoring": {
       "localizations": {
         "de": {
@@ -690,7 +780,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Island"
+            "value": "Insel"
           }
         }
       }
@@ -1025,6 +1115,26 @@
         }
       }
     },
+    "Network": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netzwerk"
+          }
+        }
+      }
+    },
+    "Network settings…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netzwerkeinstellungen…"
+          }
+        }
+      }
+    },
     "No modules active": {
       "localizations": {
         "de": {
@@ -1252,6 +1362,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stellt zurück, was Sonary geändert hat, löscht seine Einstellungen und Daten und beendet es."
+          }
+        }
+      }
+    },
+    "Quick actions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellaktionen"
           }
         }
       }
@@ -1537,6 +1657,16 @@
         }
       }
     },
+    "Star a function in its settings to put it here.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Markiere eine Funktion in ihren Einstellungen mit dem Stern, dann erscheint sie hier."
+          }
+        }
+      }
+    },
     "Start with": {
       "localizations": {
         "de": {
@@ -1562,7 +1692,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Super Key"
+            "value": "Supertaste"
           }
         }
       }
@@ -1778,6 +1908,16 @@
         }
       }
     },
+    "Utilities": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dienstprogramme"
+          }
+        }
+      }
+    },
     "Values of modules that are off appear once they run.": {
       "localizations": {
         "de": {
@@ -1854,6 +1994,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Welche Modul-Tabs das Menü zeigt und in welcher Reihenfolge. Die Übersicht steht immer vorne."
+          }
+        }
+      }
+    },
+    "Which tabs the panel shows, and in what order. Home always comes first.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welche Tabs das Panel zeigt und in welcher Reihenfolge. Home steht immer vorn."
           }
         }
       }

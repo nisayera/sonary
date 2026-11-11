@@ -269,6 +269,46 @@ public enum SonaryEngine {
         sections(for: area).map { AnyView($0.sonaryLook()) }
     }
 
+    /// One tab of Sonary's panel: the sections that belong to an area, whichever module they
+    /// come from. Sections of features that are not running leave themselves out.
+    public static func panelView(tab: String, group: String? = nil, starred: [String] = []) -> AnyView? {
+        guard let area = SonaryPanelArea(rawValue: tab) else { return nil }
+        let items = Set(starred.flatMap { quickItems(pane: $0) })
+        return AnyView(SonaryAreaPanel(area: area, utilityGroup: group, starredItems: items).sonaryLook())
+    }
+
+    /// The panel rows a settings pane stands for: what its star puts under Quick actions.
+    /// Empty for a pane that has no row in the panel.
+    public static func quickItems(pane: String) -> [String] {
+        switch pane {
+        case "mouse": ["mouseScroll", "smoothScroll", "linearScroll", "focusFollowsMouse", "mouseAcceleration",
+                       "mouseNavigation", "middleClick", "mouseButtonShortcuts", "mouseClickDebounce"]
+        case "superKey": ["superKey"]
+        case "keyDebounce": ["keyDebounce"]
+        case "textSnippets": ["textSnippets"]
+        case "notch": ["notch"]
+        case "clipboard": ["clipboard"]
+        case "cutPaste": ["cutPaste"]
+        case "shelf": ["shelf"]
+        case "urlCleaner": ["cleanURL"]
+        case "cleaner": ["cleaner"]
+        case "uninstaller": ["uninstaller"]
+        case "homebrew": ["homebrew"]
+        case "appUpdates": ["appUpdates"]
+        case "autoQuit": ["autoQuit"]
+        case "portManager": ["portManager"]
+        case "windowLayout": ["windowLayout", "windowMaximize", "spacesOrder"]
+        case "switcher": ["switcher"]
+        case "dock": ["dockPreview", "dockClick", "dockClickHide", "dockClickCycle"]
+        case "quickTools": ["quickLauncher", "scratchpad", "colorPicker", "cameraPreview", "cleaning"]
+        case "screenshot": ["screenshot", "screenRecorder", "screenOCR"]
+        case "commandBar": ["commandBar"]
+        case "radialMenu": ["radialMenu"]
+        case "media": ["media"]
+        default: []
+        }
+    }
+
     private static func sections(for area: String) -> AnyView? {
         switch area {
         case "monitor":
@@ -374,6 +414,145 @@ private struct SonaryMonitorPanel: View {
         SystemMonitor.shared.setMenuPanelNeeds(
             SystemMonitorPanelNeeds(system: true, network: true, disk: true, power: true, powerCard: true,
                                     connectedDevices: showsDevices))
+    }
+}
+
+enum SonaryPanelArea: String {
+    case system, network, disks, energy, utilities, control, quick
+}
+
+/// The sections of one area of Sonary's panel. The monitor samples only for what is on screen.
+private struct SonaryAreaPanel: View {
+    let area: SonaryPanelArea
+    var utilityGroup: String?
+    var starredItems: Set<String> = []
+    @ObservedObject private var features = FeatureRuntime.shared
+    @State private var showsDevices = false
+    @State private var showsPorts = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) { sections }
+            .onAppear { sync(visible: true) }
+            .onDisappear { sync(visible: false) }
+            .onChange(of: showsDevices) { _ in sync(visible: true) }
+    }
+
+    @ViewBuilder
+    private var sections: some View {
+        switch area {
+        case .system:
+            if showsDevices {
+                backButton { showsDevices = false }
+                MetricDetailView(kind: .connectedDevices)
+            } else {
+                if features.isAvailable(.monitorCPU) || features.isAvailable(.monitorGPU)
+                    || features.isAvailable(.monitorMemory) {
+                    SystemSection(collapsible: true) { showsDevices = true }
+                }
+                if features.isAvailable(.fanControl) { FanControlSection(collapsible: true) }
+                if features.isAvailable(.brightness) { BrightnessSection(collapsible: true) }
+                if features.isAvailable(.mixer) {
+                    MixerSection(collapsible: true)
+                } else if features.isAvailable(.audioPriority) {
+                    AudioPrioritySection(collapsible: true)
+                }
+                if features.isAvailable(.keepAwake) {
+                    KeepAwakeCard(collapsible: true)
+                        .onAppear { KeepAwakeManager.shared.refreshPasswordlessStatus() }
+                }
+            }
+        case .network:
+            if showsPorts {
+                PanelPortManagerView { showsPorts = false }
+            } else {
+                if features.isAvailable(.monitorNetwork) { NetworkSection(collapsible: false) }
+                if features.isAvailable(.portManager) {
+                    Button {
+                        showsPorts = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "point.3.connected.trianglepath.dotted")
+                            Text(FeatureStrings.portManager(L10n.shared.language).title)
+                            Spacer()
+                            Image(systemName: "chevron.right").foregroundStyle(.secondary)
+                        }
+                        .font(.system(size: 12, weight: .medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 8)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        case .disks:
+            if features.isAvailable(.monitorDisk) { DiskSection(collapsible: false) }
+        case .energy:
+            if features.isAvailable(.monitorPower) { PowerSection(collapsible: false) }
+        case .utilities:
+            UtilitiesSection(collapsible: false, only: utilityItems, startCleaning: {
+                SonaryHost.closePanel()
+                CleaningModeManager.shared.activate()
+            })
+            .id(utilityGroup ?? "")
+        case .control:
+            QuickControlsSection(collapsible: false)
+        case .quick:
+            if !starredItems.isDisjoint(with: Self.utilityNames) {
+                UtilitiesSection(collapsible: false, only: starredItems, startCleaning: {
+                    SonaryHost.closePanel()
+                    CleaningModeManager.shared.activate()
+                })
+            }
+            if !starredItems.subtracting(Self.utilityNames).isEmpty {
+                QuickControlsSection(collapsible: false, only: starredItems)
+            }
+            QuickTogglesSection(collapsible: false)
+        }
+    }
+
+    /// The rows that live in the utilities section; every other starred row is a control.
+    private static let utilityNames: Set<String> = [
+        "screenshot", "quickLauncher", "appUpdates", "cleaner", "homebrew", "media", "clipboard", "windowLayout",
+        "uninstaller", "cleanURL", "cleaning", "screenOCR", "colorPicker", "cameraPreview", "scratchpad",
+        "commandBar", "screenRecorder", "portManager",
+    ]
+
+    private var utilityItems: Set<String>? {
+        switch utilityGroup {
+        case "capture": ["screenshot", "screenRecorder", "screenOCR", "colorPicker", "cameraPreview", "media"]
+        case "cleanup": ["cleaner", "uninstaller", "appUpdates", "homebrew", "cleaning", "portManager"]
+        case "tools": ["quickLauncher", "clipboard", "windowLayout", "cleanURL", "scratchpad", "commandBar"]
+        default: nil
+        }
+    }
+
+    private func backButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 12, weight: .semibold))
+                .frame(width: 24, height: 24)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func sync(visible: Bool) {
+        guard visible else {
+            SystemMonitor.shared.setMenuPanelNeeds(.none)
+            return
+        }
+        switch area {
+        case .system:
+            SystemMonitor.shared.setMenuPanelNeeds(SystemMonitorPanelNeeds(system: true, connectedDevices: showsDevices))
+        case .network:
+            SystemMonitor.shared.setMenuPanelNeeds(SystemMonitorPanelNeeds(network: true))
+        case .disks:
+            SystemMonitor.shared.setMenuPanelNeeds(SystemMonitorPanelNeeds(disk: true))
+        case .energy:
+            SystemMonitor.shared.setMenuPanelNeeds(SystemMonitorPanelNeeds(power: true, powerCard: true))
+        case .utilities, .control, .quick:
+            SystemMonitor.shared.setMenuPanelNeeds(.none)
+        }
     }
 }
 

@@ -239,7 +239,11 @@ struct PanelSection<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            header
+            // Sonary's panel names the tab above a lone section, so the section does not
+            // repeat it; the row stays only where it carries the edit button.
+            if collapsible || supportsEditing {
+                header
+            }
 
             if !collapsible || !collapsed {
                 content(isEditing)
@@ -260,7 +264,6 @@ struct PanelSection<Content: View>: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                sectionTitle(title)
                 Spacer(minLength: 0)
             }
             if supportsEditing {
