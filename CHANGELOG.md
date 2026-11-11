@@ -5,6 +5,15 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.83.7] - 2026-11-11
+
+### Summary
+An urgent fix: 0.83.6 started copies of itself without end. If you installed 0.83.6, quit every copy (Activity Monitor, or `killall -9 Sonary` in Terminal) before you open this version.
+
+### Fixed
+- **Sonary started copies of itself without end** as soon as the mouse or keyboard module was on: Vorssaint's code runs its own program again to put the pointer acceleration and the Super Key mapping back, and Sonary came up as a whole new app each time instead of doing that clean-up. These runs now clean up and exit, and Sonary refuses to start next to a running copy.
+- A change to the pointer acceleration left behind by a crash is put back when the mouse module starts.
+
 ## [0.83.6] - 2026-11-11
 
 ### Summary
@@ -42,4 +51,5 @@ The biggest change since Sonary began: everything but the system monitor now run
 - CI jobs only get write access where they need it.
 - A second merge no longer cancels the tests of the first, which would have skipped its release.
 
+[0.83.7]: https://github.com/nisayera/sonary/releases/tag/v0.83.7
 [0.83.6]: https://github.com/nisayera/sonary/releases/tag/v0.83.6
