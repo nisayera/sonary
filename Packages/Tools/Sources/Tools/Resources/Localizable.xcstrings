@@ -1082,6 +1082,17 @@
         }
       }
     },
+    "Remove this ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diesen Ring entfernen"
+          }
+        }
+      }
+    },
     "Replace a trigger as you type it": {
       "localizations": {
         "de": {

@@ -1,4 +1,5 @@
 import AppKit
+import SonaryCore
 import SonaryUI
 import SwiftUI
 
@@ -20,31 +21,21 @@ public func cleaningVerdict(isKeyDown: Bool, keyCode: Int64) -> CleaningKeyVerdi
     isKeyDown && keyCode == escapeKeyCode ? .stop : .swallow
 }
 
-private func cleaningTapCallback(
-    proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, userInfo: UnsafeMutableRawPointer?
-) -> Unmanaged<CGEvent>? {
-    guard let userInfo else { return Unmanaged.passUnretained(event) }
-    let controller = Unmanaged<CleaningModeController>.fromOpaque(userInfo).takeUnretainedValue()
-    if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-        MainActor.assumeIsolated { controller.reenableTap() }
-        return Unmanaged.passUnretained(event)
-    }
-    let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-    if cleaningVerdict(isKeyDown: type == .keyDown, keyCode: keyCode) == .stop {
-        // Not from inside the tap's own callback, which stopping removes.
-        Task { @MainActor in controller.stop() }
-    }
-    return nil
-}
-
 /// Blacks out every screen so the keyboard and the display can be wiped without
 /// typing into anything. Escape ends it, and in the black version a click does too;
 /// nothing is ever locked away.
 @MainActor
 final class CleaningModeController {
     private var panels: [CleaningPanel] = []
-    private var tap: CFMachPort?
-    private var source: CFRunLoopSource?
+    /// Swallows every key; a plain Escape press ends cleaning mode.
+    private lazy var tap = EventTap(mask: Self.tapMask) { [weak self] type, event in
+        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+        if cleaningVerdict(isKeyDown: type == .keyDown, keyCode: keyCode) == .stop {
+            // Not from inside the tap's own callback, which stopping removes.
+            Task { @MainActor [weak self] in self?.stop() }
+        }
+        return .swallow
+    }
     /// Also swallow the system keys, which reach macOS before any window sees them.
     var blocksSystemKeys = true
     /// A small badge over a visible screen instead of black. Clicks are swallowed then
@@ -83,31 +74,18 @@ final class CleaningModeController {
         panels.removeAll()
     }
 
-    func reenableTap() {
-        if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
+    private static var tapMask: CGEventMask {
+        let systemDefined = CGEventMask(1) << NSEvent.EventType.systemDefined.rawValue
+        return EventTap.mask([.keyDown, .keyUp, .flagsChanged]) | systemDefined
     }
 
     /// Without Accessibility there is no tap; the panels still take the ordinary keys.
     private func installTap() {
-        guard tap == nil else { return }
-        let systemDefined = CGEventMask(1) << NSEvent.EventType.systemDefined.rawValue
-        let mask = (CGEventMask(1) << CGEventType.keyDown.rawValue) | (CGEventMask(1) << CGEventType.keyUp.rawValue)
-            | (CGEventMask(1) << CGEventType.flagsChanged.rawValue) | systemDefined
-        guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
-                                          eventsOfInterest: mask, callback: cleaningTapCallback,
-                                          userInfo: Unmanaged.passUnretained(self).toOpaque()) else { return }
-        let source = CFMachPortCreateRunLoopSource(nil, tap, 0)
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-        CGEvent.tapEnable(tap: tap, enable: true)
-        self.tap = tap
-        self.source = source
+        tap.start(promptForAccessibility: false)
     }
 
     private func removeTap() {
-        if let tap { CGEvent.tapEnable(tap: tap, enable: false) }
-        if let source { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes) }
-        tap = nil
-        source = nil
+        tap.stop()
     }
 }
 

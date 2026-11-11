@@ -19,7 +19,13 @@ struct SnapshotTests {
         let model = AppModel(defaults: defaults, startUpdater: false)
         // Modules that need no permission and no audio or display hardware can run on CI (a CI
         // machine has no microphone, and Core Audio and display services can stall there).
-        let running = ["monitor", "clipboard", "apps", "tools", "awake"]
+        // The engine modules are Vorssaint's services and are not started here; their panes and
+        // panel sections are drawn with the features marked as installed.
+        let running = ["monitor"]
+        let previewed = ["mouse", "keyboard", "notch", "clipboard", "windows", "awake", "tools"]
+        for id in previewed {
+            (model.registry.modules.first { $0.id == id } as? EngineModule)?.installForPreview()
+        }
         for id in running {
             print("SNAPSHOT starting \(id)")
             await model.registry.setEnabled(id, true)
@@ -40,8 +46,10 @@ struct SnapshotTests {
         // Only the ones whose view touches no hardware when it appears.
         for scheme in [ColorScheme.dark, .light] {
             let suffix = scheme == .dark ? "dark" : "light"
-            if let view = model.mouse.makePopoverView() {
-                await render(PanelTabPreview(content: view), name: "panel-mouse-\(suffix)", scheme: scheme, in: folder)
+            for id in ["awake", "tools"] {
+                if let view = model.registry.modules.first(where: { $0.id == id })?.makePopoverView() {
+                    await render(PanelTabPreview(content: view), name: "panel-\(id)-\(suffix)", scheme: scheme, in: folder)
+                }
             }
         }
 
@@ -49,8 +57,8 @@ struct SnapshotTests {
             (.general, "general"), (.features, "features"), (.permissions, "permissions"),
             (.shortcuts, "shortcuts"), (.module("mouse"), "mouse"), (.module("windows"), "windows"),
             (.module("monitor"), "monitor"), (.module("tools"), "tools"), (.module("clipboard"), "clipboard"),
-            (.module("sound"), "sound"), (.module("awake"), "awake"), (.module("keyboard"), "keyboard"),
-            (.module("notch"), "notch"), (.module("apps"), "apps"), (.about, "about"),
+            (.module("awake"), "awake"), (.module("keyboard"), "keyboard"),
+            (.module("notch"), "notch"), (.about, "about"),
         ]
         // The settings window's materials are not drawn off screen, so the page gets the window's
         // own colour behind it, or its text would stand on nothing.

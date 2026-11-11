@@ -113,12 +113,42 @@
         }
       }
     },
+    "App switcher": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App-Umschalter"
+          }
+        }
+      }
+    },
+    "App updates": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App-Updates"
+          }
+        }
+      }
+    },
     "Appearance": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Erscheinungsbild"
+          }
+        }
+      }
+    },
+    "Apps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps"
           }
         }
       }
@@ -163,6 +193,16 @@
         }
       }
     },
+    "Auto-quit": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-Beenden"
+          }
+        }
+      }
+    },
     "Automation": {
       "localizations": {
         "de": {
@@ -180,6 +220,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zurück zum Kürzel, das Sonary mitbringt"
+          }
+        }
+      }
+    },
+    "Bluetooth": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth"
+          }
+        }
+      }
+    },
+    "Brightness": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helligkeit"
           }
         }
       }
@@ -254,6 +314,26 @@
         }
       }
     },
+    "Clean links": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saubere Links"
+          }
+        }
+      }
+    },
+    "Cleaner": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufräumen"
+          }
+        }
+      }
+    },
     "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates.": {
       "localizations": {
         "de": {
@@ -285,12 +365,32 @@
         }
       }
     },
+    "Clipboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwischenablage"
+          }
+        }
+      }
+    },
     "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Zwischenablage-Verlauf, saubere Links, Einsetzen als reiner Text, eine Datei-Ablage und Finder-Helfer."
+          }
+        }
+      }
+    },
+    "Command bar": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Befehlsleiste"
           }
         }
       }
@@ -305,12 +405,42 @@
         }
       }
     },
+    "Device priority": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerätepriorität"
+          }
+        }
+      }
+    },
     "Dismiss": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Ausblenden"
+          }
+        }
+      }
+    },
+    "Display": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirm"
+          }
+        }
+      }
+    },
+    "Dock": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock"
           }
         }
       }
@@ -375,6 +505,16 @@
         }
       }
     },
+    "Extra brightness": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra-Helligkeit"
+          }
+        }
+      }
+    },
     "Features": {
       "localizations": {
         "de": {
@@ -391,6 +531,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dateien & Werkzeuge"
+          }
+        }
+      }
+    },
+    "Finder": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder"
           }
         }
       }
@@ -441,6 +591,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erteilt"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verlauf"
+          }
+        }
+      }
+    },
+    "Homebrew": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew"
           }
         }
       }
@@ -505,6 +675,26 @@
         }
       }
     },
+    "Island": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Island"
+          }
+        }
+      }
+    },
+    "Keep awake": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wachhalten"
+          }
+        }
+      }
+    },
     "Keeps the Mac awake for a while, until a time, or while an app runs or it is plugged in.": {
       "localizations": {
         "de": {
@@ -515,12 +705,42 @@
         }
       }
     },
+    "Key filter": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastenfilter"
+          }
+        }
+      }
+    },
+    "Keyboard": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tastatur"
+          }
+        }
+      }
+    },
     "Keyboard & mouse": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Tastatur & Maus"
+          }
+        }
+      }
+    },
+    "Layouts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layouts"
           }
         }
       }
@@ -625,6 +845,26 @@
         }
       }
     },
+    "Mascot": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maskottchen"
+          }
+        }
+      }
+    },
+    "Media": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medien"
+          }
+        }
+      }
+    },
     "Menu panel": {
       "localizations": {
         "de": {
@@ -645,6 +885,16 @@
         }
       }
     },
+    "Mixer": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mixer"
+          }
+        }
+      }
+    },
     "Modules": {
       "localizations": {
         "de": {
@@ -661,6 +911,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Warnungen des Monitors"
+          }
+        }
+      }
+    },
+    "Mouse": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maus"
           }
         }
       }
@@ -691,6 +951,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nach oben"
+          }
+        }
+      }
+    },
+    "Music app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musik-App"
           }
         }
       }
@@ -741,6 +1011,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nicht erteilt"
+          }
+        }
+      }
+    },
+    "Notch": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notch"
           }
         }
       }
@@ -825,6 +1105,16 @@
         }
       }
     },
+    "Output": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgabe"
+          }
+        }
+      }
+    },
     "Overview": {
       "localizations": {
         "de": {
@@ -865,6 +1155,16 @@
         }
       }
     },
+    "Ports": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ports"
+          }
+        }
+      }
+    },
     "Press keys…": {
       "extractionState": "manual",
       "localizations": {
@@ -872,6 +1172,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tasten drücken …"
+          }
+        }
+      }
+    },
+    "Processes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prozesse"
           }
         }
       }
@@ -886,12 +1196,42 @@
         }
       }
     },
+    "Quick tools": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellwerkzeuge"
+          }
+        }
+      }
+    },
     "Quit Sonary": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Sonary beenden"
+          }
+        }
+      }
+    },
+    "Quit protection": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beenden-Schutz"
+          }
+        }
+      }
+    },
+    "Radial menu": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radialmenü"
           }
         }
       }
@@ -966,6 +1306,16 @@
         }
       }
     },
+    "Screen capture": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmaufnahme"
+          }
+        }
+      }
+    },
     "Screenshots, text from screen, screen recording, window previews": {
       "localizations": {
         "de": {
@@ -1002,6 +1352,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Einstellungen …"
+          }
+        }
+      }
+    },
+    "Shelf": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablage"
           }
         }
       }
@@ -1097,6 +1457,16 @@
         }
       }
     },
+    "Sound": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton"
+          }
+        }
+      }
+    },
     "Source code": {
       "localizations": {
         "de": {
@@ -1127,12 +1497,22 @@
         }
       }
     },
-    "Super Key: one key becomes ⌃⌥⇧⌘ while held and runs an action when tapped.": {
+    "Super Key": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Super-Taste: Eine Taste wird gehalten zu ⌃⌥⇧⌘ und löst beim Antippen eine Aktion aus."
+            "value": "Super Key"
+          }
+        }
+      }
+    },
+    "Super Key, text snippets, a filter for double key presses and protection against quitting by accident.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Super Key, Textbausteine, ein Filter gegen doppelte Tastendrücke und Schutz vor versehentlichem Beenden."
           }
         }
       }
@@ -1153,6 +1533,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "System"
+          }
+        }
+      }
+    },
+    "Text snippets": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textbausteine"
           }
         }
       }
@@ -1207,6 +1597,16 @@
         }
       }
     },
+    "Tools": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werkzeuge"
+          }
+        }
+      }
+    },
     "Turn a module on to see the shortcuts it offers.": {
       "extractionState": "manual",
       "localizations": {
@@ -1254,6 +1654,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schalte nur ein, was du brauchst. Ein ausgeschaltetes Modul lädt nicht, läuft nicht im Hintergrund und fragt nach keiner Berechtigung."
+          }
+        }
+      }
+    },
+    "Turn the module on to see its settings.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schalte das Modul ein, um seine Einstellungen zu sehen."
+          }
+        }
+      }
+    },
+    "Uninstaller": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deinstallieren"
           }
         }
       }
@@ -1378,12 +1798,12 @@
         }
       }
     },
-    "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident.": {
+    "Window layouts, an app switcher with window previews, Dock previews and Dock clicks.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fensteranordnung per ⌃⌥-Kürzel und Schutz vor versehentlichem Beenden."
+            "value": "Fensteranordnung, ein App-Umschalter mit Fenstervorschau, Dock-Vorschau und Dock-Klicks."
           }
         }
       }

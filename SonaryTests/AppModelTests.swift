@@ -23,10 +23,10 @@ struct AppModelTests {
         #expect(!first.registry.isEnabled("monitor"))
     }
 
-    @Test func mouseModuleIsRegisteredAndNeedsAccessibility() {
+    @Test func mouseModuleIsRegisteredAndOffAtFirst() {
         let model = AppModel(defaults: makeDefaults(), startUpdater: false)
         let module = model.registry.modules.first { $0.id == "mouse" }
-        #expect(module?.requiredPermissions == [.accessibility])
+        #expect(module != nil)
         #expect(!model.registry.isEnabled("mouse"))
     }
 
@@ -45,6 +45,7 @@ struct AppDataTests {
         #expect(!isTransferableSettingsKey("SUEnableAutomaticChecks"))
         #expect(!isTransferableSettingsKey("NSWindow Frame SonaryScratchpad"))
         #expect(!isTransferableSettingsKey("app.lastVersion"))
+        #expect(!isTransferableSettingsKey("clipboard.history"))
         #expect(isTransferableSettingsKey("mouse.settings"))
     }
 

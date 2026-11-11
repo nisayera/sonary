@@ -305,6 +305,17 @@
         }
       }
     },
+    "Finder did not answer. Try again in a moment.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Finder hat nicht geantwortet. Versuch es gleich noch einmal."
+          }
+        }
+      }
+    },
     "Forget entries after %lld minutes": {
       "localizations": {
         "de": {

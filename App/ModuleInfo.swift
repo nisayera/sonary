@@ -11,11 +11,11 @@ enum ModuleInfo {
         case "notch": "An island at the notch with music, calendar, timer, downloads and accessory batteries."
         case "clipboard": "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers."
         case "apps": "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates."
-        case "windows": "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident."
+        case "windows": "Window layouts, an app switcher with window previews, Dock previews and Dock clicks."
         case "sound": "Switch speakers and microphones, volume and microphone mute on ⌃⌥M."
         case "awake": "Keeps the Mac awake for a while, until a time, or while an app runs or it is plugged in."
         case "tools": "Command bar, text from screen, color picker, screenshots, scratchpad and snippets."
-        case "keyboard": "Super Key: one key becomes ⌃⌥⇧⌘ while held and runs an action when tapped."
+        case "keyboard": "Super Key, text snippets, a filter for double key presses and protection against quitting by accident."
         case "display": "Brightness for every display, with shortcuts and dimming for displays without hardware control."
         default: ""
         }
@@ -29,11 +29,11 @@ enum ModuleInfo {
         case "notch": String(localized: "An island at the notch with music, calendar, timer, downloads and accessory batteries.")
         case "clipboard": String(localized: "Clipboard history, clean links, plain-text paste, a file shelf and Finder helpers.")
         case "apps": String(localized: "Cleaner, uninstaller, quit and force quit, port manager and Homebrew updates.")
-        case "windows": String(localized: "Window layouts on ⌃⌥ shortcuts and protection against quitting apps by accident.")
+        case "windows": String(localized: "Window layouts, an app switcher with window previews, Dock previews and Dock clicks.")
         case "sound": String(localized: "Switch speakers and microphones, volume and microphone mute on ⌃⌥M.")
         case "awake": String(localized: "Keeps the Mac awake for a while, until a time, or while an app runs or it is plugged in.")
         case "tools": String(localized: "Command bar, text from screen, color picker, screenshots, scratchpad and snippets.")
-        case "keyboard": String(localized: "Super Key: one key becomes ⌃⌥⇧⌘ while held and runs an action when tapped.")
+        case "keyboard": String(localized: "Super Key, text snippets, a filter for double key presses and protection against quitting by accident.")
         case "display": String(localized: "Brightness for every display, with shortcuts and dimming for displays without hardware control.")
         default: ""
         }

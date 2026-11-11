@@ -141,11 +141,13 @@ struct SettingsView: View {
         case .general: GeneralPage(model: model)
         case .features: FeaturesPage(model: model)
         case .permissions: PermissionsPage(model: model)
-        case .shortcuts: ShortcutsPage()
+        case .shortcuts: AllShortcutsPage()
         case .updates: UpdatesPage(model: model)
         case .about: AboutPage()
         case let .module(id):
-            if let module = model.registry.modules.first(where: { $0.id == id }) {
+            if let engine = model.registry.modules.first(where: { $0.id == id }) as? EngineModule {
+                EnginePage(model: model, module: engine)
+            } else if let module = model.registry.modules.first(where: { $0.id == id }) {
                 ModulePage(model: model, module: module)
             } else {
                 GeneralPage(model: model)

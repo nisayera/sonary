@@ -1,17 +1,10 @@
+import AppKit
 import Foundation
 import Observation
-import Keyboard
 import Monitor
-import Apps
-import Clipboard
-import Display
-import Mouse
-import Notch
 import SonaryCore
 import SonaryUI
-import Sound
-import Tools
-import Windows
+import Vorssaint
 
 @MainActor
 @Observable
@@ -20,15 +13,6 @@ final class AppModel {
     let broker: PermissionBroker
     let launchAtLogin = LaunchAtLoginModel()
     let monitor: MonitorModule
-    let mouse: MouseModule
-    let notch: NotchModule
-    let clipboard: ClipboardModule
-    let apps: AppsModule
-    let windows: WindowsModule
-    let sound: SoundModule
-    let tools: ToolsModule
-    let keyboard: KeyboardModule
-    let display: DisplayModule
     let updates: UpdateModel
     private(set) var onboardingCompleted: Bool
     /// How see-through Sonary's floating surfaces are.
@@ -43,6 +27,10 @@ final class AppModel {
     private(set) var updatedToVersion: String?
     /// What the panel's header and overview show.
     private(set) var panelOptions: PanelOptions
+    /// The pane each engine module's settings page shows, by module ID.
+    var enginePanes: [String: String] = [:]
+    /// Opens the settings window; set by a view, which is where SwiftUI hands the action out.
+    @ObservationIgnored var openSettingsWindow: (() -> Void)?
 
     @ObservationIgnored let defaults: UserDefaults
 
@@ -53,68 +41,27 @@ final class AppModel {
         self.updates = UpdateModel(startUpdater: startUpdater)
         let monitor = MonitorModule(defaults: defaults)
         self.monitor = monitor
-        let mouse = MouseModule(defaults: defaults)
-        self.mouse = mouse
-        let notch = NotchModule(defaults: defaults)
-        self.notch = notch
         ShortcutStore.shared.configure(defaults: defaults)
-        let clipboard = ClipboardModule(defaults: defaults)
-        self.clipboard = clipboard
-        let apps = AppsModule(defaults: defaults)
-        self.apps = apps
-        let windows = WindowsModule(defaults: defaults)
-        self.windows = windows
-        let sound = SoundModule(defaults: defaults)
-        self.sound = sound
-        let tools = ToolsModule(defaults: defaults)
-        self.tools = tools
-        let keyboard = KeyboardModule(defaults: defaults)
-        self.keyboard = keyboard
-        // The Super Key's tap action can open the command bar, which the tools module owns.
-        keyboard.model.commandBarAction = { [weak tools] in tools?.model.showCommandBar() }
-        // The command bar can also paste from the clipboard history and raise open windows.
-        tools.model.externalCommands = { [weak clipboard, weak windows] in
-            let pasted: [ExternalCommand] = clipboard.map { clipboard in
-                clipboard.model.history.entries.prefix(20).compactMap { entry in
-                    guard let text = entry.text, !text.isEmpty else { return nil }
-                    return ExternalCommand(id: entry.id.uuidString, title: text, symbol: "doc.on.clipboard") {
-                        clipboard.model.copy(entry)
-                    }
-                }
-            } ?? []
-            let open: [ExternalCommand] = windows.map { windows in
-                windows.model.openWindows().map { entry in
-                    ExternalCommand(id: "window-\(entry.id)", title: entry.label, symbol: "macwindow") {
-                        windows.model.raise(entry)
-                    }
-                }
-            } ?? []
-            return open + pasted
-        }
-        let display = DisplayModule(defaults: defaults)
-        self.display = display
-        // The island's controls and notes reach into the modules that own them.
-        notch.model.controls = NotchControls(
-            volume: { [weak sound] in sound?.model.outputVolume },
-            setVolume: { [weak sound] value in sound?.model.setOutputVolume(value) },
-            brightness: { [weak display] in display?.model.displays.first?.brightness },
-            setBrightness: { [weak display] value in
-                guard let display, let first = display.model.displays.first else { return }
-                display.model.setBrightness(value, for: first.id)
-            },
-            notes: { [weak tools] in tools?.model.currentTab.text ?? "" },
-            setNotes: { [weak tools] text in
-                guard let tools else { return }
-                tools.model.setText(text, for: tools.model.currentTab.id)
-            }
-        )
+        // Everything but the system monitor is Vorssaint's work for now, one engine module per
+        // group of its features. The module IDs are the ones Sonary's own modules had, so what
+        // was on stays on.
+        let engines: [any SonaryModule] = [
+            EngineModule(id: "mouse", title: "Mouse", symbol: "computermouse"),
+            EngineModule(id: "keyboard", title: "Keyboard", symbol: "keyboard"),
+            EngineModule(id: "notch", title: "Notch", symbol: "capsule.portrait.tophalf.filled"),
+            EngineModule(id: "clipboard", title: "Clipboard", symbol: "doc.on.clipboard"),
+            EngineModule(id: "apps", title: "Apps", symbol: "square.stack.3d.up"),
+            EngineModule(id: "windows", title: "Windows", symbol: "macwindow.on.rectangle"),
+            EngineModule(id: "display", title: "Display", symbol: "sun.max"),
+            EngineModule(id: "sound", title: "Sound", symbol: "speaker.wave.2"),
+            EngineModule(id: "awake", title: "Keep awake", symbol: "cup.and.saucer"),
+            EngineModule(id: "tools", title: "Tools", symbol: "wrench.and.screwdriver"),
+        ]
         // Keep awake used to be part of sound; whoever had sound on keeps keep awake on.
-        let awake = KeepAwakeModule(model: sound.model)
         if defaults.object(forKey: "module.awake.enabled") == nil, defaults.bool(forKey: "module.sound.enabled") {
             defaults.set(true, forKey: "module.awake.enabled")
         }
-        self.registry = ModuleRegistry(modules: [monitor, mouse, keyboard, notch, clipboard, apps, windows, display, sound,
-                                                 awake, tools],
+        self.registry = ModuleRegistry(modules: [monitor as any SonaryModule] + engines,
                                        defaults: defaults, permissions: broker,
                                        missingPermissionText: { missingPermissionText($0) })
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
@@ -128,6 +75,21 @@ final class AppModel {
         // A first launch has nothing new to tell; only a change of version does.
         self.updatedToVersion = seen != nil && seen != version && !version.isEmpty ? version : nil
         defaults.set(version, forKey: "app.lastVersion")
+        // Vorssaint's code asks for the settings window and the menu panel; they are Sonary's.
+        SonaryEngine.setHandlers(
+            showPane: { [weak self] area, pane in self?.showEnginePane(area, pane) },
+            openSettings: { [weak self] area, pane in
+                if let area, let pane { self?.showEnginePane(area, pane) }
+                NSApp.activate()
+                self?.openSettingsWindow?()
+            },
+            closePanel: { [weak self] in self?.closePanelIfOpen() })
+    }
+
+    /// Selects a module's page in the settings, and the pane on it.
+    func showEnginePane(_ area: String, _ pane: String) {
+        enginePanes[area] = pane
+        settingsPage = .module(area)
     }
 
     func setPanelTabOrder(_ order: [String]) {

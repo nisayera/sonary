@@ -60,6 +60,7 @@ struct PopoverView: View {
         .environment(\.sonarySurface, .panel)
         .environment(\.sonaryAppearance, model.appearance)
         .tint(Color.sonaryAccent)
+        .onAppear { model.openSettingsWindow = { openSettings() } }
     }
 
     /// As tall as the screen allows below the menu bar, less the header, tabs and footer.

@@ -6,7 +6,8 @@ options:
 packages:
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
-    from: 2.6.4
+    # Pinned: every release must ship the Sparkle that was tested. Raise it on purpose.
+    exactVersion: 2.10.1
   SonaryCore:
     path: Packages/SonaryCore
   SonaryUI:
@@ -15,8 +16,8 @@ packages:
     path: Packages/Monitor
   Mouse:
     path: Packages/Mouse
-  Notch:
-    path: Packages/Notch
+  Vorssaint:
+    path: Vendor/Vorssaint
   Clipboard:
     path: Packages/Clipboard
   Apps:
@@ -35,8 +36,10 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
-    MARKETING_VERSION: "0.80.0"
-    CURRENT_PROJECT_VERSION: 8000
+    # Set both with `python3 scripts/release_tools.py set-version X.Y.Z`; the build number follows
+    # from the version (major*10000 + minor*100 + patch) and CI checks that they agree.
+    MARKETING_VERSION: "0.83.6"
+    CURRENT_PROJECT_VERSION: 8306
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:
@@ -44,12 +47,35 @@ targets:
     platform: macOS
     sources:
       - App
+      # The island reads what is playing through /usr/bin/perl and the adapter library below.
+      - path: Vendor/Vorssaint/Resources/now-playing.pl
+        buildPhase: resources
+    postBuildScripts:
+      - name: Build the Now Playing adapter
+        basedOnDependencyAnalysis: false
+        script: |
+          set -euo pipefail
+          OUT="$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH"
+          SRC="$SRCROOT/Vendor/Vorssaint/Sources"
+          mkdir -p "$OUT"
+          xcrun swiftc -O -target arm64-apple-macosx14.0 -sdk "$SDKROOT" -emit-library \
+            -module-name VorssaintNowPlaying \
+            "$SRC/NowPlayingAdapter/NowPlayingAdapter.swift" \
+            "$SRC/NowPlayingAdapter/NowPlayingQueue.swift" \
+            "$SRC/NowPlayingAdapter/NowPlayingSelection.swift" \
+            "$SRC/Vorssaint/Services/Notch/NotchPlaybackSource.swift" \
+            "$SRC/Vorssaint/Services/Notch/NotchPlaybackCommand.swift" \
+            -o "$OUT/libVorssaintNowPlaying.dylib"
+          if [ "${CODE_SIGNING_ALLOWED:-NO}" = "YES" ]; then
+            codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:--}" "$OUT/libVorssaintNowPlaying.dylib"
+          fi
     dependencies:
       - package: SonaryCore
       - package: SonaryUI
       - package: Monitor
       - package: Mouse
-      - package: Notch
+      - package: Vorssaint
+        product: VorssaintKit
       - package: Clipboard
       - package: Apps
       - package: Windows
@@ -62,8 +88,17 @@ targets:
     entitlements:
       path: App/Sonary.entitlements
       properties:
+        # Needed while Sonary is signed with its self-signed certificate: that signature has no
+        # Team ID, and library validation under the hardened runtime would then refuse to load
+        # the embedded Sparkle.framework. Goes away with a Developer ID (see docs/RELEASING.md).
         com.apple.security.cs.disable-library-validation: true
         com.apple.security.automation.apple-events: true
+        # The hardened runtime refuses these resources without an entitlement, whatever the user
+        # allows: the microphone (mute, level, recordings with sound), the camera preview and the
+        # calendar in the island. macOS still asks the user for each.
+        com.apple.security.device.audio-input: true
+        com.apple.security.device.camera: true
+        com.apple.security.personal-information.calendars: true
     info:
       path: App/Info.plist
       properties:
@@ -79,11 +114,21 @@ targets:
         NSCalendarsFullAccessUsageDescription: "Sonary shows today's events in the notch when you turn on the calendar widget."
         NSDownloadsFolderUsageDescription: "Sonary shows your newest downloads in the notch."
         NSCameraUsageDescription: "Sonary shows a small camera preview when you turn it on from the tools tab."
+        NSAudioCaptureUsageDescription: "Sonary reads the sound that is playing to draw the live equalizer in the island when you turn that on."
+        NSBluetoothAlwaysUsageDescription: "Sonary shows the batteries of your Bluetooth accessories in the island."
+        NSDesktopFolderUsageDescription: "Sonary reads files you drop on the island from the Desktop."
+        NSDocumentsFolderUsageDescription: "Sonary reads files you drop on the island from Documents."
+        NSNetworkVolumesUsageDescription: "Sonary reads files you drop on the island from network volumes."
+        NSRemovableVolumesUsageDescription: "Sonary reads files you drop on the island from external disks."
         NSMicrophoneUsageDescription: "Sonary shows the microphone level in the sound tab, and records the microphone with the screen when you turn that on."
         NSHumanReadableCopyright: "GPL-3.0-or-later"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.sonary.Sonary
+        # Sonary's own code builds without warnings. Set here and not on the command line,
+        # where it would also apply to the vendored Vorssaint sources.
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
@@ -97,7 +142,6 @@ targets:
       - package: SonaryCore
       - package: Monitor
       - package: Mouse
-      - package: Notch
       - package: Clipboard
       - package: Apps
       - package: Windows
@@ -109,6 +153,7 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: app.sonary.SonaryTests
+        SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
 schemes:
   Sonary:
     build:

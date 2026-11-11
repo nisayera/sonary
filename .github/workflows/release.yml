@@ -1,15 +1,21 @@
 name: Release
 
-# Every merge to main whose version in project.yml has no release yet is built, signed (Sparkle EdDSA)
-# and published automatically. Pushing a tag like v0.3.0 (or publishing a release in the web UI) still works.
+# A version in project.yml that has no release yet is built, signed (Sparkle EdDSA) and published,
+# but only after CI passed for exactly that commit:
+# - a merge to main releases once the CI run for that push has finished successfully;
+# - a pushed tag like v0.3.0 or a manual run checks that CI passed for the commit first.
+# The release text comes from the version's entry in CHANGELOG.md.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
+  push:
     tags: ["v*"]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release
@@ -18,26 +24,47 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # A CI run that failed or was cancelled, or one for a pull request, releases nothing.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    permissions:
+      contents: read
+      actions: read
     outputs:
+      sha: ${{ steps.decide.outputs.sha }}
       tag: ${{ steps.decide.outputs.tag }}
       marketing: ${{ steps.decide.outputs.marketing }}
       build: ${{ steps.decide.outputs.build }}
       publish: ${{ steps.decide.outputs.publish }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
       - name: Decide whether this version needs a release
         id: decide
         env:
           GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           set -eo pipefail
-          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_EVENT_NAME" = "push" ]; then
             TAG="$GITHUB_REF_NAME"
           else
-            V=$(sed -n 's/^ *MARKETING_VERSION: *"\{0,1\}\([0-9.]*\)"\{0,1\}.*/\1/p' project.yml | head -1)
-            TAG="v$V"
+            read -r TAG _ _ < <(python3 scripts/release_tools.py project-version)
           fi
           read -r MARKETING BUILD < <(python3 scripts/release_tools.py version "$TAG")
+          python3 scripts/release_tools.py check-project
+          if [ "$GITHUB_EVENT_NAME" != "workflow_run" ]; then
+            # Tags and manual runs: the commit must have a successful CI run of its own.
+            GREEN=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$SHA&status=success" \
+              --jq '.total_count')
+            if [ "${GREEN:-0}" -eq 0 ]; then
+              echo "::error::CI has not passed for $SHA yet, so it is not released."
+              exit 1
+            fi
+          fi
           PUBLISH=true
           ASSETS=$(gh release view "$TAG" --json assets --jq '.assets | length' 2>/dev/null || echo 0)
           if [ "$ASSETS" -gt 0 ]; then
@@ -45,6 +72,7 @@ jobs:
             PUBLISH=false
           fi
           {
+            echo "sha=$SHA"
             echo "tag=$TAG"
             echo "marketing=$MARKETING"
             echo "build=$BUILD"
@@ -55,15 +83,27 @@ jobs:
     needs: check
     if: needs.check.outputs.publish == 'true'
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 90
+    permissions:
+      contents: write  # creating the release and uploading its files
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check.outputs.sha }}
 
       - name: Install tools
         run: |
           brew install xcodegen
           python3 -m venv .venv
-          .venv/bin/pip install cryptography
+          .venv/bin/pip install -r scripts/requirements.txt
+
+      - name: Release notes
+        # Before the build, so a missing or empty CHANGELOG.md entry stops the release early.
+        run: |
+          set -eo pipefail
+          .venv/bin/python scripts/release_tools.py notes --tag "${{ needs.check.outputs.tag }}" \
+            --out notes.md --appcast-out notes.html
+          cat notes.md
 
       - name: Build Release app
         run: |
@@ -84,6 +124,7 @@ jobs:
       - name: Re-sign with the stable self-signed certificate
         # A fixed signing identity keeps macOS privacy permissions (Accessibility, Screen Recording, ...)
         # across updates. Ad-hoc signatures change with every build, so macOS treated each update as a new app.
+        # Nested code (Sparkle's helpers and framework) is signed inside out, see scripts/sign_app.sh.
         env:
           P12: ${{ secrets.SIGNING_CERT_P12 }}
           P12_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
@@ -102,14 +143,15 @@ jobs:
           security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PW" "$KC" >/dev/null
           security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
-          APP="build/Build/Products/Release/Sonary.app"
-          codesign --force --deep --keychain "$KC" --sign "$CERT_SHA1" \
-            --preserve-metadata=entitlements,flags "$APP"
-          codesign --verify --deep --strict "$APP"
-          codesign -dvv "$APP" 2>&1 | grep -E "Authority|Identifier"
           rm -f "$RUNNER_TEMP/cert.p12"
+          APP="build/Build/Products/Release/Sonary.app"
+          scripts/sign_app.sh "$APP" "$CERT_SHA1" "$KC"
+          codesign -dvv "$APP" 2>&1 | grep -E "Authority|Identifier"
+          echo "KC=$KC" >> "$GITHUB_ENV"
 
       - name: Package
+        env:
+          CERT_SHA1: ${{ secrets.SIGNING_CERT_SHA1 }}
         run: |
           set -eo pipefail
           V="${{ needs.check.outputs.marketing }}"
@@ -117,16 +159,14 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent "$APP" "Sonary-$V.zip"
           mkdir dmgroot && cp -R "$APP" dmgroot/ && ln -s /Applications dmgroot/Applications
           hdiutil create -volname "Sonary $V" -srcfolder dmgroot -ov -format UDZO "Sonary-$V.dmg"
+          # The disk image carries the same signature as the app inside it.
+          codesign --force --sign "$CERT_SHA1" --keychain "$KC" --timestamp=none "Sonary-$V.dmg"
+          codesign --verify --strict --verbose=2 "Sonary-$V.dmg"
 
-      - name: Release notes
+      - name: Remove the signing keychain
+        if: always()
         run: |
-          {
-            echo "Sonary ${{ needs.check.outputs.marketing }}"
-            echo
-            echo "Install: open the DMG and drag Sonary to Applications. Requires macOS 26 on Apple silicon."
-            echo "First launch: this build is not notarized yet. Right-click Sonary, choose Open, then Open again"
-            echo "(or run: xattr -dr com.apple.quarantine /Applications/Sonary.app). Later updates install from inside the app."
-          } > notes.md
+          if [ -n "${KC:-}" ]; then security delete-keychain "$KC" || true; fi
 
       - name: Appcast (Sparkle update feed)
         env:
@@ -138,7 +178,7 @@ jobs:
           fi
           V="${{ needs.check.outputs.marketing }}"
           .venv/bin/python scripts/release_tools.py appcast --tag "${{ needs.check.outputs.tag }}" \
-            --archive "Sonary-$V.zip" --repo "$GITHUB_REPOSITORY" --notes notes.md --out appcast.xml
+            --archive "Sonary-$V.zip" --repo "$GITHUB_REPOSITORY" --notes notes.html --out appcast.xml
 
       - name: Publish GitHub release
         env:
@@ -153,5 +193,6 @@ jobs:
             gh release upload "$TAG" "${FILES[@]}" --clobber
             gh release edit "$TAG" --title "Sonary $V" --notes-file notes.md --draft=false
           else
-            gh release create "$TAG" "${FILES[@]}" --title "Sonary $V" --notes-file notes.md --target "$GITHUB_SHA"
+            gh release create "$TAG" "${FILES[@]}" --title "Sonary $V" --notes-file notes.md \
+              --target "${{ needs.check.outputs.sha }}"
           fi

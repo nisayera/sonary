@@ -165,22 +165,82 @@ struct HousekeepingTests {
         #expect(!isNewerVersion("beta", than: "1.0"))
     }
 
-    @Test func readsTheHighestVersionFromAnAppcast() {
+    private func app(short: String, build: String) -> InstalledApp {
+        InstalledApp(name: "Demo", bundleID: "app.demo", shortVersion: short, build: build,
+                     feed: URL(string: "https://example.com/appcast.xml")!,
+                     url: URL(fileURLWithPath: "/Applications/Demo.app"))
+    }
+
+    @Test func readsVersionsFromEnclosureAttributes() {
         let xml = """
-        <rss><channel>
-        <item><enclosure sparkle:shortVersionString="1.2.0" sparkle:version="120"/></item>
-        <item><enclosure sparkle:shortVersionString="1.10.0" sparkle:version="1100"/></item>
+        <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"><channel>
+        <item><enclosure url="https://x/a.zip" sparkle:shortVersionString="1.2.0" sparkle:version="120"/></item>
+        <item><enclosure url="https://x/b.zip" sparkle:shortVersionString="1.10.0" sparkle:version="1100"/></item>
         </channel></rss>
         """
-        #expect(latestAppcastVersion(xml) == "1.10.0")
-        #expect(latestAppcastVersion("<rss></rss>") == nil)
+        #expect(appcastEntries(xml) == [AppcastEntry(version: "120", shortVersion: "1.2.0"),
+                                        AppcastEntry(version: "1100", shortVersion: "1.10.0")])
+        #expect(appcastEntries("<rss></rss>").isEmpty)
+        #expect(appcastEntries("not xml at all").isEmpty)
+    }
+
+    @Test func readsVersionsFromItemElements() {
+        // The form Sonary's own feed and most current Sparkle feeds use.
+        let xml = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"><channel>
+        <item>
+          <title>Version 0.80.0</title>
+          <sparkle:version>8000</sparkle:version>
+          <sparkle:shortVersionString> 0.80.0 </sparkle:shortVersionString>
+          <description><![CDATA[<p>notes</p>]]></description>
+          <enclosure url="https://x/Sonary-0.80.0.zip" length="1" type="application/octet-stream"/>
+        </item>
+        </channel></rss>
+        """
+        #expect(appcastEntries(xml) == [AppcastEntry(version: "8000", shortVersion: "0.80.0")])
+    }
+
+    @Test func skipsItemsOnOtherChannels() {
+        let xml = """
+        <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"><channel>
+        <item><sparkle:channel>beta</sparkle:channel><sparkle:version>300</sparkle:version></item>
+        <item><sparkle:version>200</sparkle:version></item>
+        </channel></rss>
+        """
+        #expect(appcastEntries(xml) == [AppcastEntry(version: "200")])
+    }
+
+    @Test func comparesBuildWithBuildAndVersionWithVersion() {
+        // Build 8000 against an installed build 8000 is current, even though "8000" > "0.80.0".
+        let current = app(short: "0.80.0", build: "8000")
+        #expect(appUpdate(for: current, entries: [AppcastEntry(version: "8000", shortVersion: "0.80.0")]) == nil)
+        // A newer build is an update and shows the marketing version.
+        #expect(appUpdate(for: current, entries: [AppcastEntry(version: "8305", shortVersion: "0.83.5")])?
+            .latestVersion == "0.83.5")
+        // Without a build number in the feed, marketing versions are compared.
+        #expect(appUpdate(for: current, entries: [AppcastEntry(shortVersion: "0.80.0")]) == nil)
+        #expect(appUpdate(for: current, entries: [AppcastEntry(shortVersion: "0.81.0")])?.latestVersion == "0.81.0")
+        // Without a build number in the app, too.
+        let noBuild = app(short: "2.0", build: "")
+        #expect(appUpdate(for: noBuild, entries: [AppcastEntry(version: "500", shortVersion: "2.0")]) == nil)
+        #expect(appUpdate(for: noBuild, entries: [AppcastEntry(version: "501", shortVersion: "2.1")])?
+            .latestVersion == "2.1")
+    }
+
+    @Test func picksTheNewestOfSeveralReleases() {
+        let entries = [AppcastEntry(version: "120", shortVersion: "1.2.0"),
+                       AppcastEntry(version: "1100", shortVersion: "1.10.0"),
+                       AppcastEntry(version: "900", shortVersion: "1.9.0")]
+        #expect(appUpdate(for: app(short: "1.0", build: "100"), entries: entries)?.latestVersion == "1.10.0")
+        #expect(appUpdate(for: app(short: "1.10.0", build: "1100"), entries: entries) == nil)
     }
 
     @Test func onlyReportsRealUpdates() {
-        #expect(appUpdate(for: app("1.0"), latest: "1.1")?.latestVersion == "1.1")
-        #expect(appUpdate(for: app("1.1"), latest: "1.1") == nil)
-        #expect(appUpdate(for: app("1.2"), latest: "1.1") == nil)
-        #expect(appUpdate(for: app("1.0"), latest: nil) == nil)
+        #expect(appUpdate(for: app("1.0"), entries: [AppcastEntry(shortVersion: "1.1")])?.latestVersion == "1.1")
+        #expect(appUpdate(for: app("1.1"), entries: [AppcastEntry(shortVersion: "1.1")]) == nil)
+        #expect(appUpdate(for: app("1.2"), entries: [AppcastEntry(shortVersion: "1.1")]) == nil)
+        #expect(appUpdate(for: app("1.0"), entries: []) == nil)
     }
 
     @Test func skipsAppsWithoutAnHTTPSFeed() {

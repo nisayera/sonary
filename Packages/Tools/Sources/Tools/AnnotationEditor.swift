@@ -91,6 +91,7 @@ struct AnnotationEditorView: View {
             Button { annotations = undoing(annotations) } label: { Image(systemName: "arrow.uturn.backward") }
                 .disabled(annotations.isEmpty)
                 .help(Text("Undo the last mark", bundle: .module))
+                .accessibilityLabel(Text("Undo the last mark", bundle: .module))
             ShareButton { shareFile() }
             Button { copy() } label: { Text("Copy", bundle: .module) }
             Button { save() } label: { Text("Save", bundle: .module) }

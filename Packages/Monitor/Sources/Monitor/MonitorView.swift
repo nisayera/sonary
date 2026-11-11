@@ -17,6 +17,13 @@ public struct MonitorView: View {
     }
 
     public var body: some View {
+        content
+            // The process list, fans and USB devices are only read while this tab is on screen.
+            .onAppear { module.beginDetailedReadings() }
+            .onDisappear { module.endDetailedReadings() }
+    }
+
+    @ViewBuilder private var content: some View {
         if let latest = module.latest {
             let history = module.history
             VStack(alignment: .leading, spacing: PanelMetrics.spacing) {

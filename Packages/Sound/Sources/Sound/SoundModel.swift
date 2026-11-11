@@ -285,12 +285,10 @@ public final class SoundModel {
         case .next: "next track"
         case .previous: "previous track"
         }
-        // This runs inside the event tap. The command goes to the player after the tap has
-        // answered, so a player that is slow to respond cannot hold up every key press.
-        Task { @MainActor in
-            var error: NSDictionary?
-            NSAppleScript(source: "tell application \"\(name)\" to \(command)")?.executeAndReturnError(&error)
-        }
+        // This runs inside the event tap. The command goes to the player in the background,
+        // with a time limit, so a player that is slow to respond holds up neither the key
+        // presses nor the main thread.
+        AppleScriptRunner.launch("tell application \"\(name)\" to \(command)")
         return false
     }
 
