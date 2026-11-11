@@ -129,6 +129,38 @@ jobs:
           path: ${{ runner.temp }}/snapshots
           if-no-files-found: ignore
 
+  release-build:
+    # The optimized build a release makes, without signing or publishing, so a release that
+    # cannot be built shows up in the pull request and not after the merge.
+    if: github.event_name != 'push'
+    runs-on: macos-26
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Release app
+        run: |
+          set -eo pipefail
+          brew install xcodegen
+          xcodegen generate
+          xcodebuild -project Sonary.xcodeproj -scheme Sonary -configuration Release \
+            -destination 'generic/platform=macOS' -derivedDataPath build \
+            CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES \
+            SWIFT_COMPILATION_MODE=singlefile \
+            build 2>&1 | tee release-build.log | grep -E "error|warning: unre|BUILD|Compiling|Linking" | cut -c1-200 || true
+          test -d build/Build/Products/Release/Sonary.app
+          codesign --verify --deep --strict build/Build/Products/Release/Sonary.app
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build-log
+          path: release-build.log
+          if-no-files-found: ignore
+
   snapshots:
     # Pictures of the panel and the settings window, for reviewing interface changes. They go
     # to the ci-snapshots branch, replaced on every run. Pull requests from forks cannot write.

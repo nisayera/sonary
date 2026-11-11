@@ -106,6 +106,9 @@ jobs:
           cat notes.md
 
       - name: Build Release app
+        # Optimized file by file, not as whole modules: Vorssaint's 300,000 lines optimized as one
+        # module did not finish in 88 minutes. Vorssaint's own build optimizes per file as well.
+        # The release-build job in ci.yml runs the same build on every pull request.
         run: |
           set -eo pipefail
           xcodegen generate
@@ -114,6 +117,7 @@ jobs:
             MARKETING_VERSION="${{ needs.check.outputs.marketing }}" \
             CURRENT_PROJECT_VERSION="${{ needs.check.outputs.build }}" \
             CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES \
+            SWIFT_COMPILATION_MODE=singlefile \
             build 2>&1 | tee build.log
           APP="build/Build/Products/Release/Sonary.app"
           test -d "$APP"
