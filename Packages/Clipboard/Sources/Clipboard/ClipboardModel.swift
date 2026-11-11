@@ -391,7 +391,10 @@ public final class ClipboardModel {
             guard let folder = await currentFinderFolder(),
                   let terminal = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Terminal")
             else { return }
-            NSWorkspace.shared.open([folder], withApplicationAt: terminal, configuration: NSWorkspace.OpenConfiguration())
+            // The completion handler form: in an async context the plain call would pick the
+            // async overload and wait for Terminal.
+            NSWorkspace.shared.open([folder], withApplicationAt: terminal, configuration: NSWorkspace.OpenConfiguration(),
+                                    completionHandler: nil)
         }
     }
 
