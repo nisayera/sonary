@@ -5,6 +5,27 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.90.0] - 2026-11-11
+
+### Summary
+Vorssaint's features now look like Sonary, and the system monitor joins them. The pages and panel sections taken over in 0.83.6 are drawn with Sonary's cards, rows, icon badges and accent colour, and the monitor runs on Vorssaint's code as well, with fan control, your own alert thresholds and far more menu bar readouts. As before, none of this has been tried on a Mac inside Sonary yet, so please report what breaks.
+
+### Added
+- The system monitor is Vorssaint's: readouts in the menu bar for CPU, GPU, memory, network, disk, battery, temperatures, fans and accessories, together or each as its own item, with their order, colours and thresholds; memory, network and disk shown the way you choose; S.M.A.R.T. state, uptime and network use per app; alerts with your own thresholds.
+- Fan control, with fixed speeds and curves (beta in Vorssaint, untested here).
+- The monitor tab of the menu panel has Vorssaint's system, network, disk, power and fan sections, each folding on its own.
+- Light or dark appearance for Sonary alone, and a choice of symbols for the menu bar icon, in General.
+- A page in Tools for choosing which controls the panel's tool sections show.
+
+### Changed
+- Every settings page taken over from Vorssaint uses Sonary's cards, rows and icon badges, and Sonary's accent colour throughout, in the panel as well.
+- The menu bar shows Sonary's icon and, next to it, the monitor's readouts as items of their own. A click on a readout opens the panel.
+- Sonary's own monitor module is no longer used; its menu bar settings and alert choices are not carried over.
+- Special editors (fan curve, radial menu, window layout editor, mascot) keep Vorssaint's layout for now and take only Sonary's colours.
+
+### Fixed
+- The 0.83.6 release could not be built: the optimizer did not finish on Vorssaint's code. That code is now compiled without optimization, and every pull request builds the release configuration.
+
 ## [0.83.6] - 2026-11-11
 
 ### Summary
@@ -42,4 +63,5 @@ The biggest change since Sonary began: everything but the system monitor now run
 - CI jobs only get write access where they need it.
 - A second merge no longer cancels the tests of the first, which would have skipped its release.
 
+[0.90.0]: https://github.com/nisayera/sonary/releases/tag/v0.90.0
 [0.83.6]: https://github.com/nisayera/sonary/releases/tag/v0.83.6

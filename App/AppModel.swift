@@ -1,7 +1,6 @@
 import AppKit
 import Foundation
 import Observation
-import Monitor
 import SonaryCore
 import SonaryUI
 import Vorssaint
@@ -12,7 +11,6 @@ final class AppModel {
     let registry: ModuleRegistry
     let broker: PermissionBroker
     let launchAtLogin = LaunchAtLoginModel()
-    let monitor: MonitorModule
     let updates: UpdateModel
     private(set) var onboardingCompleted: Bool
     /// How see-through Sonary's floating surfaces are.
@@ -39,29 +37,28 @@ final class AppModel {
         self.broker = broker
         self.defaults = defaults
         self.updates = UpdateModel(startUpdater: startUpdater)
-        let monitor = MonitorModule(defaults: defaults)
-        self.monitor = monitor
         ShortcutStore.shared.configure(defaults: defaults)
-        // Everything but the system monitor is Vorssaint's work for now, one engine module per
-        // group of its features. The module IDs are the ones Sonary's own modules had, so what
+        // Every module is Vorssaint's work for now, one engine module per group of its
+        // features. The module IDs are the ones Sonary's own modules had, so what
         // was on stays on.
         let engines: [any SonaryModule] = [
-            EngineModule(id: "mouse", title: "Mouse", symbol: "computermouse"),
-            EngineModule(id: "keyboard", title: "Keyboard", symbol: "keyboard"),
-            EngineModule(id: "notch", title: "Notch", symbol: "capsule.portrait.tophalf.filled"),
-            EngineModule(id: "clipboard", title: "Clipboard", symbol: "doc.on.clipboard"),
-            EngineModule(id: "apps", title: "Apps", symbol: "square.stack.3d.up"),
-            EngineModule(id: "windows", title: "Windows", symbol: "macwindow.on.rectangle"),
-            EngineModule(id: "display", title: "Display", symbol: "sun.max"),
-            EngineModule(id: "sound", title: "Sound", symbol: "speaker.wave.2"),
-            EngineModule(id: "awake", title: "Keep awake", symbol: "cup.and.saucer"),
-            EngineModule(id: "tools", title: "Tools", symbol: "wrench.and.screwdriver"),
+            EngineModule(id: "monitor", title: "Monitor", symbol: "gauge.with.dots.needle.67percent", drivesEngine: startUpdater),
+            EngineModule(id: "mouse", title: "Mouse", symbol: "computermouse", drivesEngine: startUpdater),
+            EngineModule(id: "keyboard", title: "Keyboard", symbol: "keyboard", drivesEngine: startUpdater),
+            EngineModule(id: "notch", title: "Notch", symbol: "capsule.portrait.tophalf.filled", drivesEngine: startUpdater),
+            EngineModule(id: "clipboard", title: "Clipboard", symbol: "doc.on.clipboard", drivesEngine: startUpdater),
+            EngineModule(id: "apps", title: "Apps", symbol: "square.stack.3d.up", drivesEngine: startUpdater),
+            EngineModule(id: "windows", title: "Windows", symbol: "macwindow.on.rectangle", drivesEngine: startUpdater),
+            EngineModule(id: "display", title: "Display", symbol: "sun.max", drivesEngine: startUpdater),
+            EngineModule(id: "sound", title: "Sound", symbol: "speaker.wave.2", drivesEngine: startUpdater),
+            EngineModule(id: "awake", title: "Keep awake", symbol: "cup.and.saucer", drivesEngine: startUpdater),
+            EngineModule(id: "tools", title: "Tools", symbol: "wrench.and.screwdriver", drivesEngine: startUpdater),
         ]
         // Keep awake used to be part of sound; whoever had sound on keeps keep awake on.
         if defaults.object(forKey: "module.awake.enabled") == nil, defaults.bool(forKey: "module.sound.enabled") {
             defaults.set(true, forKey: "module.awake.enabled")
         }
-        self.registry = ModuleRegistry(modules: [monitor as any SonaryModule] + engines,
+        self.registry = ModuleRegistry(modules: engines,
                                        defaults: defaults, permissions: broker,
                                        missingPermissionText: { missingPermissionText($0) })
         self.onboardingCompleted = defaults.bool(forKey: "onboarding.completed")
@@ -83,7 +80,9 @@ final class AppModel {
                 NSApp.activate()
                 self?.openSettingsWindow?()
             },
+            openPanel: { [weak self] in self?.openPanelIfClosed() },
             closePanel: { [weak self] in self?.closePanelIfOpen() })
+        applyColorScheme(defaults.string(forKey: colorSchemeKey) ?? "system")
     }
 
     /// Selects a module's page in the settings, and the pane on it.

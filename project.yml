@@ -38,8 +38,8 @@ settings:
     ARCHS: arm64
     # Set both with `python3 scripts/release_tools.py set-version X.Y.Z`; the build number follows
     # from the version (major*10000 + minor*100 + patch) and CI checks that they agree.
-    MARKETING_VERSION: "0.83.6"
-    CURRENT_PROJECT_VERSION: 8306
+    MARKETING_VERSION: "0.90.0"
+    CURRENT_PROJECT_VERSION: 9000
     MACOSX_DEPLOYMENT_TARGET: "26.0"
 targets:
   Sonary:

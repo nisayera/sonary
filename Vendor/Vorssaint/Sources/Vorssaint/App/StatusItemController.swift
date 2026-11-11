@@ -366,7 +366,8 @@ final class StatusItemController {
         let signal = updateAvailable || micBadgeActive
         let islandHides = MenuBarSpacingSupport.islandHidesStatusIcon(
             in: defaults, hiddenInFullscreen: islandHiddenInFullscreen) && !signal
-        let hidden = islandHides || MenuBarSpacingSupport.shouldHideStatusIcon(
+        // Sonary: the icon in the menu bar is Sonary's own item; this one carries readouts only.
+        let hidden = SonaryHost.ownsMenuBarIcon || islandHides || MenuBarSpacingSupport.shouldHideStatusIcon(
             optionEnabled: optionEnabled,
             separateMetrics: separateMetrics,
             metricsEnabled: MenuBarMetric.anyEnabled(in: defaults),
@@ -376,7 +377,7 @@ final class StatusItemController {
         // items, so hiding means the whole main item steps aside instead of
         // just its image (which is all that item has). With Dynamic Island
         // standing in, the item goes whenever it has no text of its own.
-        let mainItemHidden = (islandHides && button.attributedTitle.length == 0)
+        let mainItemHidden = ((islandHides || SonaryHost.ownsMenuBarIcon) && button.attributedTitle.length == 0)
             || MenuBarSpacingSupport.shouldHideMainStatusItem(
                 optionEnabled: optionEnabled,
                 separateMetrics: separateMetrics,
@@ -1101,5 +1102,17 @@ enum BlackHoleGlyph {
         }
         drawn.isTemplate = true
         return drawn
+    }
+}
+
+// Sonary: lets the host tell this controller's menu bar items from its own.
+extension StatusItemController {
+    func sonaryOwns(_ window: NSWindow) -> Bool {
+        let items = [statusItem, clipboardPreviewStatusItem].compactMap { $0 } + Array(metricStatusItems.values)
+        return items.contains { $0.button?.window === window }
+    }
+
+    func sonaryRemoveMainItem() {
+        if let statusItem { NSStatusBar.system.removeStatusItem(statusItem) }
     }
 }

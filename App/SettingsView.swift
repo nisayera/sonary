@@ -241,6 +241,8 @@ private struct GeneralPage: View {
                 set: { value in model.updatePanelOptions { $0[keyPath: keyPath] = value } })
     }
     @Environment(\.openWindow) private var openWindow
+    @AppStorage(colorSchemeKey) private var colorScheme = "system"
+    @AppStorage(menuBarSymbolKey) private var menuBarSymbol = ""
 
     var body: some View {
         SettingsPage {
@@ -254,6 +256,27 @@ private struct GeneralPage: View {
                                                 set: { model.launchAtLogin.set($0) }))
             }
             SettingsCard(Text("Appearance")) {
+                SettingsRow(symbol: "circle.lefthalf.filled", title: Text("Light or dark")) {
+                    Picker(selection: $colorScheme) {
+                        Text("System").tag("system")
+                        Text("Light").tag("light")
+                        Text("Dark").tag("dark")
+                    } label: { EmptyView() }
+                        .settingsControl()
+                        .onChange(of: colorScheme) { _, choice in applyColorScheme(choice) }
+                }
+                SettingsRow(symbol: "menubar.arrow.up.rectangle", title: Text("Menu bar icon")) {
+                    Picker(selection: $menuBarSymbol) {
+                        ForEach(menuBarSymbolChoices, id: \.self) { name in
+                            if name.isEmpty {
+                                Text(verbatim: "Sonary").tag(name)
+                            } else {
+                                Image(systemName: name).tag(name)
+                            }
+                        }
+                    } label: { EmptyView() }
+                        .settingsControl()
+                }
                 SettingsRow(symbol: "paintpalette", title: Text("Accent colour"),
                             caption: Text("Used for icons, tabs, rings and bars everywhere in Sonary.")) {
                     AccentPicker(selection: SonaryTheme.shared.accent) { SonaryTheme.shared.setAccent($0) }

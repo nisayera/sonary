@@ -21,8 +21,8 @@ struct SnapshotTests {
         // machine has no microphone, and Core Audio and display services can stall there).
         // The engine modules are Vorssaint's services and are not started here; their panes and
         // panel sections are drawn with the features marked as installed.
-        let running = ["monitor"]
-        let previewed = ["mouse", "keyboard", "notch", "clipboard", "windows", "awake", "tools"]
+        let running: [String] = []
+        let previewed = ["monitor", "mouse", "keyboard", "notch", "clipboard", "windows", "awake", "tools"]
         for id in previewed {
             (model.registry.modules.first { $0.id == id } as? EngineModule)?.installForPreview()
         }

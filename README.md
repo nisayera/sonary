@@ -126,6 +126,7 @@ Every merge to `main` with a new version number is released automatically once i
 - **0.44** — the menu panel folds instead of scrolling, keep awake as its own module, brightness for external monitors over DDC/CI
 - **0.80** — one interface: every panel tab and every settings page built from the same parts; a round of fixes (edge snapping no longer fires on any drag, key debounce no longer eats key repeat, the cleaner leaves Sonary's own data alone, long Homebrew upgrades no longer hang)
 - **0.83.6** — the Dynamic Island, mouse, keyboard, clipboard, apps, windows, display, sound, keep awake and tools run on Vorssaint's code, each behind its Sonary module; Sonary's own modules return one at a time. Also: no more freezes when Music, Spotify or Finder hang, the clipboard history in its own private file, a more accurate app update checker, releases only after green tests and release pages that list the changes ([CHANGELOG.md](CHANGELOG.md))
+- **0.90** — Vorssaint's pages and panel sections in Sonary's look, the system monitor with fan control and menu bar readouts on Vorssaint's code, light or dark appearance and a choice of menu bar icon
 
 ### Before 1.0
 

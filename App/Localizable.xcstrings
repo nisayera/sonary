@@ -405,6 +405,16 @@
         }
       }
     },
+    "Dark": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dunkel"
+          }
+        }
+      }
+    },
     "Device priority": {
       "localizations": {
         "de": {
@@ -825,6 +835,26 @@
         }
       }
     },
+    "Light": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hell"
+          }
+        }
+      }
+    },
+    "Light or dark": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hell oder dunkel"
+          }
+        }
+      }
+    },
     "Linear or smooth scrolling, pointer acceleration, extra buttons, click filter and app exceptions.": {
       "localizations": {
         "de": {
@@ -865,6 +895,16 @@
         }
       }
     },
+    "Menu bar icon": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menüleisten-Symbol"
+          }
+        }
+      }
+    },
     "Menu panel": {
       "localizations": {
         "de": {
@@ -901,6 +941,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Module"
+          }
+        }
+      }
+    },
+    "Monitor": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitor"
           }
         }
       }
@@ -1121,6 +1171,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Übersicht"
+          }
+        }
+      }
+    },
+    "Panel": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel"
           }
         }
       }
