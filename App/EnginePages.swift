@@ -20,12 +20,13 @@ struct EnginePage: View {
         // column asks. The reader answers with next to nothing and lays the page out in the space
         // there really is, as Vorssaint's own settings window does.
         GeometryReader { geometry in
-            page(panes: panes, current: current)
-                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+            page(panes: panes, current: current, width: geometry.size.width)
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
+                .clipped()
         }
     }
 
-    private func page(panes: [String], current: String) -> some View {
+    private func page(panes: [String], current: String, width: CGFloat) -> some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
                 SettingsPageHeader(symbol: module.symbol, title: Text(module.title),
@@ -42,25 +43,45 @@ struct EnginePage: View {
                         .foregroundStyle(.red)
                 }
                 if module.isLive, panes.count > 1 {
-                    Picker(selection: Binding(get: { current }, set: { model.enginePanes[module.id] = $0 })) {
-                        ForEach(panes, id: \.self) { pane in
-                            Text(EnginePaneInfo.title(pane)).tag(pane)
+                    // Not a segmented control: seven panes are wider than the window, and a
+                    // control that cannot shrink pushed the whole page out of it.
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 6) {
+                            ForEach(panes, id: \.self) { pane in
+                                Button {
+                                    model.enginePanes[module.id] = pane
+                                } label: {
+                                    Text(EnginePaneInfo.title(pane))
+                                        .font(.system(size: 12, weight: pane == current ? .semibold : .regular))
+                                        .lineLimit(1)
+                                        .fixedSize()
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 5)
+                                        .foregroundStyle(pane == current ? Color.white : Color.primary)
+                                        .background(pane == current ? Color.sonaryAccent : Color.primary.opacity(0.08),
+                                                    in: Capsule())
+                                        .contentShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityAddTraits(pane == current ? .isSelected : [])
+                            }
                         }
-                    } label: { EmptyView() }
-                        .pickerStyle(.segmented)
-                        .labelsHidden()
+                    }
+                    .scrollIndicators(.never)
                 }
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
             .padding(.bottom, 12)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(width: width, alignment: .leading)
             Divider()
             if module.isLive {
                 SonaryEngine.settingsView(pane: current)
                     .id(current)
                     .tint(Color.sonaryAccent)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .frame(width: width, alignment: .topLeading)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .clipped()
             } else {
                 VStack(spacing: 10) {
                     IconBadge(symbol: module.symbol, isActive: false, size: 40)
