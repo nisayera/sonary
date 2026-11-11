@@ -68,7 +68,7 @@ struct NotchControlsView: View {
         let settings = Button(l10n.s.menuSettings) {
             service.perform {
                 SettingsRouter.shared.request(AppFeature.brightness.settingsDestination)
-                (NSApp.delegate as? AppDelegate)?.openSettingsWindow()
+                SonaryHost.openSettingsWindow()
             }
         }.buttonStyle(.plain).foregroundStyle(.secondary).font(.system(size: 11))
         let sun = Image(systemName: "sun.max.fill").font(.system(size: 12, weight: .medium)).frame(width: 18)

@@ -37,7 +37,7 @@ struct PanelAppUpdatesView: View {
             // this one is an icon: same row, no second word saying Settings.
             Button {
                 SettingsRouter.shared.page = .appUpdates
-                appDelegate()?.openSettingsWindow()
+                SonaryHost.openSettingsWindow()
             } label: {
                 Image(systemName: "gearshape")
                     .font(.system(size: 12))

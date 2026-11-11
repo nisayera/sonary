@@ -1879,7 +1879,7 @@ enum CommandBarCatalog {
                                      sidebarFeature: AppFeature? = nil) {
         SettingsRouter.shared.request(destination, targetFeature: targetFeature,
                                       sidebarFeature: sidebarFeature)
-        appDelegate()?.openSettingsWindow()
+        SonaryHost.openSettingsWindow()
     }
 
     /// Reads through the shared lane like every other clipboard row: a direct

@@ -3,6 +3,7 @@ import SwiftUI
 /// Always the Sonary icon; monitor values only when they are switched on in the monitor settings.
 struct MenuBarLabel: View {
     let model: AppModel
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         HStack(spacing: 4) {
@@ -12,5 +13,6 @@ struct MenuBarLabel: View {
             }
         }
         .accessibilityLabel(Text("Sonary"))
+        .onAppear { model.openSettingsWindow = { openSettings() } }
     }
 }

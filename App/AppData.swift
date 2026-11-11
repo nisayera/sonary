@@ -113,6 +113,12 @@ extension AppModel {
         button?.performClick(nil)
     }
 
+    /// Closes the menu bar panel if it is open, for actions that need the screen to themselves.
+    func closePanelIfOpen() {
+        let isOpen = NSApp.windows.contains { $0.isVisible && $0.className.contains("MenuBarExtra") }
+        if isOpen { openPanel() }
+    }
+
     private static func statusButton(in view: NSView) -> NSStatusBarButton? {
         if let button = view as? NSStatusBarButton { return button }
         for subview in view.subviews {

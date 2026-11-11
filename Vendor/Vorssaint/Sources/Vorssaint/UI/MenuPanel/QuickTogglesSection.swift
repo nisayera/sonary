@@ -18,7 +18,7 @@ struct QuickTogglesSection: View {
                      supportsEditing: true,
                      resetAction: QuickTogglesList.resetPanelDefaults) { editing in
             QuickTogglesList(editing: editing, draggingItem: $draggingItem) {
-                appDelegate()?.closePopover()
+                SonaryHost.closePanel()
             }
             // Actions here activate other apps (the Finder restarting, System
             // Events, the Trash confirmation), which would dismiss the panel

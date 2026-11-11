@@ -359,7 +359,7 @@ final class RecentCaptureService: ObservableObject {
                 NSSound.beep()
                 return
             }
-            appDelegate()?.closePopover()
+            SonaryHost.closePanel()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                 NSWorkspace.shared.open(url)
             }
@@ -376,7 +376,7 @@ final class RecentCaptureService: ObservableObject {
                 return
             }
             DispatchQueue.main.async {
-                appDelegate()?.closePopover()
+                SonaryHost.closePanel()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                     ScreenshotService.shared.restorePreview(capture)
                 }

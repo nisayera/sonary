@@ -2716,7 +2716,7 @@ final class CommandBarService: ObservableObject {
         if case .needsSetup(_, let page) = entry.trouble {
             hide()
             SettingsRouter.shared.page = page
-            appDelegate()?.openSettingsWindow()
+            SonaryHost.openSettingsWindow()
             return
         }
         if let url = entry.uninstallAppURL {
@@ -3510,7 +3510,7 @@ final class CommandBarService: ObservableObject {
                 case ",":
                     self.hide()
                     SettingsRouter.shared.page = .commandBar
-                    appDelegate()?.openSettingsWindow()
+                    SonaryHost.openSettingsWindow()
                     return nil
                 case "k":
                     self.openActions()

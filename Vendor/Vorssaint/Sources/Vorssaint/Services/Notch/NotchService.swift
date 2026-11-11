@@ -2274,7 +2274,7 @@ final class NotchService: ObservableObject {
         collapse()
         let destination = module.map { FeatureSettingsDestination(notch: .module($0)) }
         SettingsRouter.shared.request(destination ?? FeatureSettingsDestination(.notch))
-        (NSApp.delegate as? AppDelegate)?.openSettingsWindow()
+        SonaryHost.openSettingsWindow()
     }
 
     func perform(_ action: @escaping () -> Void) {

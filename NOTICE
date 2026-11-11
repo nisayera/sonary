@@ -14,12 +14,18 @@ Every such file is listed here:
 | Packages/Display/Sources/Display/DDC.swift (DDC/CI brightness path only, see header) | Sources/Vorssaint/Services/Display/BrightnessSupport.swift, Sources/Vorssaint/Services/Display/BrightnessService.swift | 26d3c9e199eb3afc8f43ce8bd83210b5754421bd |
 | Vendor/Vorssaint/ (the whole source tree) | Sources/, Resources/now-playing.pl, LICENSE | 181d0d5c371fbf23877d0c1b31be28f162dadb61 |
 
-Vendor/Vorssaint is Vorssaint's source as it is, built as a library. Sonary runs only the Dynamic
-Island from it. Changes made for Sonary, all of them in that folder:
+Vendor/Vorssaint is Vorssaint's source as it is, built as a library. From 0.82.0 on Sonary runs
+Vorssaint's features for everything but the system monitor: mouse, keyboard, Dynamic Island,
+clipboard, apps, windows, display, sound, keep awake and tools. Sonary's own modules for these
+stay in Packages/ and are meant to take over again one at a time. Changes made for Sonary, all of
+them in that folder:
 - `main.swift` left out and `Package.swift` rewritten, so the code builds as a library
 - `Sources/Vorssaint/SonaryBridge.swift` added (Sonary's entry point; not Vorssaint's work)
 - the name "Vorssaint" replaced by "Sonary" in the text shown to the user (`Core/*.swift`), as
   Vorssaint's trademark policy asks of forks; copyright lines are untouched
 - `Services/Notch/NotchWindowHost.swift`: the island takes Sonary's accent colour
+- calls that opened Vorssaint's settings window or closed its menu panel
+  (`appDelegate()?.openSettingsWindow()`, `appDelegate()?.closePopover()`) now ask Sonary for its
+  settings window and panel (`SonaryHost`), in 12 files under `UI/` and `Services/`
 
 Sparkle (https://sparkle-project.org) is used as a dependency for in-app updates (MIT license).

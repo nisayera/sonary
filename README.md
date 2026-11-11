@@ -121,6 +121,7 @@ Every merge to `main` with a new version number is released automatically (see [
 - **0.80** — one interface: every panel tab and every settings page built from the same parts; a round of fixes (edge snapping no longer fires on any drag, key debounce no longer eats key repeat, the cleaner leaves Sonary's own data alone, long Homebrew upgrades no longer hang)
 
 - **0.81** — the Dynamic Island is now Vorssaint's, taken over as it is
+- **0.82** — mouse, keyboard, clipboard, apps, windows, display, sound, keep awake and tools run on Vorssaint's code as well, each behind its Sonary module; Sonary's own modules return one at a time
 
 ### Before 1.0
 

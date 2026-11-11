@@ -206,6 +206,6 @@ struct SnippetLibraryView: View {
     private func openSnippetSettings() {
         library.hide()
         SettingsRouter.shared.page = .textSnippets
-        (NSApp.delegate as? AppDelegate)?.openSettingsWindow()
+        SonaryHost.openSettingsWindow()
     }
 }

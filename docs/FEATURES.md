@@ -7,6 +7,14 @@ GPL code keeps its headers and is listed in `NOTICE`.
 The list follows Vorssaint's feature catalog (84 features in eight groups), as of vorssaint-utils
 commit `181d0d5` (2026-11-10). Status checked on 2026-11-11 against Sonary 0.81.0.
 
+> **From 0.82.0** every group but the system monitor runs on Vorssaint's own code, taken over as it
+> is (`Vendor/Vorssaint`, switched on per Sonary module through `SonaryBridge.swift`). The gaps
+> named below for those groups are therefore closed in function; the lists stay as the measure for
+> Sonary's own modules in `Packages/`, which are to take over again one at a time. Still open with
+> the take-over: Vorssaint's panes and panel sections keep their own look, its menu bar readouts
+> and panel layout options have no effect in Sonary's panel, and the monitor (fan control, alerts)
+> is unchanged.
+
 The first part goes feature by feature. The second part, [Option by option](#option-by-option), goes
 through every preference Vorssaint stores and lists the ones Sonary has no counterpart for, down to
 single switches inside a feature that is otherwise done.
