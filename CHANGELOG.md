@@ -5,6 +5,22 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.91.0] - 2026-11-11
+
+### Summary
+Vorssaint's code is brought up to its 3.4.4 release. That carries the edge snapping option that came from this project, restoring a window's earlier size when you drag it away by its title bar, in its released form, along with Vorssaint's latest fixes.
+
+### Changed
+- The code taken over from Vorssaint is now that of Vorssaint 3.4.4.
+- Edge snapping: a snapped window goes back to its earlier size only once you really drag it; a click on the title bar leaves it snapped. The option is in Windows, under Layouts, and starts off.
+
+### Fixed
+- Super Key no longer crashes when it reapplies the keyboard mapping at startup.
+- Mic mute remembers each channel's level across updates and reconnects.
+- Switching a monitor to software dimming cancels brightness commands still on their way to it.
+- Volume keys for monitor speakers respect whether the feature is on.
+- Copy as GIF checks again for a cancel before it touches the clipboard.
+
 ## [0.90.0] - 2026-11-11
 
 ### Summary
@@ -72,6 +88,7 @@ The biggest change since Sonary began: everything but the system monitor now run
 - CI jobs only get write access where they need it.
 - A second merge no longer cancels the tests of the first, which would have skipped its release.
 
+[0.91.0]: https://github.com/nisayera/sonary/releases/tag/v0.91.0
 [0.90.0]: https://github.com/nisayera/sonary/releases/tag/v0.90.0
 [0.83.7]: https://github.com/nisayera/sonary/releases/tag/v0.83.7
 [0.83.6]: https://github.com/nisayera/sonary/releases/tag/v0.83.6

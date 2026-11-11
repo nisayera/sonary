@@ -5,7 +5,7 @@ its own app: Vorssaint's name, icon and branding stay out of it (see its `TRADEM
 GPL code keeps its headers and is listed in `NOTICE`.
 
 The list follows Vorssaint's feature catalog (84 features in eight groups), as of vorssaint-utils
-commit `181d0d5` (2026-11-10). Status checked on 2026-11-11 against Sonary 0.83.6.
+commit `ce12764` (2026-11-11, Vorssaint 3.4.4). Status checked on 2026-11-11 against Sonary 0.91.0.
 
 > **From 0.90.0** every group runs on Vorssaint's own code, the system monitor included
 > (`Vendor/Vorssaint`, switched on per Sonary module through `SonaryBridge.swift`), and the cards,
