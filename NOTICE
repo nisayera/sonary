@@ -19,7 +19,8 @@ Vorssaint's features for everything but the system monitor: mouse, keyboard, Dyn
 clipboard, apps, windows, display, sound, keep awake and tools. Sonary's own modules for these
 stay in Packages/ and are meant to take over again one at a time. Changes made for Sonary, all of
 them in that folder:
-- `main.swift` left out and `Package.swift` rewritten, so the code builds as a library
+- `main.swift` left out and `Package.swift` rewritten, so the code builds as a library; the target is
+  compiled without optimization, because Xcode's optimizer did not finish on it
 - `Sources/Vorssaint/SonaryBridge.swift` added (Sonary's entry point; not Vorssaint's work)
 - the name "Vorssaint" replaced by "Sonary" in the text shown to the user (`Core/*.swift`), as
   Vorssaint's trademark policy asks of forks; copyright lines are untouched

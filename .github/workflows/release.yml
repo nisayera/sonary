@@ -106,8 +106,8 @@ jobs:
           cat notes.md
 
       - name: Build Release app
-        # Optimized file by file, not as whole modules: Vorssaint's 300,000 lines optimized as one
-        # module did not finish in 88 minutes. Vorssaint's own build optimizes per file as well.
+        # Compiled file by file on every core. Vorssaint's target is built without optimization
+        # (see Vendor/Vorssaint/Package.swift): optimized, it did not finish in an hour.
         # The release-build job in ci.yml runs the same build on every pull request.
         run: |
           set -eo pipefail
