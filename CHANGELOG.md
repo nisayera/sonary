@@ -5,6 +5,15 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.92.0] - 2026-11-11
+
+### Summary
+The menu bar panel is sorted by what things are about, not by module: Home, System, Network, Disks, Energy, Utilities, Control and Quick actions.
+
+### Changed
+- The panel's tabs are now Home (the overview), System (CPU, GPU, memory, connected devices, fans, brightness, sound and keep awake), Network (traffic, speed test, ports and a button to the network settings), Disks (storage and SMART), Energy (power and battery), Utilities, Control (mouse, keyboard and windows) and Quick actions. A tab shows while one of its modules is on.
+- Settings › General › Menu panel orders and hides these tabs.
+
 ## [0.91.0] - 2026-11-11
 
 ### Summary

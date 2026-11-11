@@ -318,19 +318,18 @@ private struct GeneralPage: View {
                                   isOn: optionBinding(\.showsStatusLines))
             }
             SettingsCard(Text("Menu panel")) {
-                Text("Which module tabs the panel shows, and in what order. The overview always comes first.")
+                Text("Which tabs the panel shows, and in what order. Home always comes first.")
                     .font(.caption).foregroundStyle(.secondary)
-                let ids = orderedPanelTabs(available: model.registry.modules.filter { $0.makePopoverView() != nil }.map(\.id),
-                                           order: model.panelTabOrder, hidden: [])
+                let ids = orderedPanelTabs(available: PanelArea.allCases.map(\.id), order: model.panelTabOrder, hidden: [])
                 ForEach(Array(ids.enumerated()), id: \.element) { index, id in
-                    if let module = model.registry.modules.first(where: { $0.id == id }) {
-                        SettingsRow(symbol: module.symbol, title: Text(module.title)) {
+                    if let area = PanelArea(rawValue: id) {
+                        SettingsRow(symbol: area.symbol, title: Text(area.title)) {
                             Button { model.setPanelTabOrder(movedUp(ids, at: index)) } label: { Image(systemName: "arrow.up") }
                                 .buttonStyle(.borderless)
                                 .disabled(index == 0)
                                 .accessibilityLabel(Text("Move up"))
                             Toggle(isOn: Binding(get: { !model.hiddenPanelTabs.contains(id) },
-                                                 set: { model.setPanelTab(id, hidden: !$0) })) { Text(module.title) }
+                                                 set: { model.setPanelTab(id, hidden: !$0) })) { Text(area.title) }
                                 .labelsHidden()
                                 .toggleStyle(.switch)
                                 .controlSize(.small)
