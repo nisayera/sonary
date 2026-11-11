@@ -26,7 +26,11 @@ let package = Package(
         .target(
             name: "Vorssaint",
             dependencies: ["VMStatisticsCompat", "HIDEventSystem", "CoreAudioTapCompat", "RecorderGIFCodec"],
-            path: "Sources/Vorssaint"
+            path: "Sources/Vorssaint",
+            // Not optimized, in releases too: built by Xcode, the optimizer did not get through
+            // this target in an hour, neither as a whole module nor file by file. The flag comes
+            // after Xcode's own -O and wins. To be lifted once the slow file is found.
+            swiftSettings: [.unsafeFlags(["-Onone"])]
         )
     ]
 )

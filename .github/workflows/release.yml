@@ -106,6 +106,9 @@ jobs:
           cat notes.md
 
       - name: Build Release app
+        # Compiled file by file on every core. Vorssaint's target is built without optimization
+        # (see Vendor/Vorssaint/Package.swift): optimized, it did not finish in an hour.
+        # The release-build job in ci.yml runs the same build on every pull request.
         run: |
           set -eo pipefail
           xcodegen generate
@@ -114,6 +117,7 @@ jobs:
             MARKETING_VERSION="${{ needs.check.outputs.marketing }}" \
             CURRENT_PROJECT_VERSION="${{ needs.check.outputs.build }}" \
             CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=YES \
+            SWIFT_COMPILATION_MODE=singlefile \
             build 2>&1 | tee build.log
           APP="build/Build/Products/Release/Sonary.app"
           test -d "$APP"
