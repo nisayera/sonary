@@ -14,6 +14,16 @@ struct EnginePage: View {
         let panes = module.panes
         let chosen = model.enginePanes[module.id]
         let current = chosen.flatMap { panes.contains($0) ? $0 : nil } ?? panes.first ?? ""
+        // A pane asked for its ideal size answers with its whole content, and the window's detail
+        // column asks. The reader answers with next to nothing and lays the page out in the space
+        // there really is, as Vorssaint's own settings window does.
+        GeometryReader { geometry in
+            page(panes: panes, current: current)
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+        }
+    }
+
+    private func page(panes: [String], current: String) -> some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
                 SettingsPageHeader(symbol: module.symbol, title: Text(module.title),
@@ -45,14 +55,10 @@ struct EnginePage: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             Divider()
             if module.isLive {
-                // A pane asked for its ideal size answers with its whole content and would push
-                // the header out of the window; the reader hands it the space there really is.
-                GeometryReader { geometry in
-                    SonaryEngine.settingsView(pane: current)
-                        .id(current)
-                        .tint(Color.sonaryAccent)
-                        .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-                }
+                SonaryEngine.settingsView(pane: current)
+                    .id(current)
+                    .tint(Color.sonaryAccent)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             } else {
                 VStack(spacing: 10) {
                     IconBadge(symbol: module.symbol, isActive: false, size: 40)
@@ -71,6 +77,12 @@ struct AllShortcutsPage: View {
     @State private var showsOwn = false
 
     var body: some View {
+        GeometryReader { geometry in
+            page.frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+        }
+    }
+
+    private var page: some View {
         VStack(spacing: 0) {
             Picker(selection: $showsOwn) {
                 Text("Features").tag(false)
@@ -85,11 +97,9 @@ struct AllShortcutsPage: View {
             if showsOwn {
                 ShortcutsPage()
             } else {
-                GeometryReader { geometry in
-                    SonaryEngine.shortcutsView()
-                        .tint(Color.sonaryAccent)
-                        .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-                }
+                SonaryEngine.shortcutsView()
+                    .tint(Color.sonaryAccent)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
         }
     }
