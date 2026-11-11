@@ -12,6 +12,8 @@ struct PopoverView: View {
     @State private var contentHeight: CGFloat = 320
     /// The overview's open categories, as a comma-separated list; each opens on its own.
     @AppStorage("panel.overview.open") private var openCategory = "system"
+    /// The group of utilities on screen.
+    @AppStorage("panel.utilities.group") private var utilityGroup = "capture"
     @Environment(\.openSettings) private var openSettings
 
     init(model: AppModel, initialTab: PanelTab = .overview) {
@@ -211,7 +213,14 @@ struct PopoverView: View {
     /// The area's sections from the engine, and what Sonary adds below them.
     @ViewBuilder
     private func areaContent(_ area: PanelArea) -> some View {
-        if let view = SonaryEngine.panelView(tab: area.id) {
+        if area == .utilities {
+            HStack(spacing: 6) {
+                utilityGroupButton("capture", Text("Capture"))
+                utilityGroupButton("cleanup", Text("Apps & clean-up"))
+                utilityGroupButton("tools", Text("Tools"))
+            }
+        }
+        if let view = SonaryEngine.panelView(tab: area.id, group: area == .utilities ? utilityGroup : nil) {
             view.tint(Color.sonaryAccent)
         }
         if area == .network {
@@ -225,6 +234,21 @@ struct PopoverView: View {
             }
             .buttonStyle(PanelFooterButtonStyle())
         }
+    }
+
+    private func utilityGroupButton(_ id: String, _ title: Text) -> some View {
+        Button { utilityGroup = id } label: {
+            title
+                .font(.system(size: 11, weight: utilityGroup == id ? .semibold : .regular))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 5)
+                .foregroundStyle(utilityGroup == id ? Color.white : Color.primary)
+                .background(utilityGroup == id ? Color.sonaryAccent : Color.primary.opacity(0.08), in: Capsule())
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(utilityGroup == id ? .isSelected : [])
     }
 
     /// The live values of every running module, two to a row.

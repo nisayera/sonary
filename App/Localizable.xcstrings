@@ -153,6 +153,16 @@
         }
       }
     },
+    "Apps & clean-up": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps & Aufräumen"
+          }
+        }
+      }
+    },
     "Asked for each app": {
       "localizations": {
         "de": {
@@ -294,6 +304,16 @@
         }
       }
     },
+    "Capture": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufnahme"
+          }
+        }
+      }
+    },
     "Check for Updates…": {
       "localizations": {
         "de": {
@@ -405,6 +425,26 @@
         }
       }
     },
+    "Control": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steuerung"
+          }
+        }
+      }
+    },
+    "Custom colour": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigene Farbe"
+          }
+        }
+      }
+    },
     "Dark": {
       "localizations": {
         "de": {
@@ -421,6 +461,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gerätepriorität"
+          }
+        }
+      }
+    },
+    "Disks": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Festplatten"
           }
         }
       }
@@ -461,6 +511,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fertig"
+          }
+        }
+      }
+    },
+    "Energy": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energie"
           }
         }
       }
@@ -615,6 +675,16 @@
         }
       }
     },
+    "Home": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        }
+      }
+    },
     "Homebrew": {
       "localizations": {
         "de": {
@@ -690,7 +760,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Island"
+            "value": "Insel"
           }
         }
       }
@@ -1025,6 +1095,26 @@
         }
       }
     },
+    "Network": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netzwerk"
+          }
+        }
+      }
+    },
+    "Network settings…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Netzwerkeinstellungen…"
+          }
+        }
+      }
+    },
     "No modules active": {
       "localizations": {
         "de": {
@@ -1252,6 +1342,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stellt zurück, was Sonary geändert hat, löscht seine Einstellungen und Daten und beendet es."
+          }
+        }
+      }
+    },
+    "Quick actions": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellaktionen"
           }
         }
       }
@@ -1562,7 +1662,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Super Key"
+            "value": "Supertaste"
           }
         }
       }
@@ -1778,6 +1878,16 @@
         }
       }
     },
+    "Utilities": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dienstprogramme"
+          }
+        }
+      }
+    },
     "Values of modules that are off appear once they run.": {
       "localizations": {
         "de": {
@@ -1858,6 +1968,16 @@
         }
       }
     },
+    "Which tabs the panel shows, and in what order. Home always comes first.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welche Tabs das Panel zeigt und in welcher Reihenfolge. Home steht immer vorn."
+          }
+        }
+      }
+    },
     "Window layouts, an app switcher with window previews, Dock previews and Dock clicks.": {
       "localizations": {
         "de": {
@@ -1904,96 +2024,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deine Daten"
-          }
-        }
-      }
-    },
-    "Home": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Home"
-          }
-        }
-      }
-    },
-    "Network": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Netzwerk"
-          }
-        }
-      }
-    },
-    "Disks": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Festplatten"
-          }
-        }
-      }
-    },
-    "Energy": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Energie"
-          }
-        }
-      }
-    },
-    "Utilities": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dienstprogramme"
-          }
-        }
-      }
-    },
-    "Control": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Steuerung"
-          }
-        }
-      }
-    },
-    "Quick actions": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schnellaktionen"
-          }
-        }
-      }
-    },
-    "Network settings…": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Netzwerkeinstellungen…"
-          }
-        }
-      }
-    },
-    "Which tabs the panel shows, and in what order. Home always comes first.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Welche Tabs das Panel zeigt und in welcher Reihenfolge. Home steht immer vorn."
           }
         }
       }

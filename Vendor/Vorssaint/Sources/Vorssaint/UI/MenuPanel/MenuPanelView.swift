@@ -623,6 +623,8 @@ struct UtilitiesSection: View {
     @AppStorage(DefaultsKey.panelUtilityOrder) private var utilityOrderRaw = ""
     @State private var draggingItem: UtilityPanelItem?
     var collapsible = true
+    /// Sonary shows the utilities in groups: the raw values of the items of the group on screen.
+    var only: Set<String>?
     var startCleaning: () -> Void
 
     var body: some View {
@@ -759,7 +761,9 @@ struct UtilitiesSection: View {
     }
 
     private func items(editing: Bool) -> [UtilityPanelItem] {
-        orderedItems.filter { $0.feature.isAvailable && (editing || isVisible($0)) }
+        orderedItems.filter { item in
+            item.feature.isAvailable && (editing || isVisible(item)) && (only?.contains(item.rawValue) ?? true)
+        }
     }
 
     private func isVisible(_ item: UtilityPanelItem) -> Bool {

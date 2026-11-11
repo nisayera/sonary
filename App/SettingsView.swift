@@ -25,6 +25,7 @@ struct SettingsView: View {
                 .listStyle(.sidebar)
             }
             .navigationSplitViewColumnWidth(min: 198, ideal: 214, max: 260)
+            .toolbar(removing: .sidebarToggle)
         } detail: {
             detail
         }
@@ -280,6 +281,10 @@ private struct GeneralPage: View {
                 SettingsRow(symbol: "paintpalette", title: Text("Accent colour"),
                             caption: Text("Used for icons, tabs, rings and bars everywhere in Sonary.")) {
                     AccentPicker(selection: SonaryTheme.shared.accent) { SonaryTheme.shared.setAccent($0) }
+                    ColorPicker(selection: Binding(get: { Color.sonaryAccent }, set: { SonaryTheme.shared.setCustom($0) }),
+                                supportsOpacity: false) { Text("Custom colour") }
+                        .labelsHidden()
+                        .help(Text("Custom colour"))
                 }
                 SettingsRow(symbol: "square.on.square.dashed", title: Text("Panels and the island"),
                             caption: Text("How much of the desktop shows through.")) {

@@ -13,8 +13,13 @@ The menu bar panel is sorted by what things are about, not by module: Home, Syst
 ### Changed
 - The panel's tabs are now Home (the overview), System (CPU, GPU, memory, connected devices, fans, brightness, sound and keep awake), Network (traffic, speed test, ports and a button to the network settings), Disks (storage and SMART), Energy (power and battery), Utilities, Control (mouse, keyboard and windows) and Quick actions. A tab shows while one of its modules is on.
 - Settings › General › Menu panel orders and hides these tabs.
+- Utilities are sorted into three groups: Capture, Apps & clean-up, and Tools.
+
+### Added
+- Settings › General: a colour well next to the accent swatches, for any accent colour of your own.
 
 ### Fixed
+- The island no longer announces Vorssaint's updates. Sonary only looks for its own.
 - A panel tab with a single section no longer shows its name twice.
 - A module's settings page no longer slides out of the window when it has many panes: the panes are picked from a row that scrolls sideways.
 

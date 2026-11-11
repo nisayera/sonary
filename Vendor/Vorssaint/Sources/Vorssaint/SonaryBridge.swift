@@ -271,9 +271,9 @@ public enum SonaryEngine {
 
     /// One tab of Sonary's panel: the sections that belong to an area, whichever module they
     /// come from. Sections of features that are not running leave themselves out.
-    public static func panelView(tab: String) -> AnyView? {
+    public static func panelView(tab: String, group: String? = nil) -> AnyView? {
         guard let area = SonaryPanelArea(rawValue: tab) else { return nil }
-        return AnyView(SonaryAreaPanel(area: area).sonaryLook())
+        return AnyView(SonaryAreaPanel(area: area, utilityGroup: group).sonaryLook())
     }
 
     private static func sections(for area: String) -> AnyView? {
@@ -391,6 +391,7 @@ enum SonaryPanelArea: String {
 /// The sections of one area of Sonary's panel. The monitor samples only for what is on screen.
 private struct SonaryAreaPanel: View {
     let area: SonaryPanelArea
+    var utilityGroup: String?
     @ObservedObject private var features = FeatureRuntime.shared
     @State private var showsDevices = false
     @State private var showsPorts = false
@@ -454,14 +455,24 @@ private struct SonaryAreaPanel: View {
         case .energy:
             if features.isAvailable(.monitorPower) { PowerSection(collapsible: false) }
         case .utilities:
-            UtilitiesSection(collapsible: false, startCleaning: {
+            UtilitiesSection(collapsible: false, only: utilityItems, startCleaning: {
                 SonaryHost.closePanel()
                 CleaningModeManager.shared.activate()
             })
+            .id(utilityGroup ?? "")
         case .control:
             QuickControlsSection(collapsible: false)
         case .quick:
             QuickTogglesSection(collapsible: false)
+        }
+    }
+
+    private var utilityItems: Set<String>? {
+        switch utilityGroup {
+        case "capture": ["screenshot", "screenRecorder", "screenOCR", "colorPicker", "cameraPreview", "media"]
+        case "cleanup": ["cleaner", "uninstaller", "appUpdates", "homebrew", "cleaning", "portManager"]
+        case "tools": ["quickLauncher", "clipboard", "windowLayout", "cleanURL", "scratchpad", "commandBar"]
+        default: nil
         }
     }
 
