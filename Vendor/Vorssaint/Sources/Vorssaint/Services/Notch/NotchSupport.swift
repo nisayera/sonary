@@ -377,8 +377,30 @@ enum NotchLayout {
     /// keeps the cutout's own corners, so the closed island and the last
     /// frames of a collapse sit inside the notch instead of outlining a
     /// rounder one; the open island reaches the full radius and shoulder.
-    static func surfaceRadius(height: CGFloat) -> CGFloat { min(28, height * 0.34) }
-    static func shoulder(height: CGFloat) -> CGFloat { min(shoulder, height * 0.19) }
+    static func surfaceRadius(height: CGFloat) -> CGFloat {
+        if playerOutline { return 14 + 10 * playerOutlineProgress(height: height) }
+        return min(28, height * 0.34)
+    }
+    static func shoulder(height: CGFloat) -> CGFloat {
+        if playerOutline { return min(6 + 13 * playerOutlineProgress(height: height), height * 0.25) }
+        return min(shoulder, height * 0.19)
+    }
+
+    // MARK: Player outline (Sonary)
+    // With the player home on, the island takes the outline boring.notch
+    // draws: small shoulders and a 14 pt bottom corner closed, growing to
+    // 19 and 24 pt open, each a single quadratic curve.
+
+    /// Whether the island draws that outline. On unless turned off.
+    static var playerOutline: Bool {
+        UserDefaults.standard.object(forKey: DefaultsKey.notchPlayerHome) as? Bool ?? true
+    }
+    /// How far a surface of `height` is from the closed strip to the open island.
+    static func playerOutlineProgress(height: CGFloat) -> CGFloat {
+        min(1, max(0, (height - 44) / 96))
+    }
+    /// The height the open home takes with that outline, as boring.notch's does.
+    static let playerHomeHeight: CGFloat = 190
     /// The optional outline's stroke. Only its inner half, inside the island, shows.
     static let outlineWidth: CGFloat = 2
 
@@ -2768,7 +2790,12 @@ struct NotchGeometry: Equatable {
                 let home = NotchLayout.controls(hasCards: controlsHaveMusic, levelRow: levelRow,
                                                 shortcutCount: max(0, shortcutCount), width: contentWidth, height: room)
                 let empty = !controlsHaveMusic && sliderCount <= 0 && shortcutCount <= 0
-                contentHeight = min(room, empty ? NotchLayout.emptyHeight : home.height)
+                if NotchLayout.playerOutline, layout != .custom {
+                    // The player home keeps one height whatever plays.
+                    contentHeight = max(96, NotchLayout.playerHomeHeight - headerTopInset - headerChromeHeight)
+                } else {
+                    contentHeight = min(room, empty ? NotchLayout.emptyHeight : home.height)
+                }
             case .music:
                 let player = NotchLayout.musicPlayerHeight(band: musicBandHeight, playing: musicHasContent)
                 // Presets grow for the optional row; a custom height keeps

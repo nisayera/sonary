@@ -5,6 +5,24 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.94.0] - 2026-11-14
+
+### Summary
+The island now takes boring.notch's outline and measures, and the shortcut sheet learns what KeyClu does: a double press of ⌘, search, favourites, hidden shortcuts and shortcuts of your own.
+
+### Added
+- Shortcut sheet: it can open when ⌘ is pressed twice and held, with or without a wait, instead of on a plain hold.
+- Shortcut sheet: opened by its own shortcut it has a search field; Esc closes it.
+- Shortcut sheet: a secondary click keeps a shortcut under Favourites at the top, or hides one you already know. An eye button shows the hidden ones again, and Settings can reset both.
+- Shortcut sheet: "My shortcuts" for shortcuts no menu shows, for one app or for all, and a System group with the shortcuts macOS answers everywhere.
+- Shortcut sheet settings: the number of columns and a light, dark or system appearance.
+
+### Changed
+- Island: with the player home on, the island is drawn with boring.notch's outline: small shoulders and corners made of one curve each, 6 and 14 pt closed and 19 and 24 pt open. The open home is 190 pt tall whatever plays.
+- Island home: the cover has boring.notch's 13 pt corners over a turned, blurred glow, and steps back and dims while paused. Title and artist use the headline size.
+- Island home: the calendar is 215 pt wide with the month over the year, a wheel of days that scrolls sideways, and a centred note when a day is free.
+- Island top row: Home and Shelf share one capsule that slides behind the chosen tab; the gear sits on a black disc beside the charge and a drawn battery.
+
 ## [0.93.0] - 2026-11-13
 
 ### Summary

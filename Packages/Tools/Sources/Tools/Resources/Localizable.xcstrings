@@ -31,6 +31,16 @@
         }
       }
     },
+    "Add": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinzufügen"
+          }
+        }
+      }
+    },
     "Add a file…": {
       "localizations": {
         "de": {
@@ -82,6 +92,26 @@
         }
       }
     },
+    "Add to Favourites": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu Favoriten hinzufügen"
+          }
+        }
+      }
+    },
+    "All apps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Apps"
+          }
+        }
+      }
+    },
     "Allow Sonary to record the screen in System Settings > Privacy & Security.": {
       "extractionState": "manual",
       "localizations": {
@@ -99,6 +129,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Auch die Systemtasten sperren"
+          }
+        }
+      }
+    },
+    "App windows": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster der App zeigen"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erscheinungsbild"
           }
         }
       }
@@ -130,6 +180,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fragt beim ersten Mal nach dem Mikrofon."
+          }
+        }
+      }
+    },
+    "Automatic": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatisch"
           }
         }
       }
@@ -264,6 +324,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Farbaufnahme"
+          }
+        }
+      }
+    },
+    "Columns": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spalten"
           }
         }
       }
@@ -527,6 +597,16 @@
         }
       }
     },
+    "Emoji and symbols": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji und Symbole"
+          }
+        }
+      }
+    },
     "Empty Trash": {
       "localizations": {
         "de": {
@@ -555,6 +635,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Weitere Ringe"
+          }
+        }
+      }
+    },
+    "Favourites": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Favoriten"
+          }
+        }
+      }
+    },
+    "Favourites and hidden shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Favoriten und ausgeblendete Kurzbefehle"
+          }
+        }
+      }
+    },
+    "For shortcuts the menus do not show. Write the keys the way they should be printed, for example ⌃⌥T.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Kurzbefehle, die in keinem Menü stehen. Schreib die Tasten so, wie sie angezeigt werden sollen, zum Beispiel ⌃⌥T."
+          }
+        }
+      }
+    },
+    "Force quit apps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps sofort beenden"
           }
         }
       }
@@ -591,6 +711,36 @@
         }
       }
     },
+    "Hide the app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App ausblenden"
+          }
+        }
+      }
+    },
+    "Hide the other apps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere Apps ausblenden"
+          }
+        }
+      }
+    },
+    "Hide: I know this one": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausblenden: Den kenne ich"
+          }
+        }
+      }
+    },
     "Highlight": {
       "extractionState": "manual",
       "localizations": {
@@ -618,6 +768,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "⌘ halten für"
+          }
+        }
+      }
+    },
+    "Holding ⌘": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ halten"
           }
         }
       }
@@ -684,6 +844,16 @@
         }
       }
     },
+    "Keys": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasten"
+          }
+        }
+      }
+    },
     "Let go of ⌘ to close. Click a shortcut to run it.": {
       "localizations": {
         "de": {
@@ -694,7 +864,37 @@
         }
       }
     },
+    "Light": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hell"
+          }
+        }
+      }
+    },
+    "Like the system": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie das System"
+          }
+        }
+      }
+    },
     "Lock screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirm sperren"
+          }
+        }
+      }
+    },
+    "Lock the screen": {
       "localizations": {
         "de": {
           "stringUnit": {
@@ -743,6 +943,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Medien"
+          }
+        }
+      }
+    },
+    "Mission Control": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mission Control"
+          }
+        }
+      }
+    },
+    "Move a Space left or right": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einen Space nach links oder rechts"
+          }
+        }
+      }
+    },
+    "My shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meine Kurzbefehle"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
           }
         }
       }
@@ -811,6 +1051,16 @@
         }
       }
     },
+    "No shortcut matches the search.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Kurzbefehl passt zur Suche."
+          }
+        }
+      }
+    },
     "No text found.": {
       "localizations": {
         "de": {
@@ -828,6 +1078,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kein Video konnte verkleinert werden."
+          }
+        }
+      }
+    },
+    "No wait": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Wartezeit"
           }
         }
       }
@@ -906,6 +1166,16 @@
         }
       }
     },
+    "Opens with": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet sich durch"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "de": {
@@ -977,6 +1247,16 @@
         }
       }
     },
+    "Pressing ⌘ twice and holding": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ zweimal drücken und halten"
+          }
+        }
+      }
+    },
     "Preview": {
       "localizations": {
         "de": {
@@ -1014,6 +1294,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schnellpalette"
+          }
+        }
+      }
+    },
+    "Quit the app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App beenden"
           }
         }
       }
@@ -1112,6 +1402,16 @@
         }
       }
     },
+    "Remove from Favourites": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus Favoriten entfernen"
+          }
+        }
+      }
+    },
     "Remove snippet": {
       "localizations": {
         "de": {
@@ -1149,6 +1449,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kürzel beim Tippen ersetzen"
+          }
+        }
+      }
+    },
+    "Reset": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurücksetzen"
           }
         }
       }
@@ -1225,12 +1535,42 @@
         }
       }
     },
+    "Screenshot and recording options": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optionen für Bildschirmfoto und Aufnahme"
+          }
+        }
+      }
+    },
     "Screenshot copied to the clipboard.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Bildschirmfoto in die Zwischenablage kopiert."
+          }
+        }
+      }
+    },
+    "Screenshot of a selection": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto einer Auswahl"
+          }
+        }
+      }
+    },
+    "Screenshot of the screen": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirmfoto des Bildschirms"
           }
         }
       }
@@ -1288,6 +1628,16 @@
         }
       }
     },
+    "Search": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suchen"
+          }
+        }
+      }
+    },
     "Search apps, snippets and tools": {
       "localizations": {
         "de": {
@@ -1305,6 +1655,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apps, Bausteine, Dateien und Werkzeuge suchen"
+          }
+        }
+      }
+    },
+    "Secondary-click a shortcut to keep it under Favourites or to hide it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sekundärklick auf einen Kurzbefehl legt ihn unter Favoriten ab oder blendet ihn aus."
           }
         }
       }
@@ -1349,12 +1709,52 @@
         }
       }
     },
+    "Show again": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wieder zeigen"
+          }
+        }
+      }
+    },
     "Show an app's shortcuts while ⌘ is held": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Kurzbefehle einer App zeigen, solange ⌘ gehalten wird"
+          }
+        }
+      }
+    },
+    "Show hidden shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgeblendete Kurzbefehle zeigen"
+          }
+        }
+      }
+    },
+    "Show or hide the Dock": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock ein- oder ausblenden"
+          }
+        }
+      }
+    },
+    "Show the system's shortcuts too": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auch die Kurzbefehle des Systems zeigen"
           }
         }
       }
@@ -1411,6 +1811,16 @@
         }
       }
     },
+    "Spotlight": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spotlight"
+          }
+        }
+      }
+    },
     "Stop recording": {
       "extractionState": "manual",
       "localizations": {
@@ -1418,6 +1828,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aufnahme beenden"
+          }
+        }
+      }
+    },
+    "Switch apps": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps wechseln"
+          }
+        }
+      }
+    },
+    "Switch windows of the app": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster der App wechseln"
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
           }
         }
       }
@@ -1459,6 +1899,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Der Bildschirm bleibt sichtbar und auch Klicks werden geschluckt, damit sich das Trackpad wischen lässt. Escape beendet es."
+          }
+        }
+      }
+    },
+    "The sheet ends with the shortcuts macOS answers in every app, such as Spotlight and screenshots.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Übersicht endet mit den Kurzbefehlen, die macOS in jeder App annimmt, etwa Spotlight und Bildschirmfotos."
           }
         }
       }
