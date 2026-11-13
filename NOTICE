@@ -44,3 +44,7 @@ Sparkle (https://sparkle-project.org) is used as a dependency for in-app updates
 Since 0.92.0 also: Vorssaint's update check is switched off (`Services/Update/UpdateService.swift`),
 a lone panel section no longer draws its own title (`UI/MenuPanel/PanelLayout.swift`), and the
 utilities section can show a subset of its items (`UI/MenuPanel/MenuPanelView.swift`).
+
+Since 0.94.0 also: with the player home on, the open island is wide and flat, opens on its home and
+shows no buttons around itself (`Services/Notch/NotchSupport.swift`, `Services/Notch/NotchService.swift`),
+and the notch silhouette is the default (`Core/Defaults.swift`, `UI/Settings/Notch*Settings.swift`).

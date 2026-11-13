@@ -5,6 +5,17 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.94.0] - 2026-11-14
+
+### Summary
+The island takes the shape of boring.notch: wide and flat around the camera, opening on the player and the calendar.
+
+### Changed
+- The open island is 640 points wide and only as tall as the top row and one row of content, with square shoulders that grow out of the camera instead of a floating capsule. The capsule stays available in the island's settings.
+- The island always opens on its home with the player and the calendar, also while music plays. The music page with lyrics and the queue is a click on the title away.
+- The round buttons around the open island are gone while the new home is on; the top row holds Home, Shelf, the charge and Settings.
+- A click on the cover brings the playing app to the front.
+
 ## [0.93.0] - 2026-11-13
 
 ### Summary
