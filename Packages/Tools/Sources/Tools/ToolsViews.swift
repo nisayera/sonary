@@ -33,6 +33,7 @@ struct ToolsPopoverView: View {
                     tool("magnifyingglass", "Command bar", shortcut: "tools.commandBar") { model.showCommandBar() }
                     tool("circle.grid.cross", "Radial menu", shortcut: "tools.radialMenu") { model.showRadialMenu() }
                     tool("square.grid.3x3", "Quick panel", shortcut: "tools.quickPanel") { model.toggleQuickPanel() }
+                    tool("command", "Shortcut sheet", shortcut: "tools.shortcutSheet") { model.toggleShortcutSheet() }
                     tool("web.camera", "Camera mirror") { model.toggleCamera() }
                 }
             }
@@ -189,6 +190,32 @@ struct ToolsSettingsView: View {
                 } label: { EmptyView() }
                     .settingsControl()
             }
+        }
+        SettingsCard(Text("Shortcut sheet", bundle: .module)) {
+            SettingsToggleRow(symbol: "command", title: Text("Show an app's shortcuts while ⌘ is held", bundle: .module),
+                              caption: Text("Hold ⌘ alone for a moment and every keyboard shortcut of the app in front appears, menu by menu. Let go to close it, or click a shortcut to run it. Needs Accessibility.",
+                                            bundle: .module),
+                              isOn: Binding(get: { model.settings.shortcutSheetOnHold },
+                                            set: { value in model.update { $0.shortcutSheetOnHold = value } }))
+            if model.settings.shortcutSheetOnHold {
+                SettingsRow(symbol: "hourglass", title: Text("Hold ⌘ for", bundle: .module)) {
+                    Picker(selection: Binding(get: { model.settings.shortcutSheetDelay },
+                                              set: { value in model.update { $0.shortcutSheetDelay = value } })) {
+                        Text(verbatim: "0.5 s").tag(0.5)
+                        Text(verbatim: "1 s").tag(1.0)
+                        Text(verbatim: "1.5 s").tag(1.5)
+                        Text(verbatim: "2 s").tag(2.0)
+                    } label: { EmptyView() }
+                        .labelsHidden().frame(width: 100)
+                }
+            }
+            if model.shortcutSheetNeedsAccessibility {
+                SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.",
+                                     bundle: .module))
+            }
+            Text("It can also open on a shortcut of its own, from the Shortcuts page; then it stays until you close it.",
+                 bundle: .module)
+                .font(.caption).foregroundStyle(.secondary)
         }
         SettingsCard(Text("Quick panel", bundle: .module)) {
             Text("A small palette of your favourite tools next to the pointer. Give it a shortcut on the Shortcuts page.",
