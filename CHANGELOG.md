@@ -5,7 +5,7 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
-## [0.94.0] - 2026-11-14
+## [0.95.0] - 2026-11-14
 
 ### Summary
 The island now takes boring.notch's outline and measures, and the shortcut sheet learns what KeyClu does: a double press of ⌘, search, favourites, hidden shortcuts and shortcuts of your own.
@@ -18,10 +18,21 @@ The island now takes boring.notch's outline and measures, and the shortcut sheet
 - Shortcut sheet settings: the number of columns and a light, dark or system appearance.
 
 ### Changed
-- Island: with the player home on, the island is drawn with boring.notch's outline: small shoulders and corners made of one curve each, 6 and 14 pt closed and 19 and 24 pt open. The open home is 190 pt tall whatever plays.
+- Island: with the player home on, the island is drawn with boring.notch's outline: small shoulders and corners made of one curve each, 6 and 14 pt closed and 19 and 24 pt open.
 - Island home: the cover has boring.notch's 13 pt corners over a turned, blurred glow, and steps back and dims while paused. Title and artist use the headline size.
 - Island home: the calendar is 215 pt wide with the month over the year, a wheel of days that scrolls sideways, and a centred note when a day is free.
 - Island top row: Home and Shelf share one capsule that slides behind the chosen tab; the gear sits on a black disc beside the charge and a drawn battery.
+
+## [0.94.0] - 2026-11-14
+
+### Summary
+The island takes the shape of boring.notch: wide and flat around the camera, opening on the player and the calendar.
+
+### Changed
+- The open island is 640 points wide and only as tall as the top row and one row of content, with square shoulders that grow out of the camera instead of a floating capsule. The capsule stays available in the island's settings.
+- The island always opens on its home with the player and the calendar, also while music plays. The music page with lyrics and the queue is a click on the title away.
+- The round buttons around the open island are gone while the new home is on; the top row holds Home, Shelf, the charge and Settings.
+- A click on the cover brings the playing app to the front.
 
 ## [0.93.0] - 2026-11-13
 

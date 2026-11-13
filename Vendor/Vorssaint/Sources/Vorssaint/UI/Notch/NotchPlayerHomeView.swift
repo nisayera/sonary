@@ -50,6 +50,15 @@ enum NotchPlayerHomeLayout {
     static let minimumPlayerWidth: CGFloat = 250
     static let coverRadius: CGFloat = 13
 
+    /// Whether the island is Sonary's: wide and flat, opening on the player and the calendar.
+    static func isOn(_ defaults: UserDefaults = .standard) -> Bool {
+        defaults.object(forKey: DefaultsKey.notchPlayerHome) as? Bool ?? true
+    }
+
+    /// The open island's width, as wide as boring.notch's, and the height of its page below the top row.
+    static let islandWidth: CGFloat = 640
+    static let pageHeight: CGFloat = 118
+
     /// The calendar's width, or nil when the player needs the whole island.
     static func calendarWidth(in width: CGFloat) -> CGFloat? {
         let calendar: CGFloat = 215
@@ -128,8 +137,8 @@ struct NotchPlayerHomeView: View {
     /// playing it opens the music app instead.
     private func cover(side: CGFloat) -> some View {
         Button {
-            if isIdle, NotchPreferredPlayer.open() { return }
-            service.select(.music)
+            if isIdle { _ = NotchPreferredPlayer.open(); return }
+            if let track = music.playback?.track { RadialNowPlayingApplication.runningApplication(for: track)?.activate() }
         } label: {
             ZStack(alignment: .bottomTrailing) {
                 if let artwork = music.artwork, !reduceTransparency {

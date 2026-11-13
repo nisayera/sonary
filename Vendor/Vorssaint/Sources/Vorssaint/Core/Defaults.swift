@@ -1557,7 +1557,7 @@ enum Defaults {
         DefaultsKey.notchWatchCondition: NotchWatchCondition.changes.rawValue,
         DefaultsKey.notchEnabled: false,
         DefaultsKey.notchDisplay: NotchDisplay.automatic.rawValue,
-        DefaultsKey.notchSilhouette: NotchSilhouette.capsule.rawValue,
+        DefaultsKey.notchSilhouette: NotchSilhouette.notch.rawValue,
         DefaultsKey.notchCapsuleFitWidth: 0.0,
         DefaultsKey.notchCapsuleFitHeight: 0.0,
         DefaultsKey.notchCapsuleFitDrop: 0.0,

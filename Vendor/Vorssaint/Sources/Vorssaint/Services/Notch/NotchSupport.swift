@@ -118,7 +118,7 @@ enum NotchSilhouette: String, CaseIterable {
     case capsule, notch
 
     static func current(in defaults: UserDefaults = .standard) -> NotchSilhouette {
-        NotchSilhouette(rawValue: defaults.string(forKey: DefaultsKey.notchSilhouette) ?? "") ?? .capsule
+        NotchSilhouette(rawValue: defaults.string(forKey: DefaultsKey.notchSilhouette) ?? "") ?? .notch
     }
 }
 
@@ -392,15 +392,11 @@ enum NotchLayout {
     // 19 and 24 pt open, each a single quadratic curve.
 
     /// Whether the island draws that outline. On unless turned off.
-    static var playerOutline: Bool {
-        UserDefaults.standard.object(forKey: DefaultsKey.notchPlayerHome) as? Bool ?? true
-    }
+    static var playerOutline: Bool { NotchPlayerHomeLayout.isOn() }
     /// How far a surface of `height` is from the closed strip to the open island.
     static func playerOutlineProgress(height: CGFloat) -> CGFloat {
         min(1, max(0, (height - 44) / 96))
     }
-    /// The height the open home takes with that outline, as boring.notch's does.
-    static let playerHomeHeight: CGFloat = 190
     /// The optional outline's stroke. Only its inner half, inside the island, shows.
     static let outlineWidth: CGFloat = 2
 
@@ -2294,6 +2290,8 @@ struct NotchGeometry: Equatable {
     /// which stays the limit; nil takes all of it, as lists do. A width set
     /// by hand is the island's on every page.
     var pageContentWidth: CGFloat? = nil
+    /// Sonary: the page is the wide home with the player and the calendar.
+    var playerHome = false
     /// Nothing floating beside the island leads to its sections, so the
     /// open page's row starts with the island's own button for them.
     var sectionsButtonInRow = false
@@ -2704,7 +2702,8 @@ struct NotchGeometry: Equatable {
         let preferred = layout == .custom ? chosen : pageContentWidth.map { natural in
             min(chosen, max(natural, isNotched ? cameraWidth + wing * 2 : 0) + NotchLayout.horizontalInset * 2)
         } ?? chosen
-        return min(max(preferred, cameraWidth + 36), screen.width - 24 - NotchQuickAccessLayout.gutter * 2)
+        let wide = playerHome ? max(preferred, NotchPlayerHomeLayout.islandWidth) : preferred
+        return min(max(wide, cameraWidth + 36), screen.width - 24 - NotchQuickAccessLayout.gutter * 2)
     }
     var contentWidth: CGFloat { max(0, expandedWidth - NotchLayout.horizontalInset * 2) }
     /// Content height available before a page needs to scroll.
@@ -2777,6 +2776,8 @@ struct NotchGeometry: Equatable {
             contentHeight = max(0, capturePreviewHeight ?? 0) + 4
         } else {
             switch module {
+            case .controls where playerHome:
+                contentHeight = NotchPlayerHomeLayout.pageHeight
             case .controls:
                 // The levels sit in the top row; only playback, the shortcuts
                 // and the levels a camera's row cannot split evenly make the page.
@@ -2790,12 +2791,7 @@ struct NotchGeometry: Equatable {
                 let home = NotchLayout.controls(hasCards: controlsHaveMusic, levelRow: levelRow,
                                                 shortcutCount: max(0, shortcutCount), width: contentWidth, height: room)
                 let empty = !controlsHaveMusic && sliderCount <= 0 && shortcutCount <= 0
-                if NotchLayout.playerOutline, layout != .custom {
-                    // The player home keeps one height whatever plays.
-                    contentHeight = max(96, NotchLayout.playerHomeHeight - headerTopInset - headerChromeHeight)
-                } else {
-                    contentHeight = min(room, empty ? NotchLayout.emptyHeight : home.height)
-                }
+                contentHeight = min(room, empty ? NotchLayout.emptyHeight : home.height)
             case .music:
                 let player = NotchLayout.musicPlayerHeight(band: musicBandHeight, playing: musicHasContent)
                 // Presets grow for the optional row; a custom height keeps

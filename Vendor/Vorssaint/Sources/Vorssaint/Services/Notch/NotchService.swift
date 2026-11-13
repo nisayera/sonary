@@ -923,6 +923,8 @@ final class NotchService: ObservableObject {
         // preset's; the gallery, details and the empty island keep the chosen
         // width, and lead their row with their own way back instead of the
         // sections.
+        result.playerHome = selected == .controls && NotchPlayerHomeLayout.isOn()
+            && !showingSections && !showingAppPanel && selectedMetric == nil
         if !showingSections, !showingAppPanel, selectedMetric == nil, !modules.isEmpty {
             result.pageContentWidth = NotchLayout.naturalContentWidth(selected, controls: homeControls,
                                                                       within: geometry.contentWidth)
@@ -1446,7 +1448,9 @@ final class NotchService: ObservableObject {
         guard let panel else { return }
         let reopening = reopeningDestination
         let useReopeningSurface = module == nil && !expanded && !appPanel && !sections && metric == nil
-        let destination = module.flatMap { modules.contains($0) ? $0 : nil } ?? reopening.module
+        // Sonary's island opens on its home, which holds the player, whatever page it showed last.
+        let home: NotchModule? = NotchPlayerHomeLayout.isOn() && !expanded && modules.contains(.controls) ? .controls : nil
+        let destination = module.flatMap { modules.contains($0) ? $0 : nil } ?? home ?? reopening.module
         let appPanel = appPanel || (useReopeningSurface && reopening.appPanel)
         let sections = sections || (useReopeningSurface && reopening.sections)
         if useReopeningSurface && reopening.appPanel { MenuPanelFocus.shared.showNormalPanel() }
@@ -2741,6 +2745,7 @@ final class NotchService: ObservableObject {
         windowHost?.present(size: size, geometry: presented, animated: animated,
                             transitionContent: contentTransition,
                             quickAccess: expanded && captureControls == nil && !showingCommandBar && !access.buttons.isEmpty
+                                && !NotchPlayerHomeLayout.isOn()
                                 ? access : nil,
                             revealFromHidden: !hiddenInFullscreen && captureControls == nil
                                 && (revealingFromAppFullscreen

@@ -39,7 +39,7 @@ struct NotchSettings: View {
     @AppStorage(DefaultsKey.notchMascotPalette) private var mascotPalette = NotchMascotPalette.pearl.rawValue
     @AppStorage(DefaultsKey.notchMascotSide) private var mascotSide = NotchMascotSide.left.rawValue
     @AppStorage(DefaultsKey.notchDisplay) private var display = NotchDisplay.automatic.rawValue
-    @AppStorage(DefaultsKey.notchSilhouette) private var silhouette = NotchSilhouette.capsule.rawValue
+    @AppStorage(DefaultsKey.notchSilhouette) private var silhouette = NotchSilhouette.notch.rawValue
     @AppStorage(DefaultsKey.notchOpenOnHover) private var hover = false
     @AppStorage(DefaultsKey.notchShortcutEnabled) private var shortcutEnabled = false
     @AppStorage(DefaultsKey.notchHideInFullscreen) private var hideInFullscreen = false
