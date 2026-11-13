@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld keyboard shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Tastenkurzbefehle"
+          }
+        }
+      }
+    },
     "0 as the end keeps everything to the end. The trimmed copy lands next to the original.": {
       "localizations": {
         "de": {
@@ -592,6 +602,26 @@
         }
       }
     },
+    "Hold ⌘ alone for a moment and every keyboard shortcut of the app in front appears, menu by menu. Let go to close it, or click a shortcut to run it. Needs Accessibility.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Halte ⌘ allein einen Moment, und alle Tastenkurzbefehle der vorderen App erscheinen, Menü für Menü. Loslassen schließt die Übersicht, ein Klick auf einen Kurzbefehl führt ihn aus. Braucht Bedienungshilfen."
+          }
+        }
+      }
+    },
+    "Hold ⌘ for": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ halten für"
+          }
+        }
+      }
+    },
     "Image conversion": {
       "extractionState": "manual",
       "localizations": {
@@ -610,6 +640,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Baustein einfügen durch"
+          }
+        }
+      }
+    },
+    "It can also open on a shortcut of its own, from the Shortcuts page; then it stays until you close it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sie lässt sich auch über einen eigenen Kurzbefehl von der Kurzbefehl-Seite öffnen; dann bleibt sie, bis du sie schließt."
           }
         }
       }
@@ -640,6 +680,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tastenkürzel"
+          }
+        }
+      }
+    },
+    "Let go of ⌘ to close. Click a shortcut to run it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ loslassen zum Schließen. Klick auf einen Kurzbefehl führt ihn aus."
           }
         }
       }
@@ -1269,6 +1319,16 @@
         }
       }
     },
+    "Shortcut sheet": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurzbefehl-Übersicht"
+          }
+        }
+      }
+    },
     "Shortcuts": {
       "localizations": {
         "de": {
@@ -1285,6 +1345,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kleines Abzeichen statt schwarzem Bildschirm"
+          }
+        }
+      }
+    },
+    "Show an app's shortcuts while ⌘ is held": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurzbefehle einer App zeigen, solange ⌘ gehalten wird"
           }
         }
       }
@@ -1399,6 +1469,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Das Video ließ sich nicht kürzen."
+          }
+        }
+      }
+    },
+    "This app shows no shortcuts in its menus.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese App zeigt in ihren Menüs keine Kurzbefehle."
           }
         }
       }

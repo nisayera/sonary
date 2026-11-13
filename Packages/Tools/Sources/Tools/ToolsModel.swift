@@ -32,6 +32,10 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var recordMicrophone = false
     /// Typing a snippet's trigger anywhere replaces it with the snippet.
     public var snippetTriggers = false
+    /// Holding ⌘ for a moment shows the front app's keyboard shortcuts.
+    public var shortcutSheetOnHold = false
+    /// How long ⌘ has to be held, in seconds.
+    public var shortcutSheetDelay = 1.0
     /// Cleaning mode also swallows brightness, volume, media and Mission Control keys.
     public var cleaningBlocksSystemKeys = true
     /// Cleaning mode leaves the screen visible and shows a small badge instead of black.
@@ -82,6 +86,9 @@ public final class ToolsModel {
     @ObservationIgnored private let triggerTap = SnippetTriggerTap()
     @ObservationIgnored private let scratchpadWindow = ScratchpadWindowController()
     @ObservationIgnored private let quickPanel = QuickPanelController()
+    @ObservationIgnored private let shortcutSheet = ShortcutSheetController()
+    /// Set when the shortcut sheet could not start watching, which means Accessibility is missing.
+    public private(set) var shortcutSheetNeedsAccessibility = false
     /// Set when the trigger watcher could not start, which means Accessibility is missing.
     public private(set) var snippetTriggersNeedAccessibility = false
 
@@ -95,12 +102,14 @@ public final class ToolsModel {
         running = true
         applyShortcuts()
         applyTriggers()
+        applyShortcutSheet()
     }
 
     func stop() {
         running = false
         applyShortcuts()
         applyTriggers()
+        applyShortcutSheet()
         commandBar?.close()
         commandBar = nil
         radial.close()
@@ -112,6 +121,22 @@ public final class ToolsModel {
         editor.close()
         scratchpadWindow.close()
         quickPanel.close()
+    }
+
+    /// Starts or stops watching for a held ⌘, to match the settings.
+    private func applyShortcutSheet() {
+        shortcutSheet.delay = settings.shortcutSheetDelay
+        guard running, settings.shortcutSheetOnHold else {
+            shortcutSheet.stopWatching()
+            shortcutSheetNeedsAccessibility = false
+            return
+        }
+        shortcutSheetNeedsAccessibility = !shortcutSheet.startWatching()
+    }
+
+    /// Shows the front app's keyboard shortcuts, or closes the sheet when it is open.
+    public func toggleShortcutSheet() {
+        shortcutSheet.toggle()
     }
 
     /// The palette of favourite tools next to the pointer, or closes it when it is open.
@@ -187,10 +212,12 @@ public final class ToolsModel {
     public func update(_ change: (inout ToolsSettings) -> Void) {
         let before = settings.shortcuts
         let triggersBefore = settings.snippetTriggers
+        let sheetBefore = [settings.shortcutSheetOnHold ? 1 : 0, settings.shortcutSheetDelay]
         change(&settings)
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "tools.settings") }
         if before != settings.shortcuts { applyShortcuts() }
         if triggersBefore != settings.snippetTriggers { applyTriggers() }
+        if sheetBefore != [settings.shortcutSheetOnHold ? 1 : 0, settings.shortcutSheetDelay] { applyShortcutSheet() }
     }
 
     /// Starts or stops watching for snippet triggers.
@@ -247,6 +274,9 @@ public final class ToolsModel {
         ShortcutDefinition(id: "tools.quickPanel", title: String(localized: "Quick panel", bundle: .module),
                            group: String(localized: "Tools", bundle: .module),
                            defaultCombo: .none),
+        ShortcutDefinition(id: "tools.shortcutSheet", title: String(localized: "Shortcut sheet", bundle: .module),
+                           group: String(localized: "Tools", bundle: .module),
+                           defaultCombo: .none),
     ] }
 
     private func applyShortcuts() {
@@ -262,6 +292,7 @@ public final class ToolsModel {
         shortcuts.bind("tools.screenRecording") { [weak self] in self?.toggleRecording() }
         shortcuts.bind("tools.scratchpad") { [weak self] in self?.showScratchpadWindow() }
         shortcuts.bind("tools.quickPanel") { [weak self] in self?.toggleQuickPanel() }
+        shortcuts.bind("tools.shortcutSheet") { [weak self] in self?.toggleShortcutSheet() }
     }
 
     // MARK: Tools

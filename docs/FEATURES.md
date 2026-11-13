@@ -82,6 +82,7 @@ Below that, 109 groups of single options Vorssaint has and Sonary does not.
 ## Everyday tools
 - [x] Command bar — apps, open windows, snippets, scripts, files through Spotlight, Sonary's tools, clipboard history, the front app's menu commands, calculator, units, emoji
 - [x] Quick panel — a floating palette of favourite tools next to the pointer, on a shortcut
+- [x] Shortcut sheet — hold ⌘ for a moment (or press a shortcut) to see every keyboard shortcut of the app in front, menu by menu, and click one to run it. Not in Vorssaint; modelled on the CheatSheet app
 - [x] Quick toggles — dark mode, desktop icons, empty Trash, eject disks, lock screen
 - [x] Quit apps — every open app with Quit and Force Quit, quit all or all but the front app, with apps kept running
 - [x] Radial menu on ⌃⌥R with a free choice of Sonary's actions, apps, files and keyboard shortcuts, and extra rings
