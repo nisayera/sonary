@@ -25,6 +25,10 @@ them in that folder:
 - the name "Vorssaint" replaced by "Sonary" in the text shown to the user (`Core/*.swift`), as
   Vorssaint's trademark policy asks of forks; copyright lines are untouched
 - `Services/Notch/NotchWindowHost.swift`: the island takes Sonary's accent colour
+- `UI/Notch/NotchPlayerHomeView.swift` added (not Vorssaint's work): the open island's home laid out
+  like boring.notch, with a player beside the calendar; `NotchView.swift`, `NotchMusicView.swift`,
+  `Core/Defaults.swift` and `UI/Settings/NotchSettings.swift` changed to show and switch it. No
+  code of boring.notch is used
 - `UI/Settings/SettingsCard.swift`: cards and rows drawn in the look of Sonary's own;
   `UI/Settings/GeneralSettings.swift`: `MenuBarGlyph` shows Sonary's menu bar icon
 - the page titles inside the panes are set as sub-headings (`SonaryHost.paneTitleFont`), and

@@ -5,6 +5,19 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.93.0] - 2026-11-13
+
+### Summary
+The open island gets a new home in the layout of boring.notch, and holding ⌘ shows the front app's keyboard shortcuts.
+
+### Added
+- Island: the home page shows the player on the left, with the cover over a glow of itself, the playing app's icon, title, artist, timeline and transport, and the week with the day's events on the right. The top row has tabs for Home and Shelf, the charge and a button to Settings.
+- Island settings: "Home with player and calendar" switches between the new home and the earlier one with levels and shortcuts.
+- Tools: a shortcut sheet. Hold ⌘ alone for a moment and every keyboard shortcut in the front app's menus appears, menu by menu; a click runs one. It can also open on a shortcut of its own. Off by default.
+
+### Changed
+- With the new home on, volume and brightness readings show in the island's top row while you press their keys, since the home no longer has sliders for them.
+
 ## [0.92.0] - 2026-11-11
 
 ### Summary

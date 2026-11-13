@@ -93,6 +93,7 @@ struct NotchSettings: View {
     @AppStorage(DefaultsKey.notchHapticFeedback) private var hapticFeedback = true
     @AppStorage(DefaultsKey.notchTranslucentBackground) private var translucentBackground = false
     @AppStorage(DefaultsKey.notchLiquidGlassEnabled) private var liquidGlass = false
+    @AppStorage(DefaultsKey.notchPlayerHome) private var playerHome = true
     @AppStorage(DefaultsKey.notchShelf) private var shelfWindow = true
     @AppStorage(DefaultsKey.notchDragReveal) private var dragReveal = true
     @AppStorage(DefaultsKey.notchCaptureControls) private var captureControls = true
@@ -254,6 +255,8 @@ struct NotchSettings: View {
                           caption: liquidGlassIsOn ? text.translucentBackgroundGlassHint : text.translucentBackgroundHint,
                           isOn: liquidGlassIsOn ? .constant(true) : $translucentBackground)
                     .disabled(liquidGlassIsOn)
+                switchRow("rectangle.split.2x1", NotchPlayerHomeStrings.settingTitle(l10n.language),
+                          caption: NotchPlayerHomeStrings.settingCaption(l10n.language), isOn: $playerHome)
             }
             // Only a display without a camera can float the island.
             if NotchSupport.hasDisplayWithoutNotch {

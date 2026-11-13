@@ -509,7 +509,7 @@ struct NotchMusicIdleTransport: View {
     }
 }
 
-private struct NotchMusicTransport: View {
+struct NotchMusicTransport: View {
     let playback: NotchPlayback
     /// The home card and a short player use the smaller buttons.
     var compact = false
