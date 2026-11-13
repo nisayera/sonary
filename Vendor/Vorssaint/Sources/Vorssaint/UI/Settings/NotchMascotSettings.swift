@@ -13,7 +13,7 @@ struct NotchMascotSettings: View {
     /// Redraws when the island or the Command Bar is installed or removed.
     @ObservedObject private var features = FeatureRuntime.shared
     @AppStorage(DefaultsKey.notchEnabled) private var islandEnabled = false
-    @AppStorage(DefaultsKey.notchSilhouette) private var silhouette = NotchSilhouette.capsule.rawValue
+    @AppStorage(DefaultsKey.notchSilhouette) private var silhouette = NotchSilhouette.notch.rawValue
     @AppStorage(DefaultsKey.notchMascotEnabled) private var enabled = false
     @AppStorage(DefaultsKey.notchMascotVisits) private var visits = true
     @AppStorage(DefaultsKey.notchMascotReactions) private var reactions = true
