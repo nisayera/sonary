@@ -11,6 +11,8 @@ struct NotchView: View {
     @ObservedObject private var launcher = QuickLauncherService.shared
     @ObservedObject private var updates = UpdateService.shared
     @AppStorage(DefaultsKey.notchLiquidGlassEnabled) private var glass = false
+    /// Sonary: the home as a player beside the calendar, with Home and Shelf tabs.
+    @AppStorage(DefaultsKey.notchPlayerHome) private var playerHome = true
     @Environment(\.colorSchemeContrast) private var contrast
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -350,7 +352,7 @@ struct NotchView: View {
         let feedback = headerFeedback
         // Across a full row the home page's levels fill the leading side, so
         // a reading takes the trailing end and they make room for it.
-        let homeRow = !band.besideCamera && service.selected == .controls && !showsDetail
+        let homeRow = !playerHome && !band.besideCamera && service.selected == .controls && !showsDetail
             && !service.showingSections && !service.modules.isEmpty
         let homeReading = homeRow
             ? NotchLayout.homeReadingWidth(levels: NotchSupport.controls().filter(\.isLevel).count, side: band.leadingRoom) : nil
@@ -425,6 +427,8 @@ struct NotchView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         } else if showsDetail {
             NotchBandBackButton(title: service.detailTitle, action: service.goBack)
+        } else if playerHome, !service.modules.isEmpty, service.selected == .controls || service.selected == .files {
+            NotchPlayerHomeTabs(service: service, showsSections: band.sectionsButton)
         } else if band.sectionsButton {
             // Without the floating button, the sections stay one click away;
             // the row keeps it room before the page's own controls.
@@ -466,6 +470,9 @@ struct NotchView: View {
         var size = service.contentSize
         guard !showsDetail else { return size }
         switch service.selected {
+        case .controls where playerHome:
+            // The player and the calendar fit themselves to the island as it is.
+            break
         case .controls:
             let items = NotchSupport.controls()
             let shortcuts = items.filter { $0 != .music && !$0.isLevel }
@@ -519,7 +526,7 @@ struct NotchView: View {
         // repeat it. A level key's event shares its name with the level it moves.
         // Brightness moves there only while its slider shows the display the
         // key moved.
-        if service.selected == .controls, !showsDetail, !service.showingSections, !service.modules.isEmpty,
+        if !playerHome, service.selected == .controls, !showsDetail, !service.showingSections, !service.modules.isEmpty,
            let level = NotchControlItem(rawValue: notice.event.rawValue),
            NotchSupport.controls().contains(level),
            level != .brightness || BrightnessService.shared.islandSliderShowsFocusedDisplay {
@@ -580,7 +587,12 @@ struct NotchView: View {
                     .notchBand(trailing: { NotchClearNotificationsButton() })
             case .downloads: NotchDownloadsView(size: pageSize)
             case .calendar: NotchCalendarView(size: pageSize)
-            case .controls: NotchControlsView(service: service, size: pageSize)
+            case .controls:
+                if playerHome {
+                    NotchPlayerHomeView(service: service, size: pageSize)
+                } else {
+                    NotchControlsView(service: service, size: pageSize)
+                }
             case .mixer: NotchMixerView(size: pageSize)
             case .music: NotchMusicView(size: pageSize, extrasHeight: service.geometry.musicExtrasHeight)
             case .clipboard: NotchClipboardView(service: service, size: pageSize)

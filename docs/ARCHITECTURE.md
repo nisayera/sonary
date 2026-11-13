@@ -95,7 +95,7 @@ Packages never import each other. Where one feature needs another module, the ap
 | Monitor | `MetricsSampler` actor samples once a second into a ring buffer (~5 min); sources behind `MetricsSources`; SMC for temperatures and fans; alerts through UserNotifications |
 | Mouse | `CGEventTap` on its own thread; scroll math, smoothing, button mapping and click filter as pure functions; pointer acceleration restored on stop and after a crash |
 | Keyboard | Event tap for the Super Key and key debounce; `SuperKeyEngine` decides |
-| Notch | Vorssaint's Dynamic Island, unchanged, from `Vendor/Vorssaint`; started and stopped through `SonaryIsland` in `SonaryBridge.swift`. Every other Vorssaint feature is marked as not installed, so nothing else of it runs |
+| Notch | Vorssaint's Dynamic Island from `Vendor/Vorssaint`, with a home page of Sonary's own (player beside calendar, `NotchPlayerHomeView.swift`); started and stopped through `SonaryIsland` in `SonaryBridge.swift`. Every other Vorssaint feature is marked as not installed, so nothing else of it runs |
 | Clipboard | Polls the pasteboard, skips password entries, stores history and image files; Finder helpers through AppleScript |
 | Apps | Cleaner, uninstaller and folder tidying move files to the Trash; ports through `lsof`; Homebrew and Sparkle feeds for updates |
 | Windows | Accessibility API for moving windows, ScreenCaptureKit for previews, an event tap for ⌘Q/⌘W protection |
