@@ -5,6 +5,16 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.96.0] - 2026-11-14
+
+### Summary
+The island's home takes the look of the one on Sonary's website.
+
+### Changed
+- Island home: the artist, the timeline, today's date, the chosen day and the bars of the events use Sonary's accent colour instead of the cover's colour and the calendars' colours.
+- Island home: title and artist are 15 pt, the cover is 104 pt with a soft glow of itself behind it, and steps back while paused.
+- Island top row: Home, Shelf and the way to all sections sit in one capsule as three tabs.
+
 ## [0.95.1] - 2026-11-14
 
 ### Summary
