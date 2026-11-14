@@ -36,6 +36,17 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var shortcutSheetOnHold = false
     /// How long ⌘ has to be held, in seconds.
     public var shortcutSheetDelay = 1.0
+    /// Whether a plain hold of ⌘ opens the sheet or a double press that is held.
+    public var shortcutSheetTrigger: SheetTrigger = .hold
+    /// The sheet's columns; 0 lets the screen's width decide.
+    public var shortcutSheetColumns = 0
+    public var shortcutSheetAppearance: SheetAppearance = .system
+    /// The sheet ends with the shortcuts macOS answers in every app.
+    public var shortcutSheetSystem = true
+    /// Shortcuts no menu shows, written down by hand.
+    public var shortcutSheetCustom: [CustomSheetShortcut] = []
+    /// Favourites and hidden shortcuts, by the app's bundle identifier.
+    public var shortcutSheetMarks: [String: SheetMarks] = [:]
     /// Cleaning mode also swallows brightness, volume, media and Mission Control keys.
     public var cleaningBlocksSystemKeys = true
     /// Cleaning mode leaves the screen visible and shows a small badge instead of black.
@@ -125,7 +136,7 @@ public final class ToolsModel {
 
     /// Starts or stops watching for a held ⌘, to match the settings.
     private func applyShortcutSheet() {
-        shortcutSheet.delay = settings.shortcutSheetDelay
+        configureShortcutSheet()
         guard running, settings.shortcutSheetOnHold else {
             shortcutSheet.stopWatching()
             shortcutSheetNeedsAccessibility = false
@@ -134,8 +145,23 @@ public final class ToolsModel {
         shortcutSheetNeedsAccessibility = !shortcutSheet.startWatching()
     }
 
+    /// Hands the sheet what the settings say about its trigger, its look and its content.
+    private func configureShortcutSheet() {
+        shortcutSheet.delay = settings.shortcutSheetDelay
+        shortcutSheet.trigger = settings.shortcutSheetTrigger
+        shortcutSheet.columns = settings.shortcutSheetColumns
+        shortcutSheet.appearance = settings.shortcutSheetAppearance
+        shortcutSheet.showsSystem = settings.shortcutSheetSystem
+        shortcutSheet.custom = settings.shortcutSheetCustom
+        shortcutSheet.marks = { [weak self] bundleID in self?.settings.shortcutSheetMarks[bundleID] ?? SheetMarks() }
+        shortcutSheet.setMarks = { [weak self] bundleID, marks in
+            self?.update { $0.shortcutSheetMarks[bundleID] = marks.isEmpty ? nil : marks }
+        }
+    }
+
     /// Shows the front app's keyboard shortcuts, or closes the sheet when it is open.
     public func toggleShortcutSheet() {
+        configureShortcutSheet()
         shortcutSheet.toggle()
     }
 
@@ -212,12 +238,12 @@ public final class ToolsModel {
     public func update(_ change: (inout ToolsSettings) -> Void) {
         let before = settings.shortcuts
         let triggersBefore = settings.snippetTriggers
-        let sheetBefore = [settings.shortcutSheetOnHold ? 1 : 0, settings.shortcutSheetDelay]
+        let sheetBefore = settings.shortcutSheetOnHold
         change(&settings)
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "tools.settings") }
         if before != settings.shortcuts { applyShortcuts() }
         if triggersBefore != settings.snippetTriggers { applyTriggers() }
-        if sheetBefore != [settings.shortcutSheetOnHold ? 1 : 0, settings.shortcutSheetDelay] { applyShortcutSheet() }
+        if sheetBefore != settings.shortcutSheetOnHold { applyShortcutSheet() } else { configureShortcutSheet() }
     }
 
     /// Starts or stops watching for snippet triggers.

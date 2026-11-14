@@ -27,8 +27,10 @@ them in that folder:
 - `Services/Notch/NotchWindowHost.swift`: the island takes Sonary's accent colour
 - `UI/Notch/NotchPlayerHomeView.swift` added (not Vorssaint's work): the open island's home laid out
   like boring.notch, with a player beside the calendar; `NotchView.swift`, `NotchMusicView.swift`,
-  `Core/Defaults.swift` and `UI/Settings/NotchSettings.swift` changed to show and switch it. No
-  code of boring.notch is used
+  `Core/Defaults.swift` and `UI/Settings/NotchSettings.swift` changed to show and switch it. Its
+  measures, and the island's outline in `NotchView.swift` (`NotchShape.playerOutline`) and
+  `Services/Notch/NotchSupport.swift` (corner sizes and the home's height), follow boring.notch
+  (https://github.com/TheBoredTeam/boring.notch, GPL-3.0, © TheBoredTeam)
 - `UI/Settings/SettingsCard.swift`: cards and rows drawn in the look of Sonary's own;
   `UI/Settings/GeneralSettings.swift`: `MenuBarGlyph` shows Sonary's menu bar icon
 - the page titles inside the panes are set as sub-headings (`SonaryHost.paneTitleFont`), and

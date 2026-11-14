@@ -806,6 +806,7 @@ struct NotchShape: Shape {
         if let floatingGap { return Path(NotchLayout.capsulePath(in: rect, gap: floatingGap)) }
         let shoulder = NotchLayout.shoulder(height: rect.height)
         let bottom = min(radius, rect.height / 2, (rect.width - shoulder * 2) / 2)
+        if NotchLayout.playerOutline { return Self.playerOutline(in: rect, shoulder: shoulder, bottom: bottom) }
         let tangent: CGFloat = 0.55228475
         var path = Path()
         path.move(to: CGPoint(x: 0, y: 0))
@@ -825,6 +826,28 @@ struct NotchShape: Shape {
         path.addCurve(to: .zero,
                       control1: CGPoint(x: shoulder, y: shoulder * (1 - tangent)),
                       control2: CGPoint(x: shoulder * tangent, y: 0))
+        path.closeSubpath()
+        return path
+    }
+}
+
+extension NotchShape {
+    /// boring.notch's outline: each corner one quadratic curve, the shoulders
+    /// turning in from the menu bar and the bottom corners turning back out.
+    static func playerOutline(in rect: CGRect, shoulder: CGFloat, bottom: CGFloat) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addQuadCurve(to: CGPoint(x: rect.minX + shoulder, y: rect.minY + shoulder),
+                          control: CGPoint(x: rect.minX + shoulder, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX + shoulder, y: rect.maxY - bottom))
+        path.addQuadCurve(to: CGPoint(x: rect.minX + shoulder + bottom, y: rect.maxY),
+                          control: CGPoint(x: rect.minX + shoulder, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX - shoulder - bottom, y: rect.maxY))
+        path.addQuadCurve(to: CGPoint(x: rect.maxX - shoulder, y: rect.maxY - bottom),
+                          control: CGPoint(x: rect.maxX - shoulder, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX - shoulder, y: rect.minY + shoulder))
+        path.addQuadCurve(to: CGPoint(x: rect.maxX, y: rect.minY),
+                          control: CGPoint(x: rect.maxX - shoulder, y: rect.minY))
         path.closeSubpath()
         return path
     }
