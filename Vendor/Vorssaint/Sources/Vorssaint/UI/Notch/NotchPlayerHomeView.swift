@@ -66,7 +66,7 @@ enum NotchPlayerHomeLayout {
     }
 
     /// The cover is as tall as the page allows, within what reads well.
-    static func artwork(height: CGFloat) -> CGFloat { min(110, max(56, height - 10)) }
+    static func artwork(height: CGFloat) -> CGFloat { min(104, max(56, height - 10)) }
 
     /// The days the wheel offers: the ones the calendar has read.
     static func wheelDays(from now: Date, calendar: Calendar = .current) -> [Date] {
@@ -88,10 +88,10 @@ struct NotchPlayerHomeView: View {
     @State private var selectedDay: Date?
 
     private var mediaText: RadialMenuFeatureStrings { FeatureStrings.radialMenu(l10n.language) }
-    private var tint: Color { music.artworkTint?.color ?? .white }
     private var isIdle: Bool { !preview && music.playback == nil && !music.awaitingPlayback }
     private var isPlaying: Bool { music.playback?.isPlaying == true }
-    private var accent: Color { Color(nsColor: .controlAccentColor) }
+    /// Sonary's accent colours the artist, the timeline, today and the chosen day, as on its website.
+    private var accent: Color { SonaryIslandTint.accent ?? Color(nsColor: .controlAccentColor) }
     private var grey: Color { Color(white: 0.65) }
 
     private var showsCalendar: Bool {
@@ -145,10 +145,9 @@ struct NotchPlayerHomeView: View {
                     Image(nsImage: artwork).resizable().scaledToFill()
                         .frame(width: side, height: side)
                         .clipShape(RoundedRectangle(cornerRadius: NotchPlayerHomeLayout.coverRadius))
-                        .scaleEffect(x: 1.3, y: 1.4)
-                        .rotationEffect(.degrees(92))
-                        .blur(radius: 40)
-                        .opacity(isPlaying ? 0.5 : 0)
+                        .scaleEffect(1.12)
+                        .blur(radius: 26)
+                        .opacity(isPlaying ? 0.55 : 0)
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
                 }
@@ -167,7 +166,7 @@ struct NotchPlayerHomeView: View {
                             .accessibilityHidden(true)
                     }
                 }
-                .scaleEffect(music.playback != nil && !isPlaying ? 0.85 : 1)
+                .scaleEffect(music.playback != nil && !isPlaying ? 0.86 : 1)
             }
             .frame(width: side, height: side)
             .animation(reduceMotion ? nil : .smooth(duration: 0.3), value: isPlaying)
@@ -183,17 +182,16 @@ struct NotchPlayerHomeView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(music.playback?.track.title
                          ?? (music.awaitingPlayback ? mediaText.mediaNowPlaying : mediaText.mediaNothingPlaying))
-                        .font(.headline)
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.white)
                         .lineLimit(1)
                     if artist {
                         Text(music.commandFailed ? FeatureStrings.notchMusicExtras(l10n.language).playbackFailed
                              : music.playback?.track.artist ?? music.playback?.track.album
                                 ?? (music.awaitingPlayback ? "" : FeatureStrings.notch(l10n.language).musicHint))
-                            .font(.headline.weight(.medium))
+                            .font(.system(size: 15, weight: .medium))
                             .foregroundStyle(music.commandFailed ? AnyShapeStyle(Color.orange)
-                                             : music.artworkTint == nil ? AnyShapeStyle(Color.gray)
-                                             : AnyShapeStyle(tint.opacity(0.85)))
+                                             : isIdle ? AnyShapeStyle(Color.gray) : AnyShapeStyle(accent))
                             .lineLimit(1)
                     }
                 }
@@ -202,7 +200,7 @@ struct NotchPlayerHomeView: View {
             }
             .buttonStyle(.plain)
             if timeline, let playback = music.playback, playback.duration > 0 {
-                NotchMusicTimeline(playback: playback, service: music, tint: tint)
+                NotchMusicTimeline(playback: playback, service: music, tint: accent)
                     .padding(.top, 5)
             }
             transport
@@ -289,7 +287,7 @@ struct NotchPlayerHomeView: View {
                             }
                             .padding(4)
                             .frame(minWidth: 32)
-                            .background(chosen ? accent.opacity(0.25) : .clear,
+                            .background(chosen ? accent.opacity(0.26) : .clear,
                                         in: RoundedRectangle(cornerRadius: 8))
                             .contentShape(Rectangle())
                         }
@@ -332,10 +330,10 @@ struct NotchPlayerHomeView: View {
     private func eventRow(_ event: NotchCalendarEvent) -> some View {
         HStack(spacing: 8) {
             RoundedRectangle(cornerRadius: 1.5)
-                .fill(event.color.color)
+                .fill(accent)
                 .frame(width: 3, height: 16)
             Text(event.title)
-                .font(.callout)
+                .font(.system(size: 12.5))
                 .foregroundStyle(.white)
                 .lineLimit(1)
             Spacer(minLength: 4)
@@ -431,10 +429,26 @@ struct NotchPlayerHomeTabs: View {
                 if service.modules.contains(.files) {
                     tab("tray.fill", title: NotchModule.files.title(l10n.language), module: .files)
                 }
+                // The way to every other section is the third tab, as on Sonary's website.
+                if showsSections { sectionsTab }
             }
             .clipShape(Capsule())
-            if showsSections { NotchSectionsButton(action: service.toggleSections) }
         }
+    }
+
+    private var sectionsTab: some View {
+        let title = FeatureStrings.notch(l10n.language).sectionsTitle
+        return Button(action: service.toggleSections) {
+            Image(systemName: "square.grid.2x2")
+                .font(.system(size: 13))
+                .foregroundStyle(Color.gray)
+                .padding(.horizontal, 15)
+                .frame(height: 26)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .help(title)
+        .accessibilityLabel(title)
     }
 
     private func tab(_ symbol: String, title: String, module: NotchModule) -> some View {
