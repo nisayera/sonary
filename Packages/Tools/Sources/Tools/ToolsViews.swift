@@ -33,7 +33,6 @@ struct ToolsPopoverView: View {
                     tool("magnifyingglass", "Command bar", shortcut: "tools.commandBar") { model.showCommandBar() }
                     tool("circle.grid.cross", "Radial menu", shortcut: "tools.radialMenu") { model.showRadialMenu() }
                     tool("square.grid.3x3", "Quick panel", shortcut: "tools.quickPanel") { model.toggleQuickPanel() }
-                    tool("command", "Shortcut sheet", shortcut: "tools.shortcutSheet") { model.toggleShortcutSheet() }
                     tool("web.camera", "Camera mirror") { model.toggleCamera() }
                 }
             }
@@ -190,76 +189,6 @@ struct ToolsSettingsView: View {
                 } label: { EmptyView() }
                     .settingsControl()
             }
-        }
-        SettingsCard(Text("Shortcut sheet", bundle: .module)) {
-            SettingsToggleRow(symbol: "command", title: Text("Show an app's shortcuts while ⌘ is held", bundle: .module),
-                              caption: Text("Hold ⌘ alone for a moment and every keyboard shortcut of the app in front appears, menu by menu. Let go to close it, or click a shortcut to run it. Needs Accessibility.",
-                                            bundle: .module),
-                              isOn: Binding(get: { model.settings.shortcutSheetOnHold },
-                                            set: { value in model.update { $0.shortcutSheetOnHold = value } }))
-            if model.settings.shortcutSheetOnHold {
-                SettingsRow(symbol: "hand.tap", title: Text("Opens with", bundle: .module)) {
-                    Picker(selection: Binding(get: { model.settings.shortcutSheetTrigger },
-                                              set: { value in
-                                                  model.update {
-                                                      $0.shortcutSheetTrigger = value
-                                                      if value == .hold, $0.shortcutSheetDelay < 0.5 { $0.shortcutSheetDelay = 0.5 }
-                                                  }
-                                              })) {
-                        Text("Holding ⌘", bundle: .module).tag(SheetTrigger.hold)
-                        Text("Pressing ⌘ twice and holding", bundle: .module).tag(SheetTrigger.doubleHold)
-                    } label: { EmptyView() }
-                        .labelsHidden().frame(width: 230)
-                }
-                SettingsRow(symbol: "hourglass", title: Text("Hold ⌘ for", bundle: .module)) {
-                    Picker(selection: Binding(get: { model.settings.shortcutSheetDelay },
-                                              set: { value in model.update { $0.shortcutSheetDelay = value } })) {
-                        if model.settings.shortcutSheetTrigger == .doubleHold {
-                            Text("No wait", bundle: .module).tag(0.0)
-                        }
-                        Text(verbatim: "0.5 s").tag(0.5)
-                        Text(verbatim: "1 s").tag(1.0)
-                        Text(verbatim: "1.5 s").tag(1.5)
-                        Text(verbatim: "2 s").tag(2.0)
-                    } label: { EmptyView() }
-                        .labelsHidden().frame(width: 100)
-                }
-            }
-            SettingsRow(symbol: "rectangle.split.3x1", title: Text("Columns", bundle: .module)) {
-                Picker(selection: Binding(get: { model.settings.shortcutSheetColumns },
-                                          set: { value in model.update { $0.shortcutSheetColumns = value } })) {
-                    Text("Automatic", bundle: .module).tag(0)
-                    ForEach(2...5, id: \.self) { count in Text(verbatim: "\(count)").tag(count) }
-                } label: { EmptyView() }
-                    .labelsHidden().frame(width: 130)
-            }
-            SettingsRow(symbol: "circle.lefthalf.filled", title: Text("Appearance", bundle: .module)) {
-                Picker(selection: Binding(get: { model.settings.shortcutSheetAppearance },
-                                          set: { value in model.update { $0.shortcutSheetAppearance = value } })) {
-                    Text("Like the system", bundle: .module).tag(SheetAppearance.system)
-                    Text("Light", bundle: .module).tag(SheetAppearance.light)
-                    Text("Dark", bundle: .module).tag(SheetAppearance.dark)
-                } label: { EmptyView() }
-                    .labelsHidden().frame(width: 150)
-            }
-            SettingsToggleRow(symbol: "apple.logo", title: Text("Show the system's shortcuts too", bundle: .module),
-                              caption: Text("The sheet ends with the shortcuts macOS answers in every app, such as Spotlight and screenshots.",
-                                            bundle: .module),
-                              isOn: Binding(get: { model.settings.shortcutSheetSystem },
-                                            set: { value in model.update { $0.shortcutSheetSystem = value } }))
-            SheetCustomShortcutsEditor(model: model)
-            if model.settings.shortcutSheetMarks.values.contains(where: { !$0.isEmpty }) {
-                SettingsRow(symbol: "star.slash", title: Text("Favourites and hidden shortcuts", bundle: .module)) {
-                    Button { model.update { $0.shortcutSheetMarks = [:] } } label: { Text("Reset", bundle: .module) }
-                }
-            }
-            if model.shortcutSheetNeedsAccessibility {
-                SettingsWarning(Text("Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then switch this off and on again.",
-                                     bundle: .module))
-            }
-            Text("It can also open on a shortcut of its own, from the Shortcuts page; then it stays until you close it.",
-                 bundle: .module)
-                .font(.caption).foregroundStyle(.secondary)
         }
         SettingsCard(Text("Quick panel", bundle: .module)) {
             Text("A small palette of your favourite tools next to the pointer. Give it a shortcut on the Shortcuts page.",
@@ -713,76 +642,5 @@ struct VideoTrimSheet: View {
         panel.allowedContentTypes = [.movie]
         guard panel.runModal() == .OK else { return }
         video = panel.url
-    }
-}
-
-/// The shortcuts written down by hand, under "My shortcuts" in the sheet: a name, the
-/// keys as they should be printed, and the app they belong to.
-struct SheetCustomShortcutsEditor: View {
-    let model: ToolsModel
-
-    private var apps: [(id: String, name: String)] {
-        var seen = Set<String>()
-        var result: [(id: String, name: String)] = []
-        for app in NSWorkspace.shared.runningApplications where app.activationPolicy == .regular {
-            guard let id = app.bundleIdentifier, seen.insert(id).inserted else { continue }
-            result.append((id, app.localizedName ?? id))
-        }
-        for entry in model.settings.shortcutSheetCustom {
-            if let id = entry.bundleID, seen.insert(id).inserted { result.append((id, id)) }
-        }
-        return result.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text("My shortcuts", bundle: .module).font(.system(size: 12, weight: .semibold))
-                Spacer()
-                Button {
-                    model.update { $0.shortcutSheetCustom.append(CustomSheetShortcut(title: "", keys: "")) }
-                } label: {
-                    Label { Text("Add", bundle: .module) } icon: { Image(systemName: "plus") }
-                }
-            }
-            Text("For shortcuts the menus do not show. Write the keys the way they should be printed, for example ⌃⌥T.",
-                 bundle: .module)
-                .font(.caption).foregroundStyle(.secondary)
-            let apps = apps
-            ForEach(model.settings.shortcutSheetCustom) { entry in
-                HStack(spacing: 6) {
-                    TextField(text: binding(entry.id, \.title)) { Text("Name", bundle: .module) }
-                        .textFieldStyle(.roundedBorder)
-                    TextField(text: binding(entry.id, \.keys)) { Text("Keys", bundle: .module) }
-                        .textFieldStyle(.roundedBorder).frame(width: 90)
-                    Picker(selection: Binding(get: { entry.bundleID ?? "" },
-                                              set: { value in
-                                                  model.update { settings in
-                                                      guard let index = settings.shortcutSheetCustom.firstIndex(where: { $0.id == entry.id }) else { return }
-                                                      settings.shortcutSheetCustom[index].bundleID = value.isEmpty ? nil : value
-                                                  }
-                                              })) {
-                        Text("All apps", bundle: .module).tag("")
-                        ForEach(apps, id: \.id) { app in Text(verbatim: app.name).tag(app.id) }
-                    } label: { EmptyView() }
-                        .labelsHidden().frame(width: 140)
-                    Button {
-                        model.update { $0.shortcutSheetCustom.removeAll { $0.id == entry.id } }
-                    } label: { Image(systemName: "minus.circle") }
-                        .buttonStyle(.plain).foregroundStyle(.secondary)
-                        .accessibilityLabel(Text("Remove", bundle: .module))
-                }
-            }
-        }
-    }
-
-    private func binding(_ id: UUID, _ keyPath: WritableKeyPath<CustomSheetShortcut, String>) -> Binding<String> {
-        Binding(get: { model.settings.shortcutSheetCustom.first { $0.id == id }?[keyPath: keyPath] ?? "" },
-                set: { value in
-                    model.update { settings in
-                        guard let index = settings.shortcutSheetCustom.firstIndex(where: { $0.id == id }) else { return }
-                        settings.shortcutSheetCustom[index][keyPath: keyPath] = value
-                    }
-                })
     }
 }

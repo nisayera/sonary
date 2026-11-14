@@ -32,21 +32,6 @@ public struct ToolsSettings: Codable, Equatable, Sendable {
     public var recordMicrophone = false
     /// Typing a snippet's trigger anywhere replaces it with the snippet.
     public var snippetTriggers = false
-    /// Holding ⌘ for a moment shows the front app's keyboard shortcuts.
-    public var shortcutSheetOnHold = false
-    /// How long ⌘ has to be held, in seconds.
-    public var shortcutSheetDelay = 1.0
-    /// Whether a plain hold of ⌘ opens the sheet or a double press that is held.
-    public var shortcutSheetTrigger: SheetTrigger = .hold
-    /// The sheet's columns; 0 lets the screen's width decide.
-    public var shortcutSheetColumns = 0
-    public var shortcutSheetAppearance: SheetAppearance = .system
-    /// The sheet ends with the shortcuts macOS answers in every app.
-    public var shortcutSheetSystem = true
-    /// Shortcuts no menu shows, written down by hand.
-    public var shortcutSheetCustom: [CustomSheetShortcut] = []
-    /// Favourites and hidden shortcuts, by the app's bundle identifier.
-    public var shortcutSheetMarks: [String: SheetMarks] = [:]
     /// Cleaning mode also swallows brightness, volume, media and Mission Control keys.
     public var cleaningBlocksSystemKeys = true
     /// Cleaning mode leaves the screen visible and shows a small badge instead of black.
@@ -97,9 +82,6 @@ public final class ToolsModel {
     @ObservationIgnored private let triggerTap = SnippetTriggerTap()
     @ObservationIgnored private let scratchpadWindow = ScratchpadWindowController()
     @ObservationIgnored private let quickPanel = QuickPanelController()
-    @ObservationIgnored private let shortcutSheet = ShortcutSheetController()
-    /// Set when the shortcut sheet could not start watching, which means Accessibility is missing.
-    public private(set) var shortcutSheetNeedsAccessibility = false
     /// Set when the trigger watcher could not start, which means Accessibility is missing.
     public private(set) var snippetTriggersNeedAccessibility = false
 
@@ -113,14 +95,12 @@ public final class ToolsModel {
         running = true
         applyShortcuts()
         applyTriggers()
-        applyShortcutSheet()
     }
 
     func stop() {
         running = false
         applyShortcuts()
         applyTriggers()
-        applyShortcutSheet()
         commandBar?.close()
         commandBar = nil
         radial.close()
@@ -132,37 +112,6 @@ public final class ToolsModel {
         editor.close()
         scratchpadWindow.close()
         quickPanel.close()
-    }
-
-    /// Starts or stops watching for a held ⌘, to match the settings.
-    private func applyShortcutSheet() {
-        configureShortcutSheet()
-        guard running, settings.shortcutSheetOnHold else {
-            shortcutSheet.stopWatching()
-            shortcutSheetNeedsAccessibility = false
-            return
-        }
-        shortcutSheetNeedsAccessibility = !shortcutSheet.startWatching()
-    }
-
-    /// Hands the sheet what the settings say about its trigger, its look and its content.
-    private func configureShortcutSheet() {
-        shortcutSheet.delay = settings.shortcutSheetDelay
-        shortcutSheet.trigger = settings.shortcutSheetTrigger
-        shortcutSheet.columns = settings.shortcutSheetColumns
-        shortcutSheet.appearance = settings.shortcutSheetAppearance
-        shortcutSheet.showsSystem = settings.shortcutSheetSystem
-        shortcutSheet.custom = settings.shortcutSheetCustom
-        shortcutSheet.marks = { [weak self] bundleID in self?.settings.shortcutSheetMarks[bundleID] ?? SheetMarks() }
-        shortcutSheet.setMarks = { [weak self] bundleID, marks in
-            self?.update { $0.shortcutSheetMarks[bundleID] = marks.isEmpty ? nil : marks }
-        }
-    }
-
-    /// Shows the front app's keyboard shortcuts, or closes the sheet when it is open.
-    public func toggleShortcutSheet() {
-        configureShortcutSheet()
-        shortcutSheet.toggle()
     }
 
     /// The palette of favourite tools next to the pointer, or closes it when it is open.
@@ -238,12 +187,10 @@ public final class ToolsModel {
     public func update(_ change: (inout ToolsSettings) -> Void) {
         let before = settings.shortcuts
         let triggersBefore = settings.snippetTriggers
-        let sheetBefore = settings.shortcutSheetOnHold
         change(&settings)
         if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: "tools.settings") }
         if before != settings.shortcuts { applyShortcuts() }
         if triggersBefore != settings.snippetTriggers { applyTriggers() }
-        if sheetBefore != settings.shortcutSheetOnHold { applyShortcutSheet() } else { configureShortcutSheet() }
     }
 
     /// Starts or stops watching for snippet triggers.
@@ -300,9 +247,6 @@ public final class ToolsModel {
         ShortcutDefinition(id: "tools.quickPanel", title: String(localized: "Quick panel", bundle: .module),
                            group: String(localized: "Tools", bundle: .module),
                            defaultCombo: .none),
-        ShortcutDefinition(id: "tools.shortcutSheet", title: String(localized: "Shortcut sheet", bundle: .module),
-                           group: String(localized: "Tools", bundle: .module),
-                           defaultCombo: .none),
     ] }
 
     private func applyShortcuts() {
@@ -318,7 +262,6 @@ public final class ToolsModel {
         shortcuts.bind("tools.screenRecording") { [weak self] in self?.toggleRecording() }
         shortcuts.bind("tools.scratchpad") { [weak self] in self?.showScratchpadWindow() }
         shortcuts.bind("tools.quickPanel") { [weak self] in self?.toggleQuickPanel() }
-        shortcuts.bind("tools.shortcutSheet") { [weak self] in self?.toggleShortcutSheet() }
     }
 
     // MARK: Tools

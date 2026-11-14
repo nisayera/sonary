@@ -113,7 +113,7 @@ enum ModuleCategory: CaseIterable, Hashable {
         case .system: ["monitor", "display", "sound", "awake"]
         case .input: ["mouse", "keyboard"]
         case .windows: ["windows", "notch"]
-        case .files: ["clipboard", "apps", "tools"]
+        case .files: ["clipboard", "apps", "tools", "shortcutsheet"]
         }
     }
 }

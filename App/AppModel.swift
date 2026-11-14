@@ -3,6 +3,7 @@ import Foundation
 import Observation
 import SonaryCore
 import SonaryUI
+import Tools
 import Vorssaint
 
 @MainActor
@@ -53,6 +54,8 @@ final class AppModel {
             EngineModule(id: "sound", title: "Sound", symbol: "speaker.wave.2", drivesEngine: startUpdater),
             EngineModule(id: "awake", title: "Keep awake", symbol: "cup.and.saucer", drivesEngine: startUpdater),
             EngineModule(id: "tools", title: "Tools", symbol: "wrench.and.screwdriver", drivesEngine: startUpdater),
+            // Sonary's own: the sheet of the front app's keyboard shortcuts.
+            ShortcutSheetModule(defaults: defaults),
         ]
         // Keep awake used to be part of sound; whoever had sound on keeps keep awake on.
         if defaults.object(forKey: "module.awake.enabled") == nil, defaults.bool(forKey: "module.sound.enabled") {

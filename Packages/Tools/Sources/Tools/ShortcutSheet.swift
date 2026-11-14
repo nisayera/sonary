@@ -265,6 +265,7 @@ final class ShortcutSheetController {
         let single = hold.flagsChanged(command: command, others: others)
         let double = doubleHold.flagsChanged(command: command, others: others, at: time)
         let trigger = trigger
+        guard trigger != .shortcutOnly else { return }
         guard let generation = trigger == .hold ? single : double else {
             let holding = trigger == .hold ? hold.isHolding : doubleHold.isHolding
             if !holding, shownByHold { close() }

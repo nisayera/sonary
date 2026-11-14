@@ -5,6 +5,16 @@ All notable changes to Sonary are documented here. The format follows
 [GitHub release](https://github.com/nisayera/sonary/releases) and the notes Sonary shows before
 an update; see [docs/RELEASING.md](docs/RELEASING.md#release-notes).
 
+## [0.95.1] - 2026-11-14
+
+### Summary
+The shortcut sheet is now a module of its own, "Shortcut sheet", so it can be found and switched on. Until now its settings were in a package the app never showed.
+
+### Added
+- Module "Shortcut sheet" under Files & tools in Settings and the panel. Turn it on and hold ⌘ (or press it twice and hold) to see the front app's keyboard shortcuts. Its page has the trigger, the wait, the columns, the look, the system's shortcuts and your own shortcuts.
+- A shortcut of its own for the sheet on the Shortcuts page, which opens it with a search that stays until you close it.
+- The trigger can be set to "Only its own shortcut", so ⌘ alone does nothing.
+
 ## [0.95.0] - 2026-11-14
 
 ### Summary

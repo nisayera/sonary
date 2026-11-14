@@ -669,6 +669,16 @@
         }
       }
     },
+    "For shortcuts the menus do not show. Write the keys the way they should be printed, for example ⌃⌥T. They are only listed; a click does not run them.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Kurzbefehle, die in keinem Menü stehen. Schreib die Tasten so, wie sie angezeigt werden sollen, zum Beispiel ⌃⌥T. Sie werden nur aufgelistet; ein Klick führt sie nicht aus."
+          }
+        }
+      }
+    },
     "Force quit apps": {
       "localizations": {
         "de": {
@@ -762,6 +772,16 @@
         }
       }
     },
+    "Hold ⌘ alone, or press it twice and keep the second press down. Let go to close the sheet, or click a shortcut to run it. Needs Accessibility.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ allein halten oder zweimal drücken und die zweite Berührung gedrückt halten. Loslassen schließt die Übersicht, ein Klick auf einen Kurzbefehl führt ihn aus. Braucht Bedienungshilfen."
+          }
+        }
+      }
+    },
     "Hold ⌘ for": {
       "localizations": {
         "de": {
@@ -800,6 +820,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Baustein einfügen durch"
+          }
+        }
+      }
+    },
+    "It can also open on a shortcut of its own, from the Shortcuts page; then it stays open, with a search, until you close it.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sie lässt sich auch über einen eigenen Kurzbefehl öffnen (Seite Kurzbefehle); dann bleibt sie mit Suche offen, bis du sie schließt."
           }
         }
       }
@@ -911,6 +941,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Längste Kante"
+          }
+        }
+      }
+    },
+    "Look": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Darstellung"
           }
         }
       }
@@ -1134,6 +1174,16 @@
         }
       }
     },
+    "Only its own shortcut": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur über den eigenen Kurzbefehl"
+          }
+        }
+      }
+    },
     "Open in a window": {
       "localizations": {
         "de": {
@@ -1162,6 +1212,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Skripte-Ordner öffnen"
+          }
+        }
+      }
+    },
+    "Opening": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnen"
           }
         }
       }
@@ -1800,6 +1860,16 @@
         }
       }
     },
+    "Sonary needs Accessibility for this. Allow it under System Settings → Privacy & Security → Accessibility, then turn the module off and on again.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dafür braucht Sonary die Bedienungshilfen. Erlaube sie unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen und schalte das Modul dann aus und wieder ein."
+          }
+        }
+      }
+    },
     "Sonary pink": {
       "extractionState": "manual",
       "localizations": {
@@ -2074,6 +2144,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Weiß"
+          }
+        }
+      }
+    },
+    "Your shortcuts": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Kurzbefehle"
           }
         }
       }
