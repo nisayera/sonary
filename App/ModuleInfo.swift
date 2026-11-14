@@ -17,6 +17,7 @@ enum ModuleInfo {
         case "tools": "Command bar, text from screen, color picker, screenshots, scratchpad and snippets."
         case "keyboard": "Super Key, text snippets, a filter for double key presses and protection against quitting by accident."
         case "display": "Brightness for every display, with shortcuts and dimming for displays without hardware control."
+        case "shortcutsheet": "Hold ⌘ to see every keyboard shortcut of the app in front, with search, favourites and your own shortcuts."
         default: ""
         }
     }
@@ -35,6 +36,7 @@ enum ModuleInfo {
         case "tools": String(localized: "Command bar, text from screen, color picker, screenshots, scratchpad and snippets.")
         case "keyboard": String(localized: "Super Key, text snippets, a filter for double key presses and protection against quitting by accident.")
         case "display": String(localized: "Brightness for every display, with shortcuts and dimming for displays without hardware control.")
+        case "shortcutsheet": String(localized: "Hold ⌘ to see every keyboard shortcut of the app in front, with search, favourites and your own shortcuts.")
         default: ""
         }
     }

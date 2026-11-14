@@ -685,6 +685,16 @@
         }
       }
     },
+    "Hold ⌘ to see every keyboard shortcut of the app in front, with search, favourites and your own shortcuts.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ halten zeigt jeden Kurzbefehl der App im Vordergrund, mit Suche, Favoriten und eigenen Kurzbefehlen."
+          }
+        }
+      }
+    },
     "Home": {
       "localizations": {
         "de": {

@@ -159,11 +159,11 @@ struct ShortcutSheetExtrasTests {
         #expect(sheetColumnCount(chosen: 3, screenWidth: 1440, hasShortcuts: false) == 1)
     }
 
-    @Test func olderSettingsStillLoad() throws {
-        let data = Data(#"{"shortcutSheetOnHold":true}"#.utf8)
-        let settings = StoredSettings.decode(ToolsSettings.self, from: data, fallback: ToolsSettings())
-        #expect(settings.shortcutSheetOnHold)
-        #expect(settings.shortcutSheetTrigger == .hold)
-        #expect(settings.shortcutSheetSystem)
+    @Test func settingsFromOlderVersionsStillLoad() throws {
+        let data = Data(#"{"columns":3}"#.utf8)
+        let settings = StoredSettings.decode(ShortcutSheetSettings.self, from: data, fallback: ShortcutSheetSettings())
+        #expect(settings.columns == 3)
+        #expect(settings.trigger == .hold)
+        #expect(settings.system)
     }
 }

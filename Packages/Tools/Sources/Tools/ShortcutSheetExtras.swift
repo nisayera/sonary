@@ -10,6 +10,8 @@ public enum SheetTrigger: String, Codable, Sendable, CaseIterable {
     case hold
     /// Press ⌘ twice and keep the second press down.
     case doubleHold
+    /// ⌘ does nothing; only the sheet's own shortcut opens it.
+    case shortcutOnly
 }
 
 /// The sheet's look.
